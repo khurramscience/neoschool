@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отрицательные числа - Лабораторная работа</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔢 Отрицательные числа</h1>
+            <p class="subtitle">Лабораторная работа для понимания отрицательных чисел</p>
+        </header>
+
+        <nav class="navigation">
+            <button class="nav-btn active" data-section="theory">📚 Теория</button>
+            <button class="nav-btn" data-section="practice">🎯 Тренировка</button>
+            <button class="nav-btn" data-section="test">📝 Проверка знаний</button>
+        </nav>
+
+        <!-- Блок теории -->
+        <section id="theory" class="content-section active">
+            <h2>📚 Теория отрицательных чисел</h2>
+            
+            <div class="theory-card">
+                <h3>Что такое отрицательные числа?</h3>
+                <p>Отрицательные числа - это числа меньше нуля. Они показывают "недостаток" или "долг".</p>
+                
+                <div class="example-box">
+                    <h4>🌡️ Пример из жизни: Температура</h4>
+                    <div class="temperature-demo">
+                        <div class="temp-scale">
+                            <div class="temp-positive">+20°C</div>
+                            <div class="temp-zero">0°C</div>
+                            <div class="temp-negative">-10°C</div>
+                        </div>
+                        <p>Когда на улице -10°C, это означает, что температура на 10 градусов ниже нуля!</p>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>💰 Пример из жизни: Деньги</h4>
+                    <div class="money-demo">
+                        <div class="money-example">
+                            <div class="money-item positive">
+                                <span class="icon">💵</span>
+                                <span>У тебя есть 50 рублей</span>
+                                <span class="number">+50</span>
+                            </div>
+                            <div class="money-item negative">
+                                <span class="icon">💸</span>
+                                <span>Ты должен 30 рублей</span>
+                                <span class="number">-30</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>🏢 Пример из жизни: Этажи здания</h4>
+                    <div class="building-demo">
+                        <div class="building">
+                            <div class="floor">3-й этаж</div>
+                            <div class="floor">2-й этаж</div>
+                            <div class="floor">1-й этаж</div>
+                            <div class="floor ground">Улица (0)</div>
+                            <div class="floor basement">-1-й этаж (подвал)</div>
+                            <div class="floor basement">-2-й этаж (паркинг)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Блок тренировки -->
+        <section id="practice" class="content-section">
+            <h2>🎯 Тренировка</h2>
+            
+            <div class="practice-card">
+                <h3>Попробуй сам!</h3>
+                
+                <div class="practice-exercise">
+                    <h4>🌡️ Задание 1: Температура</h4>
+                    <p>Представь, что утром было -5°C, а днём потеплело на 8 градусов. Какая температура стала днём?</p>
+                    <div class="interactive-demo">
+                        <div class="temp-slider">
+                            <input type="range" id="tempSlider" min="-20" max="20" value="-5">
+                            <div class="temp-display">
+                                <span>Температура: </span>
+                                <span id="tempValue">-5°C</span>
+                            </div>
+                        </div>
+                        <button id="warmUp" class="action-btn">Потеплеть на 8°C</button>
+                        <div id="tempResult" class="result"></div>
+                    </div>
+                </div>
+
+                <div class="practice-exercise">
+                    <h4>💰 Задание 2: Деньги</h4>
+                    <p>У тебя есть 100 рублей. Ты купил игрушку за 150 рублей. Сколько у тебя осталось?</p>
+                    <div class="money-calculator">
+                        <div class="money-input">
+                            <label>Начальная сумма: <input type="number" id="startMoney" value="100" readonly> ₽</label>
+                            <label>Покупка: <input type="number" id="purchase" value="150" readonly> ₽</label>
+                        </div>
+                        <button id="calculateMoney" class="action-btn">Рассчитать</button>
+                        <div id="moneyResult" class="result"></div>
+                    </div>
+                </div>
+
+                <div class="practice-exercise">
+                    <h4>🏢 Задание 3: Этажи</h4>
+                    <p>Ты находишься на 2-м этаже и спускаешься на 5 этажей вниз. На каком этаже ты окажешься?</p>
+                    <div class="floor-calculator">
+                        <div class="floor-display">
+                            <span>Текущий этаж: </span>
+                            <span id="currentFloor">2</span>
+                        </div>
+                        <button id="goDown" class="action-btn">Спуститься на 5 этажей</button>
+                        <div id="floorResult" class="result"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Блок проверки знаний -->
+        <section id="test" class="content-section">
+            <h2>📝 Проверка знаний</h2>
+            
+            <div class="test-card">
+                <h3>Проверь свои знания!</h3>
+                
+                <div id="testContainer">
+                    <div class="test-question" data-question="1">
+                        <h4>Вопрос 1: Какая температура ниже?</h4>
+                        <div class="options">
+                            <label><input type="radio" name="q1" value="a"> -5°C</label>
+                            <label><input type="radio" name="q1" value="b"> +2°C</label>
+                            <label><input type="radio" name="q1" value="c"> 0°C</label>
+                        </div>
+                    </div>
+
+                    <div class="test-question" data-question="2">
+                        <h4>Вопрос 2: У тебя есть 50 рублей, а ты должен 80 рублей. Твой баланс:</h4>
+                        <div class="options">
+                            <label><input type="radio" name="q2" value="a"> +30 рублей</label>
+                            <label><input type="radio" name="q2" value="b"> -30 рублей</label>
+                            <label><input type="radio" name="q2" value="c"> +130 рублей</label>
+                        </div>
+                    </div>
+
+                    <div class="test-question" data-question="3">
+                        <h4>Вопрос 3: Ты на 3-м этаже и поднимаешься на 2 этажа вверх, затем спускаешься на 6 этажей. Где ты?</h4>
+                        <div class="options">
+                            <label><input type="radio" name="q3" value="a"> 1-й этаж</label>
+                            <label><input type="radio" name="q3" value="b"> -1-й этаж</label>
+                            <label><input type="radio" name="q3" value="c"> 5-й этаж</label>
+                        </div>
+                    </div>
+
+                    <div class="test-question" data-question="4">
+                        <h4>Вопрос 4: Какое число больше?</h4>
+                        <div class="options">
+                            <label><input type="radio" name="q4" value="a"> -10</label>
+                            <label><input type="radio" name="q4" value="b"> -15</label>
+                            <label><input type="radio" name="q4" value="c"> -5</label>
+                        </div>
+                    </div>
+
+                    <div class="test-question" data-question="5">
+                        <h4>Вопрос 5: -8 + 3 = ?</h4>
+                        <div class="options">
+                            <label><input type="radio" name="q5" value="a"> -11</label>
+                            <label><input type="radio" name="q5" value="b"> -5</label>
+                            <label><input type="radio" name="q5" value="c"> +5</label>
+                        </div>
+                    </div>
+
+                    <button id="submitTest" class="action-btn">Проверить ответы</button>
+                </div>
+
+                <div id="testResults" class="test-results hidden">
+                    <h3>Результаты теста</h3>
+                    <div id="scoreDisplay"></div>
+                    <div id="answersReview"></div>
+                    <button id="retakeTest" class="action-btn">Пройти тест заново</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

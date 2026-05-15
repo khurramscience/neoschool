@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratory Work: Subtraction</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🧮 Laboratory Work: Subtraction</h1>
+            <p>Study theory, practice and test your knowledge!</p>
+        </header>
+
+        <nav class="navigation">
+            <button class="nav-btn active" data-section="theory">📚 Theory</button>
+            <button class="nav-btn" data-section="practice">🎯 Practice</button>
+            <button class="nav-btn" data-section="test">📝 Testing</button>
+        </nav>
+
+        <main class="main-content">
+            <!-- Theory Section -->
+            <section id="theory" class="section active">
+                <h2>📚 Subtraction Theory</h2>
+                <div class="theory-content">
+                    <div class="theory-card">
+                        <h3>What is subtraction?</h3>
+                        <p>Subtraction is a mathematical operation that shows how much one number is less than another or how much remains after removing a part from a whole.</p>
+                        <div class="example">
+                            <strong>Example:</strong> 15 - 7 = 8
+                            <p>This means that if we have 15 objects and we remove 7, then 8 objects remain.</p>
+                        </div>
+                    </div>
+
+                    <div class="theory-card">
+                        <h3>Column subtraction algorithm</h3>
+                        <div class="algorithm">
+                            <ol>
+                                <li>Write the numbers one under the other, aligned by digits</li>
+                                <li>Start subtraction from right to left (from ones)</li>
+                                <li>If the digit of the minuend is less than the digit of the subtrahend, borrow from the higher digit</li>
+                                <li>Continue to the leftmost digit</li>
+                            </ol>
+                        </div>
+                        <div class="example-visual">
+                            <div class="subtraction-example">
+                                <div class="number-row">
+                                    <span class="digit">1</span>
+                                    <span class="digit">2</span>
+                                    <span class="digit">5</span>
+                                </div>
+                                <div class="number-row minus">
+                                    <span class="digit">-</span>
+                                    <span class="digit">8</span>
+                                    <span class="digit">7</span>
+                                </div>
+                                <div class="number-row result">
+                                    <span class="digit">0</span>
+                                    <span class="digit">3</span>
+                                    <span class="digit">8</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="theory-card">
+                        <h3>Special cases</h3>
+                        <div class="special-cases">
+                            <div class="case">
+                                <h4>Subtraction with borrowing</h4>
+                                <p>When the digit in the minuend is less than the digit in the subtrahend, you need to borrow 1 from the higher digit.</p>
+                                <div class="example">52 - 7 = 45 (borrow 1 from tens)</div>
+                            </div>
+                            <div class="case">
+                                <h4>Subtracting zero</h4>
+                                <p>When subtracting zero, the number does not change.</p>
+                                <div class="example">25 - 0 = 25</div>
+                            </div>
+                            <div class="case">
+                                <h4>Subtracting from zero</h4>
+                                <p>From zero, you can only subtract zero, the result will be zero.</p>
+                                <div class="example">0 - 0 = 0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Practice Section -->
+            <section id="practice" class="section">
+                <h2>🎯 Practice</h2>
+                <div class="practice-content">
+                    <div class="difficulty-selector">
+                        <h3>Choose difficulty level:</h3>
+                        <div class="difficulty-buttons">
+                            <button class="difficulty-btn active" data-difficulty="easy">Easy (1-2 digits)</button>
+                            <button class="difficulty-btn" data-difficulty="medium">Medium (2-3 digits)</button>
+                            <button class="difficulty-btn" data-difficulty="hard">Hard (3-4 digits)</button>
+                        </div>
+                    </div>
+
+                    <div class="exercise-area">
+                        <div class="exercise-display">
+                            <div class="problem">
+                                <span id="num1">0</span>
+                                <span class="operator">-</span>
+                                <span id="num2">0</span>
+                                <span class="equals">=</span>
+                                <input type="number" id="answer" placeholder="?" class="answer-input">
+                            </div>
+                        </div>
+
+                        <div class="exercise-controls">
+                            <button id="check-btn" class="btn primary">Check</button>
+                            <button id="next-btn" class="btn secondary">Next</button>
+                            <button id="hint-btn" class="btn hint">Hint</button>
+                        </div>
+
+                        <div class="feedback" id="feedback"></div>
+                        <div class="hint-text" id="hint-text"></div>
+
+                        <div class="stats">
+                            <div class="stat">
+                                <span class="stat-label">Correct:</span>
+                                <span id="correct-count">0</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Total:</span>
+                                <span id="total-count">0</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Percentage:</span>
+                                <span id="percentage">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Testing Section -->
+            <section id="test" class="section">
+                <h2>📝 Testing</h2>
+                <div class="test-content">
+                    <div class="test-intro" id="test-intro">
+                        <h3>Ready to test your knowledge?</h3>
+                        <p>The test consists of 10 questions of varying difficulty. You will have 3 attempts for each question.</p>
+                        <div class="test-settings">
+                            <label>
+                                <input type="checkbox" id="include-negative" checked>
+                                Include negative numbers
+                            </label>
+                            <label>
+                                <input type="checkbox" id="include-decimals">
+                                Include decimal fractions
+                            </label>
+                        </div>
+                        <button id="start-test" class="btn primary">Start Test</button>
+                    </div>
+
+                    <div class="test-area" id="test-area" style="display: none;">
+                        <div class="test-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress-fill"></div>
+                            </div>
+                            <span id="question-counter">Question 1 of 10</span>
+                        </div>
+
+                        <div class="test-question" id="test-question">
+                            <div class="question-text">
+                                <span id="test-num1">0</span>
+                                <span class="operator">-</span>
+                                <span id="test-num2">0</span>
+                                <span class="equals">=</span>
+                                <input type="number" id="test-answer" placeholder="?" class="answer-input">
+                            </div>
+                        </div>
+
+                        <div class="test-controls">
+                            <button id="submit-answer" class="btn primary">Answer</button>
+                            <button id="skip-question" class="btn secondary">Skip</button>
+                        </div>
+
+                        <div class="test-feedback" id="test-feedback"></div>
+                        <div class="attempts-left" id="attempts-left"></div>
+                    </div>
+
+                    <div class="test-results" id="test-results" style="display: none;">
+                        <h3>Test Results</h3>
+                        <div class="results-summary">
+                            <div class="result-item">
+                                <span class="result-label">Correct answers:</span>
+                                <span id="test-correct">0</span> of <span id="test-total">10</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Success rate:</span>
+                                <span id="test-percentage">0%</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Grade:</span>
+                                <span id="test-grade">-</span>
+                            </div>
+                        </div>
+                        <div class="results-actions">
+                            <button id="retake-test" class="btn primary">Retake Test</button>
+                            <button id="view-answers" class="btn secondary">View Answers</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

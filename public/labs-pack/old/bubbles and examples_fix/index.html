@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Bubbles - Subtraction Learning Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>🎈 Math Bubbles</h1>
+            <div class="game-info">
+                <div class="level-info">
+                    <span>Level: <span id="level">1</span></span>
+                    <span>Task: Pop bubbles with answer <span id="target-number">5</span></span>
+                </div>
+                <div class="stats">
+                    <span>Time: <span id="timer">30</span>s</span>
+                    <span>Score: <span id="score">0</span></span>
+                    <span>Missed: <span id="missed">0</span></span>
+                    <span>Mistakes: <span id="incorrect">0</span></span>
+                </div>
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="game-area" id="gameArea">
+                <div class="instructions">
+                    <p>Pop only those bubbles where the subtraction result is <span id="instruction-target">5</span>!</p>
+                    <button id="startButton" class="start-button">Start Game</button>
+                </div>
+            </div>
+            <div class="level-nav" id="levelNav">
+                <button class="level-nav-btn" data-level="1">1</button>
+                <button class="level-nav-btn" data-level="2">2</button>
+                <button class="level-nav-btn" data-level="3">3</button>
+                <button class="level-nav-btn" data-level="4">4</button>
+                <button class="level-nav-btn" data-level="5">5</button>
+            </div>
+        </div>
+        
+        <div class="game-over" id="gameOver" style="display: none;">
+            <div class="game-over-content">
+                <h2 id="gameOverTitle">Game Over!</h2>
+                <p id="gameOverMessage"></p>
+                <div class="final-stats">
+                    <p>Final score: <span id="finalScore">0</span></p>
+                    <p>Correctly popped: <span id="correctBubbles">0</span></p>
+                    <p>Missed: <span id="finalMissed">0</span></p>
+                </div>
+                <button id="restartButton" class="restart-button">Play Again</button>
+            </div>
+        </div>
+        
+        <div class="level-complete" id="levelComplete" style="display: none;">
+            <div class="level-complete-content">
+                <h2>🎉 Level Complete!</h2>
+                <p id="levelCompleteMessage"></p>
+                <div class="level-stats">
+                    <p>Score for level: <span id="levelScore">0</span></p>
+                    <p>Correctly popped: <span id="levelCorrectBubbles">0</span></p>
+                    <p>Next level: <span id="nextLevelNumber">2</span></p>
+                    <p>Target number: <span id="nextLevelTarget">3</span></p>
+                </div>
+                <div class="level-buttons">
+                    <button id="continueButton" class="continue-button">Continue</button>
+                    <button id="stopButton" class="stop-button">Stop</button>
+                    <button id="playAgainButton" class="play-again-button">Play Again</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html> 

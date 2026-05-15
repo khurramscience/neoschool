@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Учимся умножению - Математические карточки</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Заголовок -->
+        <header class="header">
+            <h1>🎯 Учимся умножению</h1>
+            <p>Выбери режим и начни тренироваться!</p>
+        </header>
+
+        <!-- Выбор режима -->
+        <div id="mode-selection" class="mode-selection">
+            <h2>Выбери режим:</h2>
+            <div class="mode-grid">
+                <button class="mode-btn" data-mode="1">
+                    <span class="mode-number">1</span>
+                    <span class="mode-title">Однозначные × Однозначные</span>
+                    <span class="mode-desc">2 × 3, 7 × 8</span>
+                </button>
+                <button class="mode-btn" data-mode="2">
+                    <span class="mode-number">2</span>
+                    <span class="mode-title">Однозначные × 10-19</span>
+                    <span class="mode-desc">5 × 12, 8 × 17</span>
+                </button>
+                <button class="mode-btn" data-mode="3">
+                    <span class="mode-number">3</span>
+                    <span class="mode-title">Однозначные × 10-99</span>
+                    <span class="mode-desc">6 × 25, 9 × 47</span>
+                </button>
+                <button class="mode-btn" data-mode="4">
+                    <span class="mode-number">4</span>
+                    <span class="mode-title">Двузначные × Двузначные</span>
+                    <span class="mode-desc">23 × 45, 67 × 89</span>
+                </button>
+                <button class="mode-btn" data-mode="5">
+                    <span class="mode-number">5</span>
+                    <span class="mode-title">Смешанный режим</span>
+                    <span class="mode-desc">Все типы примеров</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Игровая область -->
+        <div id="game-area" class="game-area hidden">
+            <!-- Прогресс бар -->
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="current-card">1</span> / <span id="total-cards">10</span>
+                </div>
+            </div>
+
+            <!-- Карточка с примером -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 id="example-text">5 × 7 = ?</h2>
+                </div>
+                <div class="card-body">
+                    <div class="answer-input">
+                        <input type="number" id="answer-input" placeholder="Введите ответ" autocomplete="off">
+                        <button id="submit-btn" class="submit-btn">Проверить</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Кнопка "Назад к выбору режима" -->
+            <button id="back-btn" class="back-btn">← Назад к выбору режима</button>
+        </div>
+
+        <!-- Результаты -->
+        <div id="results" class="results hidden">
+            <div class="results-card">
+                <h2>🎉 Раунд завершен!</h2>
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Правильных ответов:</span>
+                        <span id="correct-answers" class="stat-value correct">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Неправильных ответов:</span>
+                        <span id="incorrect-answers" class="stat-value incorrect">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Процент успеха:</span>
+                        <span id="success-rate" class="stat-value">0%</span>
+                    </div>
+                </div>
+                <div class="results-actions">
+                    <button id="play-again-btn" class="play-again-btn">Играть снова</button>
+                    <button id="new-mode-btn" class="new-mode-btn">Новый режим</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

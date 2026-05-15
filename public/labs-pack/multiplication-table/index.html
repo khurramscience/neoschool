@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplication Table Laboratory</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Multiplication Table Laboratory</h1>
+        <p>Interactive learning experience for mastering multiplication tables</p>
+    </header>
+
+    <nav>
+        <button class="nav-btn active" data-section="theory">Theory</button>
+        <button class="nav-btn" data-section="practice">Practice</button>
+        <button class="nav-btn" data-section="test">Test</button>
+    </nav>
+
+    <main>
+        <!-- Theory Section -->
+        <section id="theory" class="section active">
+            <h2>Theory: Understanding Multiplication Tables</h2>
+            <div class="theory-content">
+                <div class="theory-text">
+                    <h3>What is a Multiplication Table?</h3>
+                    <p>A multiplication table is a mathematical table used to define a multiplication operation for an algebraic system. It shows the products of two numbers, typically arranged in a grid format.</p>
+                    
+                    <h3>How to Read the Table</h3>
+                    <p>To find the product of two numbers:</p>
+                    <ul>
+                        <li>Find the first number in the leftmost column</li>
+                        <li>Find the second number in the top row</li>
+                        <li>The intersection shows the product</li>
+                    </ul>
+                    
+                    <h3>Interactive Table Below</h3>
+                    <p>Hover over the table to see how rows and columns highlight, making it easy to find products!</p>
+                </div>
+                
+                <div class="multiplication-table-container">
+                    <h3>Interactive Multiplication Table (1-12)</h3>
+                    <div id="theory-table" class="multiplication-table"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Practice Section -->
+        <section id="practice" class="section">
+            <h2>Practice: Interactive Learning</h2>
+            <div class="practice-content">
+                <div class="practice-controls">
+                    <h3>Practice Mode</h3>
+                    <p>Click on any cell in the table below to see the multiplication problem and its solution.</p>
+                    <button id="reset-practice" class="btn">Reset Practice</button>
+                </div>
+                
+                <div class="practice-display">
+                    <div id="practice-problem" class="problem-display">
+                        <p>Click on any cell in the table to start practicing!</p>
+                    </div>
+                </div>
+                
+                <div class="multiplication-table-container">
+                    <h3>Practice Table (1-12)</h3>
+                    <div id="practice-table" class="multiplication-table"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Test Section -->
+        <section id="test" class="section">
+            <h2>Test: Check Your Knowledge</h2>
+            <div class="test-content">
+                <div class="test-controls">
+                    <h3>Test Mode</h3>
+                    <p>Answer multiplication questions to test your knowledge!</p>
+                    <button id="start-test" class="btn">Start Test</button>
+                    <button id="reset-test" class="btn">Reset Test</button>
+                </div>
+                
+                <div class="test-display">
+                    <div id="test-problem" class="problem-display">
+                        <p>Click "Start Test" to begin!</p>
+                    </div>
+                    <div id="test-input" class="test-input-container" style="display: none;">
+                        <input type="number" id="answer-input" placeholder="Enter your answer">
+                        <button id="submit-answer" class="btn">Submit Answer</button>
+                    </div>
+                    <div id="test-results" class="test-results">
+                        <p>Score: <span id="score">0</span> / <span id="total-questions">0</span></p>
+                    </div>
+                </div>
+                
+                <div class="multiplication-table-container">
+                    <h3>Reference Table (1-12)</h3>
+                    <div id="test-table" class="multiplication-table"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Multiplication Table Laboratory. Educational tool for learning multiplication.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html> 

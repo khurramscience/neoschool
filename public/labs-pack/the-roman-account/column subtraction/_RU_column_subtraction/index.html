@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторная работа: Вычитание в столбик</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧮 Лабораторная работа: Вычитание в столбик</h1>
+            <p>Изучи теорию, потренируйся и проверь свои знания!</p>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="theory">📚 Теория</button>
+            <button class="tab-btn" data-tab="practice">✏️ Тренировка</button>
+            <button class="tab-btn" data-tab="test">📝 Тестирование</button>
+        </nav>
+
+        <!-- Блок теории -->
+        <div id="theory" class="tab-content active">
+            <div class="theory-content">
+                <h2>Теория вычитания в столбик</h2>
+                
+                <div class="theory-section">
+                    <h3>🎯 Что такое вычитание в столбик?</h3>
+                    <p>Вычитание в столбик — это способ записи и решения примеров на вычитание, при котором числа записываются друг под другом по разрядам.</p>
+                </div>
+
+                <div class="theory-section">
+                    <h3>📋 Правила вычитания в столбик:</h3>
+                    <ol>
+                        <li>Записываем уменьшаемое сверху</li>
+                        <li>Под ним записываем вычитаемое, выравнивая по правому краю</li>
+                        <li>Проводим черту под вычитаемым</li>
+                        <li>Вычитаем поразрядно, начиная справа</li>
+                        <li>Если цифра уменьшаемого меньше цифры вычитаемого, занимаем единицу из старшего разряда</li>
+                    </ol>
+                </div>
+
+                <div class="theory-section">
+                    <h3>🔍 Пример вычитания в столбик:</h3>
+                    <div class="example">
+                        <div class="column-subtraction">
+                            <div class="number">8 4 2</div>
+                            <div class="number">- 3 5 6</div>
+                            <div class="line">─────</div>
+                            <div class="result">4 8 6</div>
+                        </div>
+                        <div class="explanation">
+                            <p><strong>Пошаговое решение:</strong></p>
+                            <p>1. 2 - 6 = невозможно, занимаем 1 из десятков: 12 - 6 = 6</p>
+                            <p>2. 3 - 5 = невозможно, занимаем 1 из сотен: 13 - 5 = 8</p>
+                            <p>3. 7 - 3 = 4</p>
+                            <p><strong>Ответ: 486</strong></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="theory-section">
+                    <h3>⚠️ Важные моменты:</h3>
+                    <ul>
+                        <li>Всегда проверяй, что уменьшаемое больше вычитаемого</li>
+                        <li>При заимствовании не забывай уменьшить цифру в старшем разряде</li>
+                        <li>Результат не может быть отрицательным числом</li>
+                        <li>Работаем только с целыми числами</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Блок тренировки -->
+        <div id="practice" class="tab-content">
+            <div class="practice-content">
+                <h2>Тренировка вычитания в столбик</h2>
+                
+                <div class="settings">
+                    <h3>⚙️ Настройки сложности:</h3>
+                    <div class="setting-group">
+                        <label for="minDigits">Минимальное количество разрядов:</label>
+                        <select id="minDigits">
+                            <option value="2">2 разряда</option>
+                            <option value="3" selected>3 разряда</option>
+                            <option value="4">4 разряда</option>
+                            <option value="5">5 разрядов</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label for="maxDigits">Максимальное количество разрядов:</label>
+                        <select id="maxDigits">
+                            <option value="3" selected>3 разряда</option>
+                            <option value="4">4 разряда</option>
+                            <option value="5">5 разрядов</option>
+                            <option value="6">6 разрядов</option>
+                        </select>
+                    </div>
+                    <button id="generateProblem" class="btn-primary">🎲 Сгенерировать пример</button>
+                </div>
+
+                <div id="problemContainer" class="problem-container" style="display: none;">
+                    <h3>Реши пример:</h3>
+                    <div id="problemDisplay" class="problem-display"></div>
+                    
+                    <div class="input-section">
+                        <label for="userAnswer">Твой ответ:</label>
+                        <input type="number" id="userAnswer" placeholder="Введи результат">
+                        <button id="checkAnswer" class="btn-primary">✅ Проверить</button>
+                    </div>
+
+                    <div id="resultMessage" class="result-message"></div>
+                    
+                    <div id="solution" class="solution" style="display: none;">
+                        <h4>📖 Подробное решение:</h4>
+                        <div id="solutionSteps"></div>
+                    </div>
+                </div>
+
+                <div class="stats">
+                    <h3>📊 Статистика:</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">Решено примеров:</span>
+                            <span id="totalProblems" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Правильных ответов:</span>
+                            <span id="correctAnswers" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Процент успеха:</span>
+                            <span id="successRate" class="stat-value">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Блок тестирования -->
+        <div id="test" class="tab-content">
+            <div class="test-content">
+                <h2>Проверочное тестирование</h2>
+                
+                <div id="testSetup" class="test-setup">
+                    <h3>🎯 Настройки теста:</h3>
+                    <div class="setting-group">
+                        <label for="testQuestions">Количество вопросов:</label>
+                        <select id="testQuestions">
+                            <option value="5">5 вопросов</option>
+                            <option value="10" selected>10 вопросов</option>
+                            <option value="15">15 вопросов</option>
+                            <option value="20">20 вопросов</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label for="testMinDigits">Минимальное количество разрядов:</label>
+                        <select id="testMinDigits">
+                            <option value="2">2 разряда</option>
+                            <option value="3" selected>3 разряда</option>
+                            <option value="4">4 разряда</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label for="testMaxDigits">Максимальное количество разрядов:</label>
+                        <select id="testMaxDigits">
+                            <option value="3" selected>3 разряда</option>
+                            <option value="4">4 разряда</option>
+                            <option value="5">5 разрядов</option>
+                        </select>
+                    </div>
+                    <button id="startTest" class="btn-primary">🚀 Начать тест</button>
+                </div>
+
+                <div id="testContainer" class="test-container" style="display: none;">
+                    <div class="test-header">
+                        <h3>Вопрос <span id="currentQuestion">1</span> из <span id="totalQuestions">10</span></h3>
+                        <div class="progress-bar">
+                            <div id="progressFill" class="progress-fill"></div>
+                        </div>
+                    </div>
+
+                    <div id="testProblem" class="test-problem"></div>
+                    
+                    <div class="test-input">
+                        <label for="testAnswer">Твой ответ:</label>
+                        <input type="number" id="testAnswer" placeholder="Введи результат">
+                        <button id="nextQuestion" class="btn-primary">⏭️ Следующий вопрос</button>
+                    </div>
+                </div>
+
+                <div id="testResults" class="test-results" style="display: none;">
+                    <h3>🎉 Результаты теста</h3>
+                    <div class="results-summary">
+                        <div class="result-item">
+                            <span class="result-label">Правильных ответов:</span>
+                            <span id="testCorrect" class="result-value">0</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Всего вопросов:</span>
+                            <span id="testTotal" class="result-value">0</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Процент успеха:</span>
+                            <span id="testPercentage" class="result-value">0%</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Оценка:</span>
+                            <span id="testGrade" class="result-value">-</span>
+                        </div>
+                    </div>
+                    
+                    <div id="testReview" class="test-review">
+                        <h4>📋 Разбор ошибок:</h4>
+                        <div id="reviewList"></div>
+                    </div>
+                    
+                    <button id="retakeTest" class="btn-primary">🔄 Пройти тест заново</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

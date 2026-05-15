@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplication Mosaic - Interactive Math Lab</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">🧩 Multiplication Mosaic</h1>
+            <p class="subtitle">Complete the multiplication puzzles to reveal the pattern!</p>
+        </header>
+
+        <div class="game-controls">
+            <div class="difficulty-selector">
+                <h3>Choose Difficulty:</h3>
+                <div class="difficulty-buttons">
+                    <button class="difficulty-btn active" data-difficulty="easy">Easy (2 puzzles)</button>
+                    <button class="difficulty-btn" data-difficulty="medium">Medium (3 puzzles)</button>
+                    <button class="difficulty-btn" data-difficulty="hard">Hard (4-5 puzzles)</button>
+                </div>
+            </div>
+            <button class="new-game-btn" id="newGameBtn">🎮 New Game</button>
+        </div>
+
+        <div class="game-area">
+            <div class="puzzle-container" id="puzzleContainer">
+                <!-- Puzzles will be generated here -->
+            </div>
+
+            <div class="mosaic-pieces" id="mosaicPieces">
+                <!-- Mosaic pieces will be generated here -->
+            </div>
+        </div>
+
+        <div class="game-info">
+            <div class="score">
+                <span>Score: </span>
+                <span id="score">0</span>
+            </div>
+            <div class="timer">
+                <span>Time: </span>
+                <span id="timer">00:00</span>
+            </div>
+            <div class="completed">
+                <span>Completed: </span>
+                <span id="completed">0</span>
+                <span>/</span>
+                <span id="total">0</span>
+            </div>
+        </div>
+
+        <div class="message" id="message"></div>
+
+        <div class="instructions">
+            <h3>How to Play:</h3>
+            <ol>
+                <li>Choose your difficulty level</li>
+                <li>Click on a mosaic piece to select it (it will glow blue)</li>
+                <li>Click on an available puzzle to place the selected number</li>
+                <li>Each correct answer earns points and reveals part of the mosaic</li>
+                <li>Complete all puzzles to see your final score!</li>
+            </ol>
+            <p><strong>Tip:</strong> You can also drag and drop pieces if you prefer!</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

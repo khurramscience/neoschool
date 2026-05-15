@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Work: Ternary Number System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🔢 Lab Work: Ternary Number System</h1>
+            <p class="subtitle">Learning the number system with base 3</p>
+        </header>
+
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-tab="theory">Theory</button>
+            <button class="tab-btn" data-tab="converter">Converter</button>
+            <button class="tab-btn" data-tab="calculator">Calculator</button>
+            <button class="tab-btn" data-tab="practice">Practice</button>
+        </nav>
+
+        <main class="content">
+            <!-- Theory -->
+            <section id="theory" class="tab-content active">
+                <div class="theory-card">
+                    <h2>📚 What is the Ternary Number System?</h2>
+                    <p>The ternary number system is a positional number system with base 3. It uses only three digits: 0, 1, and 2.</p>
+                    
+                    <div class="info-box">
+                        <h3>Basic Principles:</h3>
+                        <ul>
+                            <li>Each position represents a power of 3</li>
+                            <li>Digits: 0, 1, 2</li>
+                            <li>Positions from right to left: 3⁰, 3¹, 3², 3³, ...</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <h3>Example of converting from decimal to ternary:</h3>
+                        <p><strong>Number 25 in decimal system:</strong></p>
+                        <div class="calculation">
+                            <p>25 ÷ 3 = 8 remainder 1</p>
+                            <p>8 ÷ 3 = 2 remainder 2</p>
+                            <p>2 ÷ 3 = 0 remainder 2</p>
+                            <p><strong>Result: 221₃</strong></p>
+                        </div>
+                    </div>
+
+                    <div class="comparison-table">
+                        <h3>Comparison of number systems:</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Decimal</th>
+                                    <th>Binary</th>
+                                    <th>Ternary</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>0</td><td>0</td><td>0</td></tr>
+                                <tr><td>1</td><td>1</td><td>1</td></tr>
+                                <tr><td>2</td><td>10</td><td>2</td></tr>
+                                <tr><td>3</td><td>11</td><td>10</td></tr>
+                                <tr><td>4</td><td>100</td><td>11</td></tr>
+                                <tr><td>5</td><td>101</td><td>12</td></tr>
+                                <tr><td>6</td><td>110</td><td>20</td></tr>
+                                <tr><td>7</td><td>111</td><td>21</td></tr>
+                                <tr><td>8</td><td>1000</td><td>22</td></tr>
+                                <tr><td>9</td><td>1001</td><td>100</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Converter -->
+            <section id="converter" class="tab-content">
+                <div class="converter-card">
+                    <h2>🔄 Number System Converter</h2>
+                    
+                    <div class="converter-grid">
+                        <div class="converter-section">
+                            <h3>From Decimal to Ternary</h3>
+                            <div class="input-group">
+                                <label for="decimal-input">Decimal number:</label>
+                                <input type="number" id="decimal-input" placeholder="Enter a number" min="0">
+                                <button onclick="convertToTernary()" class="btn-primary">Convert</button>
+                            </div>
+                            <div class="result-box">
+                                <p><strong>Result:</strong> <span id="decimal-result">-</span></p>
+                                <div id="conversion-steps" class="steps-box"></div>
+                            </div>
+                        </div>
+
+                        <div class="converter-section">
+                            <h3>From Ternary to Decimal</h3>
+                            <div class="input-group">
+                                <label for="ternary-input">Ternary number:</label>
+                                <input type="text" id="ternary-input" placeholder="Enter a number (only 0,1,2)" pattern="[0-2]*">
+                                <button onclick="convertToDecimal()" class="btn-primary">Convert</button>
+                            </div>
+                            <div class="result-box">
+                                <p><strong>Result:</strong> <span id="ternary-result">-</span></p>
+                                <div id="ternary-steps" class="steps-box"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Calculator -->
+            <section id="calculator" class="tab-content">
+                <div class="calculator-card">
+                    <h2>🧮 Calculator in Ternary System</h2>
+                    
+                    <div class="calculator-grid">
+                        <div class="calc-display">
+                            <input type="text" id="calc-display" readonly value="0">
+                        </div>
+                        
+                        <div class="calc-buttons">
+                            <button class="calc-btn" onclick="appendToCalc('1')">1</button>
+                            <button class="calc-btn" onclick="appendToCalc('2')">2</button>
+                            <button class="calc-btn" onclick="appendToCalc('0')">0</button>
+                            <button class="calc-btn operator" onclick="setOperator('+')">+</button>
+                            
+                            <button class="calc-btn" onclick="appendToCalc('1')">1</button>
+                            <button class="calc-btn" onclick="appendToCalc('2')">2</button>
+                            <button class="calc-btn" onclick="appendToCalc('0')">0</button>
+                            <button class="calc-btn operator" onclick="setOperator('-')">-</button>
+                            
+                            <button class="calc-btn" onclick="appendToCalc('1')">1</button>
+                            <button class="calc-btn" onclick="appendToCalc('2')">2</button>
+                            <button class="calc-btn" onclick="appendToCalc('0')">0</button>
+                            <button class="calc-btn operator" onclick="setOperator('×')">×</button>
+                            
+                            <button class="calc-btn clear" onclick="clearCalc()">C</button>
+                            <button class="calc-btn" onclick="appendToCalc('0')">0</button>
+                            <button class="calc-btn equals" onclick="calculate()">=</button>
+                            <button class="calc-btn operator" onclick="setOperator('÷')">÷</button>
+                        </div>
+                    </div>
+                    
+                    <div class="calc-result">
+                        <h3>Calculation Result:</h3>
+                        <div id="calc-result-display">Enter numbers and operation</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Practice -->
+            <section id="practice" class="tab-content">
+                <div class="practice-card">
+                    <h2>🎯 Practice Exercises</h2>
+                    
+                    <div class="practice-controls">
+                        <button onclick="generateNewTask()" class="btn-primary">New Task</button>
+                        <button onclick="checkAnswer()" class="btn-success">Check Answer</button>
+                        <button onclick="showHint()" class="btn-info">Hint</button>
+                    </div>
+
+                    <div class="task-container">
+                        <div id="current-task" class="task-box">
+                            <h3>Task:</h3>
+                            <p id="task-text">Click "New Task" to start</p>
+                        </div>
+
+                        <div class="answer-section">
+                            <label for="user-answer">Your answer:</label>
+                            <input type="text" id="user-answer" placeholder="Enter your answer">
+                        </div>
+
+                        <div id="feedback" class="feedback-box"></div>
+                    </div>
+
+                    <div class="progress-section">
+                        <h3>Progress:</h3>
+                        <div class="progress-bar">
+                            <div id="progress-fill" class="progress-fill"></div>
+                        </div>
+                        <p>Correct answers: <span id="correct-count">0</span> of <span id="total-count">0</span></p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>© 2024 Lab Work: Ternary Number System</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

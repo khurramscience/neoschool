@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratory Work: Adding Three Numbers in Column</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧮 Laboratory Work: Adding Three Numbers in Column</h1>
+            <p>Learn to add three numbers in column with digit carryover</p>
+        </header>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="digits">Number of digits:</label>
+                <select id="digits">
+                    <option value="2">2 digits</option>
+                    <option value="3" selected>3 digits</option>
+                    <option value="4">4 digits</option>
+                    <option value="5">5 digits</option>
+                </select>
+            </div>
+            <button id="generateBtn" class="btn-primary">Generate new problem</button>
+            <button id="checkBtn" class="btn-success">Check answer</button>
+            <button id="showSolutionBtn" class="btn-info">Show solution</button>
+        </div>
+
+        <div class="workspace">
+            <div class="problem-section">
+                <h3>Problem to solve:</h3>
+                <div id="problemDisplay" class="problem-display"></div>
+            </div>
+
+            <div class="solution-section">
+                <h3>Your solution:</h3>
+                <div id="solutionWorkspace" class="solution-workspace"></div>
+            </div>
+
+            <div class="result-section">
+                <div id="resultMessage" class="result-message"></div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>📚 How to solve:</h3>
+            <ol>
+                <li>Start addition from the rightmost digit (ones)</li>
+                <li>Add digits in each position</li>
+                <li>If the sum is greater than 9, write the remainder of division by 10 and carry 1 to the next position</li>
+                <li>Repeat for all positions</li>
+            </ol>
+        </div>
+
+        <div class="stats">
+            <h3>📊 Statistics:</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-label">Problems solved:</span>
+                    <span id="solvedCount" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Correct answers:</span>
+                    <span id="correctCount" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Success rate:</span>
+                    <span id="successRate" class="stat-value">0%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

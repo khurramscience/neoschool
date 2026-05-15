@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Work: The Importance of Zero in Mathematics</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔢 Lab Work: The Importance of Zero in Mathematics</h1>
+            <p class="subtitle">Learning why zero is so important when counting objects</p>
+        </header>
+
+        <nav class="navigation">
+            <button class="nav-btn active" data-section="theory">📚 Theory</button>
+            <button class="nav-btn" data-section="practice">🎯 Practice</button>
+            <button class="nav-btn" data-section="quiz">✅ Knowledge Check</button>
+        </nav>
+
+        <!-- Theory Section -->
+        <section id="theory" class="content-section active">
+            <h2>📚 Theoretical Part</h2>
+            
+            <div class="theory-card">
+                <h3>What is Zero?</h3>
+                <p>Zero (0) is a number that means the absence of quantity. This is a very important number in mathematics!</p>
+                <div class="example-box">
+                    <h4>Examples of using zero:</h4>
+                    <ul>
+                        <li>You have 0 apples = you have no apples</li>
+                        <li>There are 0 candies in the box = the box is empty</li>
+                        <li>There are 0 books on the table = the table is empty</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="theory-card">
+                <h3>Why is Zero So Important?</h3>
+                <p>Without zero, we couldn't accurately say that we have nothing. Imagine you're counting candies:</p>
+                <div class="counting-example">
+                    <div class="count-item">
+                        <span class="number">1</span>
+                        <span class="emoji">🍬</span>
+                    </div>
+                    <div class="count-item">
+                        <span class="number">2</span>
+                        <span class="emoji">🍬🍬</span>
+                    </div>
+                    <div class="count-item">
+                        <span class="number">0</span>
+                        <span class="emoji">(empty)</span>
+                    </div>
+                </div>
+                <p>Without zero, we wouldn't know that there are no more candies!</p>
+            </div>
+
+            <div class="theory-card">
+                <h3>Zero in Positional System</h3>
+                <p>Zero helps us write large numbers correctly:</p>
+                <div class="number-examples">
+                    <div class="number-example">
+                        <span class="big-number">10</span>
+                        <span class="explanation">one ten, zero ones</span>
+                    </div>
+                    <div class="number-example">
+                        <span class="big-number">100</span>
+                        <span class="explanation">one ten of tens, zero tens, zero ones</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Practice Section -->
+        <section id="practice" class="content-section">
+            <h2>🎯 Practical Part</h2>
+            
+            <div class="practice-card">
+                <h3>Exercise 1: Counting Objects</h3>
+                <p>Count the objects and write the correct number:</p>
+                
+                <div class="counting-game">
+                    <div class="items-container" id="itemsContainer">
+                        <!-- Items will be added via JavaScript -->
+                    </div>
+                    
+                    <div class="controls">
+                        <button id="addItem" class="btn">➕ Add Item</button>
+                        <button id="removeItem" class="btn">➖ Remove Item</button>
+                        <button id="clearAll" class="btn">🗑️ Clear All</button>
+                    </div>
+                    
+                    <div class="result">
+                        <label for="userAnswer">How many objects do you see?</label>
+                        <input type="number" id="userAnswer" min="0" placeholder="Enter number">
+                        <button id="checkAnswer" class="btn btn-primary">Check</button>
+                    </div>
+                    
+                    <div id="feedback" class="feedback"></div>
+                </div>
+            </div>
+
+            <div class="practice-card">
+                <h3>Exercise 2: Fill in the Blanks</h3>
+                <p>Insert the correct numbers, including zero:</p>
+                
+                <div class="fill-blanks">
+                    <div class="blank-exercise">
+                        <span>I have <input type="number" class="blank-input" data-correct="3" min="0"> apples</span>
+                        <span>🍎🍎🍎</span>
+                    </div>
+                    <div class="blank-exercise">
+                        <span>I have <input type="number" class="blank-input" data-correct="0" min="0"> candies</span>
+                        <span>(empty)</span>
+                    </div>
+                    <div class="blank-exercise">
+                        <span>I have <input type="number" class="blank-input" data-correct="5" min="0"> pencils</span>
+                        <span>✏️✏️✏️✏️✏️</span>
+                    </div>
+                    <button id="checkBlanks" class="btn btn-primary">Check Answers</button>
+                    <div id="blanksFeedback" class="feedback"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Knowledge Check Section -->
+        <section id="quiz" class="content-section">
+            <h2>✅ Knowledge Check</h2>
+            
+            <div class="quiz-container">
+                <div id="quizProgress" class="quiz-progress">
+                    <span id="currentQuestion">1</span> of <span id="totalQuestions">5</span>
+                </div>
+                
+                <div id="quizContent" class="quiz-content">
+                    <!-- Questions will be added via JavaScript -->
+                </div>
+                
+                <div class="quiz-controls">
+                    <button id="prevQuestion" class="btn" disabled>← Back</button>
+                    <button id="nextQuestion" class="btn">Next →</button>
+                    <button id="finishQuiz" class="btn btn-primary" style="display: none;">Finish Test</button>
+                </div>
+                
+                <div id="quizResults" class="quiz-results" style="display: none;">
+                    <h3>Test Results</h3>
+                    <div id="scoreDisplay"></div>
+                    <button id="restartQuiz" class="btn btn-primary">Take Test Again</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

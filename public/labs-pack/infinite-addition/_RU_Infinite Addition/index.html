@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторная работа: Сложение трех чисел в столбик</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧮 Лабораторная работа: Сложение трех чисел в столбик</h1>
+            <p>Научитесь складывать три числа в столбик с переносом разрядов</p>
+        </header>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="digits">Количество разрядов:</label>
+                <select id="digits">
+                    <option value="2">2 разряда</option>
+                    <option value="3" selected>3 разряда</option>
+                    <option value="4">4 разряда</option>
+                    <option value="5">5 разрядов</option>
+                </select>
+            </div>
+            <button id="generateBtn" class="btn-primary">Сгенерировать новый пример</button>
+            <button id="checkBtn" class="btn-success">Проверить ответ</button>
+            <button id="showSolutionBtn" class="btn-info">Показать решение</button>
+        </div>
+
+        <div class="workspace">
+            <div class="problem-section">
+                <h3>Пример для решения:</h3>
+                <div id="problemDisplay" class="problem-display"></div>
+            </div>
+
+            <div class="solution-section">
+                <h3>Ваше решение:</h3>
+                <div id="solutionWorkspace" class="solution-workspace"></div>
+            </div>
+
+            <div class="result-section">
+                <div id="resultMessage" class="result-message"></div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>📚 Как решать:</h3>
+            <ol>
+                <li>Начните сложение с правого разряда (единиц)</li>
+                <li>Сложите цифры в каждом разряде</li>
+                <li>Если сумма больше 9, запишите остаток от деления на 10 и перенесите 1 в следующий разряд</li>
+                <li>Повторите для всех разрядов</li>
+            </ol>
+        </div>
+
+        <div class="stats">
+            <h3>📊 Статистика:</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-label">Решено примеров:</span>
+                    <span id="solvedCount" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Правильных ответов:</span>
+                    <span id="correctCount" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Процент успеха:</span>
+                    <span id="successRate" class="stat-value">0%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

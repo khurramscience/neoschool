@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn Multiplication - Math Cards</title>
+    <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Заголовок */
+.header {
+    text-align: center;
+    margin-bottom: 40px;
+    color: white;
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+/* Выбор режима */
+.mode-selection {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.mode-selection h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+    font-size: 1.5rem;
+}
+
+.mode-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.mode-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 15px;
+    padding: 25px 20px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+}
+
+.mode-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+}
+
+.mode-btn:active {
+    transform: translateY(-2px);
+}
+
+.mode-number {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 40px;
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+}
+
+.mode-title {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.mode-desc {
+    display: block;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+/* Игровая область */
+.game-area {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.hidden {
+    display: none;
+}
+
+/* Прогресс бар */
+.progress-container {
+    margin-bottom: 30px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 12px;
+    background: #e0e0e0;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50, #45a049);
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    text-align: center;
+    font-weight: 500;
+    color: #666;
+}
+
+/* Карточка */
+.card {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border-radius: 15px;
+    padding: 40px;
+    text-align: center;
+    margin-bottom: 30px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.card-header h2 {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 30px;
+}
+
+.answer-input {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+#answer-input {
+    padding: 15px 20px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    font-size: 1.2rem;
+    width: 200px;
+    text-align: center;
+    transition: border-color 0.3s ease;
+}
+
+#answer-input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.submit-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.submit-btn:active {
+    transform: translateY(0);
+}
+
+.back-btn {
+    background: #f8f9fa;
+    border: 2px solid #dee2e6;
+    color: #6c757d;
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+}
+
+/* Resultы */
+.results {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.results-card {
+    text-align: center;
+}
+
+.results-card h2 {
+    font-size: 2rem;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.stats {
+    margin-bottom: 30px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-label {
+    font-size: 1.1rem;
+    color: #666;
+}
+
+.stat-value {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.stat-value.correct {
+    color: #4CAF50;
+}
+
+.stat-value.incorrect {
+    color: #f44336;
+}
+
+.results-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.play-again-btn, .new-mode-btn {
+    padding: 15px 30px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.play-again-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.new-mode-btn {
+    background: #f8f9fa;
+    border: 2px solid #dee2e6;
+    color: #6c757d;
+}
+
+.play-again-btn:hover, .new-mode-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.mode-selection, .game-area, .results {
+    animation: fadeIn 0.5s ease;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    .header h1 {
+        font-size: 2rem;
+    }
+    
+    .mode-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .card-header h2 {
+        font-size: 2.5rem;
+    }
+    
+    .answer-input {
+        flex-direction: column;
+    }
+    
+    #answer-input {
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .results-actions {
+        flex-direction: column;
+    }
+} 
+</style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🎯 Learn Multiplication</h1>
+            <p>Choose a mode and start practicing!</p>
+        </header>
+
+        <!-- Mode Selection -->
+        <div id="mode-selection" class="mode-selection">
+            <h2>Choose a mode:</h2>
+            <div class="mode-grid">
+                <button class="mode-btn" data-mode="1">
+                    <span class="mode-number">1</span>
+                    <span class="mode-title">Single × Single</span>
+                    <span class="mode-desc">2 × 3, 7 × 8</span>
+                </button>
+                <button class="mode-btn" data-mode="2">
+                    <span class="mode-number">2</span>
+                    <span class="mode-title">Single × 10-19</span>
+                    <span class="mode-desc">5 × 12, 8 × 17</span>
+                </button>
+                <button class="mode-btn" data-mode="3">
+                    <span class="mode-number">3</span>
+                    <span class="mode-title">Single × 10-99</span>
+                    <span class="mode-desc">6 × 25, 9 × 47</span>
+                </button>
+                <button class="mode-btn" data-mode="4">
+                    <span class="mode-number">4</span>
+                    <span class="mode-title">Double × Double</span>
+                    <span class="mode-desc">23 × 45, 67 × 89</span>
+                </button>
+                <button class="mode-btn" data-mode="5">
+                    <span class="mode-number">5</span>
+                    <span class="mode-title">Mixed Mode</span>
+                    <span class="mode-desc">All types of examples</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Area -->
+        <div id="game-area" class="game-area hidden">
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="current-card">1</span> / <span id="total-cards">10</span>
+                </div>
+            </div>
+
+            <!-- Card with Example -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 id="example-text">5 × 7 = ?</h2>
+                </div>
+                <div class="card-body">
+                    <div class="answer-input">
+                        <input type="number" id="answer-input" placeholder="Enter answer" autocomplete="off">
+                        <button id="submit-btn" class="submit-btn">Check</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back to Mode Selection Button -->
+            <button id="back-btn" class="back-btn">← Back to Mode Selection</button>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="results hidden">
+            <div class="results-card">
+                <h2>🎉 Round Complete!</h2>
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Correct answers:</span>
+                        <span id="correct-answers" class="stat-value correct">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Incorrect answers:</span>
+                        <span id="incorrect-answers" class="stat-value incorrect">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Success rate:</span>
+                        <span id="success-rate" class="stat-value">0%</span>
+                    </div>
+                </div>
+                <div class="results-actions">
+                    <button id="play-again-btn" class="play-again-btn">Play Again</button>
+                    <button id="new-mode-btn" class="new-mode-btn">New Mode</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+class MultiplicationGame {
+    constructor() {
+        this.currentMode = null;
+        this.currentCard = 0;
+        this.totalCards = 10;
+        this.correctAnswers = 0;
+        this.incorrectAnswers = 0;
+        this.cards = [];
+        this.currentExample = null;
+        
+        this.initializeElements();
+        this.bindEvents();
+    }
+
+    initializeElements() {
+        // Get DOM elements
+        this.modeSelection = document.getElementById('mode-selection');
+        this.gameArea = document.getElementById('game-area');
+        this.results = document.getElementById('results');
+        
+        this.progressFill = document.getElementById('progress-fill');
+        this.currentCardSpan = document.getElementById('current-card');
+        this.totalCardsSpan = document.getElementById('total-cards');
+        
+        this.exampleText = document.getElementById('example-text');
+        this.answerInput = document.getElementById('answer-input');
+        this.submitBtn = document.getElementById('submit-btn');
+        
+        this.correctAnswersSpan = document.getElementById('correct-answers');
+        this.incorrectAnswersSpan = document.getElementById('incorrect-answers');
+        this.successRateSpan = document.getElementById('success-rate');
+    }
+
+    bindEvents() {
+        // Event handlers for mode buttons
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const mode = parseInt(e.currentTarget.dataset.mode);
+                this.startGame(mode);
+            });
+        });
+
+        // Event handler for "Check" button
+        this.submitBtn.addEventListener('click', () => this.checkAnswer());
+
+        // Event handler for Enter key in input field
+        this.answerInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.checkAnswer();
+            }
+        });
+
+        // Event handler for "Back" button
+        document.getElementById('back-btn').addEventListener('click', () => {
+            this.showModeSelection();
+        });
+
+        // Event handlers for result buttons
+        document.getElementById('play-again-btn').addEventListener('click', () => {
+            this.startGame(this.currentMode);
+        });
+
+        document.getElementById('new-mode-btn').addEventListener('click', () => {
+            this.showModeSelection();
+        });
+    }
+
+    startGame(mode) {
+        this.currentMode = mode;
+        this.currentCard = 0;
+        this.correctAnswers = 0;
+        this.incorrectAnswers = 0;
+        this.cards = this.generateCards(mode);
+        
+        this.showGameArea();
+        this.showNextCard();
+    }
+
+    generateCards(mode) {
+        const cards = [];
+        
+        for (let i = 0; i < this.totalCards; i++) {
+            let a, b;
+            
+            switch (mode) {
+                case 1: // Single × Single
+                    a = Math.floor(Math.random() * 9) + 1; // 1-9
+                    b = Math.floor(Math.random() * 9) + 1; // 1-9
+                    break;
+                    
+                case 2: // Single × 10-19
+                    a = Math.floor(Math.random() * 9) + 1; // 1-9
+                    b = Math.floor(Math.random() * 10) + 10; // 10-19
+                    break;
+                    
+                case 3: // Single × 10-99
+                    a = Math.floor(Math.random() * 9) + 1; // 1-9
+                    b = Math.floor(Math.random() * 90) + 10; // 10-99
+                    break;
+                    
+                case 4: // Double × Double
+                    a = Math.floor(Math.random() * 90) + 10; // 10-99
+                    b = Math.floor(Math.random() * 90) + 10; // 10-99
+                    break;
+                    
+                case 5: // Mixed mode
+                    const subMode = Math.floor(Math.random() * 4) + 1;
+                    const subCards = this.generateCards(subMode);
+                    cards.push(...subCards);
+                    continue;
+            }
+            
+            cards.push({
+                a: a,
+                b: b,
+                answer: a * b,
+                example: `${a} × ${b} = ?`
+            });
+        }
+        
+        // For mixed mode, take only the first 10 cards
+        return cards.slice(0, this.totalCards);
+    }
+
+    showNextCard() {
+        if (this.currentCard >= this.totalCards) {
+            this.showResults();
+            return;
+        }
+
+        this.currentExample = this.cards[this.currentCard];
+        this.exampleText.textContent = this.currentExample.example;
+        this.answerInput.value = '';
+        this.answerInput.focus();
+        
+        this.updateProgress();
+    }
+
+    checkAnswer() {
+        const userAnswer = parseInt(this.answerInput.value);
+        
+        if (isNaN(userAnswer)) {
+            alert('Please enter a number!');
+            return;
+        }
+
+        const isCorrect = userAnswer === this.currentExample.answer;
+        
+        if (isCorrect) {
+            this.correctAnswers++;
+            this.showCorrectAnswer();
+        } else {
+            this.incorrectAnswers++;
+            this.showIncorrectAnswer();
+        }
+
+        this.currentCard++;
+        
+        // Small delay before the next example
+        setTimeout(() => {
+            this.showNextCard();
+        }, 1500);
+    }
+
+    showCorrectAnswer() {
+        this.answerInput.style.borderColor = '#4CAF50';
+        this.answerInput.style.backgroundColor = '#f1f8e9';
+        this.submitBtn.textContent = '✓ Correct!';
+        this.submitBtn.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
+        
+        setTimeout(() => {
+            this.answerInput.style.borderColor = '#ddd';
+            this.answerInput.style.backgroundColor = 'white';
+            this.submitBtn.textContent = 'Check';
+            this.submitBtn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        }, 1500);
+    }
+
+    showIncorrectAnswer() {
+        this.answerInput.style.borderColor = '#f44336';
+        this.answerInput.style.backgroundColor = '#ffebee';
+        this.submitBtn.textContent = `✗ Incorrect! Correct answer: ${this.currentExample.answer}`;
+        this.submitBtn.style.background = 'linear-gradient(135deg, #f44336, #d32f2f)';
+        
+        setTimeout(() => {
+            this.answerInput.style.borderColor = '#ddd';
+            this.answerInput.style.backgroundColor = 'white';
+            this.submitBtn.textContent = 'Check';
+            this.submitBtn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        }, 1500);
+    }
+
+    updateProgress() {
+        const progress = (this.currentCard / this.totalCards) * 100;
+        this.progressFill.style.width = `${progress}%`;
+        this.currentCardSpan.textContent = this.currentCard + 1;
+        this.totalCardsSpan.textContent = this.totalCards;
+    }
+
+    showResults() {
+        const successRate = Math.round((this.correctAnswers / this.totalCards) * 100);
+        
+        this.correctAnswersSpan.textContent = this.correctAnswers;
+        this.incorrectAnswersSpan.textContent = this.incorrectAnswers;
+        this.successRateSpan.textContent = `${successRate}%`;
+        
+        this.gameArea.classList.add('hidden');
+        this.results.classList.remove('hidden');
+    }
+
+    showGameArea() {
+        this.modeSelection.classList.add('hidden');
+        this.results.classList.add('hidden');
+        this.gameArea.classList.remove('hidden');
+    }
+
+    showModeSelection() {
+        this.gameArea.classList.add('hidden');
+        this.results.classList.add('hidden');
+        this.modeSelection.classList.remove('hidden');
+    }
+}
+
+// Initialize the game when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    new MultiplicationGame();
+}); 
+</script>
+
+<script>
+(function() {
+  var LAB_NAME = "Multiplication Cards";
+  var LAB_SLUG = "multiplication-cards";
+  var sessionStart = Date.now();
+  var answers = 0, correct = 0;
+  
+  // Notify parent on load
+  window.addEventListener("load", function() {
+    window.parent.postMessage({type:"labLoaded", lab:LAB_SLUG, name:LAB_NAME}, "*");
+  });
+  
+  // Track button clicks as interactions
+  document.addEventListener("click", function(e) {
+    var btn = e.target.closest("button");
+    if (btn) {
+      window.parent.postMessage({type:"interaction", lab:LAB_SLUG, action:btn.textContent.trim().substring(0,30), time: Date.now()-sessionStart}, "*");
+    }
+  });
+  
+  // Track score elements
+  setInterval(function() {
+    var scoreEl = document.getElementById("score") || document.querySelector(".score-value") || document.querySelector("[id*='score']");
+    if (scoreEl) {
+      var s = parseInt(scoreEl.textContent)||0;
+      window.parent.postMessage({type:"scoreUpdate", lab:LAB_SLUG, score:s, time:Date.now()-sessionStart}, "*");
+    }
+  }, 2000);
+  
+  // Send session data when leaving
+  window.addEventListener("beforeunload", function() {
+    window.parent.postMessage({type:"sessionEnd", lab:LAB_SLUG, duration:Date.now()-sessionStart}, "*");
+  });
+})();
+</script>
+</body>
+</html> 

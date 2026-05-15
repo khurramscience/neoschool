@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторная работа: Переместительное свойство умножения</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔢 Лабораторная работа</h1>
+            <h2>Переместительное свойство умножения</h2>
+            <p>Изучаем, что a × b = b × a</p>
+        </header>
+
+        <nav class="navigation">
+            <button class="nav-btn active" data-section="theory">📚 Теория</button>
+            <button class="nav-btn" data-section="practice">✏️ Практика</button>
+            <button class="nav-btn" data-section="test">🧪 Проверка знаний</button>
+        </nav>
+
+        <!-- Блок теории -->
+        <section id="theory" class="content-section active">
+            <div class="theory-content">
+                <h3>📚 Теоретический материал</h3>
+                
+                <div class="theory-card">
+                    <h4>Что такое переместительное свойство умножения?</h4>
+                    <p>Переместительное свойство умножения (коммутативность) означает, что от перемены мест множителей произведение не изменяется.</p>
+                    
+                    <div class="formula">
+                        <span class="math">a × b = b × a</span>
+                    </div>
+                    
+                    <div class="examples">
+                        <h5>Примеры:</h5>
+                        <div class="example-grid">
+                            <div class="example">
+                                <span class="math">3 × 4 = 12</span>
+                                <span class="math">4 × 3 = 12</span>
+                                <span class="result">✅ Результат одинаковый!</span>
+                            </div>
+                            <div class="example">
+                                <span class="math">7 × 5 = 35</span>
+                                <span class="math">5 × 7 = 35</span>
+                                <span class="result">✅ Результат одинаковый!</span>
+                            </div>
+                            <div class="example">
+                                <span class="math">2 × 8 = 16</span>
+                                <span class="math">8 × 2 = 16</span>
+                                <span class="result">✅ Результат одинаковый!</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="theory-card">
+                    <h4>Визуальное представление</h4>
+                    <div class="visual-example">
+                        <div class="array-container">
+                            <div class="array-row">
+                                <h5>3 × 4 = 12</h5>
+                                <div class="dots-grid">
+                                    <div class="dot-row">
+                                        <span class="dot">●</span><span class="dot">●</span><span class="dot">●</span><span class="dot">●</span>
+                                    </div>
+                                    <div class="dot-row">
+                                        <span class="dot">●</span><span class="dot">●</span><span class="dot">●</span><span class="dot">●</span>
+                                    </div>
+                                    <div class="dot-row">
+                                        <span class="dot">●</span><span class="dot">●</span><span class="dot">●</span><span class="dot">●</span>
+                                    </div>
+                                </div>
+                                <p>3 ряда по 4 точки = 12 точек</p>
+                            </div>
+                            <div class="array-row">
+                                <h5>4 × 3 = 12</h5>
+                                <div class="dots-grid">
+                                    <div class="dot-row">
+                                        <span class="dot">●</span><span class="dot">●</span><span class="dot">●</span>
+                                    </div>
+                                    <div class="dot-row">
+                                        <span class="dot">●</span><span class="dot">●</span><span class="dot">●</span>
+                                    </div>
+                                    <div class="dot-row">
+                                        <span class="dot">●</span><span class="dot">●</span><span class="dot">●</span>
+                                    </div>
+                                    <div class="dot-row">
+                                        <span class="dot">●</span><span class="dot">●</span><span class="dot">●</span>
+                                    </div>
+                                </div>
+                                <p>4 ряда по 3 точки = 12 точек</p>
+                            </div>
+                        </div>
+                        <div class="explanation">
+                            <p><strong>Обрати внимание:</strong> В первом случае у нас 3 ряда по 4 точки (прямоугольник 3×4), а во втором - 4 ряда по 3 точки (прямоугольник 4×3). Количество точек одинаковое (12), но расположение разное!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Блок практики -->
+        <section id="practice" class="content-section">
+            <div class="practice-content">
+                <h3>✏️ Практические задания</h3>
+                
+                <div class="practice-card">
+                    <h4>Задание 1: Проверь переместительное свойство</h4>
+                    <p>Выбери два числа и убедись, что их произведение не зависит от порядка множителей.</p>
+                    
+                    <div class="interactive-multiplier">
+                        <div class="input-group">
+                            <label for="num1">Первое число:</label>
+                            <input type="number" id="num1" min="1" max="20" value="5">
+                        </div>
+                        <div class="input-group">
+                            <label for="num2">Второе число:</label>
+                            <input type="number" id="num2" min="1" max="20" value="3">
+                        </div>
+                        <button id="calculateBtn" class="btn-primary">Вычислить</button>
+                    </div>
+
+                    <div id="result" class="result-display" style="display: none;">
+                        <div class="calculation">
+                            <div class="calc-row">
+                                <span class="math" id="calc1"></span>
+                                <span class="equals">=</span>
+                                <span class="result" id="result1"></span>
+                            </div>
+                            <div class="calc-row">
+                                <span class="math" id="calc2"></span>
+                                <span class="equals">=</span>
+                                <span class="result" id="result2"></span>
+                            </div>
+                            <div class="conclusion" id="conclusion"></div>
+                        </div>
+                        
+                        <div class="visual-result">
+                            <h5>Визуальное представление:</h5>
+                            <div class="visual-comparison">
+                                <div class="visual-side">
+                                    <h6 id="visual-title1"></h6>
+                                    <div id="visual-dots1" class="dots-grid"></div>
+                                </div>
+                                <div class="visual-side">
+                                    <h6 id="visual-title2"></h6>
+                                    <div id="visual-dots2" class="dots-grid"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="practice-card">
+                    <h4>Задание 2: Создай свои примеры</h4>
+                    <p>Придумай три пары чисел и запиши их произведения в обоих порядках.</p>
+                    
+                    <div class="examples-creator">
+                        <div class="example-input">
+                            <input type="number" class="ex-num" placeholder="a" min="1" max="20">
+                            <span class="multiply">×</span>
+                            <input type="number" class="ex-num" placeholder="b" min="1" max="20">
+                            <span class="equals">=</span>
+                            <span class="ex-result">?</span>
+                        </div>
+                        <div class="example-input">
+                            <input type="number" class="ex-num" placeholder="b" min="1" max="20">
+                            <span class="multiply">×</span>
+                            <input type="number" class="ex-num" placeholder="a" min="1" max="20">
+                            <span class="equals">=</span>
+                            <span class="ex-result">?</span>
+                        </div>
+                        <button class="btn-secondary" onclick="calculateExample(this)">Вычислить</button>
+                    </div>
+
+                    <div class="examples-creator">
+                        <div class="example-input">
+                            <input type="number" class="ex-num" placeholder="c" min="1" max="20">
+                            <span class="multiply">×</span>
+                            <input type="number" class="ex-num" placeholder="d" min="1" max="20">
+                            <span class="equals">=</span>
+                            <span class="ex-result">?</span>
+                        </div>
+                        <div class="example-input">
+                            <input type="number" class="ex-num" placeholder="d" min="1" max="20">
+                            <span class="multiply">×</span>
+                            <input type="number" class="ex-num" placeholder="c" min="1" max="20">
+                            <span class="equals">=</span>
+                            <span class="ex-result">?</span>
+                        </div>
+                        <button class="btn-secondary" onclick="calculateExample(this)">Вычислить</button>
+                    </div>
+
+                    <div class="examples-creator">
+                        <div class="example-input">
+                            <input type="number" class="ex-num" placeholder="e" min="1" max="20">
+                            <span class="multiply">×</span>
+                            <input type="number" class="ex-num" placeholder="f" min="1" max="20">
+                            <span class="equals">=</span>
+                            <span class="ex-result">?</span>
+                        </div>
+                        <div class="example-input">
+                            <input type="number" class="ex-num" placeholder="f" min="1" max="20">
+                            <span class="multiply">×</span>
+                            <input type="number" class="ex-num" placeholder="e" min="1" max="20">
+                            <span class="equals">=</span>
+                            <span class="ex-result">?</span>
+                        </div>
+                        <button class="btn-secondary" onclick="calculateExample(this)">Вычислить</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Блок проверки знаний -->
+        <section id="test" class="content-section">
+            <div class="test-content">
+                <h3>🧪 Проверка знаний</h3>
+                <p>Тест из 10 вопросов по переместительному свойству умножения</p>
+                
+                <div id="test-container">
+                    <div id="test-intro" class="test-intro">
+                        <h4>Готов к проверке знаний?</h4>
+                        <p>В тесте 10 вопросов. Внимательно читай задания и выбирай правильные ответы.</p>
+                        <button id="startTestBtn" class="btn-primary">Начать тест</button>
+                    </div>
+                    
+                    <div id="test-questions" class="test-questions" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                            <span class="progress-text">Вопрос <span id="currentQuestion">1</span> из 10</span>
+                        </div>
+                        
+                        <div id="question-container"></div>
+                        
+                        <div class="test-navigation">
+                            <button id="prevBtn" class="btn-secondary" style="display: none;">← Назад</button>
+                            <button id="nextBtn" class="btn-primary">Далее →</button>
+                            <button id="finishBtn" class="btn-success" style="display: none;">Завершить тест</button>
+                        </div>
+                    </div>
+                    
+                    <div id="test-results" class="test-results" style="display: none;">
+                        <h4>Результаты теста</h4>
+                        <div class="score-display">
+                            <div class="score-circle">
+                                <span id="score-percentage">0%</span>
+                            </div>
+                            <p>Правильных ответов: <span id="correct-answers">0</span> из 10</p>
+                        </div>
+                        <div id="detailed-results"></div>
+                        <button id="retakeTestBtn" class="btn-primary">Пройти тест заново</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

@@ -1,0 +1,10 @@
+<svg width="48" height="64" viewBox="0 0 48 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Длинный стебель -->
+  <rect x="22" y="8" width="4" height="36" rx="2" fill="#8D5524"/>
+  <!-- Белый круг сверху -->
+  <circle cx="24" cy="12" r="8" fill="#fff" stroke="#222" stroke-width="2"/>
+  <!-- Зелёное основание с двумя лепестками -->
+  <path d="M24 44 Q16 54 12 44 Q18 38 24 44 Q30 38 36 44 Q32 54 24 44 Z" fill="#388E3C" stroke="#222" stroke-width="2"/>
+  <!-- Центральная часть основания -->
+  <ellipse cx="24" cy="44" rx="6" ry="6" fill="#66BB6A" stroke="#222" stroke-width="2"/>
+</svg> 

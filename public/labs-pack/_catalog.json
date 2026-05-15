@@ -1,0 +1,322 @@
+[
+  {
+    "id": "adding-and-subtracting-decimals",
+    "name": "Adding and Subtracting Decimals",
+    "topic": "Number Operations",
+    "emoji": "\ud83d\udd22",
+    "grades": "Gr 4\u20137",
+    "url": "./labs-pack/adding-and-subtracting-decimals/index.html"
+  },
+  {
+    "id": "adding-and-subtracting-negative-numbers",
+    "name": "Adding and Subtracting Negative Numbers",
+    "topic": "Number Operations",
+    "emoji": "\ud83d\udd22",
+    "grades": "Gr 4\u20137",
+    "url": "./labs-pack/adding-and-subtracting-negative-numbers/index.html"
+  },
+  {
+    "id": "bubbles-and-examples-fix-audio",
+    "name": "Bubbles and Examples Fix Audio",
+    "topic": "Math Practice",
+    "emoji": "\ud83e\uddee",
+    "grades": "Gr 2\u20136",
+    "url": "./labs-pack/bubbles-and-examples-fix-audio/index.html"
+  },
+  {
+    "id": "changing-the-places-of-the-terms",
+    "name": "Changing the Places of the Terms",
+    "topic": "Properties",
+    "emoji": "\ud83d\udd04",
+    "grades": "Gr 2\u20135",
+    "url": "./labs-pack/changing-the-places-of-the-terms/index.html"
+  },
+  {
+    "id": "column-addition-update",
+    "name": "Column Addition Update",
+    "topic": "Addition & Subtraction",
+    "emoji": "\u2795",
+    "grades": "Gr 1\u20134",
+    "url": "./labs-pack/column-addition-update/index.html"
+  },
+  {
+    "id": "digits-of-numbers",
+    "name": "Digits of Numbers",
+    "topic": "Number Sense",
+    "emoji": "\ud83c\udfaf",
+    "grades": "Gr 1\u20134",
+    "url": "./labs-pack/digits-of-numbers/Digits of numbers_RU/index.html"
+  },
+  {
+    "id": "division-cards-update",
+    "name": "Division Cards Update",
+    "topic": "Division",
+    "emoji": "\u2797",
+    "grades": "Gr 3\u20135",
+    "url": "./labs-pack/division-cards-update/index.html"
+  },
+  {
+    "id": "division-with-and-without-remainder-update",
+    "name": "Division With and Without Remainder Update",
+    "topic": "Division",
+    "emoji": "\u2797",
+    "grades": "Gr 3\u20135",
+    "url": "./labs-pack/division-with-and-without-remainder-update/index.html"
+  },
+  {
+    "id": "division-with-remainder",
+    "name": "Division With Remainder",
+    "topic": "Division",
+    "emoji": "\u2797",
+    "grades": "Gr 3\u20135",
+    "url": "./labs-pack/division-with-remainder/index.html"
+  },
+  {
+    "id": "egyptian",
+    "name": "Egyptian",
+    "topic": "Number Systems",
+    "emoji": "\ud83c\udfdb\ufe0f",
+    "grades": "Gr 3\u20137",
+    "url": "./labs-pack/egyptian/Egyptian account_ AVATAR_+GPT_RU+ \u0432\u0435\u0440\u0441\u0442\u043a\u0430/index.html"
+  },
+  {
+    "id": "fractions-fix",
+    "name": "Fractions Fix",
+    "topic": "Fractions",
+    "emoji": "\ud83c\udf55",
+    "grades": "Gr 3\u20136",
+    "url": "./labs-pack/fractions-fix/index.html"
+  },
+  {
+    "id": "fractions-mixed-numbers",
+    "name": "Fractions Mixed Numbers",
+    "topic": "Fractions",
+    "emoji": "\ud83c\udf55",
+    "grades": "Gr 3\u20136",
+    "url": "./labs-pack/fractions-mixed-numbers/fractions-mixed-numbers-xreadylab.html"
+  },
+  {
+    "id": "infinite-addition",
+    "name": "Infinite Addition",
+    "topic": "Addition & Subtraction",
+    "emoji": "\u2795",
+    "grades": "Gr 1\u20134",
+    "url": "./labs-pack/infinite-addition/index.html"
+  },
+  {
+    "id": "lab-29",
+    "name": "Lab 29",
+    "topic": "Math Practice",
+    "emoji": "\ud83e\uddee",
+    "grades": "Gr 2\u20136",
+    "url": "./labs-pack/lab-29/square and triangular numbers/index.html"
+  },
+  {
+    "id": "lab-33",
+    "name": "Lab 33",
+    "topic": "Math Practice",
+    "emoji": "\ud83e\uddee",
+    "grades": "Gr 2\u20136",
+    "url": "./labs-pack/lab-33/index.html"
+  },
+  {
+    "id": "lab-37",
+    "name": "Lab 37",
+    "topic": "Math Practice",
+    "emoji": "\ud83e\uddee",
+    "grades": "Gr 2\u20136",
+    "url": "./labs-pack/lab-37/SummDocu/index.html"
+  },
+  {
+    "id": "lab-41",
+    "name": "Lab 41",
+    "topic": "Math Practice",
+    "emoji": "\ud83e\uddee",
+    "grades": "Gr 2\u20136",
+    "url": "./labs-pack/lab-41/1/index.html"
+  },
+  {
+    "id": "lab-42",
+    "name": "Lab 42",
+    "topic": "Math Practice",
+    "emoji": "\ud83e\uddee",
+    "grades": "Gr 2\u20136",
+    "url": "./labs-pack/lab-42/The tertiary system/index.html"
+  },
+  {
+    "id": "match-maker",
+    "name": "Match Maker",
+    "topic": "Number Sense",
+    "emoji": "\ud83c\udfaf",
+    "grades": "Gr 1\u20134",
+    "url": "./labs-pack/match-maker/match_maker/index.html"
+  },
+  {
+    "id": "multiplication",
+    "name": "Multiplication",
+    "topic": "Multiplication",
+    "emoji": "\u2716\ufe0f",
+    "grades": "Gr 2\u20135",
+    "url": "./labs-pack/multiplication/index.html"
+  },
+  {
+    "id": "multiplication-by-0",
+    "name": "Multiplication by 0",
+    "topic": "Multiplication",
+    "emoji": "\u2716\ufe0f",
+    "grades": "Gr 2\u20135",
+    "url": "./labs-pack/multiplication-by-0/index.html"
+  },
+  {
+    "id": "multiplication-by-1",
+    "name": "Multiplication by 1",
+    "topic": "Multiplication",
+    "emoji": "\u2716\ufe0f",
+    "grades": "Gr 2\u20135",
+    "url": "./labs-pack/multiplication-by-1/index.html"
+  },
+  {
+    "id": "multiplication-by-10",
+    "name": "Multiplication by 10",
+    "topic": "Multiplication",
+    "emoji": "\u2716\ufe0f",
+    "grades": "Gr 2\u20135",
+    "url": "./labs-pack/multiplication-by-10/index.html"
+  },
+  {
+    "id": "multiplication-cards",
+    "name": "Multiplication Cards",
+    "topic": "Multiplication",
+    "emoji": "\u2716\ufe0f",
+    "grades": "Gr 2\u20135",
+    "url": "./labs-pack/multiplication-cards/index.html"
+  },
+  {
+    "id": "multiplication-of-simple-fractions",
+    "name": "Multiplication of Simple Fractions",
+    "topic": "Fractions",
+    "emoji": "\ud83c\udf55",
+    "grades": "Gr 3\u20136",
+    "url": "./labs-pack/multiplication-of-simple-fractions/index.html"
+  },
+  {
+    "id": "multiplication-table",
+    "name": "Multiplication Table",
+    "topic": "Multiplication",
+    "emoji": "\u2716\ufe0f",
+    "grades": "Gr 2\u20135",
+    "url": "./labs-pack/multiplication-table/index.html"
+  },
+  {
+    "id": "negative-numbers",
+    "name": "Negative Numbers",
+    "topic": "Number Operations",
+    "emoji": "\ud83d\udd22",
+    "grades": "Gr 4\u20137",
+    "url": "./labs-pack/negative-numbers/index.html"
+  },
+  {
+    "id": "negative-numbers-fix",
+    "name": "Negative Numbers Fix",
+    "topic": "Number Operations",
+    "emoji": "\ud83d\udd22",
+    "grades": "Gr 4\u20137",
+    "url": "./labs-pack/negative-numbers-fix/index.html"
+  },
+  {
+    "id": "new-fractions-2",
+    "name": "New Fractions 2",
+    "topic": "Fractions",
+    "emoji": "\ud83c\udf55",
+    "grades": "Gr 3\u20136",
+    "url": "./labs-pack/new-fractions-2/index.html"
+  },
+  {
+    "id": "new-fractions-2-ompare-deep",
+    "name": "New Fractions 2 Ompare Deep",
+    "topic": "Fractions",
+    "emoji": "\ud83c\udf55",
+    "grades": "Gr 3\u20136",
+    "url": "./labs-pack/new-fractions-2-ompare-deep/index.html"
+  },
+  {
+    "id": "new-fractions-2-order",
+    "name": "New Fractions 2 Order",
+    "topic": "Fractions",
+    "emoji": "\ud83c\udf55",
+    "grades": "Gr 3\u20136",
+    "url": "./labs-pack/new-fractions-2-order/index.html"
+  },
+  {
+    "id": "rounding-up",
+    "name": "Rounding Up",
+    "topic": "Number Operations",
+    "emoji": "\ud83d\udd22",
+    "grades": "Gr 4\u20137",
+    "url": "./labs-pack/rounding-up/index.html"
+  },
+  {
+    "id": "summation-constellation",
+    "name": "Summation Constellation",
+    "topic": "Addition & Subtraction",
+    "emoji": "\u2795",
+    "grades": "Gr 1\u20134",
+    "url": "./labs-pack/summation-constellation/subtraction/index.html"
+  },
+  {
+    "id": "text-division-tasks",
+    "name": "Text Division Tasks",
+    "topic": "Division",
+    "emoji": "\u2797",
+    "grades": "Gr 3\u20135",
+    "url": "./labs-pack/text-division-tasks/index.html"
+  },
+  {
+    "id": "the-computer-code",
+    "name": "The Computer Code",
+    "topic": "Number Systems",
+    "emoji": "\ud83c\udfdb\ufe0f",
+    "grades": "Gr 3\u20137",
+    "url": "./labs-pack/the-computer-code/index.html"
+  },
+  {
+    "id": "the-mosaic-of-multiplication",
+    "name": "The Mosaic of Multiplication",
+    "topic": "Multiplication",
+    "emoji": "\u2716\ufe0f",
+    "grades": "Gr 2\u20135",
+    "url": "./labs-pack/the-mosaic-of-multiplication/index.html"
+  },
+  {
+    "id": "the-multiplication-blaster",
+    "name": "The Multiplication Blaster",
+    "topic": "Multiplication",
+    "emoji": "\u2716\ufe0f",
+    "grades": "Gr 2\u20135",
+    "url": "./labs-pack/the-multiplication-blaster/index.html"
+  },
+  {
+    "id": "the-roman-account",
+    "name": "The Roman Account",
+    "topic": "Number Systems",
+    "emoji": "\ud83c\udfdb\ufe0f",
+    "grades": "Gr 3\u20137",
+    "url": "./labs-pack/the-roman-account/index.html"
+  },
+  {
+    "id": "the-sum-of-even-and-odd-numbers",
+    "name": "The Sum of Even and Odd Numbers",
+    "topic": "Number Sense",
+    "emoji": "\ud83c\udfaf",
+    "grades": "Gr 1\u20134",
+    "url": "./labs-pack/the-sum-of-even-and-odd-numbers/index.html"
+  },
+  {
+    "id": "zero",
+    "name": "Zero",
+    "topic": "Number Sense",
+    "emoji": "0\ufe0f\u20e3",
+    "grades": "Gr 1\u20133",
+    "url": "./labs-pack/zero/index.html"
+  }
+]

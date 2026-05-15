@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn the Binary Number System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🔢 Binary Number System</h1>
+            <p class="subtitle">Interactive learning for students</p>
+        </header>
+
+        <main class="main-content">
+            <!-- Theory Section -->
+            <section class="theory-section">
+                <h2>📚 What is the binary system?</h2>
+                <div class="theory-content">
+                    <p>The binary number system is a system that uses only two digits: <strong>0</strong> and <strong>1</strong>.</p>
+                    <p>Each position in a binary number represents a power of 2:</p>
+                    <div class="binary-explanation">
+                        <div class="binary-example">
+                            <span class="bit">1</span>
+                            <span class="bit">0</span>
+                            <span class="bit">1</span>
+                            <span class="bit">1</span>
+                        </div>
+                        <div class="position-labels">
+                            <span>2³</span>
+                            <span>2²</span>
+                            <span>2¹</span>
+                            <span>2⁰</span>
+                        </div>
+                        <div class="calculation">
+                            <p>1011₂ = 1×2³ + 0×2² + 1×2¹ + 1×2⁰ = 8 + 0 + 2 + 1 = 11₁₀</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Interactive Converter -->
+            <section class="converter-section">
+                <h2>🔄 Number Converter</h2>
+                <div class="converter">
+                    <div class="input-group">
+                        <label for="decimal-input">Decimal number:</label>
+                        <input type="number" id="decimal-input" placeholder="Enter a number (0-255)" min="0" max="255">
+                    </div>
+                    <div class="conversion-arrow">↓</div>
+                    <div class="binary-display">
+                        <label>Binary number:</label>
+                        <div class="binary-bits" id="binary-bits">
+                            <span class="bit-placeholder">00000000</span>
+                        </div>
+                    </div>
+                    <div class="conversion-arrow">↓</div>
+                    <div class="result-display">
+                        <label>Result:</label>
+                        <div class="result" id="result">Enter a number</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Interactive Bits -->
+            <section class="interactive-section">
+                <h2>🎮 Play with bits</h2>
+                <p>Click on the bits to change their value and see how the number changes:</p>
+                <div class="interactive-bits" id="interactive-bits">
+                    <!-- Bits will be created in JavaScript -->
+                </div>
+                <div class="interactive-result">
+                    <p>Decimal value: <span id="interactive-decimal">0</span></p>
+                </div>
+            </section>
+
+            <!-- Exercises -->
+            <section class="exercises-section">
+                <h2>📝 Exercises</h2>
+                <div class="exercise">
+                    <h3>Task 1: Convert to binary</h3>
+                    <div class="exercise-content">
+                        <p>Number: <span id="exercise-number">5</span></p>
+                        <div class="exercise-input">
+                            <input type="text" id="exercise-answer" placeholder="Enter the binary number (e.g. 101)">
+                            <button id="check-answer">Check</button>
+                        </div>
+                        <div class="exercise-result" id="exercise-result"></div>
+                        <button id="new-exercise">New task</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Powers of Two Table -->
+            <section class="table-section">
+                <h2>📊 Powers of Two Table</h2>
+                <div class="powers-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Power</th>
+                                <th>2ⁿ</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody id="powers-table-body">
+                            <!-- Rows will be created in JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>🎓 Created for learning mathematics at school</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

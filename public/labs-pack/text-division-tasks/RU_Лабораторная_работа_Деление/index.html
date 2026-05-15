@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторная работа: Деление</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Главное меню -->
+        <div id="main-menu" class="screen active">
+            <h1>🎓 Лабораторная работа: Деление</h1>
+            <p class="subtitle">Изучи деление через интересные истории!</p>
+            
+            <div class="topics-grid">
+                <div class="topic-card" data-topic="1">
+                    <h3>🚴 Велосипедная прогулка</h3>
+                    <p>Пересечение моста</p>
+                </div>
+                <div class="topic-card" data-topic="2">
+                    <h3>🍕 Пицца для друзей</h3>
+                    <p>Деление пиццы</p>
+                </div>
+                <div class="topic-card" data-topic="3">
+                    <h3>📚 Библиотека</h3>
+                    <p>Расстановка книг</p>
+                </div>
+                <div class="topic-card" data-topic="4">
+                    <h3>🎨 Художественная мастерская</h3>
+                    <p>Деление красок</p>
+                </div>
+                <div class="topic-card" data-topic="5">
+                    <h3>🏀 Спортивная площадка</h3>
+                    <p>Формирование команд</p>
+                </div>
+                <div class="topic-card" data-topic="6">
+                    <h3>🌱 Садоводство</h3>
+                    <p>Посадка цветов</p>
+                </div>
+                <div class="topic-card" data-topic="7">
+                    <h3>🎪 Цирковое представление</h3>
+                    <p>Рассадка зрителей</p>
+                </div>
+                <div class="topic-card" data-topic="8">
+                    <h3>🚌 Школьный автобус</h3>
+                    <p>Рассадка учеников</p>
+                </div>
+                <div class="topic-card" data-topic="9">
+                    <h3>🎁 День рождения</h3>
+                    <p>Деление подарков</p>
+                </div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+                <span class="progress-text" id="progress-text">0/9 завершено</span>
+            </div>
+        </div>
+
+        <!-- Экран задачи -->
+        <div id="task-screen" class="screen">
+            <div class="task-header">
+                <button class="back-btn" onclick="showMainMenu()">← Назад</button>
+                <h2 id="task-title">Задача</h2>
+            </div>
+            
+            <div class="story-container">
+                <div class="story-text" id="story-text"></div>
+            </div>
+            
+            <div class="task-form">
+                <div class="question">
+                    <p id="question-text"></p>
+                </div>
+                
+                <div class="input-group">
+                    <label for="answer-input">Ваш ответ:</label>
+                    <input type="number" id="answer-input" placeholder="Введите число">
+                    <button onclick="checkAnswer()" class="check-btn">Проверить</button>
+                </div>
+                
+                <div id="result-message" class="result-message"></div>
+            </div>
+        </div>
+
+        <!-- Экран поздравления -->
+        <div id="congratulations-screen" class="screen">
+            <div class="congratulations-content">
+                <h1>🎉 Поздравляем!</h1>
+                <p>Вы успешно завершили лабораторную работу по делению!</p>
+                <div class="achievement">
+                    <h2>🏆 Достижение разблокировано</h2>
+                    <p>Мастер деления</p>
+                </div>
+                <button onclick="restartLab()" class="restart-btn">Начать заново</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

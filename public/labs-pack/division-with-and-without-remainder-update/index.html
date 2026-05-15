@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Division Laboratory - Learning Division with and without Remainder</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">🧮 Division Laboratory</h1>
+            <p class="subtitle">Learn division with and without remainder through interactive games!</p>
+        </header>
+
+        <nav class="navigation">
+            <button class="nav-btn active" data-mode="theory">📚 Theory</button>
+            <button class="nav-btn" data-mode="practice">🎮 Practice</button>
+            <button class="nav-btn" data-mode="quiz">✅ Quiz</button>
+        </nav>
+
+        <main class="main-content">
+            <!-- Theory Section -->
+            <section id="theory" class="content-section active">
+                <h2>Understanding Division</h2>
+                
+                <div class="theory-card">
+                    <h3>What is Division?</h3>
+                    <p>Division is splitting a large group of objects into smaller equal groups. The result is called the <strong>quotient</strong> (whole number part).</p>
+                    <div class="example">
+                        <h4>Example: 12 ÷ 3 = 4 (quotient)</h4>
+                        <div class="visual-example">
+                            <div class="objects-container">
+                                <div class="object">🍎</div>
+                                <div class="object">🍎</div>
+                                <div class="object">🍎</div>
+                                <div class="object">🍎</div>
+                                <div class="object">🍎</div>
+                                <div class="object">🍎</div>
+                                <div class="object">🍎</div>
+                                <div class="object">🍎</div>
+                                <div class="object">🍎</div>
+                                <div class="object">🍎</div>
+                                <div class="object">🍎</div>
+                                <div class="object">🍎</div>
+                            </div>
+                            <div class="division-arrow">÷ 3</div>
+                            <div class="groups">
+                                <div class="group">
+                                    <div class="object">🍎</div>
+                                    <div class="object">🍎</div>
+                                    <div class="object">🍎</div>
+                                </div>
+                                <div class="group">
+                                    <div class="object">🍎</div>
+                                    <div class="object">🍎</div>
+                                    <div class="object">🍎</div>
+                                </div>
+                                <div class="group">
+                                    <div class="object">🍎</div>
+                                    <div class="object">🍎</div>
+                                    <div class="object">🍎</div>
+                                </div>
+                                <div class="group">
+                                    <div class="object">🍎</div>
+                                    <div class="object">🍎</div>
+                                    <div class="object">🍎</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="theory-card">
+                    <h3>Division with Remainder</h3>
+                    <p>Sometimes we can't divide objects equally. The leftover objects are called the <strong>remainder</strong>. We get both a <strong>quotient</strong> (whole groups) and a <strong>remainder</strong> (leftover).</p>
+                    <div class="example">
+                        <h4>Example: 14 ÷ 3 = 4 (quotient) remainder 2</h4>
+                        <div class="visual-example">
+                            <div class="objects-container">
+                                <div class="object">🍊</div>
+                                <div class="object">🍊</div>
+                                <div class="object">🍊</div>
+                                <div class="object">🍊</div>
+                                <div class="object">🍊</div>
+                                <div class="object">🍊</div>
+                                <div class="object">🍊</div>
+                                <div class="object">🍊</div>
+                                <div class="object">🍊</div>
+                                <div class="object">🍊</div>
+                                <div class="object">🍊</div>
+                                <div class="object">🍊</div>
+                                <div class="object">🍊</div>
+                                <div class="object">🍊</div>
+                            </div>
+                            <div class="division-arrow">÷ 3</div>
+                            <div class="groups-with-remainder">
+                                <div class="group">
+                                    <div class="object">🍊</div>
+                                    <div class="object">🍊</div>
+                                    <div class="object">🍊</div>
+                                </div>
+                                <div class="group">
+                                    <div class="object">🍊</div>
+                                    <div class="object">🍊</div>
+                                    <div class="object">🍊</div>
+                                </div>
+                                <div class="group">
+                                    <div class="object">🍊</div>
+                                    <div class="object">🍊</div>
+                                    <div class="object">🍊</div>
+                                </div>
+                                <div class="group">
+                                    <div class="object">🍊</div>
+                                    <div class="object">🍊</div>
+                                    <div class="object">🍊</div>
+                                </div>
+                                <div class="remainder">
+                                    <div class="object">🍊</div>
+                                    <div class="object">🍊</div>
+                                    <span class="remainder-label">Remainder: 2</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="theory-card">
+                    <h3>Key Terms</h3>
+                    <div class="terms-grid">
+                        <div class="term">
+                            <strong>Dividend:</strong> The number being divided
+                        </div>
+                        <div class="term">
+                            <strong>Divisor:</strong> The number we divide by
+                        </div>
+                        <div class="term">
+                            <strong>Quotient:</strong> The result of division
+                        </div>
+                        <div class="term">
+                            <strong>Remainder:</strong> What's left over
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Practice Section -->
+            <section id="practice" class="content-section">
+                <h2>Interactive Practice</h2>
+                <div class="practice-controls">
+                    <button id="newProblem" class="btn primary">New Problem</button>
+                    <button id="checkAnswer" class="btn secondary">Check Answer</button>
+                    <button id="resetProblem" class="btn secondary">Reset</button>
+                </div>
+
+                <div class="problem-container">
+                    <div class="problem-statement">
+                        <h3>Problem: <span id="problemText">Click "New Problem" to start</span></h3>
+                    </div>
+
+                    <div class="visual-workspace">
+                        <div class="objects-area" id="objectsArea">
+                            <!-- Objects will be generated here -->
+                        </div>
+                        
+                        <div class="groups-area" id="groupsArea">
+                            <!-- Groups will be created here -->
+                        </div>
+                    </div>
+
+                    <div class="answer-section">
+                        <div class="answer-inputs">
+                            <label for="quotientInput">Quotient (whole groups):</label>
+                            <input type="number" id="quotientInput" min="0" placeholder="?">
+                            
+                            <label for="remainderInput">Remainder (leftover):</label>
+                            <input type="number" id="remainderInput" min="0" placeholder="?">
+                        </div>
+                        
+                        <div class="feedback" id="feedback"></div>
+                    </div>
+                </div>
+
+                <div class="stats">
+                    <div class="stat">
+                        <span class="stat-label">Correct:</span>
+                        <span id="correctCount">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Total:</span>
+                        <span id="totalCount">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Score:</span>
+                        <span id="score">0%</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quiz Section -->
+            <section id="quiz" class="content-section">
+                <h2>Knowledge Check</h2>
+                
+                <div class="quiz-intro" id="quizIntro">
+                    <p>Test your understanding of division! You'll get 10 questions.</p>
+                    <button id="startQuiz" class="btn primary" type="button" onclick="beginQuiz()">Start Quiz</button>
+                </div>
+
+                <div class="quiz-container" id="quizContainer" style="display: none;">
+                    <div class="quiz-progress">
+                        Question <span id="currentQuestion">1</span> of <span id="totalQuestions">10</span>
+                    </div>
+
+                    <div class="quiz-question" id="quizQuestion">
+                        <!-- Questions will be generated here -->
+                    </div>
+
+                    <div class="quiz-options" id="quizOptions">
+                        <!-- Options will be generated here -->
+                    </div>
+
+                    <div class="quiz-navigation">
+                        <button id="nextQuestion" class="btn primary" style="display: none;">Next Question</button>
+                        <button id="finishQuiz" class="btn primary" style="display: none;">Finish Quiz</button>
+                    </div>
+                </div>
+
+                <div class="quiz-results" id="quizResults" style="display: none;">
+                    <h3>Quiz Results</h3>
+                    <div class="results-summary">
+                        <div class="result-stat">
+                            <span class="result-label">Correct Answers:</span>
+                            <span id="quizCorrect">0</span>/10
+                        </div>
+                        <div class="result-stat">
+                            <span class="result-label">Score:</span>
+                            <span id="quizScore">0%</span>
+                        </div>
+                    </div>
+                    <div class="results-feedback" id="resultsFeedback"></div>
+                    <button id="retakeQuiz" class="btn primary" type="button" onclick="beginQuiz()">Take Quiz Again</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Work: Roman Numeral System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🏛️ Lab Work: Roman Numeral System</h1>
+            <p class="subtitle">Learning the ancient number system</p>
+        </header>
+
+        <nav class="navigation">
+            <button class="nav-btn active" data-section="theory">📚 Theory</button>
+            <button class="nav-btn" data-section="converter">🔄 Converter</button>
+            <button class="nav-btn" data-section="exercises">✏️ Exercises</button>
+            <button class="nav-btn" data-section="game">🎮 Game</button>
+        </nav>
+
+        <main class="main-content">
+            <!-- Theory -->
+            <section id="theory" class="content-section active">
+                <h2>📚 Roman Numeral System Basics</h2>
+                
+                <div class="theory-card">
+                    <h3>Roman Numerals</h3>
+                    <div class="roman-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Roman Numeral</th>
+                                    <th>Arabic Numeral</th>
+                                    <th>Name</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>I</td><td>1</td><td>one</td></tr>
+                                <tr><td>V</td><td>5</td><td>five</td></tr>
+                                <tr><td>X</td><td>10</td><td>ten</td></tr>
+                                <tr><td>L</td><td>50</td><td>fifty</td></tr>
+                                <tr><td>C</td><td>100</td><td>hundred</td></tr>
+                                <tr><td>D</td><td>500</td><td>five hundred</td></tr>
+                                <tr><td>M</td><td>1000</td><td>thousand</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="theory-card">
+                    <h3>Writing Rules</h3>
+                    <div class="rules">
+                        <div class="rule">
+                            <h4>1. Addition</h4>
+                            <p>If a smaller numeral is to the right of a larger one, it is added:</p>
+                            <div class="examples">
+                                <span class="example">VI = 5 + 1 = 6</span>
+                                <span class="example">XV = 10 + 5 = 15</span>
+                                <span class="example">LXX = 50 + 10 + 10 = 70</span>
+                            </div>
+                        </div>
+                        
+                        <div class="rule">
+                            <h4>2. Subtraction</h4>
+                            <p>If a smaller numeral is to the left of a larger one, it is subtracted:</p>
+                            <div class="examples">
+                                <span class="example">IV = 5 - 1 = 4</span>
+                                <span class="example">IX = 10 - 1 = 9</span>
+                                <span class="example">XL = 50 - 10 = 40</span>
+                            </div>
+                        </div>
+
+                        <div class="rule">
+                            <h4>3. Limitations</h4>
+                            <ul>
+                                <li>Only I, X, C can be subtracted</li>
+                                <li>I can only be subtracted from V and X</li>
+                                <li>X can only be subtracted from L and C</li>
+                                <li>C can only be subtracted from D and M</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="theory-card">
+                    <h3>Number Examples</h3>
+                    <div class="examples-grid">
+                        <div class="example-item">
+                            <span class="roman">I</span> = 1
+                        </div>
+                        <div class="example-item">
+                            <span class="roman">II</span> = 2
+                        </div>
+                        <div class="example-item">
+                            <span class="roman">III</span> = 3
+                        </div>
+                        <div class="example-item">
+                            <span class="roman">IV</span> = 4
+                        </div>
+                        <div class="example-item">
+                            <span class="roman">V</span> = 5
+                        </div>
+                        <div class="example-item">
+                            <span class="roman">VI</span> = 6
+                        </div>
+                        <div class="example-item">
+                            <span class="roman">VII</span> = 7
+                        </div>
+                        <div class="example-item">
+                            <span class="roman">VIII</span> = 8
+                        </div>
+                        <div class="example-item">
+                            <span class="roman">IX</span> = 9
+                        </div>
+                        <div class="example-item">
+                            <span class="roman">X</span> = 10
+                        </div>
+                        <div class="example-item">
+                            <span class="roman">XX</span> = 20
+                        </div>
+                        <div class="example-item">
+                            <span class="roman">L</span> = 50
+                        </div>
+                        <div class="example-item">
+                            <span class="roman">C</span> = 100
+                        </div>
+                        <div class="example-item">
+                            <span class="roman">D</span> = 500
+                        </div>
+                        <div class="example-item">
+                            <span class="roman">M</span> = 1000
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Converter -->
+            <section id="converter" class="content-section">
+                <h2>🔄 Number Converter</h2>
+                <div class="converter-container">
+                    <div class="converter-card">
+                        <h3>Arabic → Roman</h3>
+                        <div class="input-group">
+                            <input type="number" id="arabicInput" placeholder="Enter number (1-3999)" min="1" max="3999">
+                            <button onclick="convertToRoman()">Convert</button>
+                        </div>
+                        <div class="result" id="romanResult">
+                            <span class="result-label">Result:</span>
+                            <span class="result-value" id="romanValue">-</span>
+                        </div>
+                    </div>
+
+                    <div class="converter-card">
+                        <h3>Roman → Arabic</h3>
+                        <div class="input-group">
+                            <input type="text" id="romanInput" placeholder="Enter Roman numerals" style="text-transform: uppercase;">
+                            <button onclick="convertToArabic()">Convert</button>
+                        </div>
+                        <div class="result" id="arabicResult">
+                            <span class="result-label">Result:</span>
+                            <span class="result-value" id="arabicValue">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quick-converter">
+                    <h3>Quick Converter</h3>
+                    <div class="quick-numbers">
+                        <button onclick="quickConvert(1)">1</button>
+                        <button onclick="quickConvert(5)">5</button>
+                        <button onclick="quickConvert(10)">10</button>
+                        <button onclick="quickConvert(50)">50</button>
+                        <button onclick="quickConvert(100)">100</button>
+                        <button onclick="quickConvert(500)">500</button>
+                        <button onclick="quickConvert(1000)">1000</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Exercises -->
+            <section id="exercises" class="content-section">
+                <h2>✏️ Exercises</h2>
+                
+                <div class="exercise-controls">
+                    <button onclick="generateExercise()" class="primary-btn">New Exercise</button>
+                    <button onclick="checkAnswer()" class="secondary-btn">Check Answer</button>
+                    <button onclick="showHint()" class="hint-btn">Hint</button>
+                </div>
+
+                <div class="exercise-container">
+                    <div class="exercise-card">
+                        <h3>Task</h3>
+                        <div class="exercise-content" id="exerciseContent">
+                            Click "New Exercise" to start
+                        </div>
+                        
+                        <div class="answer-section">
+                            <label for="userAnswer">Your answer:</label>
+                            <input type="text" id="userAnswer" placeholder="Enter your answer">
+                        </div>
+
+                        <div class="feedback" id="feedback"></div>
+                    </div>
+
+                    <div class="stats-card">
+                        <h3>Statistics</h3>
+                        <div class="stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Correct:</span>
+                                <span class="stat-value" id="correctCount">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Incorrect:</span>
+                                <span class="stat-value" id="incorrectCount">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Percentage:</span>
+                                <span class="stat-value" id="percentage">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Game -->
+            <section id="game" class="content-section">
+                <h2>🎮 Roman Numerals Game</h2>
+                
+                <div class="game-controls">
+                    <button onclick="startGame()" class="primary-btn">Start Game</button>
+                    <button onclick="pauseGame()" class="secondary-btn">Pause</button>
+                    <div class="timer" id="timer">Time: 60</div>
+                </div>
+
+                <div class="game-container">
+                    <div class="game-card">
+                        <h3>Find the Correct Number</h3>
+                        <div class="game-question" id="gameQuestion">
+                            Click "Start Game" to play
+                        </div>
+                        
+                        <div class="game-options" id="gameOptions">
+                            <!-- Options will be added dynamically -->
+                        </div>
+
+                        <div class="game-feedback" id="gameFeedback"></div>
+                    </div>
+
+                    <div class="game-stats">
+                        <h3>Game Results</h3>
+                        <div class="game-stats-content">
+                            <div class="stat-item">
+                                <span class="stat-label">Score:</span>
+                                <span class="stat-value" id="gameScore">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Time:</span>
+                                <span class="stat-value" id="gameTime">60</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>© 2024 Lab Work: Roman Numeral System</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

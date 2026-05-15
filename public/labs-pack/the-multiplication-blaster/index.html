@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplication Blaster - Learn Multiplication!</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <header class="game-header">
+            <h1>🎯 Multiplication Blaster</h1>
+            <div class="game-info">
+                <div class="level-info">
+                    <span>Level: </span>
+                    <span id="current-level">1</span>
+                    <span>/5</span>
+                </div>
+                <div class="score-info">
+                    <span>Score: </span>
+                    <span id="score">0</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="game-area">
+            <div class="controls-panel">
+                <div class="task-display">
+                    <h2>Task:</h2>
+                    <div class="task" id="current-task">3 × 4 = ?</div>
+                    <div class="target-result" id="target-result">Target: 12</div>
+                </div>
+                
+                <div class="weapon-controls">
+                    <h3>🎨 Paintball Gun</h3>
+                    <div class="line-length-control">
+                        <label for="line-length">Line Length:</label>
+                        <input type="range" id="line-length" min="1" max="9" value="1">
+                        <span id="line-length-display">1</span>
+                    </div>
+                    <button id="shoot-btn" class="shoot-button">🔫 Shoot!</button>
+                    <button id="clear-btn" class="clear-button">🧹 Clear</button>
+                </div>
+
+                <div class="game-status">
+                    <div id="status-message" class="status-message"></div>
+                    <button id="next-level-btn" class="next-level-btn" style="display: none;">Next Level →</button>
+                </div>
+            </div>
+
+            <div class="canvas-container">
+                <canvas id="gameCanvas" width="600" height="400"></canvas>
+                <div class="canvas-overlay">
+                    <div class="grid-info">
+                        <span>Grid: </span>
+                        <span id="grid-size">0 × 0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>How to Play:</h3>
+            <ol>
+                <li>Choose line length (1-9)</li>
+                <li>Click "Shoot!" to create a line of paintballs</li>
+                <li>Repeat several times to create a matrix</li>
+                <li>Achieve the correct multiplication result!</li>
+            </ol>
+        </div>
+    </div>
+
+            <div id="victory-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h2>🎉 Congratulations!</h2>
+                <p>You've completed all the tasks excellently!</p>
+                <p>Your final score: <span id="final-score">0</span></p>
+                <button id="restart-btn" class="restart-button">Play Again</button>
+            </div>
+        </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

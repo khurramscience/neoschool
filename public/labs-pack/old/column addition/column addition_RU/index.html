@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторная работа: Сложение в столбик</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧮 Лабораторная работа: Сложение в столбик</h1>
+            <p>Изучи разряды чисел и научись складывать в столбик!</p>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-btn active" onclick="showTab('learning')">📚 Обучение</button>
+            <button class="tab-btn" onclick="showTab('practice')">🎮 Практика</button>
+            <button class="tab-btn" onclick="showTab('test')">📝 Тест</button>
+        </nav>
+
+        <!-- Вкладка обучения -->
+        <div id="learning" class="tab-content active">
+            <div class="learning-section">
+                <h2>Как работают разряды при сложении</h2>
+                
+                <div class="concept-card">
+                    <h3>📊 Разряды чисел</h3>
+                    <p>Каждая цифра в числе имеет своё место - разряд:</p>
+                    <div class="place-value-example">
+                        <div class="number-display">
+                            <span class="digit">2</span>
+                            <span class="digit">4</span>
+                            <span class="digit">7</span>
+                        </div>
+                        <div class="place-labels">
+                            <span>сотни</span>
+                            <span>десятки</span>
+                            <span>единицы</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="concept-card">
+                    <h3>➕ Сложение в столбик</h3>
+                    <p>При сложении в столбик мы складываем числа по разрядам, начиная справа:</p>
+                    
+                    <div class="addition-example">
+                        <div class="step">
+                            <h4>Шаг 1: Складываем единицы</h4>
+                            <div class="column-addition">
+                                <div class="number">2 4 <span class="highlight">7</span></div>
+                                <div class="number">+ 1 3 <span class="highlight">5</span></div>
+                                <div class="line">─────</div>
+                                <div class="result">2 4 <span class="highlight">12</span></div>
+                            </div>
+                            <p>7 + 5 = 12. Записываем 2, 1 переносим в десятки.</p>
+                        </div>
+
+                        <div class="step">
+                            <h4>Шаг 2: Складываем десятки</h4>
+                            <div class="column-addition">
+                                <div class="number">2 <span class="highlight">4</span> 7</div>
+                                <div class="number">+ 1 <span class="highlight">3</span> 5</div>
+                                <div class="number">+ <span class="highlight">1</span> (перенос)</div>
+                                <div class="line">─────</div>
+                                <div class="result">2 <span class="highlight">8</span> 2</div>
+                            </div>
+                            <p>4 + 3 + 1 = 8. Записываем 8.</p>
+                        </div>
+
+                        <div class="step">
+                            <h4>Шаг 3: Складываем сотни</h4>
+                            <div class="column-addition">
+                                <div class="number"><span class="highlight">2</span> 4 7</div>
+                                <div class="number">+ <span class="highlight">1</span> 3 5</div>
+                                <div class="line">─────</div>
+                                <div class="result"><span class="highlight">3</span> 8 2</div>
+                            </div>
+                            <p>2 + 1 = 3. Записываем 3.</p>
+                        </div>
+
+                        <div class="final-result">
+                            <h4>Результат: 247 + 135 = 382</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="interactive-demo">
+                    <h3>🎯 Интерактивная демонстрация</h3>
+                    <div class="demo-controls">
+                        <button onclick="generateDemo()">Новый пример</button>
+                        <button onclick="showStep()">Следующий шаг</button>
+                        <button onclick="resetDemo()">Сбросить</button>
+                    </div>
+                    <div id="demo-area" class="demo-area">
+                        <p>Нажми "Новый пример" чтобы начать демонстрацию</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка практики -->
+        <div id="practice" class="tab-content">
+            <div class="practice-section">
+                <h2>🎮 Практические задания</h2>
+                
+                <div class="practice-controls">
+                    <button onclick="generatePractice()">Новое задание</button>
+                    <button onclick="checkAnswer()">Проверить</button>
+                    <button onclick="showSolution()">Показать решение</button>
+                </div>
+
+                <div class="practice-area">
+                    <div id="practice-problem" class="practice-problem">
+                        <p>Нажми "Новое задание" чтобы начать практику</p>
+                    </div>
+                    
+                    <div class="answer-input">
+                        <label for="user-answer">Твой ответ:</label>
+                        <input type="number" id="user-answer" placeholder="Введи результат">
+                    </div>
+
+                    <div id="practice-feedback" class="feedback"></div>
+                </div>
+
+                <div class="stats">
+                    <div class="stat">
+                        <span class="stat-label">Правильно:</span>
+                        <span id="correct-count">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Всего:</span>
+                        <span id="total-count">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Процент:</span>
+                        <span id="percentage">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка теста -->
+        <div id="test" class="tab-content">
+            <div class="test-section">
+                <h2>📝 Финальный тест</h2>
+                
+                <div id="test-intro" class="test-intro">
+                    <p>Проверь свои знания! Тест состоит из 10 заданий.</p>
+                    <button onclick="startTest()">Начать тест</button>
+                </div>
+
+                <div id="test-area" class="test-area" style="display: none;">
+                    <div class="test-progress">
+                        <span>Вопрос <span id="current-question">1</span> из 10</span>
+                        <div class="progress-bar">
+                            <div id="progress-fill" class="progress-fill"></div>
+                        </div>
+                    </div>
+
+                    <div id="test-question" class="test-question"></div>
+                    
+                    <div class="test-answer">
+                        <label for="test-answer">Ответ:</label>
+                        <input type="number" id="test-answer" placeholder="Введи результат">
+                        <button onclick="submitTestAnswer()">Ответить</button>
+                    </div>
+
+                    <div id="test-feedback" class="feedback"></div>
+                </div>
+
+                <div id="test-results" class="test-results" style="display: none;">
+                    <h3>Результаты теста</h3>
+                    <div id="test-score"></div>
+                    <div id="test-details"></div>
+                    <button onclick="restartTest()">Пройти тест заново</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

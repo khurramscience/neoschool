@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratory Work: Commutative Property of Multiplication</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔢 Laboratory Work</h1>
+            <h2>Commutative Property of Multiplication</h2>
+            <p>Learning that a × b = b × a</p>
+        </header>
+
+        <nav class="navigation">
+            <button class="nav-btn active" data-section="theory">📚 Theory</button>
+            <button class="nav-btn" data-section="practice">✏️ Practice</button>
+            <button class="nav-btn" data-section="test">🧪 Knowledge Check</button>
+        </nav>
+
+        <!-- Блок теории -->
+        <section id="theory" class="content-section active">
+            <div class="theory-content">
+                <h3>📚 Theoretical Material</h3>
+                
+                <div class="theory-card">
+                    <h4>What is the commutative property of multiplication?</h4>
+                    <p>The commutative property of multiplication means that changing the order of factors does not change the product.</p>
+                    
+                    <div class="formula">
+                        <span class="math">a × b = b × a</span>
+                    </div>
+                    
+                    <div class="examples">
+                        <h5>Examples:</h5>
+                        <div class="example-grid">
+                            <div class="example">
+                                <span class="math">3 × 4 = 12</span>
+                                <span class="math">4 × 3 = 12</span>
+                                <span class="result">✅ Same result!</span>
+                            </div>
+                            <div class="example">
+                                <span class="math">7 × 5 = 35</span>
+                                <span class="math">5 × 7 = 35</span>
+                                <span class="result">✅ Same result!</span>
+                            </div>
+                            <div class="example">
+                                <span class="math">2 × 8 = 16</span>
+                                <span class="math">8 × 2 = 16</span>
+                                <span class="result">✅ Same result!</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="theory-card">
+                    <h4>Visual Representation</h4>
+                    <div class="visual-example">
+                        <div class="array-container">
+                            <div class="array-row">
+                                <h5>3 × 4 = 12</h5>
+                                <div class="dots-grid">
+                                    <div class="dot-row">
+                                        <span class="dot">●</span><span class="dot">●</span><span class="dot">●</span><span class="dot">●</span>
+                                    </div>
+                                    <div class="dot-row">
+                                        <span class="dot">●</span><span class="dot">●</span><span class="dot">●</span><span class="dot">●</span>
+                                    </div>
+                                    <div class="dot-row">
+                                        <span class="dot">●</span><span class="dot">●</span><span class="dot">●</span><span class="dot">●</span>
+                                    </div>
+                                </div>
+                                <p>3 rows of 4 dots = 12 dots</p>
+                            </div>
+                            <div class="array-row">
+                                <h5>4 × 3 = 12</h5>
+                                <div class="dots-grid">
+                                    <div class="dot-row">
+                                        <span class="dot">●</span><span class="dot">●</span><span class="dot">●</span>
+                                    </div>
+                                    <div class="dot-row">
+                                        <span class="dot">●</span><span class="dot">●</span><span class="dot">●</span>
+                                    </div>
+                                    <div class="dot-row">
+                                        <span class="dot">●</span><span class="dot">●</span><span class="dot">●</span>
+                                    </div>
+                                    <div class="dot-row">
+                                        <span class="dot">●</span><span class="dot">●</span><span class="dot">●</span>
+                                    </div>
+                                </div>
+                                <p>4 rows of 3 dots = 12 dots</p>
+                            </div>
+                        </div>
+                        <div class="explanation">
+                            <p><strong>Pay attention:</strong> In the first case, we have 3 rows of 4 dots (3×4 rectangle), and in the second - 4 rows of 3 dots (4×3 rectangle). The number of dots is the same (12), but the arrangement is different!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Блок практики -->
+        <section id="practice" class="content-section">
+            <div class="practice-content">
+                <h3>✏️ Practical Tasks</h3>
+                
+                <div class="practice-card">
+                    <h4>Task 1: Check the commutative property</h4>
+                    <p>Choose two numbers and verify that their product does not depend on the order of factors.</p>
+                    
+                    <div class="interactive-multiplier">
+                        <div class="input-group">
+                            <label for="num1">First number:</label>
+                            <input type="number" id="num1" min="1" max="20" value="5">
+                        </div>
+                        <div class="input-group">
+                            <label for="num2">Second number:</label>
+                            <input type="number" id="num2" min="1" max="20" value="3">
+                        </div>
+                        <button id="calculateBtn" class="btn-primary">Calculate</button>
+                    </div>
+
+                    <div id="result" class="result-display" style="display: none;">
+                        <div class="calculation">
+                            <div class="calc-row">
+                                <span class="math" id="calc1"></span>
+                                <span class="equals">=</span>
+                                <span class="result" id="result1"></span>
+                            </div>
+                            <div class="calc-row">
+                                <span class="math" id="calc2"></span>
+                                <span class="equals">=</span>
+                                <span class="result" id="result2"></span>
+                            </div>
+                            <div class="conclusion" id="conclusion"></div>
+                        </div>
+                        
+                        <div class="visual-result">
+                            <h5>Visual representation:</h5>
+                            <div class="visual-comparison">
+                                <div class="visual-side">
+                                    <h6 id="visual-title1"></h6>
+                                    <div id="visual-dots1" class="dots-grid"></div>
+                                </div>
+                                <div class="visual-side">
+                                    <h6 id="visual-title2"></h6>
+                                    <div id="visual-dots2" class="dots-grid"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="practice-card">
+                    <h4>Task 2: Create your own examples</h4>
+                    <p>Think of three pairs of numbers and write their products in both orders.</p>
+                    
+                    <div class="examples-creator">
+                        <div class="example-input">
+                            <input type="number" class="ex-num" placeholder="a" min="1" max="20">
+                            <span class="multiply">×</span>
+                            <input type="number" class="ex-num" placeholder="b" min="1" max="20">
+                            <span class="equals">=</span>
+                            <span class="ex-result">?</span>
+                        </div>
+                        <div class="example-input">
+                            <input type="number" class="ex-num" placeholder="b" min="1" max="20">
+                            <span class="multiply">×</span>
+                            <input type="number" class="ex-num" placeholder="a" min="1" max="20">
+                            <span class="equals">=</span>
+                            <span class="ex-result">?</span>
+                        </div>
+                        <button class="btn-secondary" onclick="calculateExample(this)">Calculate</button>
+                    </div>
+
+                    <div class="examples-creator">
+                        <div class="example-input">
+                            <input type="number" class="ex-num" placeholder="c" min="1" max="20">
+                            <span class="multiply">×</span>
+                            <input type="number" class="ex-num" placeholder="d" min="1" max="20">
+                            <span class="equals">=</span>
+                            <span class="ex-result">?</span>
+                        </div>
+                        <div class="example-input">
+                            <input type="number" class="ex-num" placeholder="d" min="1" max="20">
+                            <span class="multiply">×</span>
+                            <input type="number" class="ex-num" placeholder="c" min="1" max="20">
+                            <span class="equals">=</span>
+                            <span class="ex-result">?</span>
+                        </div>
+                        <button class="btn-secondary" onclick="calculateExample(this)">Calculate</button>
+                    </div>
+
+                    <div class="examples-creator">
+                        <div class="example-input">
+                            <input type="number" class="ex-num" placeholder="e" min="1" max="20">
+                            <span class="multiply">×</span>
+                            <input type="number" class="ex-num" placeholder="f" min="1" max="20">
+                            <span class="equals">=</span>
+                            <span class="ex-result">?</span>
+                        </div>
+                        <div class="example-input">
+                            <input type="number" class="ex-num" placeholder="f" min="1" max="20">
+                            <span class="multiply">×</span>
+                            <input type="number" class="ex-num" placeholder="e" min="1" max="20">
+                            <span class="equals">=</span>
+                            <span class="ex-result">?</span>
+                        </div>
+                        <button class="btn-secondary" onclick="calculateExample(this)">Calculate</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Блок проверки знаний -->
+        <section id="test" class="content-section">
+            <div class="test-content">
+                <h3>🧪 Knowledge Check</h3>
+                <p>Test with 10 questions on the commutative property of multiplication</p>
+                
+                <div id="test-container">
+                    <div id="test-intro" class="test-intro">
+                        <h4>Ready for the knowledge check?</h4>
+                        <p>The test has 10 questions. Read the tasks carefully and choose the correct answers.</p>
+                        <button id="startTestBtn" class="btn-primary">Start Test</button>
+                    </div>
+                    
+                    <div id="test-questions" class="test-questions" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                            <span class="progress-text">Question <span id="currentQuestion">1</span> of 10</span>
+                        </div>
+                        
+                        <div id="question-container"></div>
+                        
+                        <div class="test-navigation">
+                            <button id="prevBtn" class="btn-secondary" style="display: none;">← Back</button>
+                            <button id="nextBtn" class="btn-primary">Next →</button>
+                            <button id="finishBtn" class="btn-success" style="display: none;">Finish Test</button>
+                        </div>
+                    </div>
+                    
+                    <div id="test-results" class="test-results" style="display: none;">
+                        <h4>Test Results</h4>
+                        <div class="score-display">
+                            <div class="score-circle">
+                                <span id="score-percentage">0%</span>
+                            </div>
+                            <p>Correct answers: <span id="correct-answers">0</span> out of 10</p>
+                        </div>
+                        <div id="detailed-results"></div>
+                        <button id="retakeTestBtn" class="btn-primary">Take Test Again</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+// Навигация между разделами
+document.addEventListener('DOMContentLoaded', function() {
+    const navButtons = document.querySelectorAll('.nav-btn');
+    const contentSections = document.querySelectorAll('.content-section');
+
+    navButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const targetSection = button.getAttribute('data-section');
+            
+            // Убираем активный класс со всех кнопок и секций
+            navButtons.forEach(btn => btn.classList.remove('active'));
+            contentSections.forEach(section => section.classList.remove('active'));
+            
+            // Добавляем активный класс к выбранной кнопке и секции
+            button.classList.add('active');
+            document.getElementById(targetSection).classList.add('active');
+        });
+    });
+
+    // Инициализация практических заданий
+    initPractice();
+    
+    // Инициализация теста
+    initTest();
+});
+
+// Практические задания
+function initPractice() {
+    const calculateBtn = document.getElementById('calculateBtn');
+    const resultDisplay = document.getElementById('result');
+    
+    calculateBtn.addEventListener('click', () => {
+        const num1 = parseInt(document.getElementById('num1').value);
+        const num2 = parseInt(document.getElementById('num2').value);
+        
+        if (num1 && num2) {
+            const result1 = num1 * num2;
+            const result2 = num2 * num1;
+            
+            document.getElementById('calc1').textContent = `${num1} × ${num2}`;
+            document.getElementById('result1').textContent = result1;
+            document.getElementById('calc2').textContent = `${num2} × ${num1}`;
+            document.getElementById('result2').textContent = result2;
+            
+            const conclusion = document.getElementById('conclusion');
+            if (result1 === result2) {
+                conclusion.textContent = `✅ Excellent! ${num1} × ${num2} = ${num2} × ${num1} = ${result1}. The commutative property works!`;
+                conclusion.style.background = '#d4edda';
+                conclusion.style.color = '#155724';
+            } else {
+                conclusion.textContent = `❌ Something went wrong. Check your calculations.`;
+                conclusion.style.background = '#f8d7da';
+                conclusion.style.color = '#721c24';
+            }
+            
+            // Создаем визуальное представление
+            createVisualDots(num1, num2, result1);
+            
+            resultDisplay.style.display = 'block';
+        }
+    });
+}
+
+// Функция для создания визуального представления точек
+function createVisualDots(num1, num2, result) {
+    const visualTitle1 = document.getElementById('visual-title1');
+    const visualTitle2 = document.getElementById('visual-title2');
+    const visualDots1 = document.getElementById('visual-dots1');
+    const visualDots2 = document.getElementById('visual-dots2');
+    
+    visualTitle1.textContent = `${num1} × ${num2} = ${result}`;
+    visualTitle2.textContent = `${num2} × ${num1} = ${result}`;
+    
+    // Создаем первый массив (num1 строк по num2 точки)
+    let dots1Html = '';
+    for (let i = 0; i < num1; i++) {
+        dots1Html += '<div class="dot-row">';
+        for (let j = 0; j < num2; j++) {
+            dots1Html += '<span class="dot">●</span>';
+        }
+        dots1Html += '</div>';
+    }
+    visualDots1.innerHTML = dots1Html;
+    
+    // Создаем второй массив (num2 строк по num1 точки)
+    let dots2Html = '';
+    for (let i = 0; i < num2; i++) {
+        dots2Html += '<div class="dot-row">';
+        for (let j = 0; j < num1; j++) {
+            dots2Html += '<span class="dot">●</span>';
+        }
+        dots2Html += '</div>';
+    }
+    visualDots2.innerHTML = dots2Html;
+}
+
+// Функция для вычисления примеров в практическом задании
+function calculateExample(button) {
+    const container = button.parentElement;
+    const inputs = container.querySelectorAll('.ex-num');
+    const results = container.querySelectorAll('.ex-result');
+    
+    const num1 = parseInt(inputs[0].value);
+    const num2 = parseInt(inputs[1].value);
+    const num3 = parseInt(inputs[2].value);
+    const num4 = parseInt(inputs[3].value);
+    
+    if (num1 && num2 && num3 && num4) {
+        const result1 = num1 * num2;
+        const result2 = num3 * num4;
+        
+        results[0].textContent = result1;
+        results[1].textContent = result2;
+        
+        if (result1 === result2) {
+            results[0].style.color = '#28a745';
+            results[1].style.color = '#28a745';
+        } else {
+            results[0].style.color = '#dc3545';
+            results[1].style.color = '#dc3545';
+        }
+    }
+}
+
+// Test
+let currentQuestionIndex = 0;
+let userAnswers = [];
+let testQuestions = [];
+
+function initTest() {
+    const startTestBtn = document.getElementById('startTestBtn');
+    const retakeTestBtn = document.getElementById('retakeTestBtn');
+    
+    startTestBtn.addEventListener('click', startTest);
+    retakeTestBtn.addEventListener('click', startTest);
+    
+    // Генерация вопросов для теста
+    generateTestQuestions();
+}
+
+function generateTestQuestions() {
+    testQuestions = [
+        {
+            question: "What does the commutative property of multiplication mean?",
+            options: [
+                "Changing the order of factors does not change the product",
+                "Changing the order of addends does not change the sum",
+                "The product is always zero",
+                "The product is always one"
+            ],
+            correct: 0
+        },
+        {
+            question: "Which expression demonstrates the commutative property?",
+            options: [
+                "3 + 4 = 4 + 3",
+                "3 × 4 = 4 × 3",
+                "3 - 4 = 4 - 3",
+                "3 ÷ 4 = 4 ÷ 3"
+            ],
+            correct: 1
+        },
+        {
+            question: "What is 7 × 5?",
+            options: ["30", "35", "40", "45"],
+            correct: 1
+        },
+        {
+            question: "What is 5 × 7?",
+            options: ["30", "35", "40", "45"],
+            correct: 1
+        },
+        {
+            question: "If a × b = 24, then what is b × a?",
+            options: ["12", "24", "48", "Cannot be determined"],
+            correct: 1
+        },
+        {
+            question: "What property does the equality 2 × 8 = 8 × 2 demonstrate?",
+            options: [
+                "Associative property",
+                "Commutative property",
+                "Distributive property",
+                "Identity property"
+            ],
+            correct: 1
+        },
+        {
+            question: "Choose the correct statement:",
+            options: [
+                "a × b is always greater than b × a",
+                "a × b is always less than b × a",
+                "a × b = b × a",
+                "a × b ≠ b × a"
+            ],
+            correct: 2
+        },
+        {
+            question: "If 6 × 4 = 24, then 4 × 6 = ?",
+            options: ["20", "24", "28", "30"],
+            correct: 1
+        },
+        {
+            question: "What number can be put instead of x in the expression 3 × x = x × 3?",
+            options: ["Only 3", "Any number", "Only even numbers", "Only odd numbers"],
+            correct: 1
+        },
+        {
+            question: "Why is the commutative property useful in mathematics?",
+            options: [
+                "It allows simplifying calculations",
+                "It makes numbers larger",
+                "It changes the result",
+                "It has no practical application"
+            ],
+            correct: 0
+        }
+    ];
+}
+
+function startTest() {
+    currentQuestionIndex = 0;
+    userAnswers = new Array(testQuestions.length).fill(null);
+    
+    document.getElementById('test-intro').style.display = 'none';
+    document.getElementById('test-results').style.display = 'none';
+    document.getElementById('test-questions').style.display = 'block';
+    
+    showQuestion();
+}
+
+function showQuestion() {
+    const question = testQuestions[currentQuestionIndex];
+    const questionContainer = document.getElementById('question-container');
+    const currentQuestionSpan = document.getElementById('currentQuestion');
+    const progressFill = document.querySelector('.progress-fill');
+    
+    currentQuestionSpan.textContent = currentQuestionIndex + 1;
+    progressFill.style.width = `${((currentQuestionIndex + 1) / testQuestions.length) * 100}%`;
+    
+    let optionsHtml = '';
+    question.options.forEach((option, index) => {
+        const isSelected = userAnswers[currentQuestionIndex] === index;
+        optionsHtml += `
+            <div class="option ${isSelected ? 'selected' : ''}" onclick="selectOption(${index})">
+                <input type="radio" name="question${currentQuestionIndex}" value="${index}" ${isSelected ? 'checked' : ''}>
+                <label>${option}</label>
+            </div>
+        `;
+    });
+    
+    questionContainer.innerHTML = `
+        <div class="question-text">${question.question}</div>
+        <div class="options">${optionsHtml}</div>
+    `;
+    
+    updateNavigationButtons();
+}
+
+function selectOption(optionIndex) {
+    userAnswers[currentQuestionIndex] = optionIndex;
+    
+    // Обновляем визуальное отображение выбора
+    const options = document.querySelectorAll('.option');
+    options.forEach((option, index) => {
+        option.classList.remove('selected');
+        if (index === optionIndex) {
+            option.classList.add('selected');
+        }
+    });
+    
+    updateNavigationButtons();
+}
+
+function updateNavigationButtons() {
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const finishBtn = document.getElementById('finishBtn');
+    
+    prevBtn.style.display = currentQuestionIndex > 0 ? 'block' : 'none';
+    
+    if (currentQuestionIndex === testQuestions.length - 1) {
+        nextBtn.style.display = 'none';
+        finishBtn.style.display = 'block';
+    } else {
+        nextBtn.style.display = 'block';
+        finishBtn.style.display = 'none';
+    }
+    
+    // Проверяем, есть ли answer на текущий вопрос
+    const hasAnswer = userAnswers[currentQuestionIndex] !== null;
+    nextBtn.disabled = !hasAnswer;
+    finishBtn.disabled = !hasAnswer;
+}
+
+// Обработчики навигации по тесту
+document.addEventListener('DOMContentLoaded', function() {
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const finishBtn = document.getElementById('finishBtn');
+    
+    prevBtn.addEventListener('click', () => {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            showQuestion();
+        }
+    });
+    
+    nextBtn.addEventListener('click', () => {
+        if (userAnswers[currentQuestionIndex] !== null && currentQuestionIndex < testQuestions.length - 1) {
+            currentQuestionIndex++;
+            showQuestion();
+        }
+    });
+    
+    finishBtn.addEventListener('click', () => {
+        if (userAnswers[currentQuestionIndex] !== null) {
+            showResults();
+        }
+    });
+});
+
+function showResults() {
+    const testQuestionsDiv = document.getElementById('test-questions');
+    const testResultsDiv = document.getElementById('test-results');
+    
+    testQuestionsDiv.style.display = 'none';
+    testResultsDiv.style.display = 'block';
+    
+    // Подсчет правильных answerов
+    let correctAnswers = 0;
+    const detailedResults = document.getElementById('detailed-results');
+    let detailedHtml = '<h5>Detailed results:</h5>';
+    
+    userAnswers.forEach((answer, index) => {
+        const question = testQuestions[index];
+        const isCorrect = answer === question.correct;
+        
+        if (isCorrect) {
+            correctAnswers++;
+        }
+        
+        detailedHtml += `
+            <div class="question-result ${isCorrect ? 'correct' : 'incorrect'}">
+                <h5>Question ${index + 1}: ${question.question}</h5>
+                <p>Your answer: ${question.options[answer]}</p>
+                <p>Correct answer: ${question.options[question.correct]}</p>
+                <p>${isCorrect ? '✅ Correct!' : '❌ Incorrect'}</p>
+            </div>
+        `;
+    });
+    
+    const percentage = Math.round((correctAnswers / testQuestions.length) * 100);
+    
+    document.getElementById('score-percentage').textContent = `${percentage}%`;
+    document.getElementById('correct-answers').textContent = correctAnswers;
+    detailedResults.innerHTML = detailedHtml;
+    
+    // Анимация появления resultов
+    setTimeout(() => {
+        document.querySelector('.score-circle').style.transform = 'scale(1.1)';
+        setTimeout(() => {
+            document.querySelector('.score-circle').style.transform = 'scale(1)';
+        }, 200);
+    }, 100);
+}
+
+// Дополнительные функции для улучшения UX
+function addConfetti() {
+    // Простая анимация конфетти для правильных answerов
+    const colors = ['#667eea', '#764ba2', '#28a745', '#ffc107', '#dc3545'];
+    
+    for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+            const confetti = document.createElement('div');
+            confetti.style.position = 'fixed';
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.top = '-10px';
+            confetti.style.width = '10px';
+            confetti.style.height = '10px';
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.borderRadius = '50%';
+            confetti.style.pointerEvents = 'none';
+            confetti.style.zIndex = '9999';
+            confetti.style.animation = 'fall 3s linear forwards';
+            
+            document.body.appendChild(confetti);
+            
+            setTimeout(() => {
+                document.body.removeChild(confetti);
+            }, 3000);
+        }, i * 50);
+    }
+}
+
+// Добавляем CSS анимацию для конфетти
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fall {
+        to {
+            transform: translateY(100vh) rotate(360deg);
+        }
+    }
+`;
+document.head.appendChild(style);
+
+// Вызываем конфетти при отличном resultе
+function checkForExcellentResult(percentage) {
+    if (percentage >= 90) {
+        addConfetti();
+    }
+} 
+</script>
+
+<script>
+(function() {
+  var LAB_NAME = "Commutative Property";
+  var LAB_SLUG = "commutative";
+  var sessionStart = Date.now();
+  var answers = 0, correct = 0;
+  
+  // Notify parent on load
+  window.addEventListener("load", function() {
+    window.parent.postMessage({type:"labLoaded", lab:LAB_SLUG, name:LAB_NAME}, "*");
+  });
+  
+  // Track button clicks as interactions
+  document.addEventListener("click", function(e) {
+    var btn = e.target.closest("button");
+    if (btn) {
+      window.parent.postMessage({type:"interaction", lab:LAB_SLUG, action:btn.textContent.trim().substring(0,30), time: Date.now()-sessionStart}, "*");
+    }
+  });
+  
+  // Track score elements
+  setInterval(function() {
+    var scoreEl = document.getElementById("score") || document.querySelector(".score-value") || document.querySelector("[id*='score']");
+    if (scoreEl) {
+      var s = parseInt(scoreEl.textContent)||0;
+      window.parent.postMessage({type:"scoreUpdate", lab:LAB_SLUG, score:s, time:Date.now()-sessionStart}, "*");
+    }
+  }, 2000);
+  
+  // Send session data when leaving
+  window.addEventListener("beforeunload", function() {
+    window.parent.postMessage({type:"sessionEnd", lab:LAB_SLUG, duration:Date.now()-sessionStart}, "*");
+  });
+})();
+</script>
+</body>
+</html> 

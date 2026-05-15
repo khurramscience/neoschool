@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Even and Odd Numbers - Math Lab</title>
+    <style>
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header Styles */
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+    color: white;
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    font-weight: 300;
+}
+
+/* Navigation Styles */
+.navigation {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.nav-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.nav-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.nav-btn.active {
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+/* Main Content Styles */
+.main-content {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    overflow: hidden;
+}
+
+.section {
+    display: none;
+    padding: 40px;
+}
+
+.section.active {
+    display: block;
+}
+
+/* Theory Section Styles */
+.theory-content h2 {
+    color: #4a5568;
+    margin-bottom: 30px;
+    font-size: 2rem;
+    text-align: center;
+}
+
+.concept-card {
+    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 30px;
+    border-left: 5px solid #4299e1;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.concept-card h3 {
+    color: #2d3748;
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+}
+
+.concept-card p {
+    color: #4a5568;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+}
+
+.examples h4 {
+    color: #2d3748;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}
+
+.number-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 0 auto;
+}
+
+.number.even {
+    background: linear-gradient(135deg, #4299e1, #3182ce);
+    box-shadow: 0 4px 10px rgba(66, 153, 225, 0.3);
+}
+
+.number.odd {
+    background: linear-gradient(135deg, #e53e3e, #c53030);
+    box-shadow: 0 4px 10px rgba(229, 62, 62, 0.3);
+}
+
+.number:hover {
+    transform: scale(1.1);
+}
+
+.rule {
+    background: #e6fffa;
+    border: 2px solid #38b2ac;
+    border-radius: 10px;
+    padding: 15px;
+    color: #2c7a7b;
+    font-weight: 500;
+}
+
+/* Interactive Demo Styles */
+.interactive-demo {
+    background: linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%);
+    border-radius: 15px;
+    padding: 25px;
+    margin-top: 30px;
+    border: 2px solid #38b2ac;
+}
+
+.interactive-demo h3 {
+    color: #2d3748;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.demo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.demo-result {
+    text-align: center;
+    padding: 15px;
+    background: white;
+    border-radius: 10px;
+    font-weight: 500;
+    color: #4a5568;
+    border: 2px solid #e2e8f0;
+}
+
+/* Practice Section Styles */
+.practice-content h2 {
+    color: #4a5568;
+    margin-bottom: 30px;
+    font-size: 2rem;
+    text-align: center;
+}
+
+.exercise-container {
+    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.exercise-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.exercise-header h3 {
+    color: #2d3748;
+    font-size: 1.4rem;
+}
+
+.score-display {
+    background: #4299e1;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.exercise-area {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.number-display {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin: 20px 0;
+    padding: 20px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.button-group {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #4299e1, #3182ce);
+    color: white;
+    box-shadow: 0 4px 15px rgba(66, 153, 225, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(66, 153, 225, 0.4);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #a0aec0, #718096);
+    color: white;
+    box-shadow: 0 4px 15px rgba(160, 174, 192, 0.3);
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(160, 174, 192, 0.4);
+}
+
+.btn-even {
+    background: linear-gradient(135deg, #4299e1, #3182ce);
+    color: white;
+    box-shadow: 0 4px 15px rgba(66, 153, 225, 0.3);
+}
+
+.btn-even:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(66, 153, 225, 0.4);
+}
+
+.btn-odd {
+    background: linear-gradient(135deg, #e53e3e, #c53030);
+    color: white;
+    box-shadow: 0 4px 15px rgba(229, 62, 62, 0.3);
+}
+
+.btn-odd:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(229, 62, 62, 0.4);
+}
+
+.feedback {
+    text-align: center;
+    padding: 15px;
+    border-radius: 10px;
+    font-weight: 600;
+    margin-top: 20px;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.feedback.correct {
+    background: #c6f6d5;
+    color: #22543d;
+    border: 2px solid #68d391;
+}
+
+.feedback.incorrect {
+    background: #fed7d7;
+    color: #742a2a;
+    border: 2px solid #fc8181;
+}
+
+/* Sorting Exercise Styles */
+.sorting-exercise {
+    text-align: center;
+}
+
+.numbers-to-sort {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 30px;
+    min-height: 60px;
+    padding: 20px;
+    background: white;
+    border-radius: 15px;
+    border: 2px dashed #cbd5e0;
+}
+
+.sorting-areas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.sort-area {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    border: 2px solid #e2e8f0;
+}
+
+.sort-area h4 {
+    color: #2d3748;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.even-area {
+    border-color: #4299e1;
+}
+
+.odd-area {
+    border-color: #e53e3e;
+}
+
+.drop-zone {
+    min-height: 100px;
+    border: 2px dashed #cbd5e0;
+    border-radius: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 15px;
+    align-items: flex-start;
+}
+
+.sortable-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: white;
+    cursor: grab;
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+.sortable-number:active {
+    cursor: grabbing;
+}
+
+.sortable-number.even {
+    background: linear-gradient(135deg, #4299e1, #3182ce);
+}
+
+.sortable-number.odd {
+    background: linear-gradient(135deg, #e53e3e, #c53030);
+}
+
+/* Test Section Styles */
+.test-content h2 {
+    color: #4a5568;
+    margin-bottom: 30px;
+    font-size: 2rem;
+    text-align: center;
+}
+
+.test-info {
+    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.test-info p {
+    color: #4a5568;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+}
+
+.test-stats {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.test-stats span {
+    background: #4299e1;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.test-container {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.test-start {
+    text-align: center;
+}
+
+.test-start h3 {
+    color: #2d3748;
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+}
+
+.test-start p {
+    color: #4a5568;
+    margin-bottom: 25px;
+}
+
+.test-question {
+    text-align: center;
+}
+
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 15px;
+    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+    border-radius: 10px;
+}
+
+.question-number {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.question-timer {
+    background: #e53e3e;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.question-content h3 {
+    color: #2d3748;
+    margin-bottom: 30px;
+    font-size: 1.4rem;
+}
+
+.question-options {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.option-btn {
+    background: linear-gradient(135deg, #4299e1, #3182ce);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 120px;
+}
+
+.option-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(66, 153, 225, 0.4);
+}
+
+.option-btn.selected {
+    background: linear-gradient(135deg, #38a169, #2f855a);
+    transform: scale(1.05);
+}
+
+.test-results {
+    text-align: center;
+}
+
+.test-results h3 {
+    color: #2d3748;
+    margin-bottom: 30px;
+    font-size: 1.8rem;
+}
+
+.results-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.result-item {
+    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+    padding: 20px;
+    border-radius: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.result-message {
+    background: #c6f6d5;
+    color: #22543d;
+    padding: 20px;
+    border-radius: 15px;
+    font-weight: 600;
+    margin-bottom: 25px;
+    border: 2px solid #68d391;
+}
+
+/* Footer Styles */
+.footer {
+    text-align: center;
+    margin-top: 30px;
+    color: white;
+    opacity: 0.8;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .header h1 {
+        font-size: 2rem;
+    }
+    
+    .section {
+        padding: 20px;
+    }
+    
+    .sorting-areas {
+        grid-template-columns: 1fr;
+    }
+    
+    .button-group {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .question-options {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .test-stats {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .results-summary {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Animation Classes */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.bounce {
+    animation: bounce 0.6s ease-in-out;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+}
+
+.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+} 
+</style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🔢 Even and Odd Numbers</h1>
+            <p class="subtitle">Interactive Math Laboratory for Students</p>
+        </header>
+
+        <nav class="navigation">
+            <button class="nav-btn active" data-section="theory">📚 Theory</button>
+            <button class="nav-btn" data-section="practice">🎯 Practice</button>
+            <button class="nav-btn" data-section="test">📝 Test</button>
+        </nav>
+
+        <main class="main-content">
+            <!-- Theory Section -->
+            <section id="theory" class="section active">
+                <div class="theory-content">
+                    <h2>Understanding Even and Odd Numbers</h2>
+                    
+                    <div class="concept-card">
+                        <h3>🔵 Even Numbers</h3>
+                        <p>Even numbers are integers that can be divided by 2 without leaving a remainder.</p>
+                        <div class="examples">
+                            <h4>Examples:</h4>
+                            <div class="number-grid">
+                                <span class="number even">2</span>
+                                <span class="number even">4</span>
+                                <span class="number even">6</span>
+                                <span class="number even">8</span>
+                                <span class="number even">10</span>
+                                <span class="number even">12</span>
+                                <span class="number even">14</span>
+                                <span class="number even">16</span>
+                                <span class="number even">18</span>
+                                <span class="number even">20</span>
+                            </div>
+                        </div>
+                        <div class="rule">
+                            <strong>Rule:</strong> If a number ends with 0, 2, 4, 6, or 8, it's even!
+                        </div>
+                    </div>
+
+                    <div class="concept-card">
+                        <h3>🔴 Odd Numbers</h3>
+                        <p>Odd numbers are integers that cannot be divided by 2 without leaving a remainder.</p>
+                        <div class="examples">
+                            <h4>Examples:</h4>
+                            <div class="number-grid">
+                                <span class="number odd">1</span>
+                                <span class="number odd">3</span>
+                                <span class="number odd">5</span>
+                                <span class="number odd">7</span>
+                                <span class="number odd">9</span>
+                                <span class="number odd">11</span>
+                                <span class="number odd">13</span>
+                                <span class="number odd">15</span>
+                                <span class="number odd">17</span>
+                                <span class="number odd">19</span>
+                            </div>
+                        </div>
+                        <div class="rule">
+                            <strong>Rule:</strong> If a number ends with 1, 3, 5, 7, or 9, it's odd!
+                        </div>
+                    </div>
+
+                    <div class="interactive-demo">
+                        <h3>🎮 Interactive Demo</h3>
+                        <p>Click on numbers to see if they're even or odd:</p>
+                        <div class="demo-grid" id="demoGrid">
+                            <!-- Numbers will be generated by JavaScript -->
+                        </div>
+                        <div class="demo-result" id="demoResult">
+                            Click on a number to see the result!
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Practice Section -->
+            <section id="practice" class="section">
+                <div class="practice-content">
+                    <h2>Practice Exercises</h2>
+                    
+                    <div class="exercise-container">
+                        <div class="exercise-header">
+                            <h3>Exercise 1: Identify Even and Odd Numbers</h3>
+                            <div class="score-display">
+                                <span>Score: <span id="practiceScore">0</span>/<span id="practiceTotal">0</span></span>
+                            </div>
+                        </div>
+                        
+                        <div class="exercise-area">
+                            <div class="number-display" id="practiceNumber">Click "New Number" to start</div>
+                            <div class="button-group">
+                                <button class="btn btn-even" onclick="checkAnswer('even')">Even</button>
+                                <button class="btn btn-odd" onclick="checkAnswer('odd')">Odd</button>
+                            </div>
+                            <button class="btn btn-primary" onclick="generateNewNumber()">New Number</button>
+                        </div>
+                        
+                        <div class="feedback" id="practiceFeedback"></div>
+                    </div>
+
+                    <div class="exercise-container">
+                        <div class="exercise-header">
+                            <h3>Exercise 2: Sort Numbers</h3>
+                            <div class="score-display">
+                                <span>Score: <span id="sortScore">0</span>/<span id="sortTotal">0</span></span>
+                            </div>
+                        </div>
+                        
+                        <div class="sorting-exercise">
+                            <div class="numbers-to-sort" id="numbersToSort">
+                                <!-- Numbers will be generated by JavaScript -->
+                            </div>
+                            <div class="sorting-areas">
+                                <div class="sort-area even-area">
+                                    <h4>Even Numbers</h4>
+                                    <div class="drop-zone" id="evenDropZone"></div>
+                                </div>
+                                <div class="sort-area odd-area">
+                                    <h4>Odd Numbers</h4>
+                                    <div class="drop-zone" id="oddDropZone"></div>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" onclick="checkSorting()">Check Answer</button>
+                            <button class="btn btn-secondary" onclick="resetSorting()">Reset</button>
+                        </div>
+                        
+                        <div class="feedback" id="sortingFeedback"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Test Section -->
+            <section id="test" class="section">
+                <div class="test-content">
+                    <h2>Final Test</h2>
+                    
+                    <div class="test-info">
+                        <p>Complete this test to check your understanding of even and odd numbers.</p>
+                        <div class="test-stats">
+                            <span>Questions: <span id="testQuestionCount">0</span></span>
+                            <span>Time: <span id="testTimer">00:00</span></span>
+                        </div>
+                    </div>
+
+                    <div class="test-container" id="testContainer">
+                        <div class="test-start" id="testStart">
+                            <h3>Ready to test your knowledge?</h3>
+                            <p>This test contains 10 questions about even and odd numbers.</p>
+                            <button class="btn btn-primary" onclick="startTest()">Start Test</button>
+                        </div>
+                        
+                        <div class="test-question" id="testQuestion" style="display: none;">
+                            <div class="question-header">
+                                <span class="question-number">Question <span id="currentQuestion">1</span> of 10</span>
+                                <span class="question-timer" id="questionTimer">30</span>
+                            </div>
+                            
+                            <div class="question-content">
+                                <h3 id="questionText">Is the number 15 even or odd?</h3>
+                                <div class="question-options">
+                                    <button class="option-btn" onclick="selectOption('even')" id="optionEven">Even</button>
+                                    <button class="option-btn" onclick="selectOption('odd')" id="optionOdd">Odd</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="test-results" id="testResults" style="display: none;">
+                            <h3>Test Results</h3>
+                            <div class="results-summary">
+                                <div class="result-item">
+                                    <span>Correct Answers:</span>
+                                    <span id="correctAnswers">0</span>
+                                </div>
+                                <div class="result-item">
+                                    <span>Score:</span>
+                                    <span id="finalScore">0%</span>
+                                </div>
+                                <div class="result-item">
+                                    <span>Time Taken:</span>
+                                    <span id="timeTaken">00:00</span>
+                                </div>
+                            </div>
+                            <div class="result-message" id="resultMessage"></div>
+                            <button class="btn btn-primary" onclick="restartTest()">Take Test Again</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2024 Math Laboratory - Even and Odd Numbers</p>
+        </footer>
+    </div>
+
+    <script>
+// Global variables
+let currentNumber = 0;
+let practiceScore = 0;
+let practiceTotal = 0;
+let sortScore = 0;
+let sortTotal = 0;
+let testQuestions = [];
+let currentQuestionIndex = 0;
+let testScore = 0;
+let testTimer = null;
+let questionTimer = null;
+let testStartTime = null;
+
+// Navigation functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize the application
+    initializeApp();
+    
+    // Navigation event listeners
+    const navButtons = document.querySelectorAll('.nav-btn');
+    navButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const targetSection = this.getAttribute('data-section');
+            switchSection(targetSection);
+        });
+    });
+});
+
+function initializeApp() {
+    // Initialize demo grid
+    generateDemoGrid();
+    
+    // Initialize practice exercises
+    initializePractice();
+    
+    // Initialize sorting exercise
+    initializeSorting();
+    
+    // Initialize test
+    initializeTest();
+}
+
+function switchSection(sectionName) {
+    // Remove active class from all sections and buttons
+    document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
+    });
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Add active class to target section and button
+    document.getElementById(sectionName).classList.add('active');
+    document.querySelector(`[data-section="${sectionName}"]`).classList.add('active');
+}
+
+// Theory Section - Interactive Demo
+function generateDemoGrid() {
+    const demoGrid = document.getElementById('demoGrid');
+    demoGrid.innerHTML = '';
+    
+    // Generate random numbers for demo
+    for (let i = 0; i < 12; i++) {
+        const number = Math.floor(Math.random() * 50) + 1;
+        const isEven = number % 2 === 0;
+        const numberElement = document.createElement('div');
+        numberElement.className = `number ${isEven ? 'even' : 'odd'}`;
+        numberElement.textContent = number;
+        numberElement.addEventListener('click', () => showDemoResult(number, isEven));
+        demoGrid.appendChild(numberElement);
+    }
+}
+
+function showDemoResult(number, isEven) {
+    const resultElement = document.getElementById('demoResult');
+    const result = isEven ? 'EVEN' : 'ODD';
+    const color = isEven ? '#4299e1' : '#e53e3e';
+    
+    resultElement.innerHTML = `
+        <strong>${number}</strong> is <span style="color: ${color}; font-weight: bold;">${result}</span>!
+        <br><small>${number} ${isEven ? 'can' : 'cannot'} be divided by 2 without remainder</small>
+    `;
+    resultElement.style.borderColor = color;
+    resultElement.classList.add('bounce');
+    
+    setTimeout(() => {
+        resultElement.classList.remove('bounce');
+    }, 600);
+}
+
+// Practice Section - Exercise 1
+function initializePractice() {
+    generateNewNumber();
+}
+
+function generateNewNumber() {
+    currentNumber = Math.floor(Math.random() * 100) + 1;
+    document.getElementById('practiceNumber').textContent = currentNumber;
+    document.getElementById('practiceFeedback').innerHTML = '';
+    document.getElementById('practiceFeedback').className = 'feedback';
+}
+
+function checkAnswer(answer) {
+    const isEven = currentNumber % 2 === 0;
+    const correctAnswer = isEven ? 'even' : 'odd';
+    const feedbackElement = document.getElementById('practiceFeedback');
+    
+    practiceTotal++;
+    
+    if (answer === correctAnswer) {
+        practiceScore++;
+        feedbackElement.textContent = `Correct! ${currentNumber} is ${correctAnswer}.`;
+        feedbackElement.className = 'feedback correct';
+        feedbackElement.classList.add('bounce');
+    } else {
+        feedbackElement.textContent = `Incorrect! ${currentNumber} is ${correctAnswer}, not ${answer}.`;
+        feedbackElement.className = 'feedback incorrect';
+        feedbackElement.classList.add('shake');
+    }
+    
+    // Update score display
+    document.getElementById('practiceScore').textContent = practiceScore;
+    document.getElementById('practiceTotal').textContent = practiceTotal;
+    
+    // Remove animation classes
+    setTimeout(() => {
+        feedbackElement.classList.remove('bounce', 'shake');
+    }, 600);
+    
+    // Generate new number after a short delay
+    setTimeout(generateNewNumber, 1500);
+}
+
+// Practice Section - Exercise 2 (Sorting)
+function initializeSorting() {
+    generateSortingNumbers();
+    setupDragAndDrop();
+}
+
+function generateSortingNumbers() {
+    const numbersToSort = document.getElementById('numbersToSort');
+    numbersToSort.innerHTML = '';
+    
+    // Generate 8 random numbers (4 even, 4 odd)
+    const numbers = [];
+    const evenNumbers = [];
+    const oddNumbers = [];
+    
+    while (evenNumbers.length < 4) {
+        const num = Math.floor(Math.random() * 50) * 2; // Even numbers
+        if (!evenNumbers.includes(num)) {
+            evenNumbers.push(num);
+        }
+    }
+    
+    while (oddNumbers.length < 4) {
+        const num = Math.floor(Math.random() * 50) * 2 + 1; // Odd numbers
+        if (!oddNumbers.includes(num)) {
+            oddNumbers.push(num);
+        }
+    }
+    
+    numbers.push(...evenNumbers, ...oddNumbers);
+    
+    // Shuffle the array
+    for (let i = numbers.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+    }
+    
+    // Create sortable number elements
+    numbers.forEach(number => {
+        const isEven = number % 2 === 0;
+        const numberElement = document.createElement('div');
+        numberElement.className = `sortable-number ${isEven ? 'even' : 'odd'}`;
+        numberElement.textContent = number;
+        numberElement.draggable = true;
+        numberElement.dataset.number = number;
+        numberElement.dataset.type = isEven ? 'even' : 'odd';
+        numbersToSort.appendChild(numberElement);
+    });
+}
+
+function setupDragAndDrop() {
+    const sortableNumbers = document.querySelectorAll('.sortable-number');
+    const dropZones = document.querySelectorAll('.drop-zone');
+    
+    sortableNumbers.forEach(number => {
+        number.addEventListener('dragstart', handleDragStart);
+        number.addEventListener('dragend', handleDragEnd);
+    });
+    
+    dropZones.forEach(zone => {
+        zone.addEventListener('dragover', handleDragOver);
+        zone.addEventListener('drop', handleDrop);
+    });
+}
+
+function handleDragStart(e) {
+    e.target.style.opacity = '0.5';
+    e.dataTransfer.setData('text/plain', e.target.dataset.number);
+}
+
+function handleDragEnd(e) {
+    e.target.style.opacity = '1';
+}
+
+function handleDragOver(e) {
+    e.preventDefault();
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    const number = e.dataTransfer.getData('text/plain');
+    const numberElement = document.querySelector(`[data-number="${number}"]`);
+    
+    if (numberElement && !numberElement.parentElement.classList.contains('drop-zone')) {
+        e.target.appendChild(numberElement);
+    }
+}
+
+function checkSorting() {
+    const evenDropZone = document.getElementById('evenDropZone');
+    const oddDropZone = document.getElementById('oddDropZone');
+    const feedbackElement = document.getElementById('sortingFeedback');
+    
+    const evenNumbers = Array.from(evenDropZone.children).map(el => parseInt(el.dataset.number));
+    const oddNumbers = Array.from(oddDropZone.children).map(el => parseInt(el.dataset.number));
+    
+    let correct = 0;
+    let total = 0;
+    
+    // Check even numbers
+    evenNumbers.forEach(num => {
+        total++;
+        if (num % 2 === 0) correct++;
+    });
+    
+    // Check odd numbers
+    oddNumbers.forEach(num => {
+        total++;
+        if (num % 2 === 1) correct++;
+    });
+    
+    sortScore = correct;
+    sortTotal = total;
+    
+    document.getElementById('sortScore').textContent = sortScore;
+    document.getElementById('sortTotal').textContent = sortTotal;
+    
+    if (correct === total && total > 0) {
+        feedbackElement.textContent = 'Excellent! All numbers are correctly sorted!';
+        feedbackElement.className = 'feedback correct';
+        feedbackElement.classList.add('bounce');
+    } else {
+        feedbackElement.textContent = `You got ${correct} out of ${total} correct. Try again!`;
+        feedbackElement.className = 'feedback incorrect';
+        feedbackElement.classList.add('shake');
+    }
+    
+    setTimeout(() => {
+        feedbackElement.classList.remove('bounce', 'shake');
+    }, 600);
+}
+
+function resetSorting() {
+    document.getElementById('evenDropZone').innerHTML = '';
+    document.getElementById('oddDropZone').innerHTML = '';
+    document.getElementById('sortingFeedback').innerHTML = '';
+    document.getElementById('sortingFeedback').className = 'feedback';
+    generateSortingNumbers();
+    setupDragAndDrop();
+}
+
+// Test Section
+function initializeTest() {
+    generateTestQuestions();
+    document.getElementById('testQuestionCount').textContent = '10';
+}
+
+function generateTestQuestions() {
+    testQuestions = [];
+    
+    // Generate 10 random test questions
+    for (let i = 0; i < 10; i++) {
+        const number = Math.floor(Math.random() * 100) + 1;
+        const isEven = number % 2 === 0;
+        const correctAnswer = isEven ? 'even' : 'odd';
+        
+        testQuestions.push({
+            number: number,
+            correctAnswer: correctAnswer,
+            question: `Is the number ${number} even or odd?`
+        });
+    }
+}
+
+function startTest() {
+    document.getElementById('testStart').style.display = 'none';
+    document.getElementById('testQuestion').style.display = 'block';
+    document.getElementById('testResults').style.display = 'none';
+    
+    currentQuestionIndex = 0;
+    testScore = 0;
+    testStartTime = Date.now();
+    
+    showQuestion();
+    startQuestionTimer();
+}
+
+function showQuestion() {
+    if (currentQuestionIndex >= testQuestions.length) {
+        endTest();
+        return;
+    }
+    
+    const question = testQuestions[currentQuestionIndex];
+    document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+    document.getElementById('questionText').textContent = question.question;
+    
+    // Reset option buttons
+    document.getElementById('optionEven').classList.remove('selected');
+    document.getElementById('optionOdd').classList.remove('selected');
+    
+    // Reset question timer
+    document.getElementById('questionTimer').textContent = '30';
+    startQuestionTimer();
+}
+
+function startQuestionTimer() {
+    let timeLeft = 30;
+    document.getElementById('questionTimer').textContent = timeLeft;
+    
+    questionTimer = setInterval(() => {
+        timeLeft--;
+        document.getElementById('questionTimer').textContent = timeLeft;
+        
+        if (timeLeft <= 0) {
+            clearInterval(questionTimer);
+            selectOption('timeout');
+        }
+    }, 1000);
+}
+
+function selectOption(answer) {
+    clearInterval(questionTimer);
+    
+    const question = testQuestions[currentQuestionIndex];
+    const isCorrect = answer === question.correctAnswer;
+    
+    if (isCorrect) {
+        testScore++;
+    }
+    
+    // Visual feedback
+    if (answer !== 'timeout') {
+        const selectedButton = document.getElementById(`option${answer.charAt(0).toUpperCase() + answer.slice(1)}`);
+        selectedButton.classList.add('selected');
+        
+        setTimeout(() => {
+            selectedButton.classList.remove('selected');
+        }, 1000);
+    }
+    
+    currentQuestionIndex++;
+    
+    // Show next question after a short delay
+    setTimeout(showQuestion, 1000);
+}
+
+function endTest() {
+    clearInterval(questionTimer);
+    clearInterval(testTimer);
+    
+    const endTime = Date.now();
+    const timeTaken = Math.floor((endTime - testStartTime) / 1000);
+    const minutes = Math.floor(timeTaken / 60);
+    const seconds = timeTaken % 60;
+    const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    
+    const percentage = Math.round((testScore / testQuestions.length) * 100);
+    
+    document.getElementById('correctAnswers').textContent = testScore;
+    document.getElementById('finalScore').textContent = `${percentage}%`;
+    document.getElementById('timeTaken').textContent = timeString;
+    
+    // Set result message
+    const resultMessage = document.getElementById('resultMessage');
+    if (percentage >= 90) {
+        resultMessage.textContent = '🎉 Outstanding! You have excellent understanding of even and odd numbers!';
+        resultMessage.style.background = '#c6f6d5';
+        resultMessage.style.color = '#22543d';
+        resultMessage.style.borderColor = '#68d391';
+    } else if (percentage >= 70) {
+        resultMessage.textContent = '👍 Good job! You have a solid understanding of even and odd numbers.';
+        resultMessage.style.background = '#c6f6d5';
+        resultMessage.style.color = '#22543d';
+        resultMessage.style.borderColor = '#68d391';
+    } else if (percentage >= 50) {
+        resultMessage.textContent = '📚 Not bad! Review the theory section and practice more.';
+        resultMessage.style.background = '#fef5e7';
+        resultMessage.style.color = '#744210';
+        resultMessage.style.borderColor = '#f6ad55';
+    } else {
+        resultMessage.textContent = '📖 Keep practicing! Review the theory and try the practice exercises.';
+        resultMessage.style.background = '#fed7d7';
+        resultMessage.style.color = '#742a2a';
+        resultMessage.style.borderColor = '#fc8181';
+    }
+    
+    document.getElementById('testQuestion').style.display = 'none';
+    document.getElementById('testResults').style.display = 'block';
+}
+
+function restartTest() {
+    generateTestQuestions();
+    document.getElementById('testStart').style.display = 'block';
+    document.getElementById('testQuestion').style.display = 'none';
+    document.getElementById('testResults').style.display = 'none';
+}
+
+// Utility functions
+function isEven(number) {
+    return number % 2 === 0;
+}
+
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
+// Add some interactive effects
+document.addEventListener('DOMContentLoaded', function() {
+    // Add hover effects to numbers in theory section
+    const theoryNumbers = document.querySelectorAll('.number-grid .number');
+    theoryNumbers.forEach(number => {
+        number.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.1) rotate(5deg)';
+        });
+        
+        number.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1) rotate(0deg)';
+        });
+    });
+    
+    // Add smooth scrolling for better UX
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+}); 
+</script>
+
+<script>
+(function() {
+  var LAB_NAME = "Even & Odd Division";
+  var LAB_SLUG = "division-remainder";
+  var sessionStart = Date.now();
+  var answers = 0, correct = 0;
+  
+  // Notify parent on load
+  window.addEventListener("load", function() {
+    window.parent.postMessage({type:"labLoaded", lab:LAB_SLUG, name:LAB_NAME}, "*");
+  });
+  
+  // Track button clicks as interactions
+  document.addEventListener("click", function(e) {
+    var btn = e.target.closest("button");
+    if (btn) {
+      window.parent.postMessage({type:"interaction", lab:LAB_SLUG, action:btn.textContent.trim().substring(0,30), time: Date.now()-sessionStart}, "*");
+    }
+  });
+  
+  // Track score elements
+  setInterval(function() {
+    var scoreEl = document.getElementById("score") || document.querySelector(".score-value") || document.querySelector("[id*='score']");
+    if (scoreEl) {
+      var s = parseInt(scoreEl.textContent)||0;
+      window.parent.postMessage({type:"scoreUpdate", lab:LAB_SLUG, score:s, time:Date.now()-sessionStart}, "*");
+    }
+  }, 2000);
+  
+  // Send session data when leaving
+  window.addEventListener("beforeunload", function() {
+    window.parent.postMessage({type:"sessionEnd", lab:LAB_SLUG, duration:Date.now()-sessionStart}, "*");
+  });
+})();
+</script>
+</body>
+</html> 

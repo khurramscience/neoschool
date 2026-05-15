@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratory Work: Column Subtraction</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧮 Laboratory Work: Column Subtraction</h1>
+            <p>Study the theory, practice and test your knowledge!</p>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="theory">📚 Theory</button>
+            <button class="tab-btn" data-tab="practice">✏️ Practice</button>
+            <button class="tab-btn" data-tab="test">📝 Testing</button>
+        </nav>
+
+        <!-- Блок теории -->
+        <div id="theory" class="tab-content active">
+            <div class="theory-content">
+                <h2>Theory of Column Subtraction</h2>
+                
+                <div class="theory-section">
+                    <h3>🎯 What is Column Subtraction?</h3>
+                    <p>Column subtraction is a method of writing and solving subtraction problems where numbers are written one under another by digits.</p>
+                </div>
+
+                <div class="theory-section">
+                    <h3>📋 Rules of Column Subtraction:</h3>
+                    <ol>
+                        <li>Write the minuend at the top</li>
+                        <li>Write the subtrahend below it, aligned to the right</li>
+                        <li>Draw a line under the subtrahend</li>
+                        <li>Subtract digit by digit, starting from the right</li>
+                        <li>If the digit of the minuend is less than the digit of the subtrahend, borrow one from the higher digit</li>
+                    </ol>
+                </div>
+
+                <div class="theory-section">
+                    <h3>🔍 Example of Column Subtraction:</h3>
+                    <div class="example">
+                        <div class="column-subtraction">
+                            <div class="number">8 4 2</div>
+                            <div class="number">- 3 5 6</div>
+                            <div class="line">─────</div>
+                            <div class="result">4 8 6</div>
+                        </div>
+                        <div class="explanation">
+                            <p><strong>Step-by-step solution:</strong></p>
+                            <p>1. 2 - 6 = impossible, borrow 1 from tens: 12 - 6 = 6</p>
+                            <p>2. 3 - 5 = impossible, borrow 1 from hundreds: 13 - 5 = 8</p>
+                            <p>3. 7 - 3 = 4</p>
+                            <p><strong>Answer: 486</strong></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="theory-section">
+                    <h3>⚠️ Important Points:</h3>
+                    <ul>
+                        <li>Always check that the minuend is greater than the subtrahend</li>
+                        <li>When borrowing, don't forget to decrease the digit in the higher place</li>
+                        <li>The result cannot be a negative number</li>
+                        <li>We work only with whole numbers</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Блок тренировки -->
+        <div id="practice" class="tab-content">
+            <div class="practice-content">
+                <h2>Practice Column Subtraction</h2>
+                
+                <div class="settings">
+                    <h3>⚙️ Difficulty Settings:</h3>
+                    <div class="setting-group">
+                        <label for="topDigits">Number of digits (minuend):</label>
+                        <select id="topDigits">
+                            <option value="2">2 digits</option>
+                            <option value="3" selected>3 digits</option>
+                            <option value="4">4 digits</option>
+                            <option value="5">5 digits</option>
+                            <option value="6">6 digits</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label for="bottomDigits">Number of digits (subtrahend):</label>
+                        <select id="bottomDigits">
+                            <option value="2">2 digits</option>
+                            <option value="3">3 digits</option>
+                            <option value="4" selected>4 digits</option>
+                            <option value="5">5 digits</option>
+                            <option value="6">6 digits</option>
+                        </select>
+                    </div>
+                    <button id="generateProblem" class="btn-primary">🎲 Generate Problem</button>
+                </div>
+
+                <div id="problemContainer" class="problem-container" style="display: none;">
+                    <h3>Solve the problem:</h3>
+                    <div id="problemDisplay" class="problem-display"></div>
+                    
+                    <div class="input-section">
+                        <label for="userAnswer">Your answer:</label>
+                        <input type="number" id="userAnswer" placeholder="Enter result">
+                        <button id="checkAnswer" class="btn-primary">✅ Check</button>
+                    </div>
+
+                    <div id="resultMessage" class="result-message"></div>
+                    
+                    <div id="solution" class="solution" style="display: none;">
+                        <h4>📖 Detailed solution:</h4>
+                        <div id="solutionSteps"></div>
+                    </div>
+                </div>
+
+                <div class="stats">
+                    <h3>📊 Statistics:</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">Problems solved:</span>
+                            <span id="totalProblems" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Correct answers:</span>
+                            <span id="correctAnswers" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Success rate:</span>
+                            <span id="successRate" class="stat-value">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Блок тестирования -->
+        <div id="test" class="tab-content">
+            <div class="test-content">
+                <h2>Assessment Testing</h2>
+                
+                <div id="testSetup" class="test-setup">
+                    <h3>🎯 Test Settings:</h3>
+                    <div class="setting-group">
+                        <label for="testQuestions">Number of questions:</label>
+                        <select id="testQuestions">
+                            <option value="5">5 questions</option>
+                            <option value="10" selected>10 questions</option>
+                            <option value="15">15 questions</option>
+                            <option value="20">20 questions</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label for="testMinDigits">Minimum number of digits:</label>
+                        <select id="testMinDigits">
+                            <option value="2">2 digits</option>
+                            <option value="3" selected>3 digits</option>
+                            <option value="4">4 digits</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label for="testMaxDigits">Maximum number of digits:</label>
+                        <select id="testMaxDigits">
+                            <option value="3" selected>3 digits</option>
+                            <option value="4">4 digits</option>
+                            <option value="5">5 digits</option>
+                        </select>
+                    </div>
+                    <button id="startTest" class="btn-primary">🚀 Start Test</button>
+                </div>
+
+                <div id="testContainer" class="test-container" style="display: none;">
+                    <div class="test-header">
+                        <h3>Question <span id="currentQuestion">1</span> of <span id="totalQuestions">10</span></h3>
+                        <div class="progress-bar">
+                            <div id="progressFill" class="progress-fill"></div>
+                        </div>
+                    </div>
+
+                    <div id="testProblem" class="test-problem"></div>
+                    
+                    <div class="test-input">
+                        <label for="testAnswer">Your answer:</label>
+                        <input type="number" id="testAnswer" placeholder="Enter result">
+                        <button id="nextQuestion" class="btn-primary">⏭️ Next Question</button>
+                    </div>
+                </div>
+
+                <div id="testResults" class="test-results" style="display: none;">
+                    <h3>🎉 Test Results</h3>
+                    <div class="results-summary">
+                        <div class="result-item">
+                            <span class="result-label">Correct answers:</span>
+                            <span id="testCorrect" class="result-value">0</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Total questions:</span>
+                            <span id="testTotal" class="result-value">0</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Success rate:</span>
+                            <span id="testPercentage" class="result-value">0%</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Grade:</span>
+                            <span id="testGrade" class="result-value">-</span>
+                        </div>
+                    </div>
+                    
+                    <div id="testReview" class="test-review">
+                        <h4>📋 Error Analysis:</h4>
+                        <div id="reviewList"></div>
+                    </div>
+                    
+                    <button id="retakeTest" class="btn-primary">🔄 Retake Test</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

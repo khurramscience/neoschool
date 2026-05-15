@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Work: Column Addition</title>
+    <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+    color: white;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+header p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+/* Вкладки */
+.tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+    gap: 10px;
+}
+
+.tab-btn {
+    padding: 15px 25px;
+    border: none;
+    border-radius: 25px;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.tab-btn:hover {
+    background: rgba(255,255,255,0.3);
+    transform: translateY(-2px);
+}
+
+.tab-btn.active {
+    background: white;
+    color: #667eea;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+/* Контент вкладок */
+.tab-content {
+    display: none;
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    min-height: 500px;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Карточки концепций */
+.concept-card {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 25px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.concept-card h3 {
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+
+/* Примеры разрядов */
+.place-value-example {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.number-display {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.digit {
+    width: 50px;
+    height: 50px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    backdrop-filter: blur(5px);
+}
+
+.place-labels {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* Примеры сложения */
+.addition-example {
+    margin: 20px 0;
+}
+
+.step {
+    background: rgba(255,255,255,0.1);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.step h4 {
+    margin-bottom: 15px;
+    color: #ffd700;
+}
+
+.column-addition {
+    font-family: 'Courier New', monospace;
+    font-size: 1.2rem;
+    text-align: right;
+    margin: 15px 0;
+    padding: 15px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+}
+
+.number {
+    margin: 5px 0;
+}
+
+.line {
+    border-top: 2px solid rgba(255,255,255,0.5);
+    margin: 10px 0;
+    padding-top: 10px;
+}
+
+.result {
+    font-weight: bold;
+    color: #ffd700;
+}
+
+.highlight {
+    background: rgba(255,215,0,0.3);
+    padding: 2px 5px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.final-result {
+    text-align: center;
+    background: rgba(255,215,0,0.2);
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.final-result h4 {
+    color: #ffd700;
+    font-size: 1.3rem;
+}
+
+/* Интерактивная демонстрация */
+.interactive-demo {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+    padding: 25px;
+    border-radius: 15px;
+    margin-top: 30px;
+}
+
+.demo-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.demo-controls button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.demo-controls button:hover {
+    background: rgba(255,255,255,0.3);
+    transform: translateY(-2px);
+}
+
+.demo-area {
+    background: rgba(255,255,255,0.1);
+    padding: 20px;
+    border-radius: 10px;
+    min-height: 100px;
+    font-family: 'Courier New', monospace;
+    font-size: 1.1rem;
+}
+
+/* Practice */
+.practice-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.practice-controls button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.practice-controls button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.practice-problem {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 1.3rem;
+    text-align: center;
+    border: 2px solid #e9ecef;
+}
+
+.answer-input {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.answer-input label {
+    font-weight: bold;
+    color: #495057;
+}
+
+.answer-input input {
+    padding: 12px 15px;
+    border: 2px solid #dee2e6;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    width: 150px;
+    transition: border-color 0.3s ease;
+}
+
+.answer-input input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.feedback {
+    padding: 15px;
+    border-radius: 10px;
+    margin: 15px 0;
+    font-weight: bold;
+}
+
+.feedback.correct {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.feedback.incorrect {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Статистика */
+.stats {
+    display: flex;
+    justify-content: space-around;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin-top: 25px;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin-bottom: 5px;
+}
+
+.stat span:last-child {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+/* Test */
+.test-intro {
+    text-align: center;
+    padding: 40px;
+}
+
+.test-intro button {
+    padding: 15px 30px;
+    border: none;
+    border-radius: 25px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.test-intro button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.test-progress {
+    margin-bottom: 25px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    background: #e9ecef;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    transition: width 0.3s ease;
+}
+
+.test-question {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 1.3rem;
+    text-align: center;
+    border: 2px solid #e9ecef;
+}
+
+.test-answer {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.test-answer input {
+    padding: 12px 15px;
+    border: 2px solid #dee2e6;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    width: 150px;
+}
+
+.test-answer button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.test-results {
+    text-align: center;
+    padding: 30px;
+}
+
+.test-results h3 {
+    margin-bottom: 20px;
+    color: #667eea;
+}
+
+.test-results button {
+    padding: 15px 30px;
+    border: none;
+    border-radius: 25px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    header h1 {
+        font-size: 2rem;
+    }
+    
+    .tabs {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .tab-btn {
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .demo-controls,
+    .practice-controls {
+        flex-direction: column;
+    }
+    
+    .stats {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .answer-input,
+    .test-answer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .answer-input input,
+    .test-answer input {
+        width: 100%;
+    }
+} 
+</style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧮 Lab Work: Column Addition</h1>
+            <p>Learn place values and master column addition!</p>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-btn active" onclick="showTab('learning')">📚 Learning</button>
+            <button class="tab-btn" onclick="showTab('practice')">🎮 Practice</button>
+            <button class="tab-btn" onclick="showTab('test')">📝 Test</button>
+        </nav>
+
+        <!-- Learning tab -->
+        <div id="learning" class="tab-content active">
+            <div class="learning-section">
+                <h2>How Place Values Work in Addition</h2>
+                
+                <div class="concept-card">
+                    <h3>📊 Place Values</h3>
+                    <p>Each digit in a number has its place - the place value:</p>
+                    <div class="place-value-example">
+                        <div class="number-display">
+                            <span class="digit">2</span>
+                            <span class="digit">4</span>
+                            <span class="digit">7</span>
+                        </div>
+                        <div class="place-labels">
+                            <span>hundreds</span>
+                            <span>tens</span>
+                            <span>ones</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="concept-card">
+                    <h3>➕ Column Addition</h3>
+                    <p>In column addition, we add numbers by place values, starting from the right:</p>
+                    
+                    <div class="addition-example">
+                        <div class="step">
+                            <h4>Step 1: Add the ones</h4>
+                            <div class="column-addition" style="position: relative;">
+                                <div style="text-align: right; color: #ffd700; font-size: 0.9rem; margin-bottom: -5px; padding-right: 20px;">&nbsp;&nbsp;&nbsp;1</div>
+                                <div class="number">&nbsp;&nbsp;2 4 <span class="highlight">7</span></div>
+                                <div class="number">+ 1 3 <span class="highlight">5</span></div>
+                                <div class="line">─────</div>
+                                <div class="result">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">2</span></div>
+                            </div>
+                            <p>7 + 5 = 12. Write 2 in ones place, carry 1 to tens place (shown above).</p>
+                        </div>
+
+                        <div class="step">
+                            <h4>Step 2: Add the tens</h4>
+                            <div class="column-addition" style="position: relative;">
+                                <div style="text-align: right; color: #ffd700; font-size: 0.9rem; margin-bottom: -5px; padding-right: 20px;">&nbsp;&nbsp;&nbsp;1</div>
+                                <div class="number">&nbsp;&nbsp;2 <span class="highlight">4</span> 7</div>
+                                <div class="number">+ 1 <span class="highlight">3</span> 5</div>
+                                <div class="line">─────</div>
+                                <div class="result">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">8</span> 2</div>
+                            </div>
+                            <p>4 + 3 + 1 (carry) = 8. Write 8 in tens place.</p>
+                        </div>
+
+                        <div class="step">
+                            <h4>Step 3: Add the hundreds</h4>
+                            <div class="column-addition">
+                                <div class="number"><span class="highlight">2</span> 4 7</div>
+                                <div class="number">+ <span class="highlight">1</span> 3 5</div>
+                                <div class="line">─────</div>
+                                <div class="result"><span class="highlight">3</span> 8 2</div>
+                            </div>
+                            <p>2 + 1 = 3. Write 3 in hundreds place.</p>
+                        </div>
+
+                        <div class="final-result">
+                            <h4>Result: 247 + 135 = 382</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="interactive-demo">
+                    <h3>🎯 Interactive Demonstration</h3>
+                    <div class="demo-controls">
+                        <button onclick="generateDemo()">New Example</button>
+                        <button onclick="showStep()">Next Step</button>
+                        <button onclick="resetDemo()">Reset</button>
+                    </div>
+                    <div id="demo-area" class="demo-area">
+                        <p>Click "New Example" to start the demonstration</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Practice tab -->
+        <div id="practice" class="tab-content">
+            <div class="practice-section">
+                <h2>🎮 Practice Exercises</h2>
+                
+                <div class="practice-controls">
+                    <button onclick="generatePractice()">New Exercise</button>
+                    <button onclick="checkAnswer()">Check Answer</button>
+                    <button onclick="showSolution()">Show Solution</button>
+                </div>
+
+                <div class="practice-area">
+                    <div id="practice-problem" class="practice-problem">
+                        <p>Click "New Exercise" to start practicing</p>
+                    </div>
+                    
+                    <div class="answer-input">
+                        <label for="user-answer">Your answer:</label>
+                        <input type="number" id="user-answer" placeholder="Enter result">
+                    </div>
+
+                    <div id="practice-feedback" class="feedback"></div>
+                </div>
+
+                <div class="stats">
+                    <div class="stat">
+                        <span class="stat-label">Correct:</span>
+                        <span id="correct-count">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Total:</span>
+                        <span id="total-count">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Percentage:</span>
+                        <span id="percentage">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test tab -->
+        <div id="test" class="tab-content">
+            <div class="test-section">
+                <h2>📝 Final Test</h2>
+                
+                <div id="test-intro" class="test-intro">
+                    <p>Test your knowledge! The test consists of 10 questions.</p>
+                    <button onclick="startTest()">Start Test</button>
+                </div>
+
+                <div id="test-area" class="test-area" style="display: none;">
+                    <div class="test-progress">
+                        <span>Question <span id="current-question">1</span> of 10</span>
+                        <div class="progress-bar">
+                            <div id="progress-fill" class="progress-fill"></div>
+                        </div>
+                    </div>
+
+                    <div id="test-question" class="test-question"></div>
+                    
+                    <div class="test-answer">
+                        <label for="test-answer">Answer:</label>
+                        <input type="number" id="test-answer" placeholder="Enter result">
+                        <button onclick="submitTestAnswer()">Submit</button>
+                    </div>
+
+                    <div id="test-feedback" class="feedback"></div>
+                </div>
+
+                <div id="test-results" class="test-results" style="display: none;">
+                    <h3>Test Results</h3>
+                    <div id="test-score"></div>
+                    <div id="test-details"></div>
+                    <button onclick="restartTest()">Take Test Again</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+// Global variables
+let currentDemo = null;
+let currentPractice = null;
+let testQuestions = [];
+let currentTestQuestion = 0;
+let testAnswers = [];
+let practiceStats = { correct: 0, total: 0 };
+
+// Tab switching function
+function showTab(tabName) {
+    // Hide all tabs
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabContents.forEach(content => content.classList.remove('active'));
+    
+    // Remove active class from all buttons
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    tabButtons.forEach(btn => btn.classList.remove('active'));
+    
+    // Show the needed tab
+    document.getElementById(tabName).classList.add('active');
+    
+    // Make button active
+    event.target.classList.add('active');
+}
+
+// Functions for interactive demonstration
+function generateDemo() {
+    const num1 = Math.floor(Math.random() * 900) + 100; // 100-999
+    const num2 = Math.floor(Math.random() * 900) + 100; // 100-999
+    
+    currentDemo = {
+        num1: num1,
+        num2: num2,
+        result: num1 + num2,
+        step: 0
+    };
+    
+    displayDemo();
+}
+
+function displayDemo() {
+    const demoArea = document.getElementById('demo-area');
+    const { num1, num2, step } = currentDemo;
+    
+    if (step === 0) {
+        demoArea.innerHTML = `
+            <div style="text-align: center;">
+                <h4>Example: ${num1} + ${num2}</h4>
+                <div style="font-family: 'Courier New', monospace; font-size: 1.2rem; margin: 20px 0;">
+                    <div>${num1}</div>
+                    <div>+ ${num2}</div>
+                    <div style="border-top: 2px solid white; margin: 10px 0; padding-top: 10px;">?</div>
+                </div>
+                <p>Click "Next Step" to see the solution</p>
+            </div>
+        `;
+    } else if (step === 1) {
+        // Show ones addition
+        const units1 = num1 % 10;
+        const units2 = num2 % 10;
+        const unitsSum = units1 + units2;
+        const carry = Math.floor(unitsSum / 10);
+        const unitsResult = unitsSum % 10;
+        
+        demoArea.innerHTML = `
+            <div style="text-align: center;">
+                <h4>Step 1: Add the ones</h4>
+                <div style="font-family: 'Courier New', monospace; font-size: 1.2rem; margin: 20px 0;">
+                    <div>${num1}</div>
+                    <div>+ ${num2}</div>
+                    <div style="border-top: 2px solid white; margin: 10px 0; padding-top: 10px;">
+                        ${carry > 0 ? carry : ' '} ${unitsResult}
+                    </div>
+                </div>
+                <p>${units1} + ${units2} = ${unitsSum}. Write ${unitsResult}${carry > 0 ? `, carry ${carry}` : ''}</p>
+            </div>
+        `;
+    } else if (step === 2) {
+        // Show tens addition
+        const tens1 = Math.floor((num1 % 100) / 10);
+        const tens2 = Math.floor((num2 % 100) / 10);
+        const units1 = num1 % 10;
+        const units2 = num2 % 10;
+        const unitsSum = units1 + units2;
+        const carry1 = Math.floor(unitsSum / 10);
+        const tensSum = tens1 + tens2 + carry1;
+        const carry2 = Math.floor(tensSum / 10);
+        const tensResult = tensSum % 10;
+        const unitsResult = unitsSum % 10;
+        
+        demoArea.innerHTML = `
+            <div style="text-align: center;">
+                <h4>Step 2: Add the tens</h4>
+                <div style="font-family: 'Courier New', monospace; font-size: 1.2rem; margin: 20px 0;">
+                    <div>${num1}</div>
+                    <div>+ ${num2}</div>
+                    <div>+ ${carry1} (carry)</div>
+                    <div style="border-top: 2px solid white; margin: 10px 0; padding-top: 10px;">
+                        ${carry2 > 0 ? carry2 : ' '} ${tensResult} ${unitsResult}
+                    </div>
+                </div>
+                <p>${tens1} + ${tens2} + ${carry1} = ${tensSum}. Write ${tensResult}${carry2 > 0 ? `, carry ${carry2}` : ''}</p>
+            </div>
+        `;
+    } else if (step === 3) {
+        // Show final result
+        const result = num1 + num2;
+        
+        demoArea.innerHTML = `
+            <div style="text-align: center;">
+                <h4>Result</h4>
+                <div style="font-family: 'Courier New', monospace; font-size: 1.2rem; margin: 20px 0;">
+                    <div>${num1}</div>
+                    <div>+ ${num2}</div>
+                    <div style="border-top: 2px solid white; margin: 10px 0; padding-top: 10px;">
+                        ${result}
+                    </div>
+                </div>
+                <p style="color: #ffd700; font-weight: bold;">${num1} + ${num2} = ${result}</p>
+            </div>
+        `;
+    }
+}
+
+function showStep() {
+    if (currentDemo) {
+        currentDemo.step++;
+        if (currentDemo.step > 3) {
+            currentDemo.step = 3;
+        }
+        displayDemo();
+    } else {
+        alert('Generate an example first!');
+    }
+}
+
+function resetDemo() {
+    currentDemo = null;
+    document.getElementById('demo-area').innerHTML = '<p>Click "New Example" to start the demonstration</p>';
+}
+
+// Functions for practice
+function generatePractice() {
+    const num1 = Math.floor(Math.random() * 900) + 100; // 100-999
+    const num2 = Math.floor(Math.random() * 900) + 100; // 100-999
+    
+    currentPractice = {
+        num1: num1,
+        num2: num2,
+        result: num1 + num2
+    };
+    
+    document.getElementById('practice-problem').innerHTML = `
+        <div style="font-family: 'Courier New', monospace; font-size: 1.5rem;">
+            <div>${num1}</div>
+            <div>+ ${num2}</div>
+            <div style="border-top: 2px solid #333; margin: 10px 0; padding-top: 10px;">?</div>
+        </div>
+    `;
+    
+    document.getElementById('user-answer').value = '';
+    document.getElementById('practice-feedback').innerHTML = '';
+}
+
+function checkAnswer() {
+    if (!currentPractice) {
+        alert('Generate an exercise first!');
+        return;
+    }
+    
+    const userAnswer = parseInt(document.getElementById('user-answer').value);
+    const feedback = document.getElementById('practice-feedback');
+    
+    if (isNaN(userAnswer)) {
+        feedback.innerHTML = '<p style="color: #721c24; background: #f8d7da; padding: 10px; border-radius: 5px;">Please enter a number!</p>';
+        return;
+    }
+    
+    practiceStats.total++;
+    
+    if (userAnswer === currentPractice.result) {
+        practiceStats.correct++;
+        feedback.innerHTML = '<p style="color: #155724; background: #d4edda; padding: 10px; border-radius: 5px;">✅ Correct! Well done!</p>';
+    } else {
+        feedback.innerHTML = `<p style="color: #721c24; background: #f8d7da; padding: 10px; border-radius: 5px;">❌ Incorrect. Correct answer: ${currentPractice.result}</p>`;
+    }
+    
+    updateStats();
+}
+
+function showSolution() {
+    if (!currentPractice) {
+        alert('Generate an exercise first!');
+        return;
+    }
+    
+    const { num1, num2, result } = currentPractice;
+    
+    // Show step-by-step solution
+    const feedback = document.getElementById('practice-feedback');
+    feedback.innerHTML = `
+        <div style="background: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 15px;">
+            <h4>Step-by-step solution:</h4>
+            <div style="font-family: 'Courier New', monospace; font-size: 1.1rem;">
+                <div>${num1}</div>
+                <div>+ ${num2}</div>
+                <div style="border-top: 2px solid #333; margin: 10px 0; padding-top: 10px;">${result}</div>
+            </div>
+            <p style="margin-top: 10px;"><strong>Check:</strong> ${num1} + ${num2} = ${result}</p>
+        </div>
+    `;
+}
+
+function updateStats() {
+    document.getElementById('correct-count').textContent = practiceStats.correct;
+    document.getElementById('total-count').textContent = practiceStats.total;
+    
+    const percentage = practiceStats.total > 0 ? Math.round((practiceStats.correct / practiceStats.total) * 100) : 0;
+    document.getElementById('percentage').textContent = percentage + '%';
+}
+
+// Functions for test
+function startTest() {
+    // Generate 10 questions
+    testQuestions = [];
+    for (let i = 0; i < 10; i++) {
+        const num1 = Math.floor(Math.random() * 900) + 100;
+        const num2 = Math.floor(Math.random() * 900) + 100;
+        testQuestions.push({
+            num1: num1,
+            num2: num2,
+            result: num1 + num2
+        });
+    }
+    
+    testAnswers = [];
+    currentTestQuestion = 0;
+    
+    document.getElementById('test-intro').style.display = 'none';
+    document.getElementById('test-area').style.display = 'block';
+    document.getElementById('test-results').style.display = 'none';
+    
+    showTestQuestion();
+}
+
+function showTestQuestion() {
+    const question = testQuestions[currentTestQuestion];
+    
+    document.getElementById('current-question').textContent = currentTestQuestion + 1;
+    document.getElementById('progress-fill').style.width = ((currentTestQuestion + 1) / 10) * 100 + '%';
+    
+    document.getElementById('test-question').innerHTML = `
+        <div style="font-family: 'Courier New', monospace; font-size: 1.5rem;">
+            <div>${question.num1}</div>
+            <div>+ ${question.num2}</div>
+            <div style="border-top: 2px solid #333; margin: 10px 0; padding-top: 10px;">?</div>
+        </div>
+    `;
+    
+    document.getElementById('test-answer').value = '';
+    document.getElementById('test-feedback').innerHTML = '';
+}
+
+function submitTestAnswer() {
+    const userAnswer = parseInt(document.getElementById('test-answer').value);
+    const feedback = document.getElementById('test-feedback');
+    
+    if (isNaN(userAnswer)) {
+        feedback.innerHTML = '<p style="color: #721c24; background: #f8d7da; padding: 10px; border-radius: 5px;">Please enter a number!</p>';
+        return;
+    }
+    
+    const question = testQuestions[currentTestQuestion];
+    const isCorrect = userAnswer === question.result;
+    
+    testAnswers.push({
+        question: question,
+        userAnswer: userAnswer,
+        isCorrect: isCorrect
+    });
+    
+    if (isCorrect) {
+        feedback.innerHTML = '<p style="color: #155724; background: #d4edda; padding: 10px; border-radius: 5px;">✅ Correct!</p>';
+    } else {
+        feedback.innerHTML = `<p style="color: #721c24; background: #f8d7da; padding: 10px; border-radius: 5px;">❌ Incorrect. Correct answer: ${question.result}</p>`;
+    }
+    
+    // Move to next question after 1.5 seconds
+    setTimeout(() => {
+        currentTestQuestion++;
+        if (currentTestQuestion < 10) {
+            showTestQuestion();
+        } else {
+            showTestResults();
+        }
+    }, 1500);
+}
+
+function showTestResults() {
+    const correctAnswers = testAnswers.filter(answer => answer.isCorrect).length;
+    const percentage = Math.round((correctAnswers / 10) * 100);
+    
+    document.getElementById('test-area').style.display = 'none';
+    document.getElementById('test-results').style.display = 'block';
+    
+    let grade = '';
+    let color = '';
+    
+    if (percentage >= 90) {
+        grade = 'Excellent! 🏆';
+        color = '#28a745';
+    } else if (percentage >= 70) {
+        grade = 'Good! 👍';
+        color = '#17a2b8';
+    } else if (percentage >= 50) {
+        grade = 'Satisfactory 📚';
+        color = '#ffc107';
+    } else {
+        grade = 'Need to review the material 📖';
+        color = '#dc3545';
+    }
+    
+    document.getElementById('test-score').innerHTML = `
+        <h2 style="color: ${color}; margin-bottom: 20px;">${grade}</h2>
+        <p style="font-size: 1.2rem; margin-bottom: 10px;">Correct answers: ${correctAnswers} out of 10</p>
+        <p style="font-size: 1.2rem; margin-bottom: 20px;">Completion percentage: ${percentage}%</p>
+    `;
+    
+    // Show answer details
+    let detailsHTML = '<h4 style="margin-bottom: 15px;">Answer details:</h4>';
+    testAnswers.forEach((answer, index) => {
+        const status = answer.isCorrect ? '✅' : '❌';
+        detailsHTML += `
+            <div style="margin-bottom: 10px; padding: 10px; background: ${answer.isCorrect ? '#d4edda' : '#f8d7da'}; border-radius: 5px;">
+                <strong>Question ${index + 1}:</strong> ${answer.question.num1} + ${answer.question.num2} = ${answer.question.result}
+                <br>Your answer: ${answer.userAnswer} ${status}
+            </div>
+        `;
+    });
+    
+    document.getElementById('test-details').innerHTML = detailsHTML;
+}
+
+function restartTest() {
+    document.getElementById('test-results').style.display = 'none';
+    document.getElementById('test-intro').style.display = 'block';
+}
+
+// Initialization when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up event handlers for Enter key in input fields
+    document.getElementById('user-answer').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            checkAnswer();
+        }
+    });
+    
+    document.getElementById('test-answer').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            submitTestAnswer();
+        }
+    });
+    
+    // Initialize statistics
+    updateStats();
+}); 
+</script>
+
+<script>
+(function() {
+  var LAB_NAME = "Column Addition";
+  var LAB_SLUG = "column-addition";
+  var sessionStart = Date.now();
+  var answers = 0, correct = 0;
+  
+  // Notify parent on load
+  window.addEventListener("load", function() {
+    window.parent.postMessage({type:"labLoaded", lab:LAB_SLUG, name:LAB_NAME}, "*");
+  });
+  
+  // Track button clicks as interactions
+  document.addEventListener("click", function(e) {
+    var btn = e.target.closest("button");
+    if (btn) {
+      window.parent.postMessage({type:"interaction", lab:LAB_SLUG, action:btn.textContent.trim().substring(0,30), time: Date.now()-sessionStart}, "*");
+    }
+  });
+  
+  // Track score elements
+  setInterval(function() {
+    var scoreEl = document.getElementById("score") || document.querySelector(".score-value") || document.querySelector("[id*='score']");
+    if (scoreEl) {
+      var s = parseInt(scoreEl.textContent)||0;
+      window.parent.postMessage({type:"scoreUpdate", lab:LAB_SLUG, score:s, time:Date.now()-sessionStart}, "*");
+    }
+  }, 2000);
+  
+  // Send session data when leaving
+  window.addEventListener("beforeunload", function() {
+    window.parent.postMessage({type:"sessionEnd", lab:LAB_SLUG, duration:Date.now()-sessionStart}, "*");
+  });
+})();
+</script>
+</body>
+</html> 

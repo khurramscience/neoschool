@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Work: Multiplication</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧮 Lab Work: Multiplication</h1>
+            <p>Study theory, practice and test your knowledge!</p>
+        </header>
+
+        <nav class="navigation">
+            <button class="nav-btn active" onclick="showSection('theory')">📚 Theory</button>
+            <button class="nav-btn" onclick="showSection('practice')">🎯 Practice</button>
+            <button class="nav-btn" onclick="showSection('test')">📝 Test</button>
+        </nav>
+
+        <!-- Theory section -->
+        <section id="theory" class="section active">
+            <h2>📚 Theoretical Material</h2>
+            
+            <div class="theory-content">
+                <div class="theory-card">
+                    <h3>What is multiplication?</h3>
+                    <p>Multiplication is a mathematical operation that allows you to quickly add the same numbers.</p>
+                    <div class="example">
+                        <p><strong>Example:</strong> 3 × 4 = 3 + 3 + 3 + 3 = 12</p>
+                        <p>Read as: "three times four equals twelve"</p>
+                    </div>
+                </div>
+
+                <div class="theory-card">
+                    <h3>Components of multiplication</h3>
+                    <div class="components">
+                        <div class="component">
+                            <span class="label">Multiplicand</span>
+                            <span class="number">3</span>
+                        </div>
+                        <div class="component">
+                            <span class="label">Sign</span>
+                            <span class="symbol">×</span>
+                        </div>
+                        <div class="component">
+                            <span class="label">Multiplier</span>
+                            <span class="number">4</span>
+                        </div>
+                        <div class="component">
+                            <span class="label">Equals sign</span>
+                            <span class="symbol">=</span>
+                        </div>
+                        <div class="component">
+                            <span class="label">Product</span>
+                            <span class="number">12</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="theory-card">
+                    <h3>Properties of multiplication</h3>
+                    <ul>
+                        <li><strong>Commutative property:</strong> a × b = b × a</li>
+                        <li><strong>Associative property:</strong> (a × b) × c = a × (b × c)</li>
+                        <li><strong>Distributive property:</strong> a × (b + c) = a × b + a × c</li>
+                        <li><strong>Multiplication by 1:</strong> a × 1 = a</li>
+                        <li><strong>Multiplication by 0:</strong> a × 0 = 0</li>
+                    </ul>
+                </div>
+
+                <div class="theory-card">
+                    <h3>Multiplication table (part)</h3>
+                    <div class="multiplication-table">
+                        <table>
+                            <tr><th>×</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr>
+                            <tr><td>1</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr>
+                            <tr><td>2</td><td>2</td><td>4</td><td>6</td><td>8</td><td>10</td></tr>
+                            <tr><td>3</td><td>3</td><td>6</td><td>9</td><td>12</td><td>15</td></tr>
+                            <tr><td>4</td><td>4</td><td>8</td><td>12</td><td>16</td><td>20</td></tr>
+                            <tr><td>5</td><td>5</td><td>10</td><td>15</td><td>20</td><td>25</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Practice section -->
+        <section id="practice" class="section">
+            <h2>🎯 Practice Exercises</h2>
+            
+            <div class="practice-content">
+                <div class="exercise-card">
+                    <h3>Exercise 1: Simple multiplication</h3>
+                    <div class="exercise">
+                        <div class="problem">
+                            <span id="num1">5</span> × <span id="num2">3</span> = ?
+                        </div>
+                        <input type="number" id="answer1" placeholder="Enter answer">
+                        <button onclick="checkAnswer(1)">Check</button>
+                        <div id="result1" class="result"></div>
+                    </div>
+                </div>
+
+                <div class="exercise-card">
+                    <h3>Exercise 2: Multiplication with visualization</h3>
+                    <div class="exercise">
+                        <div class="visual-problem">
+                            <div class="visual-grid" id="visualGrid"></div>
+                            <p>How many dots in total? <span id="visualQuestion">4 × 3 = ?</span></p>
+                        </div>
+                        <input type="number" id="answer2" placeholder="Enter answer">
+                        <button onclick="checkVisualAnswer()">Check</button>
+                        <div id="result2" class="result"></div>
+                    </div>
+                </div>
+
+                <div class="exercise-card">
+                    <h3>Exercise 3: Fill in the blanks</h3>
+                    <div class="exercise">
+                        <div class="fill-blanks">
+                            <p>Fill in the blanks in the multiplication table:</p>
+                            <div class="blanks-grid">
+                                <div>2 × <input type="number" id="blank1" class="blank-input"> = 8</div>
+                                <div><input type="number" id="blank2" class="blank-input"> × 4 = 16</div>
+                                <div>3 × 5 = <input type="number" id="blank3" class="blank-input"></div>
+                                <div>6 × <input type="number" id="blank4" class="blank-input"> = 24</div>
+                            </div>
+                        </div>
+                        <button onclick="checkBlanks()">Check</button>
+                        <div id="result3" class="result"></div>
+                    </div>
+                </div>
+
+                <button class="new-exercise-btn" onclick="generateNewExercise()">🎲 New exercise</button>
+            </div>
+        </section>
+
+        <!-- Test section -->
+        <section id="test" class="section">
+            <h2>📝 Test</h2>
+            
+            <div class="test-content">
+                <div class="test-info">
+                    <p>Read each question carefully and choose the correct answer.</p>
+                    <div class="progress">
+                        <span id="currentQuestion">1</span> of <span id="totalQuestions">10</span>
+                    </div>
+                </div>
+
+                <div class="test-question" id="testQuestion">
+                    <h3 id="questionText">Question 1</h3>
+                    <div id="questionContent"></div>
+                    <div id="answerOptions"></div>
+                    <button onclick="nextQuestion()" id="nextBtn" style="display: none;">Next question</button>
+                </div>
+
+                <div class="test-results" id="testResults" style="display: none;">
+                    <h3>Test Results</h3>
+                    <div class="score">
+                        <p>Correct answers: <span id="correctAnswers">0</span> of <span id="totalAnswers">10</span></p>
+                        <p>Completion percentage: <span id="percentage">0%</span></p>
+                        <div class="grade" id="grade"></div>
+                    </div>
+                    <button onclick="restartTest()">🔄 Take test again</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

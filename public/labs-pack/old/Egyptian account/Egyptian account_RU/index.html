@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Египетская система счисления - Лабораторная работа</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🏺 Египетская система счисления</h1>
+            <p class="subtitle">Интерактивная лабораторная работа для школьников</p>
+        </header>
+
+        <nav class="navigation">
+            <button class="nav-btn active" data-section="theory">📚 Теория</button>
+            <button class="nav-btn" data-section="converter">🔄 Конвертер</button>
+            <button class="nav-btn" data-section="practice">✏️ Практика</button>
+            <button class="nav-btn" data-section="quiz">🎯 Тест</button>
+        </nav>
+
+        <main class="main-content">
+            <!-- Теория -->
+            <section id="theory" class="content-section active">
+                <h2>📚 Основы египетской системы счисления</h2>
+                
+                <div class="theory-card">
+                    <h3>Древнеегипетские иероглифы</h3>
+                    <div class="hieroglyphs-grid">
+                        <div class="hieroglyph-item">
+                            <img src="img/1_.png" alt="1" width="48" height="64" />
+                            <span>1</span>
+                        </div>
+                        <div class="hieroglyph-item">
+                            <img src="img/10_.png" alt="10" width="48" height="64" />
+                            <span>10</span>
+                        </div>
+                        <div class="hieroglyph-item">
+                            <img src="img/100_.png" alt="100" width="48" height="64" />
+                            <span>100</span>
+                        </div>
+                        <div class="hieroglyph-item">
+                            <img src="img/1000_.png" alt="1000" width="48" height="64" />
+                            <span>1000</span>
+                        </div>
+                        <div class="hieroglyph-item">
+                            <img src="img/10000_.png" alt="10000" width="48" height="64" />
+                            <span>10000</span>
+                        </div>
+                        <div class="hieroglyph-item">
+                            <img src="img/100000_.png" alt="100000" width="48" height="64" />
+                            <span>100000</span>
+                        </div>
+                        <div class="hieroglyph-item">
+                            <img src="img/1000000_.png" alt="1000000" width="48" height="64" />
+                            <span>1000000</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="theory-card">
+                    <h3>Как читать египетские числа</h3>
+                    <p>Египтяне использовали <strong>аддитивную систему</strong> - числа записывались как сумма символов:</p>
+                    <div class="example">
+                        <div class="example-number">
+                            <span class="arabic">3247</span>
+                            <span class="arrow">→</span>
+                            <span class="egyptian" id="example-egyptian"></span>
+                        </div>
+                        <p class="explanation">3 × 1000 + 2 × 100 + 4 × 10 + 7 × 1 = 3247</p>
+                    </div>
+                </div>
+
+                <div class="theory-card">
+                    <h3>Правила записи</h3>
+                    <ul>
+                        <li>Символы располагаются слева направо в порядке убывания</li>
+                        <li>Одинаковые символы группируются вместе</li>
+                        <li>Число читается как сумма всех символов</li>
+                        <li>Нуля в египетской системе не было!</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Конвертер -->
+            <section id="converter" class="content-section">
+                <h2>🔄 Конвертер чисел</h2>
+                
+                <div class="converter-container">
+                    <div class="converter-input">
+                        <label for="arabic-input">Арабское число:</label>
+                        <input type="number" id="arabic-input" placeholder="Введите число (1-9999999)" min="1" max="9999999">
+                        <button id="convert-btn">Конвертировать</button>
+                    </div>
+
+                    <div class="converter-result">
+                        <div class="result-display">
+                            <h3>Результат:</h3>
+                            <div id="egyptian-result" class="egyptian-display"></div>
+                            <div id="explanation-result" class="explanation-text"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="converter-examples">
+                    <h3>Примеры:</h3>
+                    <div class="examples-grid">
+                        <div class="example-item" data-number="123">123</div>
+                        <div class="example-item" data-number="456">456</div>
+                        <div class="example-item" data-number="789">789</div>
+                        <div class="example-item" data-number="2024">2024</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Практика -->
+            <section id="practice" class="content-section">
+                <h2>✏️ Практические задания</h2>
+                
+                <div class="practice-container">
+                    <div class="task-card">
+                        <h3>Задание 1: Переведите в египетскую систему</h3>
+                        <div class="task-content">
+                            <p>Переведите число <span id="task-number">0</span> в египетскую систему счисления:</p>
+                            <div class="hieroglyph-builder">
+                                <div class="builder-controls">
+                                    <button class="hieroglyph-btn" data-value="1"><img src="img/1_.png" alt="1" class="egyptian-img" /></button>
+                                    <button class="hieroglyph-btn" data-value="10"><img src="img/10_.png" alt="10" class="egyptian-img" /></button>
+                                    <button class="hieroglyph-btn" data-value="100"><img src="img/100_.png" alt="100" class="egyptian-img" /></button>
+                                    <button class="hieroglyph-btn" data-value="1000"><img src="img/1000_.png" alt="1000" class="egyptian-img" /></button>
+                                    <button class="hieroglyph-btn" data-value="10000"><img src="img/10000_.png" alt="10000" class="egyptian-img" /></button>
+                                    <button class="hieroglyph-btn" data-value="100000"><img src="img/100000_.png" alt="100000" class="egyptian-img" /></button>
+                                    <button class="hieroglyph-btn" data-value="1000000"><img src="img/1000000_.png" alt="1000000" class="egyptian-img" /></button>
+                                </div>
+                                <div class="builder-area">
+                                    <div id="builder-result" class="builder-result"></div>
+                                    <div class="builder-sum">Сумма: <span id="builder-sum">0</span></div>
+                                </div>
+                                <div class="builder-actions">
+                                    <button id="clear-btn">Очистить</button>
+                                    <button id="check-btn">Проверить</button>
+                                </div>
+                            </div>
+                            <div id="task-feedback" class="feedback"></div>
+                        </div>
+                    </div>
+
+                    <div class="task-card">
+                        <h3>Задание 2: Переведите из египетской системы</h3>
+                        <div class="task-content">
+                            <p>Переведите египетское число в арабское:</p>
+                            <div class="egyptian-task">
+                                <div id="egyptian-task-display" class="egyptian-display"></div>
+                            </div>
+                            <input type="number" id="answer-input" placeholder="Введите ответ">
+                            <button id="check-answer-btn">Проверить</button>
+                            <div id="answer-feedback" class="feedback"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Тест -->
+            <section id="quiz" class="content-section">
+                <h2>🎯 Проверь свои знания</h2>
+                
+                <div class="quiz-container">
+                    <div id="quiz-question" class="quiz-question">
+                        <h3>Вопрос <span id="question-number">1</span> из <span id="total-questions">5</span></h3>
+                        <p id="question-text">Загрузка вопроса...</p>
+                        <div id="quiz-options" class="quiz-options"></div>
+                        <button id="next-question-btn" class="quiz-btn">Следующий вопрос</button>
+                    </div>
+                    
+                    <div id="quiz-results" class="quiz-results hidden">
+                        <h3>Результаты теста</h3>
+                        <div class="score-display">
+                            <p>Правильных ответов: <span id="correct-answers">0</span> из <span id="total-answers">5</span></p>
+                            <div class="score-percentage">
+                                <div class="progress-bar">
+                                    <div id="progress-fill" class="progress-fill"></div>
+                                </div>
+                                <span id="percentage">0%</span>
+                            </div>
+                        </div>
+                        <button id="restart-quiz-btn" class="quiz-btn">Начать заново</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>© 2024 Лабораторная работа по египетской системе счисления</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

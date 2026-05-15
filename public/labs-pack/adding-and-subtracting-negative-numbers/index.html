@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratory Work: Adding and Subtracting Negative Numbers</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🧮 Laboratory Work</h1>
+            <h2>Adding and Subtracting Negative Numbers</h2>
+        </header>
+
+        <nav class="navigation">
+            <button class="nav-btn active" data-section="theory">📚 Theory</button>
+            <button class="nav-btn" data-section="practice">✏️ Practice</button>
+            <button class="nav-btn" data-section="test">📝 Knowledge Check</button>
+        </nav>
+
+        <main class="main-content">
+            <!-- Theory -->
+            <section id="theory" class="section active">
+                <div class="theory-content">
+                    <h3>Basic Rules for Working with Negative Numbers</h3>
+                    
+                    <div class="rule-card">
+                        <h4>🔢 Adding Negative Numbers</h4>
+                        <p>When adding two negative numbers:</p>
+                        <ul>
+                            <li>Add their absolute values (moduli)</li>
+                            <li>Put a minus sign before the result</li>
+                        </ul>
+                        <div class="example">
+                            <strong>Example:</strong> (-5) + (-3) = -(5 + 3) = -8
+                        </div>
+                    </div>
+
+                    <div class="rule-card">
+                        <h4>➖ Subtracting Negative Numbers</h4>
+                        <p>When subtracting a negative number:</p>
+                        <ul>
+                            <li>Subtracting a negative number = adding a positive number</li>
+                            <li>a - (-b) = a + b</li>
+                        </ul>
+                        <div class="example">
+                            <strong>Example:</strong> 7 - (-4) = 7 + 4 = 11
+                        </div>
+                    </div>
+
+                    <div class="rule-card">
+                        <h4>➕ Adding Numbers with Different Signs</h4>
+                        <p>When adding a positive and negative number:</p>
+                        <ul>
+                            <li>Subtract the smaller absolute value from the larger one</li>
+                            <li>Use the sign of the number with the larger absolute value</li>
+                        </ul>
+                        <div class="example">
+                            <strong>Example:</strong> 8 + (-3) = 8 - 3 = 5
+                        </div>
+                    </div>
+
+                    <div class="rule-card special">
+                        <h4>🔢 Working with Fractions</h4>
+                        <p>When adding and subtracting fractions with negative numbers:</p>
+                        <ul>
+                            <li>Find a common denominator</li>
+                            <li>Apply the same sign rules</li>
+                            <li>Negative fraction: -a/b = (-a)/b = a/(-b)</li>
+                        </ul>
+                        <div class="example">
+                            <strong>Example:</strong> 1/2 + (-1/3) = 3/6 + (-2/6) = 1/6
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Practice -->
+            <section id="practice" class="section">
+                <div class="practice-content">
+                    <h3>Practice Exercises</h3>
+                    
+                    <div class="practice-controls">
+                        <button id="generateTask" class="btn primary">🎲 Generate Task</button>
+                        <button id="checkAnswer" class="btn secondary">✅ Check Answer</button>
+                        <button id="showSolution" class="btn secondary">💡 Show Solution</button>
+                    </div>
+
+                    <div class="task-container">
+                        <div class="task-display">
+                            <h4>Task:</h4>
+                            <div id="taskText" class="task-text">Click "Generate Task" to start</div>
+                        </div>
+
+                        <div class="answer-input">
+                            <label for="userAnswer">Your answer:</label>
+                            <input type="text" id="userAnswer" placeholder="Enter answer (e.g., 5, -3, 1/2, -2/3)">
+                        </div>
+
+                        <div id="result" class="result"></div>
+                        <div id="solution" class="solution hidden"></div>
+                    </div>
+
+                    <div class="stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Correct:</span>
+                            <span id="correctCount" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Total:</span>
+                            <span id="totalCount" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Percentage:</span>
+                            <span id="percentage" class="stat-value">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Knowledge Check -->
+            <section id="test" class="section">
+                <div class="test-content">
+                    <h3>Knowledge Check</h3>
+                    
+                    <div class="test-controls">
+                        <button id="startTest" class="btn primary">🚀 Start Test</button>
+                        <button id="submitTest" class="btn success hidden">📤 Finish Test</button>
+                    </div>
+
+                    <div id="testContainer" class="test-container hidden">
+                        <div class="test-info">
+                            <span id="questionCounter">Question 1 of 10</span>
+                            <span id="timer">Time: 00:00</span>
+                        </div>
+
+                        <div id="testQuestions" class="test-questions">
+                            <!-- Questions will be generated dynamically -->
+                        </div>
+                        
+                        <div id="testAnswerInput" class="test-answer-input hidden">
+                            <label for="testUserAnswer">Your answer:</label>
+                            <input type="text" id="testUserAnswer" placeholder="Enter answer (e.g., 5, -3, 1/2, -2/3)">
+                            <button id="submitAnswer" class="btn primary">Submit</button>
+                        </div>
+
+                        <div id="testResults" class="test-results hidden">
+                            <h4>Test Results</h4>
+                            <div class="score-display">
+                                <div class="score-circle">
+                                    <span id="finalScore">0</span>
+                                    <span class="score-max">/10</span>
+                                </div>
+                            </div>
+                            <div id="scoreDetails" class="score-details"></div>
+                            <button id="retakeTest" class="btn primary">🔄 Retake Test</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

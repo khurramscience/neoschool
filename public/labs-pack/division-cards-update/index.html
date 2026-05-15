@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Division Cards - Math Learning Lab</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🧮 Division Cards</h1>
+            <p>Learn division with fun card games!</p>
+        </header>
+
+        <div class="game-container">
+            <!-- Start Screen -->
+            <div id="startScreen" class="screen active">
+                <div class="welcome-card">
+                    <h2>Welcome to Division Cards!</h2>
+                    <p>Test your division skills with timed challenges. You'll have 30 seconds to solve as many division problems as you can!</p>
+                    
+                    <div class="difficulty-selector">
+                        <h3>Choose Difficulty:</h3>
+                        <div class="difficulty-buttons">
+                            <button class="difficulty-btn" data-difficulty="easy">Easy (÷2 to ÷5)</button>
+                            <button class="difficulty-btn" data-difficulty="medium">Medium (÷6 to ÷10)</button>
+                            <button class="difficulty-btn" data-difficulty="hard">Hard (÷11 to ÷15)</button>
+                        </div>
+                    </div>
+
+                    <button id="startGame" class="start-btn" disabled>Start Game</button>
+                </div>
+            </div>
+
+            <!-- Game Screen -->
+            <div id="gameScreen" class="screen">
+                <div class="game-header">
+                    <div class="timer-container">
+                        <div class="timer-label">Time Remaining:</div>
+                        <div id="timer" class="timer">30</div>
+                    </div>
+                    <div class="score-container">
+                        <div class="score-label">Score:</div>
+                        <div id="score" class="score">0</div>
+                    </div>
+                </div>
+
+                <div class="card-container">
+                    <div id="currentCard" class="card">
+                        <div class="card-header">
+                            <span class="card-number">1</span>
+                        </div>
+                        <div class="division-problem">
+                            <div id="dividend" class="dividend">12</div>
+                            <div class="division-symbol">÷</div>
+                            <div id="divisor" class="divisor">3</div>
+                            <div class="equals">=</div>
+                            <input type="number" id="answer" class="answer-input" placeholder="?" min="0">
+                        </div>
+                        <button id="submitAnswer" class="submit-btn">Submit Answer</button>
+                    </div>
+                </div>
+
+                <div class="game-controls">
+                    <button id="pauseGame" class="control-btn">Pause</button>
+                    <button id="endGame" class="control-btn">End Game</button>
+                </div>
+            </div>
+
+            <!-- Results Screen -->
+            <div id="resultsScreen" class="screen">
+                <div class="results-card">
+                    <h2>Game Complete!</h2>
+                    <div class="results-stats">
+                        <div class="stat">
+                            <span class="stat-label">Final Score:</span>
+                            <span id="finalScore" class="stat-value">0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Correct Answers:</span>
+                            <span id="correctAnswers" class="stat-value">0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Total Questions:</span>
+                            <span id="totalQuestions" class="stat-value">0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Accuracy:</span>
+                            <span id="accuracy" class="stat-value">0%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="results-actions">
+                        <button id="playAgain" class="action-btn primary">Play Again</button>
+                        <button id="backToMenu" class="action-btn">Back to Menu</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>Made with ❤️ for learning math</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

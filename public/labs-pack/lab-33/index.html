@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Division - Math Lab</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🧮 Math Lab</h1>
+            <h2>Learning division with groups of objects</h2>
+        </header>
+
+        <main class="main-content">
+            <!-- Переключатель режимов -->
+            <div class="mode-switcher">
+                <button id="autoModeBtn" class="mode-btn active">Automatic mode</button>
+                <button id="interactiveModeBtn" class="mode-btn">Interactive mode</button>
+            </div>
+
+            <!-- Автоматический режим -->
+            <div id="autoMode" class="mode-content active">
+                <div class="controls-section">
+                    <div class="control-group">
+                        <label for="totalObjects">Total number of objects:</label>
+                        <input type="number" id="totalObjects" min="1" max="50" value="12">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="groupSize">Group size:</label>
+                        <input type="number" id="groupSize" min="1" max="20" value="3">
+                    </div>
+                    
+                    <button id="calculateBtn" class="calculate-btn">Calculate division</button>
+                </div>
+
+                <div class="result-section">
+                    <div class="math-expression">
+                        <span id="expression">12 ÷ 3 = 4</span>
+                    </div>
+                    
+                    <div class="explanation">
+                        <p id="explanation">Let's divide 12 objects into groups of 3. We get 4 groups.</p>
+                    </div>
+                </div>
+
+                <div class="visualization-section">
+                    <h3>Visualization:</h3>
+                    <div id="objectsContainer" class="objects-container">
+                        <!-- Объекты будут добавлены через JavaScript -->
+                    </div>
+                    
+                    <div class="groups-info">
+                        <div class="group-count">
+                            <span>Number of groups: </span>
+                            <span id="groupCount" class="highlight">4</span>
+                        </div>
+                        <div class="remainder">
+                            <span>Remainder: </span>
+                            <span id="remainder" class="highlight">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Интерактивный режим -->
+            <div id="interactiveMode" class="mode-content">
+                <div class="interactive-controls">
+                    <div class="control-group">
+                        <label for="interactiveTotalObjects">Total number of objects:</label>
+                        <input type="number" id="interactiveTotalObjects" min="1" max="30" value="12">
+                        <button id="createObjectsBtn" class="create-btn">Create objects</button>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="interactiveGroupCount">Number of groups:</label>
+                        <input type="number" id="interactiveGroupCount" min="1" max="15" value="4">
+                        <button id="updateGroupsBtn" class="update-btn">Update groups</button>
+                    </div>
+                    
+                    <div class="control-group">
+                        <button id="resetBtn" class="reset-btn">Reset all</button>
+                    </div>
+                </div>
+
+                <!-- Панель состояния -->
+                <div class="status-panel">
+                    <div class="status-item">
+                        <span class="status-label">Total objects:</span>
+                        <span id="totalObjectsCount" class="status-value">12</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">In groups:</span>
+                        <span id="groupedObjectsCount" class="status-value">0</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Free objects:</span>
+                        <span id="freeObjectsCount" class="status-value">12</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Groups created:</span>
+                        <span id="interactiveGroupCount" class="status-value">0</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Target groups:</span>
+                        <span id="targetGroupCount" class="status-value">4</span>
+                    </div>
+                </div>
+
+                <!-- Область для перетаскивания -->
+                <div class="interactive-area">
+                    <div class="free-objects-zone">
+                        <h3>Free objects</h3>
+                        <div id="freeObjectsContainer" class="free-objects-container">
+                            <!-- Свободные объекты -->
+                        </div>
+                    </div>
+                    
+                    <div class="groups-zone">
+                        <h3>Created groups</h3>
+                        <div id="groupsContainer" class="groups-container">
+                            <!-- Группы будут создаваться здесь -->
+                        </div>
+                        <div class="create-group-hint">
+                            <p>💡 Drag objects here to create groups</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Подробная статистика -->
+                <div class="detailed-stats">
+                    <h4>📊 Detailed statistics:</h4>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">Total objects:</span>
+                            <span id="statTotalObjects" class="stat-value">12</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Groups created:</span>
+                            <span id="statCreatedGroups" class="stat-value">3</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Target groups:</span>
+                            <span id="statTargetGroups" class="stat-value">4</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Free objects:</span>
+                            <span id="statFreeObjects" class="stat-value">0</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Рекомендации -->
+                    <div class="recommendations">
+                        <h4>🎯 Recommendations:</h4>
+                        <div id="recommendationsContent">
+                            <!-- Рекомендации будут добавлены через JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="learning-tips">
+                <h3>💡 Useful tips:</h3>
+                <ul>
+                    <li>Division is an operation that shows how many equal groups can be made</li>
+                    <li>If the remainder is 0, the division is exact</li>
+                    <li>Try different numbers to better understand the principle of division</li>
+                    <li>In interactive mode, you can create groups yourself by dragging objects</li>
+                </ul>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>Created for learning math at school 🎓</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

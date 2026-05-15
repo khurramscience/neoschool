@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplication by 1 - Interactive Lab</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔢 Multiplication by 1</h1>
+            <p class="subtitle">Interactive Mathematics Laboratory</p>
+        </header>
+
+        <nav class="navigation">
+            <button class="nav-btn active" data-section="theory">📚 Theory</button>
+            <button class="nav-btn" data-section="practice">✏️ Practice</button>
+            <button class="nav-btn" data-section="quiz">🧠 Quiz</button>
+        </nav>
+
+        <!-- Theory Section -->
+        <section id="theory" class="content-section active">
+            <h2>Understanding Multiplication by 1</h2>
+            
+            <div class="theory-card">
+                <h3>🎯 Key Concept</h3>
+                <p>When you multiply any number by 1, the result is always the original number itself.</p>
+                <div class="formula">a × 1 = a</div>
+            </div>
+
+            <div class="theory-grid">
+                <div class="theory-item">
+                    <h4>🔢 Whole Numbers</h4>
+                    <p>Any whole number multiplied by 1 equals itself:</p>
+                    <ul>
+                        <li>5 × 1 = 5</li>
+                        <li>12 × 1 = 12</li>
+                        <li>100 × 1 = 100</li>
+                    </ul>
+                </div>
+
+                <div class="theory-item">
+                    <h4>🔢 Zero</h4>
+                    <p>Zero multiplied by 1 equals zero:</p>
+                    <ul>
+                        <li>0 × 1 = 0</li>
+                    </ul>
+                </div>
+
+                <div class="theory-item">
+                    <h4>🔢 Fractions</h4>
+                    <p>Any fraction multiplied by 1 equals itself:</p>
+                    <ul>
+                        <li>½ × 1 = ½</li>
+                        <li>¾ × 1 = ¾</li>
+                        <li>⅔ × 1 = ⅔</li>
+                    </ul>
+                </div>
+
+                <div class="theory-item">
+                    <h4>🔢 Decimals</h4>
+                    <p>Any decimal number multiplied by 1 equals itself:</p>
+                    <ul>
+                        <li>3.14 × 1 = 3.14</li>
+                        <li>0.5 × 1 = 0.5</li>
+                        <li>2.75 × 1 = 2.75</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="theory-card highlight">
+                <h3>💡 Why is this important?</h3>
+                <p>Understanding that multiplying by 1 doesn't change a number helps us:</p>
+                <ul>
+                    <li>Simplify mathematical expressions</li>
+                    <li>Understand the identity property of multiplication</li>
+                    <li>Build a foundation for more complex math concepts</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Practice Section -->
+        <section id="practice" class="content-section">
+            <h2>Practice Exercises</h2>
+            
+            <div class="practice-container">
+                <div class="exercise-card">
+                    <h3>Exercise 1: Fill in the blanks</h3>
+                    <div class="exercise-grid">
+                        <div class="exercise-item">
+                            <span class="problem">7 × 1 = </span>
+                            <input type="number" class="answer-input" data-answer="7">
+                            <button class="check-btn">Check</button>
+                            <span class="result"></span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="problem">0 × 1 = </span>
+                            <input type="number" class="answer-input" data-answer="0">
+                            <button class="check-btn">Check</button>
+                            <span class="result"></span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="problem">25 × 1 = </span>
+                            <input type="number" class="answer-input" data-answer="25">
+                            <button class="check-btn">Check</button>
+                            <span class="result"></span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="problem">100 × 1 = </span>
+                            <input type="number" class="answer-input" data-answer="100">
+                            <button class="check-btn">Check</button>
+                            <span class="result"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exercise-card">
+                    <h3>Exercise 2: True or False</h3>
+                    <div class="true-false-grid">
+                        <div class="tf-item">
+                            <span class="statement">½ × 1 = ½</span>
+                            <div class="tf-buttons">
+                                <button class="tf-btn" data-correct="true">True</button>
+                                <button class="tf-btn" data-correct="false">False</button>
+                            </div>
+                            <span class="tf-result"></span>
+                        </div>
+                        <div class="tf-item">
+                            <span class="statement">3.5 × 1 = 3.5</span>
+                            <div class="tf-buttons">
+                                <button class="tf-btn" data-correct="true">True</button>
+                                <button class="tf-btn" data-correct="false">False</button>
+                            </div>
+                            <span class="tf-result"></span>
+                        </div>
+                        <div class="tf-item">
+                            <span class="statement">0 × 1 = 1</span>
+                            <div class="tf-buttons">
+                                <button class="tf-btn" data-correct="false">True</button>
+                                <button class="tf-btn" data-correct="true">False</button>
+                            </div>
+                            <span class="tf-result"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="reset-btn">Reset All Answers</button>
+            </div>
+        </section>
+
+        <!-- Quiz Section -->
+        <section id="quiz" class="content-section">
+            <h2>Knowledge Check - Quiz</h2>
+            
+            <div class="quiz-container">
+                <div class="quiz-info">
+                    <p>Complete all 10 questions to test your understanding of multiplication by 1.</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <span class="progress-text">0/10 completed</span>
+                </div>
+
+                <div class="quiz-questions">
+                    <div class="question" data-question="1">
+                        <h3>Question 1</h3>
+                        <p>What is 15 × 1?</p>
+                        <div class="options">
+                            <button class="option" data-correct="true">15</button>
+                            <button class="option" data-correct="false">0</button>
+                            <button class="option" data-correct="false">1</button>
+                            <button class="option" data-correct="false">16</button>
+                        </div>
+                    </div>
+
+                    <div class="question" data-question="2">
+                        <h3>Question 2</h3>
+                        <p>What is 0 × 1?</p>
+                        <div class="options">
+                            <button class="option" data-correct="false">1</button>
+                            <button class="option" data-correct="true">0</button>
+                            <button class="option" data-correct="false">undefined</button>
+                            <button class="option" data-correct="false">10</button>
+                        </div>
+                    </div>
+
+                    <div class="question" data-question="3">
+                        <h3>Question 3</h3>
+                        <p>What is ½ × 1?</p>
+                        <div class="options">
+                            <button class="option" data-correct="false">1</button>
+                            <button class="option" data-correct="false">2</button>
+                            <button class="option" data-correct="true">0.5</button>
+                            <button class="option" data-correct="false">0</button>
+                        </div>
+                    </div>
+
+                    <div class="question" data-question="4">
+                        <h3>Question 4</h3>
+                        <p>What is 3.14 × 1?</p>
+                        <div class="options">
+                            <button class="option" data-correct="true">3.14</button>
+                            <button class="option" data-correct="false">3</button>
+                            <button class="option" data-correct="false">4</button>
+                            <button class="option" data-correct="false">1</button>
+                        </div>
+                    </div>
+
+                    <div class="question" data-question="5">
+                        <h3>Question 5</h3>
+                        <p>What is 1 × 1?</p>
+                        <div class="options">
+                            <button class="option" data-correct="false">2</button>
+                            <button class="option" data-correct="false">0</button>
+                            <button class="option" data-correct="true">1</button>
+                            <button class="option" data-correct="false">undefined</button>
+                        </div>
+                    </div>
+
+                    <div class="question" data-question="6">
+                        <h3>Question 6</h3>
+                        <p>What is 1000 × 1?</p>
+                        <div class="options">
+                            <button class="option" data-correct="true">1000</button>
+                            <button class="option" data-correct="false">1001</button>
+                            <button class="option" data-correct="false">999</button>
+                            <button class="option" data-correct="false">1</button>
+                        </div>
+                    </div>
+
+                    <div class="question" data-question="7">
+                        <h3>Question 7</h3>
+                        <p>What is 0.25 × 1?</p>
+                        <div class="options">
+                            <button class="option" data-correct="true">0.25</button>
+                            <button class="option" data-correct="false">0.5</button>
+                            <button class="option" data-correct="false">1</button>
+                            <button class="option" data-correct="false">0</button>
+                        </div>
+                    </div>
+
+                    <div class="question" data-question="8">
+                        <h3>Question 8</h3>
+                        <p>What is ¾ × 1?</p>
+                        <div class="options">
+                            <button class="option" data-correct="true">0.75</button>
+                            <button class="option" data-correct="false">1</button>
+                            <button class="option" data-correct="false">0.5</button>
+                            <button class="option" data-correct="false">0.25</button>
+                        </div>
+                    </div>
+
+                    <div class="question" data-question="9">
+                        <h3>Question 9</h3>
+                        <p>What is 42 × 1?</p>
+                        <div class="options">
+                            <button class="option" data-correct="true">42</button>
+                            <button class="option" data-correct="false">43</button>
+                            <button class="option" data-correct="false">41</button>
+                            <button class="option" data-correct="false">1</button>
+                        </div>
+                    </div>
+
+                    <div class="question" data-question="10">
+                        <h3>Question 10</h3>
+                        <p>What is 2.5 × 1?</p>
+                        <div class="options">
+                            <button class="option" data-correct="true">2.5</button>
+                            <button class="option" data-correct="false">2</button>
+                            <button class="option" data-correct="false">3</button>
+                            <button class="option" data-correct="false">1</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quiz-results" style="display: none;">
+                    <h3>Quiz Results</h3>
+                    <div class="score-display">
+                        <span class="score-text">Your Score: </span>
+                        <span class="score-value">0/10</span>
+                    </div>
+                    <div class="score-message"></div>
+                    <button class="retake-btn">Take Quiz Again</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

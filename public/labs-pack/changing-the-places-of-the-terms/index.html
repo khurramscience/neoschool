@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratory Work: Commutative Property of Multiplication</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔢 Laboratory Work</h1>
+            <h2>Commutative Property of Multiplication</h2>
+            <p>Learning that a × b = b × a</p>
+        </header>
+
+        <nav class="navigation">
+            <button class="nav-btn active" data-section="theory">📚 Theory</button>
+            <button class="nav-btn" data-section="practice">✏️ Practice</button>
+            <button class="nav-btn" data-section="test">🧪 Knowledge Check</button>
+        </nav>
+
+        <!-- Блок теории -->
+        <section id="theory" class="content-section active">
+            <div class="theory-content">
+                <h3>📚 Theoretical Material</h3>
+                
+                <div class="theory-card">
+                    <h4>What is the commutative property of multiplication?</h4>
+                    <p>The commutative property of multiplication means that changing the order of factors does not change the product.</p>
+                    
+                    <div class="formula">
+                        <span class="math">a × b = b × a</span>
+                    </div>
+                    
+                    <div class="examples">
+                        <h5>Examples:</h5>
+                        <div class="example-grid">
+                            <div class="example">
+                                <span class="math">3 × 4 = 12</span>
+                                <span class="math">4 × 3 = 12</span>
+                                <span class="result">✅ Same result!</span>
+                            </div>
+                            <div class="example">
+                                <span class="math">7 × 5 = 35</span>
+                                <span class="math">5 × 7 = 35</span>
+                                <span class="result">✅ Same result!</span>
+                            </div>
+                            <div class="example">
+                                <span class="math">2 × 8 = 16</span>
+                                <span class="math">8 × 2 = 16</span>
+                                <span class="result">✅ Same result!</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="theory-card">
+                    <h4>Visual Representation</h4>
+                    <div class="visual-example">
+                        <div class="array-container">
+                            <div class="array-row">
+                                <h5>3 × 4 = 12</h5>
+                                <div class="dots-grid">
+                                    <div class="dot-row">
+                                        <span class="dot">●</span><span class="dot">●</span><span class="dot">●</span><span class="dot">●</span>
+                                    </div>
+                                    <div class="dot-row">
+                                        <span class="dot">●</span><span class="dot">●</span><span class="dot">●</span><span class="dot">●</span>
+                                    </div>
+                                    <div class="dot-row">
+                                        <span class="dot">●</span><span class="dot">●</span><span class="dot">●</span><span class="dot">●</span>
+                                    </div>
+                                </div>
+                                <p>3 rows of 4 dots = 12 dots</p>
+                            </div>
+                            <div class="array-row">
+                                <h5>4 × 3 = 12</h5>
+                                <div class="dots-grid">
+                                    <div class="dot-row">
+                                        <span class="dot">●</span><span class="dot">●</span><span class="dot">●</span>
+                                    </div>
+                                    <div class="dot-row">
+                                        <span class="dot">●</span><span class="dot">●</span><span class="dot">●</span>
+                                    </div>
+                                    <div class="dot-row">
+                                        <span class="dot">●</span><span class="dot">●</span><span class="dot">●</span>
+                                    </div>
+                                    <div class="dot-row">
+                                        <span class="dot">●</span><span class="dot">●</span><span class="dot">●</span>
+                                    </div>
+                                </div>
+                                <p>4 rows of 3 dots = 12 dots</p>
+                            </div>
+                        </div>
+                        <div class="explanation">
+                            <p><strong>Pay attention:</strong> In the first case, we have 3 rows of 4 dots (3×4 rectangle), and in the second - 4 rows of 3 dots (4×3 rectangle). The number of dots is the same (12), but the arrangement is different!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Блок практики -->
+        <section id="practice" class="content-section">
+            <div class="practice-content">
+                <h3>✏️ Practical Tasks</h3>
+                
+                <div class="practice-card">
+                    <h4>Task 1: Check the commutative property</h4>
+                    <p>Choose two numbers and verify that their product does not depend on the order of factors.</p>
+                    
+                    <div class="interactive-multiplier">
+                        <div class="input-group">
+                            <label for="num1">First number:</label>
+                            <input type="number" id="num1" min="1" max="20" value="5">
+                        </div>
+                        <div class="input-group">
+                            <label for="num2">Second number:</label>
+                            <input type="number" id="num2" min="1" max="20" value="3">
+                        </div>
+                        <button id="calculateBtn" class="btn-primary">Calculate</button>
+                    </div>
+
+                    <div id="result" class="result-display" style="display: none;">
+                        <div class="calculation">
+                            <div class="calc-row">
+                                <span class="math" id="calc1"></span>
+                                <span class="equals">=</span>
+                                <span class="result" id="result1"></span>
+                            </div>
+                            <div class="calc-row">
+                                <span class="math" id="calc2"></span>
+                                <span class="equals">=</span>
+                                <span class="result" id="result2"></span>
+                            </div>
+                            <div class="conclusion" id="conclusion"></div>
+                        </div>
+                        
+                        <div class="visual-result">
+                            <h5>Visual representation:</h5>
+                            <div class="visual-comparison">
+                                <div class="visual-side">
+                                    <h6 id="visual-title1"></h6>
+                                    <div id="visual-dots1" class="dots-grid"></div>
+                                </div>
+                                <div class="visual-side">
+                                    <h6 id="visual-title2"></h6>
+                                    <div id="visual-dots2" class="dots-grid"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="practice-card">
+                    <h4>Task 2: Create your own examples</h4>
+                    <p>Think of three pairs of numbers and write their products in both orders.</p>
+                    
+                    <div class="examples-creator">
+                        <div class="example-input">
+                            <input type="number" class="ex-num" placeholder="a" min="1" max="20">
+                            <span class="multiply">×</span>
+                            <input type="number" class="ex-num" placeholder="b" min="1" max="20">
+                            <span class="equals">=</span>
+                            <span class="ex-result">?</span>
+                        </div>
+                        <div class="example-input">
+                            <input type="number" class="ex-num" placeholder="b" min="1" max="20">
+                            <span class="multiply">×</span>
+                            <input type="number" class="ex-num" placeholder="a" min="1" max="20">
+                            <span class="equals">=</span>
+                            <span class="ex-result">?</span>
+                        </div>
+                        <button class="btn-secondary" onclick="calculateExample(this)">Calculate</button>
+                    </div>
+
+                    <div class="examples-creator">
+                        <div class="example-input">
+                            <input type="number" class="ex-num" placeholder="c" min="1" max="20">
+                            <span class="multiply">×</span>
+                            <input type="number" class="ex-num" placeholder="d" min="1" max="20">
+                            <span class="equals">=</span>
+                            <span class="ex-result">?</span>
+                        </div>
+                        <div class="example-input">
+                            <input type="number" class="ex-num" placeholder="d" min="1" max="20">
+                            <span class="multiply">×</span>
+                            <input type="number" class="ex-num" placeholder="c" min="1" max="20">
+                            <span class="equals">=</span>
+                            <span class="ex-result">?</span>
+                        </div>
+                        <button class="btn-secondary" onclick="calculateExample(this)">Calculate</button>
+                    </div>
+
+                    <div class="examples-creator">
+                        <div class="example-input">
+                            <input type="number" class="ex-num" placeholder="e" min="1" max="20">
+                            <span class="multiply">×</span>
+                            <input type="number" class="ex-num" placeholder="f" min="1" max="20">
+                            <span class="equals">=</span>
+                            <span class="ex-result">?</span>
+                        </div>
+                        <div class="example-input">
+                            <input type="number" class="ex-num" placeholder="f" min="1" max="20">
+                            <span class="multiply">×</span>
+                            <input type="number" class="ex-num" placeholder="e" min="1" max="20">
+                            <span class="equals">=</span>
+                            <span class="ex-result">?</span>
+                        </div>
+                        <button class="btn-secondary" onclick="calculateExample(this)">Calculate</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Блок проверки знаний -->
+        <section id="test" class="content-section">
+            <div class="test-content">
+                <h3>🧪 Knowledge Check</h3>
+                <p>Test with 10 questions on the commutative property of multiplication</p>
+                
+                <div id="test-container">
+                    <div id="test-intro" class="test-intro">
+                        <h4>Ready for the knowledge check?</h4>
+                        <p>The test has 10 questions. Read the tasks carefully and choose the correct answers.</p>
+                        <button id="startTestBtn" class="btn-primary">Start Test</button>
+                    </div>
+                    
+                    <div id="test-questions" class="test-questions" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                            <span class="progress-text">Question <span id="currentQuestion">1</span> of 10</span>
+                        </div>
+                        
+                        <div id="question-container"></div>
+                        
+                        <div class="test-navigation">
+                            <button id="prevBtn" class="btn-secondary" style="display: none;">← Back</button>
+                            <button id="nextBtn" class="btn-primary">Next →</button>
+                            <button id="finishBtn" class="btn-success" style="display: none;">Finish Test</button>
+                        </div>
+                    </div>
+                    
+                    <div id="test-results" class="test-results" style="display: none;">
+                        <h4>Test Results</h4>
+                        <div class="score-display">
+                            <div class="score-circle">
+                                <span id="score-percentage">0%</span>
+                            </div>
+                            <p>Correct answers: <span id="correct-answers">0</span> out of 10</p>
+                        </div>
+                        <div id="detailed-results"></div>
+                        <button id="retakeTestBtn" class="btn-primary">Take Test Again</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

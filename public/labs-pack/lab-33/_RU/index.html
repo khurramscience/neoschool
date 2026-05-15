@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Изучаем деление - Математическая лаборатория</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🧮 Математическая лаборатория</h1>
+            <h2>Изучаем деление с помощью групп объектов</h2>
+        </header>
+
+        <main class="main-content">
+            <!-- Переключатель режимов -->
+            <div class="mode-switcher">
+                <button id="autoModeBtn" class="mode-btn active">Автоматический режим</button>
+                <button id="interactiveModeBtn" class="mode-btn">Интерактивный режим</button>
+            </div>
+
+            <!-- Автоматический режим -->
+            <div id="autoMode" class="mode-content active">
+                <div class="controls-section">
+                    <div class="control-group">
+                        <label for="totalObjects">Общее количество объектов:</label>
+                        <input type="number" id="totalObjects" min="1" max="50" value="12">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="groupSize">Размер группы:</label>
+                        <input type="number" id="groupSize" min="1" max="20" value="3">
+                    </div>
+                    
+                    <button id="calculateBtn" class="calculate-btn">Рассчитать деление</button>
+                </div>
+
+                <div class="result-section">
+                    <div class="math-expression">
+                        <span id="expression">12 ÷ 3 = 4</span>
+                    </div>
+                    
+                    <div class="explanation">
+                        <p id="explanation">Разделим 12 объектов на группы по 3. Получим 4 группы.</p>
+                    </div>
+                </div>
+
+                <div class="visualization-section">
+                    <h3>Визуализация:</h3>
+                    <div id="objectsContainer" class="objects-container">
+                        <!-- Объекты будут добавлены через JavaScript -->
+                    </div>
+                    
+                    <div class="groups-info">
+                        <div class="group-count">
+                            <span>Количество групп: </span>
+                            <span id="groupCount" class="highlight">4</span>
+                        </div>
+                        <div class="remainder">
+                            <span>Остаток: </span>
+                            <span id="remainder" class="highlight">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Интерактивный режим -->
+            <div id="interactiveMode" class="mode-content">
+                <div class="interactive-controls">
+                    <div class="control-group">
+                        <label for="interactiveTotalObjects">Общее количество объектов:</label>
+                        <input type="number" id="interactiveTotalObjects" min="1" max="30" value="12">
+                        <button id="createObjectsBtn" class="create-btn">Создать объекты</button>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="interactiveGroupCount">Количество групп:</label>
+                        <input type="number" id="interactiveGroupCount" min="1" max="15" value="4">
+                        <button id="updateGroupsBtn" class="update-btn">Обновить группы</button>
+                    </div>
+                    
+                    <div class="control-group">
+                        <button id="resetBtn" class="reset-btn">Сбросить все</button>
+                    </div>
+                </div>
+
+                <!-- Панель состояния -->
+                <div class="status-panel">
+                    <div class="status-item">
+                        <span class="status-label">Всего объектов:</span>
+                        <span id="totalObjectsCount" class="status-value">12</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">В группах:</span>
+                        <span id="groupedObjectsCount" class="status-value">0</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Свободных:</span>
+                        <span id="freeObjectsCount" class="status-value">12</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Создано групп:</span>
+                        <span id="interactiveGroupCount" class="status-value">0</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Целевых групп:</span>
+                        <span id="targetGroupCount" class="status-value">4</span>
+                    </div>
+                </div>
+
+                <!-- Область для перетаскивания -->
+                <div class="interactive-area">
+                    <div class="free-objects-zone">
+                        <h3>Свободные объекты</h3>
+                        <div id="freeObjectsContainer" class="free-objects-container">
+                            <!-- Свободные объекты -->
+                        </div>
+                    </div>
+                    
+                    <div class="groups-zone">
+                        <h3>Созданные группы</h3>
+                        <div id="groupsContainer" class="groups-container">
+                            <!-- Группы будут создаваться здесь -->
+                        </div>
+                        <div class="create-group-hint">
+                            <p>💡 Перетащите объекты сюда, чтобы создать группы</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Подробная статистика -->
+                <div class="detailed-stats">
+                    <h4>📊 Подробная статистика:</h4>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">Всего объектов:</span>
+                            <span id="statTotalObjects" class="stat-value">12</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Создано групп:</span>
+                            <span id="statCreatedGroups" class="stat-value">3</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Целевых групп:</span>
+                            <span id="statTargetGroups" class="stat-value">4</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Свободных объектов:</span>
+                            <span id="statFreeObjects" class="stat-value">0</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Рекомендации -->
+                    <div class="recommendations">
+                        <h4>🎯 Рекомендации:</h4>
+                        <div id="recommendationsContent">
+                            <!-- Рекомендации будут добавлены через JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="learning-tips">
+                <h3>💡 Полезные подсказки:</h3>
+                <ul>
+                    <li>Деление - это операция, которая показывает, сколько равных групп можно составить</li>
+                    <li>Если остаток равен 0, то деление выполняется нацело</li>
+                    <li>Попробуйте разные числа, чтобы лучше понять принцип деления</li>
+                    <li>В интерактивном режиме вы можете сами создавать группы, перетаскивая объекты</li>
+                </ul>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>Создано для изучения математики в школе 🎓</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

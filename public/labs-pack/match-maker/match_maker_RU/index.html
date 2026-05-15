@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Математическая Память - Лабораторная работа</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧮 Математическая Память</h1>
+            <p>Найди пары: пример и его ответ!</p>
+        </header>
+
+        <div class="game-controls">
+            <div class="mode-selector">
+                <h3>Выбери режим игры:</h3>
+                <div class="mode-buttons">
+                    <button id="stepsMode" class="mode-btn active">Подсчёт шагов</button>
+                    <button id="timeMode" class="mode-btn">Подсчёт времени</button>
+                </div>
+            </div>
+            
+            <div class="difficulty-selector">
+                <h3>Сложность:</h3>
+                <select id="difficulty">
+                    <option value="easy">Легкая (6 пар)</option>
+                    <option value="medium" selected>Средняя (8 пар)</option>
+                    <option value="hard">Сложная (12 пар)</option>
+                </select>
+            </div>
+
+            <button id="startGame" class="start-btn">Начать игру</button>
+        </div>
+
+        <div class="game-info">
+            <div class="info-item">
+                <span class="label">Шаги:</span>
+                <span id="stepsCount">0</span>
+            </div>
+            <div class="info-item">
+                <span class="label">Время:</span>
+                <span id="timeCount">00:00</span>
+            </div>
+            <div class="info-item">
+                <span class="label">Найдено пар:</span>
+                <span id="pairsFound">0</span>
+            </div>
+        </div>
+
+        <div id="gameBoard" class="game-board"></div>
+
+        <div id="gameOver" class="game-over hidden">
+            <div class="game-over-content">
+                <h2>🎉 Поздравляем!</h2>
+                <p>Ты нашёл все пары!</p>
+                <div class="results">
+                    <p>Шагов: <span id="finalSteps">0</span></p>
+                    <p>Время: <span id="finalTime">00:00</span></p>
+                </div>
+                <button id="playAgain" class="play-again-btn">Играть снова</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

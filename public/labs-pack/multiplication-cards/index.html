@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn Multiplication - Math Cards</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🎯 Learn Multiplication</h1>
+            <p>Choose a mode and start practicing!</p>
+        </header>
+
+        <!-- Mode Selection -->
+        <div id="mode-selection" class="mode-selection">
+            <h2>Choose a mode:</h2>
+            <div class="mode-grid">
+                <button class="mode-btn" data-mode="1">
+                    <span class="mode-number">1</span>
+                    <span class="mode-title">Single × Single</span>
+                    <span class="mode-desc">2 × 3, 7 × 8</span>
+                </button>
+                <button class="mode-btn" data-mode="2">
+                    <span class="mode-number">2</span>
+                    <span class="mode-title">Single × 10-19</span>
+                    <span class="mode-desc">5 × 12, 8 × 17</span>
+                </button>
+                <button class="mode-btn" data-mode="3">
+                    <span class="mode-number">3</span>
+                    <span class="mode-title">Single × 10-99</span>
+                    <span class="mode-desc">6 × 25, 9 × 47</span>
+                </button>
+                <button class="mode-btn" data-mode="4">
+                    <span class="mode-number">4</span>
+                    <span class="mode-title">Double × Double</span>
+                    <span class="mode-desc">23 × 45, 67 × 89</span>
+                </button>
+                <button class="mode-btn" data-mode="5">
+                    <span class="mode-number">5</span>
+                    <span class="mode-title">Mixed Mode</span>
+                    <span class="mode-desc">All types of examples</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Area -->
+        <div id="game-area" class="game-area hidden">
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="current-card">1</span> / <span id="total-cards">10</span>
+                </div>
+            </div>
+
+            <!-- Card with Example -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 id="example-text">5 × 7 = ?</h2>
+                </div>
+                <div class="card-body">
+                    <div class="answer-input">
+                        <input type="number" id="answer-input" placeholder="Enter answer" autocomplete="off">
+                        <button id="submit-btn" class="submit-btn">Check</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back to Mode Selection Button -->
+            <button id="back-btn" class="back-btn">← Back to Mode Selection</button>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="results hidden">
+            <div class="results-card">
+                <h2>🎉 Round Complete!</h2>
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Correct answers:</span>
+                        <span id="correct-answers" class="stat-value correct">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Incorrect answers:</span>
+                        <span id="incorrect-answers" class="stat-value incorrect">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Success rate:</span>
+                        <span id="success-rate" class="stat-value">0%</span>
+                    </div>
+                </div>
+                <div class="results-actions">
+                    <button id="play-again-btn" class="play-again-btn">Play Again</button>
+                    <button id="new-mode-btn" class="new-mode-btn">New Mode</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

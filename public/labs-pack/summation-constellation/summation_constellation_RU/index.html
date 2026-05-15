@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Математическая Игра - Сумма Последовательностей</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="game-header">
+            <h1>🎯 Математическая Игра</h1>
+            <p>Найдите последовательности чисел, сумма которых равна заданной!</p>
+        </header>
+
+        <div class="game-info">
+            <div class="info-panel">
+                <div class="score-section">
+                    <h3>Очки: <span id="score">0</span></h3>
+                    <h3>Время: <span id="timer">60</span>с</h3>
+                </div>
+                <div class="target-section">
+                    <h3>Целевая сумма: <span id="target-sum">15</span></h3>
+                    <h3>Уровень: <span id="level">1</span></h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div class="game-board" id="game-board">
+                <!-- Игровое поле будет создано JavaScript -->
+            </div>
+            
+            <div class="controls">
+                <button id="start-btn" class="btn btn-primary">Начать Игру</button>
+                <button id="pause-btn" class="btn btn-secondary" disabled>Пауза</button>
+                <button id="restart-btn" class="btn btn-warning">Новая Игра</button>
+                <button id="test-btn" class="btn btn-info">Тест Последовательностей</button>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>📋 Как играть:</h3>
+            <ul>
+                <li>Найдите последовательности чисел, сумма которых равна целевой сумме</li>
+                <li>Кликайте на числа и ведите курсор по горизонтали или вертикали</li>
+                <li>Можно поворачивать линию на 90° во время перетаскивания</li>
+                <li>Чем длиннее последовательность, тем больше очков!</li>
+                <li>У вас есть 60 секунд, чтобы набрать как можно больше очков</li>
+            </ul>
+        </div>
+
+        <div id="game-over-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>🎉 Игра завершена!</h2>
+                <p>Ваш финальный счет: <span id="final-score">0</span></p>
+                <p>Уровень: <span id="final-level">1</span></p>
+                <button id="play-again-btn" class="btn btn-primary">Играть снова</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

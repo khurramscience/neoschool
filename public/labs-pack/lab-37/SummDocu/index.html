@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Mosaic</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧩 Math Mosaic</h1>
+            <p>Place the mosaic pieces so that the sums of numbers horizontally and vertically match the indicated values</p>
+        </header>
+
+        <div class="game-controls">
+            <button id="newGameBtn" class="btn">New Game</button>
+            <button id="checkBtn" class="btn">Check</button>
+            <button id="hintBtn" class="btn">Hint</button>
+            <div class="size-selector">
+                <label for="gridSizeSelect">Grid Size:</label>
+                <select id="gridSizeSelect" class="size-select">
+                    <option value="2">2x2</option>
+                    <option value="3">3x3</option>
+                    <option value="4" selected>4x4</option>
+                    <option value="5">5x5</option>
+                    <option value="6">6x6</option>
+                </select>
+            </div>
+            <div class="score">Level: <span id="level">1</span></div>
+        </div>
+
+        <div class="game-board">
+            <!-- Суммы по горизонтали (сверху) -->
+            <div class="horizontal-sums top-sums"></div>
+            
+            <div class="main-area">
+                <!-- Игровое поле -->
+                <div class="grid-container">
+                    <div id="gameGrid" class="game-grid"></div>
+                </div>
+                
+                <!-- Суммы по вертикали (справа) -->
+                <div class="vertical-sums right-sums"></div>
+            </div>
+        </div>
+
+        <!-- Область с кусочками мозаики -->
+        <div class="pieces-container">
+            <h3>Mosaic Pieces:</h3>
+            <div id="piecesArea" class="pieces-area"></div>
+        </div>
+
+        <!-- Модальное окно для результатов -->
+        <div id="resultModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 id="resultTitle"></h2>
+                <p id="resultMessage"></p>
+                <button id="nextLevelBtn" class="btn">Next Level</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

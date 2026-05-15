@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Work: Decimal Fractions</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🔢 Lab Work: Decimal Fractions</h1>
+            <p class="subtitle">Learn decimal fractions interactively!</p>
+        </header>
+
+        <nav class="navigation">
+            <button class="nav-btn active" data-section="theory">📚 Theory</button>
+            <button class="nav-btn" data-section="visualization">🎯 Visualization</button>
+            <button class="nav-btn" data-section="practice">✏️ Practice</button>
+            <button class="nav-btn" data-section="game">🎮 Game</button>
+        </nav>
+
+        <main class="main-content">
+            <!-- Theory -->
+            <section id="theory" class="section active">
+                <h2>📚 Basics of Decimal Fractions</h2>
+                <div class="theory-content">
+                    <div class="theory-card">
+                        <h3>What is a Decimal Fraction?</h3>
+                        <p>A decimal fraction is a way to write an ordinary fraction where the denominator is 10, 100, 1000, etc.</p>
+                        <div class="example">
+                            <strong>Examples:</strong>
+                            <ul>
+                                <li>0.5 = 5/10 = 1/2</li>
+                                <li>0.25 = 25/100 = 1/4</li>
+                                <li>0.125 = 125/1000 = 1/8</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="theory-card">
+                        <h3>Decimal Place Values</h3>
+                        <div class="place-value">
+                            <div class="number-display">
+                                <span class="digit">1</span>
+                                <span class="digit">2</span>
+                                <span class="digit">3</span>
+                                <span class="decimal">.</span>
+                                <span class="digit">4</span>
+                                <span class="digit">5</span>
+                                <span class="digit">6</span>
+                            </div>
+                            <div class="place-labels">
+                                <span>hundreds</span>
+                                <span>tens</span>
+                                <span>ones</span>
+                                <span class="decimal-label"></span>
+                                <span>tenths</span>
+                                <span>hundredths</span>
+                                <span>thousandths</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Visualization -->
+            <section id="visualization" class="section">
+                <h2>🎯 Decimal Fraction Visualization</h2>
+                <div class="visualization-content">
+                    <div class="control-panel">
+                        <label for="decimal-input">Enter a decimal fraction:</label>
+                        <input type="number" id="decimal-input" step="0.01" min="0" max="1" value="0.5">
+                        <button id="visualize-btn">Show</button>
+                    </div>
+                    
+                    <div class="visualization-area">
+                        <div class="grid-container" id="grid-container">
+                            <!-- Grid will be created by JavaScript -->
+                        </div>
+                        <div class="fraction-info">
+                            <p>Fraction: <span id="fraction-display">1/2</span></p>
+                            <p>Decimal: <span id="decimal-display">0.5</span></p>
+                            <p>Percentage: <span id="percent-display">50%</span></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Practice -->
+            <section id="practice" class="section">
+                <h2>✏️ Practice Exercises</h2>
+                <div class="practice-content">
+                    <div class="task-container">
+                        <h3>Exercise 1: Fraction Conversion</h3>
+                        <div class="task">
+                            <p>Convert the ordinary fraction to decimal:</p>
+                            <div class="fraction-input">
+                                <input type="number" id="numerator" placeholder="numerator">
+                                <span>/</span>
+                                <input type="number" id="denominator" placeholder="denominator">
+                                <span>=</span>
+                                <input type="number" id="decimal-result" placeholder="result" step="0.001">
+                                <button id="check-fraction">Check</button>
+                            </div>
+                            <div id="fraction-feedback" class="feedback"></div>
+                        </div>
+                    </div>
+
+                    <div class="task-container">
+                        <h3>Exercise 2: Fraction Comparison</h3>
+                        <div class="comparison-task">
+                            <div class="comparison-inputs">
+                                <input type="number" id="compare1" placeholder="0.5" step="0.01">
+                                <select id="comparison-operator">
+                                    <option value="<">&lt;</option>
+                                    <option value="=">=</option>
+                                    <option value=">">&gt;</option>
+                                </select>
+                                <input type="number" id="compare2" placeholder="0.25" step="0.01">
+                            </div>
+                            <button id="check-comparison" class="practice-btn">Check</button>
+                            <div id="comparison-feedback" class="feedback"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Game -->
+            <section id="game" class="section">
+                <h2>🎮 Game: Find the Correct Fraction</h2>
+                <div class="game-content">
+                    <div class="game-info">
+                        <p>Score: <span id="score">0</span></p>
+                        <p>Level: <span id="level">1</span></p>
+                    </div>
+                    
+                    <div class="game-area">
+                        <div class="target-display">
+                            <p>Find the fraction equal to: <span id="target-fraction">0.5</span></p>
+                        </div>
+                        
+                        <div class="options-grid" id="options-grid">
+                            <!-- Answer options will be created by JavaScript -->
+                        </div>
+                        
+                        <button id="next-question" style="display: none;">Next Question</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>🎓 Lab Work on Decimal Fractions | Created for Mathematics Learning</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

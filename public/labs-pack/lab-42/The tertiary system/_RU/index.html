@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторная работа: Третичная система счисления</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🔢 Лабораторная работа: Третичная система счисления</h1>
+            <p class="subtitle">Изучаем систему счисления с основанием 3</p>
+        </header>
+
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-tab="theory">Теория</button>
+            <button class="tab-btn" data-tab="converter">Конвертер</button>
+            <button class="tab-btn" data-tab="calculator">Калькулятор</button>
+            <button class="tab-btn" data-tab="practice">Практика</button>
+        </nav>
+
+        <main class="content">
+            <!-- Теория -->
+            <section id="theory" class="tab-content active">
+                <div class="theory-card">
+                    <h2>📚 Что такое третичная система счисления?</h2>
+                    <p>Третичная система счисления — это позиционная система счисления с основанием 3. В ней используются только три цифры: 0, 1 и 2.</p>
+                    
+                    <div class="info-box">
+                        <h3>Основные принципы:</h3>
+                        <ul>
+                            <li>Каждая позиция представляет степень числа 3</li>
+                            <li>Цифры: 0, 1, 2</li>
+                            <li>Позиции справа налево: 3⁰, 3¹, 3², 3³, ...</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <h3>Пример перевода из десятичной в третичную:</h3>
+                        <p><strong>Число 25 в десятичной системе:</strong></p>
+                        <div class="calculation">
+                            <p>25 ÷ 3 = 8 остаток 1</p>
+                            <p>8 ÷ 3 = 2 остаток 2</p>
+                            <p>2 ÷ 3 = 0 остаток 2</p>
+                            <p><strong>Результат: 221₃</strong></p>
+                        </div>
+                    </div>
+
+                    <div class="comparison-table">
+                        <h3>Сравнение систем счисления:</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Десятичная</th>
+                                    <th>Двоичная</th>
+                                    <th>Третичная</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>0</td><td>0</td><td>0</td></tr>
+                                <tr><td>1</td><td>1</td><td>1</td></tr>
+                                <tr><td>2</td><td>10</td><td>2</td></tr>
+                                <tr><td>3</td><td>11</td><td>10</td></tr>
+                                <tr><td>4</td><td>100</td><td>11</td></tr>
+                                <tr><td>5</td><td>101</td><td>12</td></tr>
+                                <tr><td>6</td><td>110</td><td>20</td></tr>
+                                <tr><td>7</td><td>111</td><td>21</td></tr>
+                                <tr><td>8</td><td>1000</td><td>22</td></tr>
+                                <tr><td>9</td><td>1001</td><td>100</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Конвертер -->
+            <section id="converter" class="tab-content">
+                <div class="converter-card">
+                    <h2>🔄 Конвертер систем счисления</h2>
+                    
+                    <div class="converter-grid">
+                        <div class="converter-section">
+                            <h3>Из десятичной в третичную</h3>
+                            <div class="input-group">
+                                <label for="decimal-input">Десятичное число:</label>
+                                <input type="number" id="decimal-input" placeholder="Введите число" min="0">
+                                <button onclick="convertToTernary()" class="btn-primary">Конвертировать</button>
+                            </div>
+                            <div class="result-box">
+                                <p><strong>Результат:</strong> <span id="decimal-result">-</span></p>
+                                <div id="conversion-steps" class="steps-box"></div>
+                            </div>
+                        </div>
+
+                        <div class="converter-section">
+                            <h3>Из третичной в десятичную</h3>
+                            <div class="input-group">
+                                <label for="ternary-input">Третичное число:</label>
+                                <input type="text" id="ternary-input" placeholder="Введите число (только 0,1,2)" pattern="[0-2]*">
+                                <button onclick="convertToDecimal()" class="btn-primary">Конвертировать</button>
+                            </div>
+                            <div class="result-box">
+                                <p><strong>Результат:</strong> <span id="ternary-result">-</span></p>
+                                <div id="ternary-steps" class="steps-box"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Калькулятор -->
+            <section id="calculator" class="tab-content">
+                <div class="calculator-card">
+                    <h2>🧮 Калькулятор в третичной системе</h2>
+                    
+                    <div class="calculator-grid">
+                        <div class="calc-display">
+                            <input type="text" id="calc-display" readonly value="0">
+                        </div>
+                        
+                        <div class="calc-buttons">
+                            <button class="calc-btn" onclick="appendToCalc('1')">1</button>
+                            <button class="calc-btn" onclick="appendToCalc('2')">2</button>
+                            <button class="calc-btn" onclick="appendToCalc('0')">0</button>
+                            <button class="calc-btn operator" onclick="setOperator('+')">+</button>
+                            
+                            <button class="calc-btn" onclick="appendToCalc('1')">1</button>
+                            <button class="calc-btn" onclick="appendToCalc('2')">2</button>
+                            <button class="calc-btn" onclick="appendToCalc('0')">0</button>
+                            <button class="calc-btn operator" onclick="setOperator('-')">-</button>
+                            
+                            <button class="calc-btn" onclick="appendToCalc('1')">1</button>
+                            <button class="calc-btn" onclick="appendToCalc('2')">2</button>
+                            <button class="calc-btn" onclick="appendToCalc('0')">0</button>
+                            <button class="calc-btn operator" onclick="setOperator('×')">×</button>
+                            
+                            <button class="calc-btn clear" onclick="clearCalc()">C</button>
+                            <button class="calc-btn" onclick="appendToCalc('0')">0</button>
+                            <button class="calc-btn equals" onclick="calculate()">=</button>
+                            <button class="calc-btn operator" onclick="setOperator('÷')">÷</button>
+                        </div>
+                    </div>
+                    
+                    <div class="calc-result">
+                        <h3>Результат вычислений:</h3>
+                        <div id="calc-result-display">Введите числа и операцию</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Практика -->
+            <section id="practice" class="tab-content">
+                <div class="practice-card">
+                    <h2>🎯 Практические задания</h2>
+                    
+                    <div class="practice-controls">
+                        <button onclick="generateNewTask()" class="btn-primary">Новое задание</button>
+                        <button onclick="checkAnswer()" class="btn-success">Проверить ответ</button>
+                        <button onclick="showHint()" class="btn-info">Подсказка</button>
+                    </div>
+
+                    <div class="task-container">
+                        <div id="current-task" class="task-box">
+                            <h3>Задание:</h3>
+                            <p id="task-text">Нажмите "Новое задание" чтобы начать</p>
+                        </div>
+
+                        <div class="answer-section">
+                            <label for="user-answer">Ваш ответ:</label>
+                            <input type="text" id="user-answer" placeholder="Введите ответ">
+                        </div>
+
+                        <div id="feedback" class="feedback-box"></div>
+                    </div>
+
+                    <div class="progress-section">
+                        <h3>Прогресс:</h3>
+                        <div class="progress-bar">
+                            <div id="progress-fill" class="progress-fill"></div>
+                        </div>
+                        <p>Правильных ответов: <span id="correct-count">0</span> из <span id="total-count">0</span></p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>© 2024 Лабораторная работа по третичной системе счисления</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

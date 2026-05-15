@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab: Adding and Subtracting Decimals</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔢 Math Lab</h1>
+            <h2>Adding and Subtracting Decimals</h2>
+            <div class="mode-switcher">
+                <button id="practice-mode" class="mode-btn active">Practice Mode</button>
+                <button id="test-mode" class="mode-btn">Test Mode</button>
+            </div>
+        </header>
+
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-label">Correct:</span>
+                <span id="correct-count">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Total:</span>
+                <span id="total-count">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Percent:</span>
+                <span id="percentage">0%</span>
+            </div>
+        </div>
+
+        <div class="exercise-container">
+            <div class="exercise">
+                <div class="numbers">
+                    <span id="num1">0</span>
+                    <span id="operator">+</span>
+                    <span id="num2">0</span>
+                    <span>=</span>
+                </div>
+                <div class="answer-input">
+                    <input type="number" id="answer" step="0.01" placeholder="Enter your answer">
+                    <button id="check-btn">Check</button>
+                </div>
+            </div>
+
+            <div class="result" id="result"></div>
+            
+            <!-- Step-by-step solution section -->
+            <div class="step-by-step" id="step-by-step">
+                <h3>📝 Step-by-step Solution:</h3>
+                <div class="solution-steps" id="solution-steps">
+                    <!-- Steps will be shown here -->
+                </div>
+                <div class="step-controls">
+                    <button id="prev-step" disabled>← Previous Step</button>
+                    <span id="step-counter">Step 1 of 1</span>
+                    <button id="next-step" disabled>Next Step →</button>
+                </div>
+            </div>
+            
+            <!-- Test results section -->
+            <div class="test-results" id="test-results" style="display: none;">
+                <h3>📊 Test Results</h3>
+                <div class="test-summary">
+                    <div class="test-stat">
+                        <span class="test-label">Correct Answers:</span>
+                        <span id="test-correct">0</span>
+                    </div>
+                    <div class="test-stat">
+                        <span class="test-label">Total Questions:</span>
+                        <span id="test-total">0</span>
+                    </div>
+                    <div class="test-stat">
+                        <span class="test-label">Success Rate:</span>
+                        <span id="test-percentage">0%</span>
+                    </div>
+                    <div class="test-stat">
+                        <span class="test-label">Grade:</span>
+                        <span id="test-grade">-</span>
+                    </div>
+                </div>
+                <div class="test-details" id="test-details">
+                    <!-- Details for each question -->
+                </div>
+                <div class="test-actions">
+                    <button id="retake-test">Retake Test</button>
+                    <button id="download-results">Download Results</button>
+                </div>
+            </div>
+        </div>
+        </div>
+
+    <div class="controls-wrapper">
+        <div class="controls">
+            <button id="new-exercise-btn">New Exercise</button>
+            <button id="reset-btn">Restart</button>
+            <button id="show-solution-btn">Show Solution</button>
+        </div>
+    </div>
+
+    <div class="help-wrapper">
+        <div class="help">
+            <h3>💡 How to solve:</h3>
+            <div class="help-content">
+                <p><strong>Addition:</strong> Write the numbers so that the decimal points are aligned, then add as usual.</p>
+                <p><strong>Subtraction:</strong> Write the numbers so that the decimal points are aligned, then subtract as usual.</p>
+                <p><strong>Example:</strong> 2.5 + 1.3 = 3.8</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

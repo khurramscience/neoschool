@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Number Place Values</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🔢 Learning Number Place Values</h1>
+            <p>Interactive helper for understanding number place values</p>
+        </header>
+
+        <main class="main-content">
+            <!-- Number Input Section -->
+            <section class="input-section">
+                <h2>Enter a Number</h2>
+                <div class="number-input-container">
+                    <input type="number" id="numberInput" placeholder="For example: 1234" min="0" max="999999999">
+                    <button id="analyzeBtn" class="btn btn-primary">Analyze Number</button>
+                </div>
+            </section>
+
+            <!-- Number Analysis Section -->
+            <section class="analysis-section" id="analysisSection" style="display: none;">
+                <h2>Number Analysis</h2>
+                <div class="number-display" id="numberDisplay"></div>
+                <div class="digits-grid" id="digitsGrid"></div>
+                <div class="explanation" id="explanation"></div>
+            </section>
+
+            <!-- Practice Section -->
+            <section class="practice-section">
+                <h2>Practice</h2>
+                <div class="practice-controls">
+                    <button id="generateNumberBtn" class="btn btn-secondary">Generate Number</button>
+                    <button id="clearBtn" class="btn btn-outline">Clear</button>
+                </div>
+                <div class="practice-area" id="practiceArea" style="display: none;">
+                    <p>Try to break down this number:</p>
+                    <div class="practice-number" id="practiceNumber"></div>
+                    <div class="practice-inputs" id="practiceInputs"></div>
+                    <button id="checkAnswerBtn" class="btn btn-success">Check Answer</button>
+                    <div class="result" id="result"></div>
+                </div>
+            </section>
+
+            <!-- Theory Section -->
+            <section class="theory-section">
+                <h2>Theory</h2>
+                <div class="theory-content">
+                    <div class="theory-card">
+                        <h3>What are Place Values?</h3>
+                        <p>A place value is the position of a digit in a number. Each position has its own name and value.</p>
+                    </div>
+                    <div class="theory-card">
+                        <h3>Basic Place Values</h3>
+                        <ul>
+                            <li><strong>Ones</strong> — first position from the right</li>
+                            <li><strong>Tens</strong> — second position from the right</li>
+                            <li><strong>Hundreds</strong> — third position from the right</li>
+                            <li><strong>Thousands</strong> — fourth position from the right</li>
+                            <li><strong>Ten Thousands</strong> — fifth position from the right</li>
+                            <li><strong>Hundred Thousands</strong> — sixth position from the right</li>
+                        </ul>
+                    </div>
+                    <div class="theory-card">
+                        <h3>Example</h3>
+                        <p>In the number <strong>1234</strong>:</p>
+                        <ul>
+                            <li>4 — ones (4 × 1 = 4)</li>
+                            <li>3 — tens (3 × 10 = 30)</li>
+                            <li>2 — hundreds (2 × 100 = 200)</li>
+                            <li>1 — thousands (1 × 1000 = 1000)</li>
+                        </ul>
+                        <p>Total: 1000 + 200 + 30 + 4 = 1234</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>Created for learning mathematics in school 🎓</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

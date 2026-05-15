@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratory Work: Division</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Главное меню -->
+        <div id="main-menu" class="screen active">
+            <h1>🎓 Laboratory Work: Division</h1>
+            <p class="subtitle">Learn division through interesting stories!</p>
+            
+            <div class="topics-grid">
+                <div class="topic-card" data-topic="1">
+                    <h3>🚴 Bicycle Ride</h3>
+                    <p>Bridge Crossing</p>
+                </div>
+                <div class="topic-card" data-topic="2">
+                    <h3>🍕 Pizza for Friends</h3>
+                    <p>Pizza Division</p>
+                </div>
+                <div class="topic-card" data-topic="3">
+                    <h3>📚 Library</h3>
+                    <p>Book Arrangement</p>
+                </div>
+                <div class="topic-card" data-topic="4">
+                    <h3>🎨 Art Studio</h3>
+                    <p>Paint Division</p>
+                </div>
+                <div class="topic-card" data-topic="5">
+                    <h3>🏀 Sports Ground</h3>
+                    <p>Team Formation</p>
+                </div>
+                <div class="topic-card" data-topic="6">
+                    <h3>🌱 Gardening</h3>
+                    <p>Flower Planting</p>
+                </div>
+                <div class="topic-card" data-topic="7">
+                    <h3>🎪 Circus Show</h3>
+                    <p>Audience Seating</p>
+                </div>
+                <div class="topic-card" data-topic="8">
+                    <h3>🚌 School Bus</h3>
+                    <p>Student Seating</p>
+                </div>
+                <div class="topic-card" data-topic="9">
+                    <h3>🎁 Birthday Party</h3>
+                    <p>Gift Division</p>
+                </div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+                <span class="progress-text" id="progress-text">0/9 completed</span>
+            </div>
+        </div>
+
+        <!-- Экран задачи -->
+        <div id="task-screen" class="screen">
+            <div class="task-header">
+                <button class="back-btn" onclick="showMainMenu()">← Back</button>
+                <h2 id="task-title">Task</h2>
+            </div>
+            
+            <div class="story-container">
+                <div class="story-text" id="story-text"></div>
+            </div>
+            
+            <div class="task-form">
+                <div class="question">
+                    <p id="question-text"></p>
+                </div>
+                
+                <div class="input-group">
+                    <label for="answer-input">Your answer:</label>
+                    <input type="number" id="answer-input" placeholder="Enter a number">
+                    <button onclick="checkAnswer()" class="check-btn">Check</button>
+                </div>
+                
+                <div id="result-message" class="result-message"></div>
+            </div>
+        </div>
+
+        <!-- Экран поздравления -->
+        <div id="congratulations-screen" class="screen">
+            <div class="congratulations-content">
+                <h1>🎉 Congratulations!</h1>
+                <p>You have successfully completed the division laboratory work!</p>
+                <div class="achievement">
+                    <h2>🏆 Achievement Unlocked</h2>
+                    <p>Division Master</p>
+                </div>
+                <button onclick="restartLab()" class="restart-btn">Start Over</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

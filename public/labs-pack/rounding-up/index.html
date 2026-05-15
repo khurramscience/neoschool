@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Work: Rounding Numbers</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🔢 Lab Work: Rounding Numbers</h1>
+            <p class="subtitle">Learn the rules of rounding numbers in an interactive format</p>
+        </header>
+
+        <div class="content">
+            <div class="theory-section">
+                <h2>📚 Theory</h2>
+                <div class="theory-cards">
+                    <div class="theory-card">
+                        <h3>Rounding Rule</h3>
+                        <p>If the digit after the place we're rounding to is <strong>5 or greater</strong>, then we increase the digit in that place by 1.</p>
+                        <p>If the digit is <strong>less than 5</strong>, then we leave the digit unchanged.</p>
+                    </div>
+                    <div class="theory-card">
+                        <h3>Examples</h3>
+                        <ul>
+                            <li>3.7 → 4 (7 > 5, round up)</li>
+                            <li>3.4 → 3 (4 < 5, round down)</li>
+                            <li>3.5 → 4 (5 = 5, round up)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="practice-section">
+                <h2>🎯 Practice</h2>
+                
+                <div class="controls">
+                    <div class="control-group">
+                        <label for="numberInput">Enter a number:</label>
+                        <input type="number" id="numberInput" step="0.1" placeholder="For example: 3.7">
+                    </div>
+                    <div class="control-group">
+                        <label for="decimalPlaces">Round to:</label>
+                        <select id="decimalPlaces">
+                            <option value="0">Whole numbers</option>
+                            <option value="1">1 decimal place</option>
+                            <option value="2">2 decimal places</option>
+                            <option value="3">3 decimal places</option>
+                        </select>
+                    </div>
+                    <button id="roundBtn" class="round-btn">Round</button>
+                </div>
+
+                <div class="result-section" id="resultSection" style="display: none;">
+                    <h3>Result:</h3>
+                    <div class="result-display">
+                        <div class="original-number">
+                            <span class="label">Original number:</span>
+                            <span class="value" id="originalNumber"></span>
+                        </div>
+                        <div class="rounded-number">
+                            <span class="label">Rounded number:</span>
+                            <span class="value" id="roundedNumber"></span>
+                        </div>
+                        <div class="explanation" id="explanation"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="exercise-section">
+                <h2>📝 Exercises</h2>
+                <div class="exercise-controls">
+                    <button id="generateExercise" class="exercise-btn">Create New Exercise</button>
+                    <button id="checkAnswer" class="exercise-btn" style="display: none;">Check Answer</button>
+                </div>
+                
+                <div class="exercise-display" id="exerciseDisplay" style="display: none;">
+                    <div class="exercise-task">
+                        <h3>Task:</h3>
+                        <p id="exerciseText"></p>
+                        <div class="answer-input">
+                            <label for="userAnswer">Your answer:</label>
+                            <input type="number" id="userAnswer" step="0.1" placeholder="Enter your answer">
+                        </div>
+                    </div>
+                    <div class="exercise-result" id="exerciseResult" style="display: none;"></div>
+                </div>
+            </div>
+
+            <div class="stats-section">
+                <h2>📊 Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalExercises">0</div>
+                        <div class="stat-label">Total Exercises</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="correctAnswers">0</div>
+                        <div class="stat-label">Correct Answers</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="accuracy">0%</div>
+                        <div class="stat-label">Accuracy</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>🎓 Math Lab Work - Rounding Numbers</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Лабораторная: Доли и дроби</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="topbar">
+        <div class="brand">Математическая лаборатория: дроби</div>
+        <nav class="modes">
+            <button id="btnTheory" class="mode-btn active" aria-pressed="true">Теория</button>
+            <button id="btnGame" class="mode-btn" aria-pressed="false">Игра</button>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section id="sectionTheory" class="section">
+            <h2>Что такое «целое» и «доля»</h2>
+            <p>
+                Квадрат на поле — это одно <strong>целое</strong> (число 1). Если разделить целое на равные части,
+                каждая часть называется <strong>долей</strong>. Например: на 2 части — каждая доля это 1/2; на 4 части — 1/4;
+                на 8 частей — 1/8; на 16 частей — 1/16 и т.д.
+            </p>
+
+            <h3>Термины</h3>
+            <ul>
+                <li><strong>целое</strong> — то, что делим (у нас это квадрат);</li>
+                <li><strong>часть</strong> — одна из равных долей целого;</li>
+                <li><strong>дробь 1/n</strong> — одна из n равных частей целого (чем больше n, тем меньше доля);</li>
+                <li><strong>равные части</strong> — одинаковые по форме и площади.</li>
+            </ul>
+
+            <h3>Как работает «молоток»</h3>
+            <ul>
+                <li>Каждый удар <strong>удваивает</strong> число частей, удар применяется <strong>только к выбранной части</strong>.</li>
+                <li>Направление задаётся кнопкой «Направление». Модификаторы: Shift — вертикально, Ctrl — горизонтально, правый клик — противоположное от текущего. Автопереключения больше нет.</li>
+            </ul>
+
+            <h3>Примеры</h3>
+            <ul>
+                <li>Нужно 4 равные части — сделай 2 удара (последовательно: 2, затем 4 части).</li>
+                <li>Нужно доля 1/8 — доведи общее число частей до 8 (это 3 удара: 2, 4, 8).</li>
+                <li>Нужно доля 1/64 — доведи общее число частей до 64 (это 6 ударов).</li>
+            </ul>
+
+            <h3>Советы</h3>
+            <ul>
+                <li>Если частей меньше, чем нужно — продолжай бить молотком.</li>
+                <li>Если частей получилось больше — нажми «Очистить поле» и начни заново.</li>
+                <li>Готов? Нажми «Отправить на проверку», учитель даст обратную связь и новое задание.</li>
+            </ul>
+
+            <div class="theory-note">
+                Подсказка: чтобы получить 4 части — 2 удара; 8 частей — 3 удара; 64 части — 6 ударов.
+            </div>
+        </section>
+
+        <section id="sectionGame" class="section hidden">
+            <div class="game-layout">
+                <div class="left">
+                    <div class="board-wrapper">
+                        <div class="board" aria-label="Игровое поле — целый квадрат">
+                            <div id="grid" class="grid" role="grid" aria-live="polite"></div>
+                        </div>
+                    </div>
+
+                    <div class="controls">
+                        <button id="btnHammer" class="primary">Ударить молотком</button>
+                        <button id="btnToggleDir" class="ghost" aria-pressed="false">Направление: вертикально</button>
+                        <button id="btnClear" class="ghost">Очистить поле</button>
+                        <button id="btnSubmit" class="success">Отправить на проверку</button>
+                    </div>
+
+                    <div class="status">
+                        <div>Частей: <span id="partsCount">1</span></div>
+                        <div>Следующее разбиение: <span id="nextSplit">по вертикали</span></div>
+                    </div>
+                </div>
+
+                <aside class="right chat">
+                    <div class="chat-header">Чат с AI‑учителем</div>
+                    <div id="chatLog" class="chat-log" aria-live="polite" aria-atomic="false"></div>
+                </aside>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        Сделано для изучения дробей: целого и равных долей
+    </footer>
+
+    <script defer src="script.js"></script>
+</body>
+</html>
+
+

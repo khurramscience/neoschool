@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Обучение дробям</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <h1>Изучаем дроби</h1>
+            <div class="exercise-container">
+                <div id="exercise" class="exercise">
+                    <!-- Здесь будут отображаться задания -->
+                </div>
+                <div id="text-answer-input" class="answer-input">
+                    <input type="text" id="answer" placeholder="Введите ваш ответ">
+                    <button id="check-answer">Проверить</button>
+                </div>
+            </div>
+            <div id="test-complete" class="test-complete" style="display: none;">
+                <h2>Тест завершен!</h2>
+                <div id="final-results" class="final-results">
+                    <!-- Здесь будут отображаться итоговые результаты -->
+                </div>
+                <button id="restart-test" class="restart-button">Пройти еще раз</button>
+            </div>
+        </div>
+        <div class="chat-container">
+            <div class="chat-messages" id="chat-messages">
+                <!-- Здесь будут отображаться сообщения чата -->
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chat-input" placeholder="Введите сообщение...">
+                <button id="send-message">Отправить</button>
+            </div>
+            <div class="robot-icon">
+                <i class="fas fa-robot"></i>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 

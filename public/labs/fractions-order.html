@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Math Lab: Fractions</title>
+    <style>
+:root {
+  --bg: #f8fafc;            /* светлый фон страницы */
+  --panel: #ffffff;         /* карточки/панели */
+  --panel-2: #fafafa;       /* второй тон панелей */
+  --text: #0f172a;          /* основной тёмный текст */
+  --muted: #64748b;         /* вторичный текст */
+  --accent: #8b5cf6;        /* лиловый акцент */
+  --primary: #8b5cf6;       /* основная кнопка */
+  --danger: #ef4444;        /* ошибки */
+  --ghost: #e2e8f0;         /* светлая обводка */
+  --cell: #ffffff;          /* клетки поля */
+  --cell-border: #e5e7eb;   /* границы клеток */
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  color: var(--text);
+  background: var(--bg);
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background: var(--panel);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.brand { font-weight: 600; letter-spacing: 0.2px; }
+.modes { display: flex; gap: 8px; }
+.mode-btn {
+  color: var(--text);
+  background: #ffffff;
+  border: 1px solid var(--ghost);
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+.mode-btn.active { border-color: var(--primary); background: rgba(139, 92, 246, 0.12); }
+
+.container { max-width: 1200px; margin: 0 auto; padding: 16px; }
+.section { margin-top: 16px; }
+.hidden { display: none; }
+
+.theory-note {
+  margin-top: 12px;
+  color: var(--muted);
+  background: #f5f3ff;
+  border: 1px dashed #dcd7fe;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.game-layout { display: grid; grid-template-columns: 1fr 360px; gap: 16px; align-items: start; }
+.left { display: grid; gap: 12px; align-content: start; }
+.right { position: sticky; top: 72px; }
+
+.board-wrapper { background: var(--panel); border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; }
+.board { width: 100%; max-width: 680px; margin: 0 auto; aspect-ratio: 1 / 1; background: var(--panel-2); border-radius: 10px; display: grid; place-items: center; }
+.grid { width: 92%; height: 92%; position: relative; background: var(--cell-border); padding: 2px; border-radius: 8px; cursor: crosshair; }
+.grid.paint { cursor: pointer; }
+.grid.hit { animation: thump 120ms ease; }
+@keyframes thump { 0% { transform: scale(1); } 50% { transform: scale(0.995); } 100% { transform: scale(1); } }
+.cell { position: absolute; background: var(--cell); border: 1px solid var(--cell-border); border-radius: 4px; box-sizing: border-box; }
+.cell.flash { animation: flash 300ms ease; }
+@keyframes flash { from { background: #ede9fe; } to { background: var(--cell); } }
+
+/* Small fraction label inside a cell */
+.cell .fraction-label {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  background: rgba(255,255,255,0.9);
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--text);
+  padding: 2px 6px;
+  pointer-events: none;
+}
+
+.controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.controls button { border-radius: 8px; padding: 10px 14px; border: 1px solid transparent; cursor: pointer; }
+.controls .primary { background: var(--primary); color: white; }
+.controls .success { background: #22c55e; color: #065f46; }
+.controls .ghost { background: #ffffff; border-color: var(--ghost); color: var(--text); border: 1px solid var(--ghost); }
+
+/* Drawing mode controls */
+.draw-controls { display: flex; gap: 8px; align-items: center; }
+.draw-controls.hidden { display: none !important; }
+.palette { display: flex; gap: 6px; align-items: center; background: #ffffff; border: 1px solid var(--ghost); padding: 6px 8px; border-radius: 8px; }
+.swatch { width: 24px; height: 24px; border-radius: 6px; border: 1px solid #e5e7eb; background: var(--sw); cursor: pointer; }
+.swatch.selected { outline: 2px solid var(--primary); outline-offset: 2px; }
+#colorPicker { width: 28px; height: 28px; padding: 0; border: 1px solid #e5e7eb; border-radius: 6px; background: transparent; cursor: pointer; }
+.tool-active { border-color: var(--primary) !important; background: rgba(139, 92, 246, 0.12) !important; }
+.hidden { display: none; }
+
+/* Compare mode controls */
+.compare-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.compare-controls.hidden { display: none !important; }
+.compare-controls select { padding: 6px 8px; border-radius: 8px; border: 1px solid var(--ghost); background: #fff; }
+.compare-controls .answers.hidden { display: none !important; }
+/* Hide difficulty controls only in Deep mode */
+.compare-controls.deep label[for="compareDifficulty"],
+.compare-controls.deep #compareDifficulty { display: none !important; }
+
+/* Chat answer buttons in Compare mode */
+.chat-answers { display: flex; gap: 8px; margin-top: 8px; }
+.chat-answers .chat-answer { border: 1px solid #e5e7eb; background: #ffffff; border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+.chat-answers .chat-answer:disabled { opacity: 0.6; cursor: not-allowed; }
+.legend { display: inline-flex; gap: 8px; align-items: center; background: #ffffff; border: 1px solid var(--ghost); padding: 6px 8px; border-radius: 8px; }
+.legend .dot { width: 14px; height: 14px; background: var(--dot); border: 1px solid #cbd5e1; border-radius: 50%; display: inline-block; margin-right: 4px; }
+.answers { display: inline-flex; gap: 6px; }
+.answers.hidden { display: none !important; }
+.compare-result { min-height: 20px; color: var(--muted); font-size: 14px; }
+
+.status { display: flex; gap: 16px; color: var(--muted); font-size: 14px; }
+
+.chat { background: var(--panel); border: 1px solid #e5e7eb; border-radius: 12px; }
+.chat-header { padding: 12px; border-bottom: 1px solid #e5e7eb; font-weight: 600; }
+.chat-log { max-height: 560px; overflow: auto; padding: 12px; display: grid; gap: 10px; }
+.msg { display: grid; gap: 4px; }
+.msg .who { font-size: 12px; color: var(--muted); }
+.msg .bubble { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 8px 10px; }
+.msg.me .bubble { background: #f5f3ff; border-color: #dcd7fe; }
+.msg .bubble.ok { background: #ecfdf5; border-color: #bbf7d0; color: #065f46; }
+.msg .bubble.err { background: #fff1f2; border-color: #fecdd3; color: #7f1d1d; }
+
+.footer { margin: 24px 0; text-align: center; color: var(--muted); font-size: 13px; }
+
+@media (max-width: 980px) {
+  .game-layout { grid-template-columns: 1fr; }
+  .right { position: static; }
+}
+
+
+
+</style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="topbar">
+        <div class="brand">Math Lab: Fractions</div>
+        <nav class="modes">
+            <button id="btnTheory" class="mode-btn active" aria-pressed="true">Theory</button>
+            <button id="btnGame" class="mode-btn" aria-pressed="false">Game</button>
+            <button id="btnDraw" class="mode-btn" aria-pressed="false">Drawing</button>
+            <button id="btnCompare" class="mode-btn" aria-pressed="false">Compare</button>
+            <button id="btnDeepCompare" class="mode-btn" aria-pressed="false">Deep</button>
+            <button id="btnOrder" class="mode-btn" aria-pressed="false">Order</button>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section id="sectionTheory" class="section">
+            <h2>What are a “whole” and a “fraction”</h2>
+            <p>
+                The square on the board is one <strong>whole</strong> (number 1). When we split the whole into equal parts,
+                each part is called a <strong>fraction</strong>. Examples: into 2 parts — each is 1/2; into 4 — 1/4;
+                into 8 — 1/8; into 16 — 1/16, and so on.
+            </p>
+
+            <h3>Terms</h3>
+            <ul>
+                <li><strong>whole</strong> — the thing we split (here it is the square);</li>
+                <li><strong>part</strong> — one of the equal shares of the whole;</li>
+                <li><strong>fraction 1/n</strong> — one of n equal parts of the whole (the larger n, the smaller the part);</li>
+                <li><strong>equal parts</strong> — same shape and area.</li>
+            </ul>
+
+            <h3>How the “hammer” works</h3>
+            <ul>
+                <li>Each hit <strong>doubles</strong> the number of parts, and the hit applies <strong>only to the selected part</strong>.</li>
+                <li>The direction is set by the “Direction” button. Modifiers: Shift — vertical, Ctrl — horizontal, right‑click — opposite to the current one. No auto switching.</li>
+            </ul>
+
+            <h3>Examples</h3>
+            <ul>
+                <li>Need 4 equal parts — make 2 hits (2, then 4 parts).</li>
+                <li>Need the fraction 1/8 — split one part 3 times to get a 1/8 piece.</li>
+                <li>Need the fraction 1/64 — split one part 6 times to get a 1/64 piece.</li>
+            </ul>
+
+            <h3>Tips</h3>
+            <ul>
+                <li>If you have fewer parts than required — keep hitting the hammer.</li>
+                <li>If you got too many parts — press “Clear board” and start again.</li>
+                <li>Ready? Press “Submit for check” — the teacher will respond and give a new task.</li>
+            </ul>
+
+            <div class="theory-note">
+                Hint: 4 parts — 2 hits; 8 parts — 3 hits; 64 parts — 6 hits.
+            </div>
+        </section>
+
+        <section id="sectionGame" class="section hidden">
+            <div class="game-layout">
+                <div class="left">
+                    <div class="board-wrapper">
+                        <div class="board" aria-label="Game board — the whole square">
+                            <div id="grid" class="grid" role="grid" aria-live="polite"></div>
+                        </div>
+                    </div>
+
+                    <div class="controls">
+                        <button id="btnHammer" class="primary">Hammer strike</button>
+                        <button id="btnToggleDir" class="ghost" aria-pressed="false">Direction: vertical</button>
+                        <button id="btnGlueTool" class="ghost hidden" aria-pressed="false" title="Select two equal neighbor parts to glue">Glue tool</button>
+                        <button id="btnClear" class="ghost">Clear board</button>
+                        <button id="btnFraction" class="ghost" aria-pressed="false">Fraction</button>
+                        <button id="btnSubmit" class="success">Submit for check</button>
+                        <div id="drawControls" class="draw-controls hidden">
+                            <div class="palette" role="group" aria-label="Color palette">
+                                <button class="swatch" data-color="#ef4444" style="--sw: #ef4444" aria-label="Red"></button>
+                                <button class="swatch" data-color="#f59e0b" style="--sw: #f59e0b" aria-label="Orange"></button>
+                                <button class="swatch" data-color="#10b981" style="--sw: #10b981" aria-label="Green"></button>
+                                <button class="swatch" data-color="#3b82f6" style="--sw: #3b82f6" aria-label="Blue"></button>
+                                <button class="swatch" data-color="#8b5cf6" style="--sw: #8b5cf6" aria-label="Purple"></button>
+                                <button class="swatch" data-color="#fbbf24" style="--sw: #fbbf24" aria-label="Yellow"></button>
+                                <button class="swatch" data-color="#06b6d4" style="--sw: #06b6d4" aria-label="Cyan"></button>
+                                <button class="swatch" data-color="#ec4899" style="--sw: #ec4899" aria-label="Pink"></button>
+                                <button class="swatch" data-color="#111827" style="--sw: #111827" aria-label="Black"></button>
+                                <button class="swatch" data-color="#ffffff" style="--sw: #ffffff" aria-label="White"></button>
+                                <input id="colorPicker" type="color" aria-label="Custom color" />
+                            </div>
+                            <button id="btnPaint" class="ghost" aria-pressed="false">Paint</button>
+                        </div>
+
+                        <div id="compareControls" class="compare-controls hidden">
+                            <div id="legend" class="legend" aria-label="Legend">
+                                <span class="dot" style="--dot: #ef4444"></span><span>Red</span>
+                                <span class="dot" style="--dot: #3b82f6"></span><span>Blue</span>
+                            </div>
+                            <label for="compareDifficulty">Difficulty:</label>
+                            <select id="compareDifficulty" aria-label="Difficulty">
+                                <option value="easy">Easy</option>
+                                <option value="normal" selected>Normal</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                            <button id="btnCompareNew" class="ghost">New set</button>
+                            <button id="btnRefineAll" class="ghost" aria-pressed="false" title="Split all parts once">Glue (refine all)</button>
+                            <div class="answers">
+                                <button id="btnAnsRed" class="ghost">Red more</button>
+                                <button id="btnAnsEqual" class="ghost">Equal</button>
+                                <button id="btnAnsBlue" class="ghost">Blue more</button>
+                            </div>
+                            <div id="compareResult" class="compare-result" aria-live="polite"></div>
+                        </div>
+                    </div>
+
+                    <div class="status">
+                        <div>Parts: <span id="partsCount">1</span></div>
+                        <div>Next split: <span id="nextSplit">vertical</span></div>
+                    </div>
+                </div>
+
+                <aside class="right chat">
+                    <div class="chat-header">Chat with AI Teacher</div>
+                    <div id="chatLog" class="chat-log" aria-live="polite" aria-atomic="false"></div>
+                </aside>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        Built for learning fractions: the whole and equal parts
+    </footer>
+
+    <script defer src="script.js"></script>
+
+<script>
+(function() {
+  var LAB_NAME = "Ordering Fractions";
+  var LAB_SLUG = "fractions-order";
+  var sessionStart = Date.now();
+  var answers = 0, correct = 0;
+  
+  // Notify parent on load
+  window.addEventListener("load", function() {
+    window.parent.postMessage({type:"labLoaded", lab:LAB_SLUG, name:LAB_NAME}, "*");
+  });
+  
+  // Track button clicks as interactions
+  document.addEventListener("click", function(e) {
+    var btn = e.target.closest("button");
+    if (btn) {
+      window.parent.postMessage({type:"interaction", lab:LAB_SLUG, action:btn.textContent.trim().substring(0,30), time: Date.now()-sessionStart}, "*");
+    }
+  });
+  
+  // Track score elements
+  setInterval(function() {
+    var scoreEl = document.getElementById("score") || document.querySelector(".score-value") || document.querySelector("[id*='score']");
+    if (scoreEl) {
+      var s = parseInt(scoreEl.textContent)||0;
+      window.parent.postMessage({type:"scoreUpdate", lab:LAB_SLUG, score:s, time:Date.now()-sessionStart}, "*");
+    }
+  }, 2000);
+  
+  // Send session data when leaving
+  window.addEventListener("beforeunload", function() {
+    window.parent.postMessage({type:"sessionEnd", lab:LAB_SLUG, duration:Date.now()-sessionStart}, "*");
+  });
+})();
+</script>
+</body>
+</html>
+
+

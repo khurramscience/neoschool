@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторная работа: Важность нуля в математике</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔢 Лабораторная работа: Важность нуля в математике</h1>
+            <p class="subtitle">Изучаем, почему ноль так важен при подсчете предметов</p>
+        </header>
+
+        <nav class="navigation">
+            <button class="nav-btn active" data-section="theory">📚 Теория</button>
+            <button class="nav-btn" data-section="practice">🎯 Практика</button>
+            <button class="nav-btn" data-section="quiz">✅ Проверка знаний</button>
+        </nav>
+
+        <!-- Блок теории -->
+        <section id="theory" class="content-section active">
+            <h2>📚 Теоретическая часть</h2>
+            
+            <div class="theory-card">
+                <h3>Что такое ноль?</h3>
+                <p>Ноль (0) - это число, которое означает отсутствие количества. Это очень важное число в математике!</p>
+                <div class="example-box">
+                    <h4>Примеры использования нуля:</h4>
+                    <ul>
+                        <li>У тебя 0 яблок = у тебя нет яблок</li>
+                        <li>В коробке 0 конфет = коробка пустая</li>
+                        <li>На столе 0 книг = стол пустой</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="theory-card">
+                <h3>Почему ноль так важен?</h3>
+                <p>Без нуля мы не могли бы точно сказать, что у нас ничего нет. Представь, что ты считаешь конфеты:</p>
+                <div class="counting-example">
+                    <div class="count-item">
+                        <span class="number">1</span>
+                        <span class="emoji">🍬</span>
+                    </div>
+                    <div class="count-item">
+                        <span class="number">2</span>
+                        <span class="emoji">🍬🍬</span>
+                    </div>
+                    <div class="count-item">
+                        <span class="number">0</span>
+                        <span class="emoji">(пусто)</span>
+                    </div>
+                </div>
+                <p>Без нуля мы не знали бы, что конфет больше нет!</p>
+            </div>
+
+            <div class="theory-card">
+                <h3>Ноль в позиционной системе</h3>
+                <p>Ноль помогает нам правильно записывать большие числа:</p>
+                <div class="number-examples">
+                    <div class="number-example">
+                        <span class="big-number">10</span>
+                        <span class="explanation">один десяток, ноль единиц</span>
+                    </div>
+                    <div class="number-example">
+                        <span class="big-number">100</span>
+                        <span class="explanation">один десяток десятков, ноль десятков, ноль единиц</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Блок практики -->
+        <section id="practice" class="content-section">
+            <h2>🎯 Практическая часть</h2>
+            
+            <div class="practice-card">
+                <h3>Упражнение 1: Подсчет предметов</h3>
+                <p>Посчитай предметы и запиши правильное количество:</p>
+                
+                <div class="counting-game">
+                    <div class="items-container" id="itemsContainer">
+                        <!-- Предметы будут добавлены через JavaScript -->
+                    </div>
+                    
+                    <div class="controls">
+                        <button id="addItem" class="btn">➕ Добавить предмет</button>
+                        <button id="removeItem" class="btn">➖ Убрать предмет</button>
+                        <button id="clearAll" class="btn">🗑️ Убрать все</button>
+                    </div>
+                    
+                    <div class="result">
+                        <label for="userAnswer">Сколько предметов ты видишь?</label>
+                        <input type="number" id="userAnswer" min="0" placeholder="Введи число">
+                        <button id="checkAnswer" class="btn btn-primary">Проверить</button>
+                    </div>
+                    
+                    <div id="feedback" class="feedback"></div>
+                </div>
+            </div>
+
+            <div class="practice-card">
+                <h3>Упражнение 2: Заполни пропуски</h3>
+                <p>Вставь правильные числа, включая ноль:</p>
+                
+                <div class="fill-blanks">
+                    <div class="blank-exercise">
+                        <span>У меня есть <input type="number" class="blank-input" data-correct="3" min="0"> яблока</span>
+                        <span>🍎🍎🍎</span>
+                    </div>
+                    <div class="blank-exercise">
+                        <span>У меня есть <input type="number" class="blank-input" data-correct="0" min="0"> конфет</span>
+                        <span>(пусто)</span>
+                    </div>
+                    <div class="blank-exercise">
+                        <span>У меня есть <input type="number" class="blank-input" data-correct="5" min="0"> карандашей</span>
+                        <span>✏️✏️✏️✏️✏️</span>
+                    </div>
+                    <button id="checkBlanks" class="btn btn-primary">Проверить ответы</button>
+                    <div id="blanksFeedback" class="feedback"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Блок проверки знаний -->
+        <section id="quiz" class="content-section">
+            <h2>✅ Проверка знаний</h2>
+            
+            <div class="quiz-container">
+                <div id="quizProgress" class="quiz-progress">
+                    <span id="currentQuestion">1</span> из <span id="totalQuestions">5</span>
+                </div>
+                
+                <div id="quizContent" class="quiz-content">
+                    <!-- Вопросы будут добавлены через JavaScript -->
+                </div>
+                
+                <div class="quiz-controls">
+                    <button id="prevQuestion" class="btn" disabled>← Назад</button>
+                    <button id="nextQuestion" class="btn">Далее →</button>
+                    <button id="finishQuiz" class="btn btn-primary" style="display: none;">Завершить тест</button>
+                </div>
+                
+                <div id="quizResults" class="quiz-results" style="display: none;">
+                    <h3>Результаты теста</h3>
+                    <div id="scoreDisplay"></div>
+                    <button id="restartQuiz" class="btn btn-primary">Пройти тест заново</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Изучаем разряды чисел</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🔢 Изучаем разряды чисел</h1>
+            <p>Интерактивный помощник для понимания разрядов чисел</p>
+        </header>
+
+        <main class="main-content">
+            <!-- Секция ввода числа -->
+            <section class="input-section">
+                <h2>Введите число</h2>
+                <div class="number-input-container">
+                    <input type="number" id="numberInput" placeholder="Например: 1234" min="0" max="999999999">
+                    <button id="analyzeBtn" class="btn btn-primary">Разобрать число</button>
+                </div>
+            </section>
+
+            <!-- Секция разбора числа -->
+            <section class="analysis-section" id="analysisSection" style="display: none;">
+                <h2>Разбор числа</h2>
+                <div class="number-display" id="numberDisplay"></div>
+                <div class="digits-grid" id="digitsGrid"></div>
+                <div class="explanation" id="explanation"></div>
+            </section>
+
+            <!-- Секция практики -->
+            <section class="practice-section">
+                <h2>Практика</h2>
+                <div class="practice-controls">
+                    <button id="generateNumberBtn" class="btn btn-secondary">Сгенерировать число</button>
+                    <button id="clearBtn" class="btn btn-outline">Очистить</button>
+                </div>
+                <div class="practice-area" id="practiceArea" style="display: none;">
+                    <p>Попробуйте разобрать это число:</p>
+                    <div class="practice-number" id="practiceNumber"></div>
+                    <div class="practice-inputs" id="practiceInputs"></div>
+                    <button id="checkAnswerBtn" class="btn btn-success">Проверить ответ</button>
+                    <div class="result" id="result"></div>
+                </div>
+            </section>
+
+            <!-- Секция теории -->
+            <section class="theory-section">
+                <h2>Теория</h2>
+                <div class="theory-content">
+                    <div class="theory-card">
+                        <h3>Что такое разряды?</h3>
+                        <p>Разряд — это позиция цифры в числе. Каждая позиция имеет своё название и значение.</p>
+                    </div>
+                    <div class="theory-card">
+                        <h3>Основные разряды</h3>
+                        <ul>
+                            <li><strong>Единицы</strong> — первый разряд справа</li>
+                            <li><strong>Десятки</strong> — второй разряд справа</li>
+                            <li><strong>Сотни</strong> — третий разряд справа</li>
+                            <li><strong>Тысячи</strong> — четвёртый разряд справа</li>
+                            <li><strong>Десятки тысяч</strong> — пятый разряд справа</li>
+                            <li><strong>Сотни тысяч</strong> — шестой разряд справа</li>
+                        </ul>
+                    </div>
+                    <div class="theory-card">
+                        <h3>Пример</h3>
+                        <p>В числе <strong>1234</strong>:</p>
+                        <ul>
+                            <li>4 — единицы (4 × 1 = 4)</li>
+                            <li>3 — десятки (3 × 10 = 30)</li>
+                            <li>2 — сотни (2 × 100 = 200)</li>
+                            <li>1 — тысячи (1 × 1000 = 1000)</li>
+                        </ul>
+                        <p>Итого: 1000 + 200 + 30 + 4 = 1234</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>Создано для изучения математики в школе 🎓</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Square and Triangular Numbers — Web Lab</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>Square and Triangular Numbers</h1>
+      <nav class="tabs" role="tablist" aria-label="Разделы">
+        <button class="tab is-active" data-tab="theory" role="tab" aria-selected="true">Theory</button>
+        <button class="tab" data-tab="practice" role="tab" aria-selected="false">Practice</button>
+      </nav>
+    </header>
+
+    <main>
+      <!-- Theory -->
+      <section id="theory" class="panel is-active" role="tabpanel" aria-labelledby="theory-tab">
+        <div class="theory-controls">
+          <label>
+            n = <input id="n-slider" type="range" min="2" max="15" step="1" value="6" />
+            <span id="n-value">6</span>
+          </label>
+        </div>
+
+        <div class="theory-layout">
+          <div class="viz-block">
+            <h3>Triangle T(n)</h3>
+            <div id="tri-n" class="shape tri"></div>
+            <div class="caption"><span id="tri-n-val">T(6) = 21</span></div>
+          </div>
+          <div class="viz-block">
+            <h3>Triangle T(n−1)</h3>
+            <div id="tri-n1" class="shape tri"></div>
+            <div class="caption"><span id="tri-n1-val">T(5) = 15</span></div>
+          </div>
+          <div class="viz-block">
+            <h3>Square S(n) = n²</h3>
+            <div id="sq-n" class="shape sq"></div>
+            <div class="caption"><span id="sq-n-val">S(6) = 36</span></div>
+          </div>
+        </div>
+
+        <div class="formulas">
+          <div class="formula">T(n−1) + T(n) = S(n)</div>
+          <div class="formula">2·T(n−1) + S(n) = T(2n−1)</div>
+          <div class="formula">3·T(n) + T(n−1) = T(2n−1)</div>
+          <div class="formula">8·T(n) + 1 = S(2n+1)</div>
+        </div>
+
+        <details class="hint">
+          <summary>How to read the visuals</summary>
+          <p>Each dot is one unit. Triangles are built with rows 1, 2, …, n. A square is n×n. Move the slider n to compare dot counts and verify the identities above.</p>
+        </details>
+      </section>
+
+      <!-- Practice -->
+      <section id="practice" class="panel" role="tabpanel" aria-labelledby="practice-tab">
+        <div class="practice-top">
+          <div class="task-info">
+            <div class="task-title">Task <span id="task-index">1</span>/10</div>
+            <div id="task-text">Build an n×n square from triangles and squares with prime side lengths.</div>
+          </div>
+          <div class="target">
+            <div class="target-label">Target square: <b>n = <span id="target-n">4</span></b> → <b><span id="target-n2">16</span></b> dots</div>
+            <div id="target-board" class="shape sq"></div>
+          </div>
+        </div>
+
+        <div class="practice-work">
+          <aside class="palette" aria-label="Pieces palette">
+            <h3>Pieces (prime sides)</h3>
+            <div id="palette-list" class="palette-list"></div>
+            <div class="palette-note">Drag into the workspace to use.</div>
+          </aside>
+          <section class="workspace" aria-label="Workspace">
+            <div class="workspace-header">
+              <div>
+                Sum of dots: <b><span id="current-sum">0</span></b> of <b><span id="target-sum">16</span></b>
+              </div>
+              <div class="sum-breakdown" title="Разложение суммы по использованным фигурам">
+                <span id="sum-breakdown"></span>
+              </div>
+            </div>
+            <div id="board" class="board">
+              <div id="board-grid" class="board-grid"></div>
+              <div id="board-layer" class="board-layer"></div>
+            </div>
+            <div class="controls">
+              <button id="btn-check" class="primary">Check</button>
+              <button id="btn-clear" class="ghost">Clear</button>
+              <button id="btn-hint" class="ghost">Hint</button>
+              <button id="btn-next" class="primary">Next</button>
+            </div>
+            <div id="result" class="result" role="status" aria-live="polite"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <div>© Web Lab: Square and Triangular Numbers</div>
+    </footer>
+
+    <script src="tasks.js"></script>
+    <script src="app.js"></script>
+  </body>
+  </html>
+
+

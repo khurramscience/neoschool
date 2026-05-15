@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Game - Sum Sequences</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="game-header">
+            <h1>🎯 Math Game</h1>
+            <p>Find sequences of numbers that sum up to the target value!</p>
+        </header>
+
+        <div class="game-info">
+            <div class="info-panel">
+                <div class="score-section">
+                    <h3>Score: <span id="score">0</span></h3>
+                    <h3>Time: <span id="timer">60</span>s</h3>
+                </div>
+                <div class="target-section">
+                    <h3>Target Sum: <span id="target-sum">15</span></h3>
+                    <h3>Level: <span id="level">1</span></h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div class="game-board" id="game-board">
+                <!-- Game board will be created by JavaScript -->
+            </div>
+            
+            <div class="controls">
+                <button id="start-btn" class="btn btn-primary">Start Game</button>
+                <button id="pause-btn" class="btn btn-secondary" disabled>Pause</button>
+                <button id="restart-btn" class="btn btn-warning">New Game</button>
+                <button id="test-btn" class="btn btn-info">Test Sequences</button>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>📋 How to Play:</h3>
+            <ul>
+                <li>Find sequences of numbers that sum up to the target value</li>
+                <li>Click on numbers and drag cursor horizontally or vertically</li>
+                <li>You can turn the line 90° while dragging</li>
+                <li>The longer the sequence, the more points you get!</li>
+                <li>You have 60 seconds to score as many points as possible</li>
+            </ul>
+        </div>
+
+        <div id="game-over-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>🎉 Game Over!</h2>
+                <p>Final Score: <span id="final-score">0</span></p>
+                <p>Level: <span id="final-level">1</span></p>
+                <button id="play-again-btn" class="btn btn-primary">Play Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

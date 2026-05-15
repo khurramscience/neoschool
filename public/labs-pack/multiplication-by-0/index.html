@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplication by Zero - Interactive Math Lab</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🔢 Multiplication by Zero</h1>
+            <p class="subtitle">Interactive Math Laboratory for Students</p>
+        </header>
+
+        <nav class="navigation">
+            <button class="nav-btn active" data-section="theory">📚 Theory</button>
+            <button class="nav-btn" data-section="practice">✏️ Practice</button>
+            <button class="nav-btn" data-section="quiz">🎯 Quiz</button>
+        </nav>
+
+        <main class="main-content">
+            <!-- Theory Section -->
+            <section id="theory" class="section active">
+                <div class="theory-content">
+                    <h2>Understanding Multiplication by Zero</h2>
+                    
+                    <div class="concept-card">
+                        <h3>🎯 The Golden Rule</h3>
+                        <div class="rule-highlight">
+                            <span class="math-formula">a × 0 = 0</span>
+                            <p>Any number multiplied by zero equals zero!</p>
+                        </div>
+                    </div>
+
+                    <div class="examples-grid">
+                        <div class="example-card">
+                            <h4>Small Numbers</h4>
+                            <div class="math-examples">
+                                <div class="example">5 × 0 = 0</div>
+                                <div class="example">12 × 0 = 0</div>
+                                <div class="example">1 × 0 = 0</div>
+                            </div>
+                        </div>
+
+                        <div class="example-card">
+                            <h4>Large Numbers</h4>
+                            <div class="math-examples">
+                                <div class="example">1,000 × 0 = 0</div>
+                                <div class="example">999,999 × 0 = 0</div>
+                                <div class="example">1,000,000 × 0 = 0</div>
+                            </div>
+                        </div>
+
+                        <div class="example-card">
+                            <h4>Fractions</h4>
+                            <div class="math-examples">
+                                <div class="example">½ × 0 = 0</div>
+                                <div class="example">¾ × 0 = 0</div>
+                                <div class="example">⅔ × 0 = 0</div>
+                            </div>
+                        </div>
+
+                        <div class="example-card">
+                            <h4>Zero by Zero</h4>
+                            <div class="math-examples">
+                                <div class="example">0 × 0 = 0</div>
+                                <div class="example">0 × 5 = 0</div>
+                                <div class="example">0 × ½ = 0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="visual-explanation">
+                        <h3>🎨 Visual Understanding</h3>
+                        <div class="visual-grid">
+                            <div class="visual-item">
+                                <div class="visual-box">
+                                    <div class="dots">●●●●●</div>
+                                    <div class="label">5 groups</div>
+                                </div>
+                                <div class="multiply-symbol">×</div>
+                                <div class="visual-box">
+                                    <div class="dots">(empty)</div>
+                                    <div class="label">0 items each</div>
+                                </div>
+                                <div class="equals">=</div>
+                                <div class="visual-box">
+                                    <div class="dots">(empty)</div>
+                                    <div class="label">0 total</div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="visual-text">Think of it as having 5 empty boxes. How many items do you have? Zero!</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Practice Section -->
+            <section id="practice" class="section">
+                <div class="practice-content">
+                    <h2>Practice Problems</h2>
+                    <p class="practice-intro">Solve these problems to master multiplication by zero!</p>
+
+                    <div class="practice-controls">
+                        <button id="generateProblem" class="btn-primary">🎲 Generate New Problem</button>
+                        <button id="checkAnswer" class="btn-secondary">✅ Check Answer</button>
+                        <button id="showSolution" class="btn-secondary">💡 Show Solution</button>
+                    </div>
+
+                    <div class="problem-container">
+                        <div class="problem-display">
+                            <div id="currentProblem" class="problem-text">Click "Generate New Problem" to start!</div>
+                        </div>
+
+                        <div class="answer-section">
+                            <label for="userAnswer">Your Answer:</label>
+                            <input type="number" id="userAnswer" placeholder="Enter your answer" step="any">
+                            <div id="answerFeedback" class="feedback"></div>
+                        </div>
+
+                        <div id="solution" class="solution hidden">
+                            <h4>Solution:</h4>
+                            <div id="solutionText"></div>
+                        </div>
+                    </div>
+
+                    <div class="progress-tracker">
+                        <div class="progress-info">
+                            <span>Correct: <span id="correctCount">0</span></span>
+                            <span>Total: <span id="totalCount">0</span></span>
+                        </div>
+                        <div class="progress-bar">
+                            <div id="progressFill" class="progress-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quiz Section -->
+            <section id="quiz" class="section">
+                <div class="quiz-content">
+                    <h2>Knowledge Check Quiz</h2>
+                    <p class="quiz-intro">Test your understanding with these questions!</p>
+
+                    <div class="quiz-controls">
+                        <button id="startQuiz" class="btn-primary">🚀 Start Quiz</button>
+                        <button id="submitQuiz" class="btn-secondary hidden">📤 Submit Quiz</button>
+                        <button id="retakeQuiz" class="btn-secondary hidden">🔄 Retake Quiz</button>
+                    </div>
+
+                    <div id="quizContainer" class="quiz-container hidden">
+                        <div class="quiz-progress">
+                            Question <span id="currentQuestion">1</span> of <span id="totalQuestions">10</span>
+                        </div>
+
+                        <div id="questionContainer" class="question-container">
+                            <!-- Questions will be dynamically generated here -->
+                        </div>
+
+                        <div class="quiz-navigation">
+                            <button id="prevQuestion" class="nav-btn-small">← Previous</button>
+                            <button id="nextQuestion" class="nav-btn-small">Next →</button>
+                        </div>
+                    </div>
+
+                    <div id="quizResults" class="quiz-results hidden">
+                        <h3>🎉 Quiz Results</h3>
+                        <div class="results-summary">
+                            <div class="score-display">
+                                <span id="finalScore">0</span>/<span id="maxScore">10</span>
+                            </div>
+                            <div id="scoreMessage" class="score-message"></div>
+                        </div>
+                        <div id="resultsBreakdown" class="results-breakdown">
+                            <!-- Detailed results will be shown here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>Made with ❤️ for math education | Interactive Math Laboratory</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

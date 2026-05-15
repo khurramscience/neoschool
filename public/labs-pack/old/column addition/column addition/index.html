@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Work: Column Addition</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧮 Lab Work: Column Addition</h1>
+            <p>Learn place values and master column addition!</p>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-btn active" onclick="showTab('learning')">📚 Learning</button>
+            <button class="tab-btn" onclick="showTab('practice')">🎮 Practice</button>
+            <button class="tab-btn" onclick="showTab('test')">📝 Test</button>
+        </nav>
+
+        <!-- Learning tab -->
+        <div id="learning" class="tab-content active">
+            <div class="learning-section">
+                <h2>How Place Values Work in Addition</h2>
+                
+                <div class="concept-card">
+                    <h3>📊 Place Values</h3>
+                    <p>Each digit in a number has its place - the place value:</p>
+                    <div class="place-value-example">
+                        <div class="number-display">
+                            <span class="digit">2</span>
+                            <span class="digit">4</span>
+                            <span class="digit">7</span>
+                        </div>
+                        <div class="place-labels">
+                            <span>hundreds</span>
+                            <span>tens</span>
+                            <span>ones</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="concept-card">
+                    <h3>➕ Column Addition</h3>
+                    <p>In column addition, we add numbers by place values, starting from the right:</p>
+                    
+                    <div class="addition-example">
+                        <div class="step">
+                            <h4>Step 1: Add the ones</h4>
+                            <div class="column-addition">
+                                <div class="number">2 4 <span class="highlight">7</span></div>
+                                <div class="number">+ 1 3 <span class="highlight">5</span></div>
+                                <div class="line">─────</div>
+                                <div class="result">2 4 <span class="highlight">12</span></div>
+                            </div>
+                            <p>7 + 5 = 12. Write 2, carry 1 to tens.</p>
+                        </div>
+
+                        <div class="step">
+                            <h4>Step 2: Add the tens</h4>
+                            <div class="column-addition">
+                                <div class="number">2 <span class="highlight">4</span> 7</div>
+                                <div class="number">+ 1 <span class="highlight">3</span> 5</div>
+                                <div class="number">+ <span class="highlight">1</span> (carry)</div>
+                                <div class="line">─────</div>
+                                <div class="result">2 <span class="highlight">8</span> 2</div>
+                            </div>
+                            <p>4 + 3 + 1 = 8. Write 8.</p>
+                        </div>
+
+                        <div class="step">
+                            <h4>Step 3: Add the hundreds</h4>
+                            <div class="column-addition">
+                                <div class="number"><span class="highlight">2</span> 4 7</div>
+                                <div class="number">+ <span class="highlight">1</span> 3 5</div>
+                                <div class="line">─────</div>
+                                <div class="result"><span class="highlight">3</span> 8 2</div>
+                            </div>
+                            <p>2 + 1 = 3. Write 3.</p>
+                        </div>
+
+                        <div class="final-result">
+                            <h4>Result: 247 + 135 = 382</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="interactive-demo">
+                    <h3>🎯 Interactive Demonstration</h3>
+                    <div class="demo-controls">
+                        <button onclick="generateDemo()">New Example</button>
+                        <button onclick="showStep()">Next Step</button>
+                        <button onclick="resetDemo()">Reset</button>
+                    </div>
+                    <div id="demo-area" class="demo-area">
+                        <p>Click "New Example" to start the demonstration</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Practice tab -->
+        <div id="practice" class="tab-content">
+            <div class="practice-section">
+                <h2>🎮 Practice Exercises</h2>
+                
+                <div class="practice-controls">
+                    <button onclick="generatePractice()">New Exercise</button>
+                    <button onclick="checkAnswer()">Check Answer</button>
+                    <button onclick="showSolution()">Show Solution</button>
+                </div>
+
+                <div class="practice-area">
+                    <div id="practice-problem" class="practice-problem">
+                        <p>Click "New Exercise" to start practicing</p>
+                    </div>
+                    
+                    <div class="answer-input">
+                        <label for="user-answer">Your answer:</label>
+                        <input type="number" id="user-answer" placeholder="Enter result">
+                    </div>
+
+                    <div id="practice-feedback" class="feedback"></div>
+                </div>
+
+                <div class="stats">
+                    <div class="stat">
+                        <span class="stat-label">Correct:</span>
+                        <span id="correct-count">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Total:</span>
+                        <span id="total-count">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Percentage:</span>
+                        <span id="percentage">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test tab -->
+        <div id="test" class="tab-content">
+            <div class="test-section">
+                <h2>📝 Final Test</h2>
+                
+                <div id="test-intro" class="test-intro">
+                    <p>Test your knowledge! The test consists of 10 questions.</p>
+                    <button onclick="startTest()">Start Test</button>
+                </div>
+
+                <div id="test-area" class="test-area" style="display: none;">
+                    <div class="test-progress">
+                        <span>Question <span id="current-question">1</span> of 10</span>
+                        <div class="progress-bar">
+                            <div id="progress-fill" class="progress-fill"></div>
+                        </div>
+                    </div>
+
+                    <div id="test-question" class="test-question"></div>
+                    
+                    <div class="test-answer">
+                        <label for="test-answer">Answer:</label>
+                        <input type="number" id="test-answer" placeholder="Enter result">
+                        <button onclick="submitTestAnswer()">Submit</button>
+                    </div>
+
+                    <div id="test-feedback" class="feedback"></div>
+                </div>
+
+                <div id="test-results" class="test-results" style="display: none;">
+                    <h3>Test Results</h3>
+                    <div id="test-score"></div>
+                    <div id="test-details"></div>
+                    <button onclick="restartTest()">Take Test Again</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

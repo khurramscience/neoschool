@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Fractions</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <h1>Learning Fractions</h1>
+            <div class="exercise-container">
+                <div id="exercise" class="exercise">
+                    <!-- Exercise content will be displayed here -->
+                </div>
+                <div id="text-answer-input" class="answer-input">
+                    <input type="text" id="answer" placeholder="Enter your answer">
+                    <button id="check-answer">Check</button>
+                </div>
+            </div>
+            <div id="test-complete" class="test-complete" style="display: none;">
+                <h2>Test Completed!</h2>
+                <div id="final-results" class="final-results">
+                    <!-- Final results will be displayed here -->
+                </div>
+                <button id="restart-test" class="restart-button">Take Again</button>
+            </div>
+        </div>
+        <div class="chat-container">
+            <div class="chat-messages" id="chat-messages">
+                <!-- Chat messages will be displayed here -->
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chat-input" placeholder="Enter your message...">
+                <button id="send-message">Send</button>
+            </div>
+            <div class="robot-icon">
+                <i class="fas fa-robot"></i>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
