@@ -1,12 +1,34 @@
 // ── NEOSCHOOL API LAYER ───────────────────────────────────────────────────────
 const MODEL = "claude-sonnet-4-20250514";
 
-// Get API key from environment or localStorage (for deployed version)
+// If a Supabase URL is configured, route all Anthropic calls through our
+// Edge Function (anthropic-proxy) so the API key stays server-side.
+// Otherwise, fall back to direct browser calls using a per-user localStorage key.
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const PROXY_URL = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1/anthropic-proxy` : null;
+
+// Get user-provided API key (only used in fallback mode)
 function getApiKey() {
   return localStorage.getItem("neo_api_key") || "";
 }
 
 export async function claude(system, messages, maxT = 200) {
+  // Prefer the Edge Function proxy (production path)
+  if (PROXY_URL) {
+    const r = await fetch(PROXY_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: MODEL, max_tokens: maxT, system, messages }),
+    });
+    if (!r.ok) {
+      const errText = await r.text().catch(() => "");
+      throw new Error(`Anthropic proxy error ${r.status}: ${errText}`);
+    }
+    const data = await r.json();
+    return data.content?.[0]?.text || "";
+  }
+
+  // Fallback: direct browser call with user's localStorage key
   const apiKey = getApiKey();
   const headers = { "Content-Type": "application/json" };
   if (apiKey) headers["x-api-key"] = apiKey;
