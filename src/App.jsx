@@ -1862,21 +1862,22 @@ function CoachOS({ user }) {
 
   return (
     <div style={{ display: "flex", height: "100%" }}>
-      <div className="sb" style={{ padding: "16px 10px" }}>
-        <div style={{ padding: "2px 6px", marginBottom: 18 }}><Logo l sz={13} /></div>
-        <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,.3)", letterSpacing: ".1em", textTransform: "uppercase", padding: "0 6px", marginBottom: 6 }}>Guide Dashboard</div>
+      <div className="sb" style={{ padding: "20px 12px" }}>
+        <div style={{ padding: "2px 6px", marginBottom: 22 }}><Logo l sz={13} /></div>
+        <div style={{ fontFamily:"'Geist Mono',monospace", fontSize: 9.5, fontWeight: 500, color: "rgba(255,255,255,.35)", letterSpacing: ".14em", textTransform: "uppercase", padding: "0 8px", marginBottom: 8 }}>Guide Dashboard</div>
         {nav.map(n => (
           <div key={n.id} className={`ni${view === n.id ? " ac" : ""}`} onClick={() => setView(n.id)}>
             <span>{n.i}</span><span>{n.l}</span>
             {n.id === "nudges" && nudges.filter(x => !dismissed.includes(x.id) && x.sev === "high").length > 0 && (
-              <span style={{ marginLeft: "auto", background: "var(--rd)", color: "#fff", borderRadius: 99, width: 16, height: 16, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700 }}>{nudges.filter(x => !dismissed.includes(x.id) && x.sev === "high").length}</span>
+              <span style={{ marginLeft: "auto", background: "var(--or)", color: "#fff", borderRadius: 99, width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9.5, fontWeight: 600, fontFamily:"'Geist Mono',monospace" }}>{nudges.filter(x => !dismissed.includes(x.id) && x.sev === "high").length}</span>
             )}
           </div>
         ))}
         <div style={{ flex: 1 }} />
-        <div style={{ borderTop: "1px solid rgba(255,255,255,.07)", padding: "12px 6px 0" }}>
-          <div style={{ fontSize: 10, color: "rgba(255,255,255,.35)", marginBottom: 3 }}>Coach: {user?.name?.split(" ")[0]}</div>
-          <div style={{ fontWeight: 600, color: "rgba(255,255,255,.8)", fontSize: 12 }}>{DEMO_STUDENTS.length} students · May 2026</div>
+        <div style={{ borderTop: "1px solid rgba(255,255,255,.08)", padding: "14px 8px 0" }}>
+          <div style={{ fontFamily:"'Geist Mono',monospace", fontSize: 9.5, color: "rgba(255,255,255,.35)", marginBottom: 4, letterSpacing:".08em", textTransform:"uppercase" }}>Coach</div>
+          <div style={{ fontFamily:"'Fraunces',serif", fontWeight: 500, color: "rgba(255,255,255,.9)", fontSize: 15, marginBottom:2 }}>{user?.name?.split(" ")[0]}</div>
+          <div style={{ fontFamily:"'Geist Mono',monospace", fontSize:10, color:"rgba(255,255,255,.45)", letterSpacing:".05em" }}>{DEMO_STUDENTS.length} students · May 2026</div>
         </div>
       </div>
       <div style={{ flex: 1, overflowY: "auto", padding: "20px", background: "var(--cr)" }}>
@@ -3269,15 +3270,16 @@ Return ONLY valid JSON:
     <div style={{ display:"flex", height:"100%" }}>
       {showPay && <PaymentModal userId={user.id} onClose={() => setShowPay(false)}/>}
       {activeTool && <SimViewer tool={activeTool} onClose={() => setActiveTool(null)}/>}
-      <div className="sb" style={{ padding:"16px 10px" }}>
-        <div style={{ padding:"2px 6px", marginBottom:18 }}><Logo l sz={13}/></div>
-        <div style={{ fontSize:9, fontWeight:700, color:"rgba(255,255,255,.3)", letterSpacing:".1em", textTransform:"uppercase", padding:"0 6px", marginBottom:6 }}>Campus Director</div>
+      <div className="sb" style={{ padding:"20px 12px" }}>
+        <div style={{ padding:"2px 6px", marginBottom:22 }}><Logo l sz={13}/></div>
+        <div style={{ fontFamily:"'Geist Mono',monospace", fontSize:9.5, fontWeight:500, color:"rgba(255,255,255,.35)", letterSpacing:".14em", textTransform:"uppercase", padding:"0 8px", marginBottom:8 }}>Campus Director</div>
         {nav.map(n => <div key={n.id} className={`ni${view===n.id?" ac":""}`} onClick={() => setView(n.id)}><span>{n.i}</span><span>{n.l}</span></div>)}
         <div style={{ flex:1 }}/>
-        <div style={{ borderTop:"1px solid rgba(255,255,255,.07)", padding:"12px 6px 0" }}>
+        <div style={{ borderTop:"1px solid rgba(255,255,255,.08)", padding:"14px 8px 0" }}>
           <CreditsWidget userId={user.id} onBuyMore={() => setShowPay(true)}/>
-          <div style={{ marginTop:8, fontSize:10, color:"rgba(255,255,255,.35)" }}>
-            {user?.name} · Director
+          <div style={{ marginTop:10 }}>
+            <div style={{ fontFamily:"'Geist Mono',monospace", fontSize:9.5, color:"rgba(255,255,255,.35)", marginBottom:3, letterSpacing:".08em", textTransform:"uppercase" }}>Director</div>
+            <div style={{ fontFamily:"'Fraunces',serif", fontWeight:500, color:"rgba(255,255,255,.9)", fontSize:14 }}>{user?.name}</div>
           </div>
         </div>
       </div>
