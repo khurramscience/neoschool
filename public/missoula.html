@@ -362,36 +362,49 @@
       submitted_at: new Date().toISOString(),
     };
 
-    // 1. Save to Supabase `applications` table
-    let savedToSupabase = false;
+    // PRIMARY: Submit via Edge Function (handles DB + email + logging)
+    let serverResult = null;
     try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/applications`, {
+      const r = await fetch(`${SUPABASE_URL}/functions/v1/submit-application`, {
         method: "POST",
-        headers: {
-          "apikey": SUPABASE_ANON_KEY,
-          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-          "Content-Type": "application/json",
-          "Prefer": "return=minimal",
-        },
-        body: JSON.stringify({
-          form_data: data,
-          campus: "Missoula",
-          child_name: data.child_name,
-          grade: data.grade,
-          status: "new",
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
       });
-      if (res.ok) savedToSupabase = true;
-    } catch (err) { console.warn("Supabase save failed:", err); }
+      if (r.ok) serverResult = await r.json();
+    } catch (err) { console.warn("Edge function failed:", err); }
 
-    // 2. Always save to localStorage too (backup, parent can recover if needed)
+    // BACKUP 1: Direct Supabase insert
+    let savedToSupabase = serverResult?.db_saved || false;
+    if (!savedToSupabase) {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/applications`, {
+          method: "POST",
+          headers: {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+            "Prefer": "return=minimal",
+          },
+          body: JSON.stringify({
+            form_data: data,
+            campus: "Missoula",
+            child_name: data.child_name,
+            grade: data.grade,
+            status: "new",
+          }),
+        });
+        if (res.ok) savedToSupabase = true;
+      } catch (err) { console.warn("Direct insert failed:", err); }
+    }
+
+    // BACKUP 2: Always save to localStorage
     try {
       const local = JSON.parse(localStorage.getItem("neo_applications") || "[]");
-      local.push({ id: Date.now(), ...data });
+      local.push({ id: Date.now(), ...data, server_result: serverResult });
       localStorage.setItem("neo_applications", JSON.stringify(local));
     } catch {}
 
-    // 3. Open a mailto with the application as fallback (works even with no DB)
+    // BACKUP 3: mailto fallback (always shows)
     const mailBody = `New neoschool Missoula application:\n\n` +
       `Parent: ${data.parent_name}\n` +
       `Email: ${data.email}\n` +
@@ -400,8 +413,7 @@
       `Grade: ${data.grade}\n` +
       `Situation: ${data.situation || "—"}\n\n` +
       `Notes: ${data.notes || "—"}\n\n` +
-      `Submitted: ${data.submitted_at}\n` +
-      `Saved to Supabase: ${savedToSupabase ? "yes" : "no"}`;
+      `Submitted: ${data.submitted_at}`;
 
     status.classList.add("success");
     status.style.display = "block";
