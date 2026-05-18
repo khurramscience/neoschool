@@ -83,6 +83,9 @@
     </div>
   </div>
 
+  <div id="systemStatus" style="display:none;background:#fff;border:1px solid #e8dfd0;border-radius:12px;padding:14px 18px;margin-bottom:18px;font-size:13px;line-height:1.6">
+  </div>
+
   <div class="stats">
     <div class="stat"><div class="stat-num" id="totalCount">—</div><div class="stat-label">Total applications</div></div>
     <div class="stat"><div class="stat-num" id="newCount">—</div><div class="stat-label">New · need review</div></div>
@@ -148,6 +151,31 @@
   async function refresh() {
     document.getElementById("resultsCount").textContent = "Loading…";
     const apps = [];
+
+    // Test Supabase + Edge Function health
+    let dbHealthy = false, edgeFnHealthy = false;
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/applications?limit=1`, {
+        headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` },
+      });
+      dbHealthy = r.ok;
+    } catch {}
+    try {
+      const r = await fetch(`${SUPABASE_URL}/functions/v1/submit-application`, { method: "OPTIONS" });
+      edgeFnHealthy = r.ok;
+    } catch {}
+
+    // Show status banner
+    const status = document.getElementById("systemStatus");
+    const allGood = dbHealthy && edgeFnHealthy;
+    status.style.display = "block";
+    status.innerHTML = `
+      <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center">
+        <div><span style="color:${dbHealthy?'#4a7c6a':'#a83d3d'};font-size:14px">●</span> <strong>Database:</strong> ${dbHealthy?'connected':'unreachable'} ${!dbHealthy?'<span style="color:#7a7367">(Supabase 522 — applies will still save to localStorage + function logs)</span>':''}</div>
+        <div><span style="color:${edgeFnHealthy?'#4a7c6a':'#a83d3d'};font-size:14px">●</span> <strong>Submit endpoint:</strong> ${edgeFnHealthy?'live':'unreachable'}</div>
+        <div><span style="color:#c8940e;font-size:14px">●</span> <strong>Email notifications:</strong> add <code style="background:#f1ebe0;padding:2px 6px;border-radius:4px;font-family:'Geist Mono',monospace;font-size:11px">RESEND_API_KEY</code> to <a href="https://supabase.com/dashboard/project/dwpxsaamaehtmhsuuprg/functions/secrets" target="_blank" style="color:#c25420">Supabase secrets</a> to enable</div>
+      </div>
+    `;
 
     // 1. Pull from Supabase
     try {
