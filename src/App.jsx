@@ -189,7 +189,11 @@ function Marketing({ onStart }) {
               flagship: false,
             },
           ].map((c,i) => {
-            const onCardClick = () => onStart("parent");
+            const isMissoula = c.name === "Missoula";
+            const onCardClick = () => {
+              if (isMissoula) window.location.href = "/missoula.html";
+              else onStart("parent");
+            };
             return (
               <div key={i} className={`card fu d${i+1}`} onClick={onCardClick} style={{
                 textDecoration: "none", color: "inherit",
@@ -3432,6 +3436,124 @@ function StudentAssessment({ onDone }) {
 // ── CAMPUS DIRECTOR PORTAL ───────────────────────────────────────────────────
 // Inspired by Alpha School model: Director owns the parent relationship.
 // Guides focus 100% on facilitation. Director handles comms, community, enrollment.
+// ── CAMPUS APPLICATIONS TABLE — pulls real applications from Supabase ──
+function CampusApplicationsTable({ filter }) {
+  const [apps, setApps] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [usingDemo, setUsingDemo] = useState(false);
+
+  useEffect(() => {
+    async function fetchApps() {
+      setLoading(true);
+      const url = import.meta.env.VITE_SUPABASE_URL;
+      const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      let realApps = [];
+
+      // 1. Try Supabase
+      if (url && key) {
+        try {
+          const res = await fetch(`${url}/rest/v1/applications?order=submitted_at.desc&limit=50`, {
+            headers: { "apikey": key, "Authorization": `Bearer ${key}` },
+          });
+          if (res.ok) realApps = await res.json();
+        } catch (e) { console.warn("Couldn't fetch applications:", e); }
+      }
+
+      // 2. Also pull localStorage submissions (backup from form submits)
+      try {
+        const local = JSON.parse(localStorage.getItem("neo_applications") || "[]");
+        const localFormatted = local.map(l => ({
+          id: l.id,
+          submitted_at: l.submitted_at,
+          form_data: l,
+          child_name: l.child_name,
+          grade: l.grade,
+          campus: l.campus,
+          status: "new",
+          source: "localStorage",
+        }));
+        realApps = [...realApps, ...localFormatted];
+      } catch {}
+
+      if (realApps.length === 0) {
+        // Fallback to demo data so the table never looks empty
+        setUsingDemo(true);
+        setApps([
+          { family:"Yang",      child:"Mia",      grade:"K",   stage:"Deposit paid",   stageColor:"#c8940e", source:"Founder referral", last:"3 days ago",   next:"Send welcome packet" },
+          { family:"Chen",      child:"Liam",     grade:"1st", stage:"Applied",        stageColor:"#d9622b", source:"Instagram",         last:"yesterday",    next:"Review application" },
+          { family:"Rodriguez", child:"Sofia",    grade:"K",   stage:"Tour scheduled", stageColor:"#2d6ea8", source:"Google",            last:"this morning", next:"Tour on Thu 2pm" },
+          { family:"Patel",     child:"Arjun",    grade:"K",   stage:"New inquiry",    stageColor:"#7c4a9a", source:"Friend referral",   last:"2 days ago",   next:"Reply to inquiry email" },
+        ]);
+      } else {
+        setUsingDemo(false);
+        setApps(realApps.map(a => {
+          const fd = a.form_data || {};
+          const stageMap = {
+            "new":         { stage:"New inquiry",    color:"#7c4a9a" },
+            "reviewing":   { stage:"Reviewing",      color:"#d9622b" },
+            "accepted":    { stage:"Accepted",       color:"#4a7c6a" },
+            "waitlisted":  { stage:"Waitlisted",     color:"#2d6ea8" },
+            "rejected":    { stage:"Declined",       color:"#a83d3d" },
+          };
+          const sm = stageMap[a.status] || stageMap["new"];
+          const d = new Date(a.submitted_at);
+          const days = Math.floor((Date.now() - d.getTime()) / 86400000);
+          const lastStr = days === 0 ? "today" : days === 1 ? "yesterday" : `${days} days ago`;
+          return {
+            family: (fd.parent_name || fd.parentName || "—").split(" ").slice(-1)[0],
+            child:  a.child_name || fd.child_name || fd.childName || "—",
+            grade:  (a.grade || fd.grade || "").replace(/^([0-9])/, "$1").substring(0, 4),
+            stage:  sm.stage,
+            stageColor: sm.color,
+            source: fd.source || a.source || "Direct",
+            last:   lastStr,
+            next:   a.status === "new" ? "Review application" : "Follow up",
+            email:  fd.email || "",
+          };
+        }));
+      }
+      setLoading(false);
+    }
+    fetchApps();
+  }, [filter]);
+
+  if (loading) return <div className="card" style={{ padding:30, textAlign:"center", color:"var(--mu)" }}>Loading applications…</div>;
+
+  const filtered = filter && filter !== "All" ? apps.filter(a => a.stage.toLowerCase().includes(filter.toLowerCase())) : apps;
+
+  return (
+    <>
+      <div className="card fu" style={{ padding:0, overflow:"hidden" }}>
+        <table style={{ width:"100%", borderCollapse:"collapse", fontSize:12 }}>
+          <thead style={{ background:"var(--p)" }}><tr>
+            {["Family","Child","Grade","Stage","Source","Last contact","Next step"].map(h => <th key={h} style={{ textAlign:"left", padding:"9px 11px", fontSize:10, fontWeight:700, color:"var(--mu)", textTransform:"uppercase" }}>{h}</th>)}
+          </tr></thead>
+          <tbody>
+            {filtered.length === 0 ? (
+              <tr><td colSpan={7} style={{ padding:30, textAlign:"center", color:"var(--mu)", fontStyle:"italic" }}>No applications matching this filter.</td></tr>
+            ) : filtered.map((f,i) => (
+              <tr key={i} style={{ borderBottom:"1px solid var(--p2)", cursor:"pointer" }} onMouseOver={e => e.currentTarget.style.background="var(--p)"} onMouseOut={e => e.currentTarget.style.background="#fff"}>
+                <td style={{ padding:"10px 11px", fontWeight:600 }}>{f.family}{f.email && <div style={{ fontSize:10, color:"var(--mu)", fontWeight:400 }}>{f.email}</div>}</td>
+                <td style={{ padding:"10px 11px" }}>{f.child}</td>
+                <td style={{ padding:"10px 11px", color:"var(--mu)" }}>{f.grade}</td>
+                <td style={{ padding:"10px 11px" }}><span style={{ background:f.stageColor+"22", color:f.stageColor, padding:"3px 9px", borderRadius:99, fontSize:11, fontWeight:600 }}>{f.stage}</span></td>
+                <td style={{ padding:"10px 11px", fontSize:11, color:"var(--mu)" }}>{f.source}</td>
+                <td style={{ padding:"10px 11px", fontSize:11, color:"var(--mu)" }}>{f.last}</td>
+                <td style={{ padding:"10px 11px", fontSize:11.5, color:"var(--or)", fontWeight:500 }}>→ {f.next}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p style={{ textAlign:"center", fontSize:11, color:"var(--mu)", marginTop:14 }}>
+        {usingDemo
+          ? "📋 Demo data shown — real applications will appear here once families apply"
+          : `${filtered.length} application${filtered.length === 1 ? "" : "s"} · live from Supabase + localStorage`}
+      </p>
+    </>
+  );
+}
+
 function CampusDirectorPortal({ user }) {
   const [view, setView]         = useState("overview");
   const [activeTool, setActiveTool] = useState(null);
@@ -3441,6 +3563,7 @@ function CampusDirectorPortal({ user }) {
   const [sent, setSent]         = useState({});
   const [newsletter, setNewsletter] = useState(null);
   const [loadNL, setLoadNL]     = useState(false);
+  const [waitlistFilter, setWaitlistFilter] = useState("All");
   const [showPay, setShowPay]   = useState(false);
 
   const nav = [
@@ -3809,48 +3932,17 @@ Return ONLY valid JSON:
               ))}
             </div>
 
-            {/* Filter pills */}
+            {/* Filter pills — functional */}
             <div style={{ display:"flex", gap:7, marginBottom:14, flexWrap:"wrap" }}>
-              {["All (94)","New inquiry","Tour scheduled","Applied","Deposit paid","Needs follow-up"].map((f,i) => (
-                <button key={i} className="btn bg sm" style={{ fontSize:11, padding:"5px 11px", background: i===0 ? "var(--nv)":"var(--p)", color: i===0 ? "#fff":"var(--mu)" }}>
+              {["All","New inquiry","Tour scheduled","Applied","Deposit paid","Needs follow-up"].map((f,i) => (
+                <button key={i} onClick={() => setWaitlistFilter(f)} className="btn bg sm" style={{ fontSize:11, padding:"5px 11px", background: waitlistFilter===f ? "var(--nv)":"var(--p)", color: waitlistFilter===f ? "#fff":"var(--mu)", border:"none", cursor:"pointer" }}>
                   {f}
                 </button>
               ))}
             </div>
 
-            {/* CRM table */}
-            <div className="card fu" style={{ padding:0, overflow:"hidden" }}>
-              <table style={{ width:"100%", borderCollapse:"collapse", fontSize:12 }}>
-                <thead style={{ background:"var(--p)" }}><tr>
-                  {["Family","Child","Grade","Stage","Source","Last contact","Next step"].map(h => <th key={h} style={{ textAlign:"left", padding:"9px 11px", fontSize:10, fontWeight:700, color:"var(--mu)", textTransform:"uppercase" }}>{h}</th>)}
-                </tr></thead>
-                <tbody>
-                  {[
-                    { family:"Yang",      child:"Mia",      grade:"K",   stage:"Deposit paid",   stageColor:"#c8940e", source:"Founder referral", last:"3 days ago",   next:"Send welcome packet" },
-                    { family:"Chen",      child:"Liam",     grade:"1st", stage:"Applied",        stageColor:"#d9622b", source:"Instagram",         last:"yesterday",    next:"Review application" },
-                    { family:"Rodriguez", child:"Sofia",    grade:"K",   stage:"Tour scheduled", stageColor:"#2d6ea8", source:"Google",            last:"this morning", next:"Tour on Thu 2pm" },
-                    { family:"Patel",     child:"Arjun",    grade:"K",   stage:"New inquiry",    stageColor:"#7c4a9a", source:"Friend referral",   last:"2 days ago",   next:"Reply to inquiry email" },
-                    { family:"Müller",    child:"Lukas",    grade:"1st", stage:"Applied",        stageColor:"#d9622b", source:"Podcast",           last:"4 days ago",   next:"Schedule tour" },
-                    { family:"Park",      child:"Ji-woo",   grade:"K",   stage:"Deposit paid",   stageColor:"#c8940e", source:"Founder referral", last:"1 week ago",   next:"Send assessment link" },
-                    { family:"O'Brien",   child:"Aoife",    grade:"1st", stage:"Tour scheduled", stageColor:"#2d6ea8", source:"School fair",       last:"2 days ago",   next:"Tour Fri 10am" },
-                    { family:"Johnson",   child:"Riley",    grade:"K",   stage:"New inquiry",    stageColor:"#7c4a9a", source:"Google",            last:"yesterday",    next:"Send info packet" },
-                  ].map((f,i) => (
-                    <tr key={i} style={{ borderBottom:"1px solid var(--p2)", cursor:"pointer" }} onMouseOver={e => e.currentTarget.style.background="var(--p)"} onMouseOut={e => e.currentTarget.style.background="#fff"}>
-                      <td style={{ padding:"10px 11px", fontWeight:600 }}>{f.family}</td>
-                      <td style={{ padding:"10px 11px" }}>{f.child}</td>
-                      <td style={{ padding:"10px 11px", color:"var(--mu)" }}>{f.grade}</td>
-                      <td style={{ padding:"10px 11px" }}><span style={{ background:f.stageColor+"22", color:f.stageColor, padding:"3px 9px", borderRadius:99, fontSize:11, fontWeight:600 }}>{f.stage}</span></td>
-                      <td style={{ padding:"10px 11px", fontSize:11, color:"var(--mu)" }}>{f.source}</td>
-                      <td style={{ padding:"10px 11px", fontSize:11, color:"var(--mu)" }}>{f.last}</td>
-                      <td style={{ padding:"10px 11px", fontSize:11.5, color:"var(--or)", fontWeight:500 }}>→ {f.next}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <p style={{ textAlign:"center", fontSize:11, color:"var(--mu)", marginTop:14 }}>
-              Showing 8 of 94 · <a href="#" style={{ color:"var(--or)" }}>view all</a> · <a href="#" style={{ color:"var(--or)" }}>export CSV</a>
-            </p>
+            {/* CRM table — REAL applications from Supabase + demo fallback */}
+            <CampusApplicationsTable filter={waitlistFilter} />
           </div>
         )}
 
