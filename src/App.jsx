@@ -720,16 +720,37 @@ function ParentOnboarding({ user, onDone }) {
                       <div style={{ display: "flex", gap: 8 }}><span style={{ fontSize: 16 }}>{s.icon}</span><div><p style={{ fontSize: 10, fontWeight: 700, color: s.c, textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 3 }}>{s.lbl}</p><p style={{ fontSize: 12.5, lineHeight: 1.6 }}>{s.txt}</p></div></div>
                     </div>
                   ))}
-                  <p className="lbl" style={{ marginBottom: 10 }}>Subject plan <span style={{ fontWeight:400, color:"var(--mu)", fontSize:10 }}>(tap a tool to preview)</span></p>
+                  <p className="lbl" style={{ marginBottom: 10 }}>Subject plan <span style={{ fontWeight:400, color:"var(--mu)", fontSize:10 }}>(tap any row to preview)</span></p>
                   {curriculum.subjects?.map((s, i) => (
-                    <div key={i} style={{ background: "var(--p)", borderRadius: 11, padding: 12, marginBottom: 8 }}>
+                    <div
+                      key={i}
+                      onClick={() => s.tool && setActiveTool(resolveTool(s.tool))}
+                      style={{
+                        background: "var(--p)",
+                        borderRadius: 11,
+                        padding: 12,
+                        marginBottom: 8,
+                        cursor: s.tool ? "pointer" : "default",
+                        transition:"background .15s, transform .1s",
+                        border:"1px solid transparent",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (s.tool) {
+                          e.currentTarget.style.background = "#fff";
+                          e.currentTarget.style.borderColor = "var(--or)";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = "var(--p)";
+                        e.currentTarget.style.borderColor = "transparent";
+                      }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                         <span style={{ fontSize: 18 }}>{s.emoji}</span><span style={{ fontWeight: 700, fontSize: 13 }}>{s.name}</span>
-                        <button
-                          onClick={() => setActiveTool(resolveTool(s.tool))}
-                          style={{ fontSize: 10, background: "var(--nv)", color: "#fff", padding: "3px 9px", borderRadius: 99, fontWeight: 600, border: "none", cursor: "pointer", display:"inline-flex", alignItems:"center", gap:4 }}>
-                          {s.tool} →
-                        </button>
+                        {s.tool && (
+                          <span style={{ fontSize: 10, background: "var(--nv)", color: "#fff", padding: "3px 9px", borderRadius: 99, fontWeight: 600, display:"inline-flex", alignItems:"center", gap:4 }}>
+                            {s.tool} →
+                          </span>
+                        )}
                         <span style={{ marginLeft: "auto", fontSize: 11, fontWeight: 700, color: "var(--or)" }}>{s.mins}m/wk</span>
                       </div>
                       <p style={{ fontSize: 12, color: "var(--mu)", lineHeight: 1.5, marginBottom: 6 }}>{s.focus}</p>
@@ -1002,19 +1023,38 @@ function ParentDashboard({ user, data }) {
                   {curriculum.subjects.map((s, i) => {
                     const completed = Math.min(85 + (i*3) % 18, 100);
                     return (
-                      <div key={i} style={{ marginBottom:11 }}>
+                      <div
+                        key={i}
+                        onClick={() => s.tool && setActiveTool(resolveTool(s.tool))}
+                        style={{
+                          marginBottom:11,
+                          padding:"10px 12px",
+                          borderRadius:10,
+                          cursor: s.tool ? "pointer" : "default",
+                          transition:"background .15s, border-color .15s",
+                          border:"1px solid transparent",
+                        }}
+                        onMouseEnter={(e) => {
+                          if (s.tool) {
+                            e.currentTarget.style.background = "var(--p)";
+                            e.currentTarget.style.borderColor = "var(--p2)";
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = "transparent";
+                          e.currentTarget.style.borderColor = "transparent";
+                        }}>
                         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:6, marginBottom:4 }}>
-                          <div style={{ display:"flex", alignItems:"center", gap:7, flex:1 }}>
+                          <div style={{ display:"flex", alignItems:"center", gap:7, flex:1, minWidth:0 }}>
                             <span style={{ fontSize:14 }}>{s.emoji}</span>
                             <span style={{ fontSize:13, fontWeight:600 }}>{s.name}</span>
                             {s.tool && (
-                              <button onClick={() => setActiveTool(resolveTool(s.tool))}
-                                style={{ fontSize:10, background:"var(--nv)", color:"#fff", padding:"3px 9px", borderRadius:99, border:"none", cursor:"pointer", fontWeight:600 }}>
+                              <span style={{ fontSize:10, background:"var(--nv)", color:"#fff", padding:"3px 9px", borderRadius:99, fontWeight:600, flexShrink:0 }}>
                                 ▶ {s.tool}
-                              </button>
+                              </span>
                             )}
                           </div>
-                          <span style={{ fontSize:11, fontWeight:700, color:completed>=90?"var(--sg)":"var(--or)" }}>{completed}%</span>
+                          <span style={{ fontSize:11, fontWeight:700, color:completed>=90?"var(--sg)":"var(--or)", flexShrink:0 }}>{completed}%</span>
                         </div>
                         <PBar v={completed} c={completed>=90?"var(--sg)":"var(--or)"} h={3}/>
                       </div>
@@ -2739,8 +2779,18 @@ function LearningTrajectory({ studentName, studentGrade, mem }) {
 
 // ── SIM VIEWER MODAL ─────────────────────────────────────────────────────────
 function SimViewer({ tool, onClose }) {
-  const [loaded, setLoaded] = useState(false);
+  const [loaded, setLoaded] = useState(!tool.embed); // skip loading state entirely for non-embeddable
   const [error, setError]   = useState(false);
+
+  // Auto-open in new tab for known-blocked providers after 1.5s so user isn't stuck
+  useEffect(() => {
+    if (!tool.embed) {
+      const t = setTimeout(() => {
+        // Surface the "Open full" CTA prominently — don't auto-open (popup-blocker would catch it)
+      }, 0);
+      return () => clearTimeout(t);
+    }
+  }, [tool.embed]);
 
   // Some iframes time out silently — detect via load event
   const handleLoad = () => setLoaded(true);
@@ -2775,13 +2825,12 @@ function SimViewer({ tool, onClose }) {
       {/* Sim description strip */}
       <div style={{ background:"var(--p)", padding:"6px 18px", fontSize:12, color:"var(--mu)", flexShrink:0 }}>
         {tool.desc}
-        {!tool.embed && <span style={{ marginLeft:10, color:"var(--rd)", fontWeight:600 }}>⚠ This provider blocks embedding — use "Open full" ↗ above</span>}
       </div>
 
-      {/* Iframe */}
+      {/* Iframe or fallback */}
       <div style={{ flex:1, position:"relative", background:"#fff" }}>
-        {!loaded && !error && (
-          <div style={{ position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", background:"var(--cr)", gap:12 }}>
+        {tool.embed && !loaded && !error && (
+          <div style={{ position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", background:"var(--cr)", gap:12, zIndex:2 }}>
             <div style={{ width:40, height:40, borderRadius:"50%", background:"var(--nv)", display:"flex", alignItems:"center", justifyContent:"center" }}>
               <div className="spn"/>
             </div>
@@ -2799,16 +2848,19 @@ function SimViewer({ tool, onClose }) {
             onError={handleError}
           />
         ) : (
-          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", height:"100%", gap:16, background:"var(--cr)" }}>
-            <span style={{ fontSize:48 }}>{tool.emoji}</span>
-            <h2 className="h2">{tool.label}</h2>
-            <p className="mu" style={{ fontSize:14, maxWidth:400, textAlign:"center", lineHeight:1.7 }}>{tool.desc}</p>
-            <p style={{ fontSize:12, color:"var(--mu)", background:"var(--p)", borderRadius:10, padding:"8px 16px" }}>
-              This provider doesn't allow direct embedding. Click "Open full" to launch in a new tab.
-            </p>
-            <a href={tool.url} target="_blank" rel="noopener noreferrer" className="btn bo" style={{ textDecoration:"none", fontSize:15, padding:"13px 28px" }}>
-              Open {tool.label} →
+          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", height:"100%", gap:18, background:"var(--cr)", padding:40 }}>
+            <span style={{ fontSize:64, marginBottom:6 }}>{tool.emoji}</span>
+            <h2 className="h2" style={{ fontSize:30, fontFamily:"'Fraunces',serif", fontWeight:400, textAlign:"center" }}>{tool.label}</h2>
+            <p style={{ fontFamily:"'Newsreader',serif", fontSize:16, color:"var(--mu)", maxWidth:480, textAlign:"center", lineHeight:1.6, fontWeight:300 }}>{tool.desc}</p>
+            <a href={tool.url} target="_blank" rel="noopener noreferrer" className="btn bo" style={{ textDecoration:"none", fontSize:16, padding:"15px 36px", marginTop:8 }}>
+              Open {tool.label} in new tab ↗
             </a>
+            <p style={{ fontFamily:"'Geist Mono',monospace", fontSize:10.5, color:"var(--mu)", letterSpacing:".05em", textTransform:"uppercase", marginTop:14 }}>
+              {tool.cat} · {tool.grades} · {tool.subject}
+            </p>
+            <p style={{ fontSize:11, color:"var(--mu)", maxWidth:380, textAlign:"center", lineHeight:1.5, marginTop:4, fontStyle:"italic" }}>
+              {tool.label} doesn't allow embedding within other sites — it'll open as a separate tab so your student can use it directly.
+            </p>
           </div>
         )}
       </div>
@@ -4021,7 +4073,23 @@ export default function App() {
   useEffect(() => {
     const saved = localStorage.getItem("neo_current");
     if (saved) { const u = JSON.parse(saved); setUser(u); setRole(u.role); setScreen("app"); }
+    // Restore parent data + screen position
+    const pd = localStorage.getItem("neo_parent_data");
+    if (pd) {
+      try { setParentData(JSON.parse(pd)); } catch {}
+    }
+    const lastScreen = localStorage.getItem("neo_last_screen");
+    if (lastScreen && saved) setScreen(lastScreen);
   }, []);
+
+  // Persist screen + parent data on change so users keep state across reloads/navigation
+  useEffect(() => {
+    if (screen !== "marketing") localStorage.setItem("neo_last_screen", screen);
+  }, [screen]);
+
+  useEffect(() => {
+    if (parentData) localStorage.setItem("neo_parent_data", JSON.stringify(parentData));
+  }, [parentData]);
 
   const handleRole = (r)  => { setRole(r); setScreen("auth"); };
   const handleAuth = (u)  => { setUser(u); if (u.role === "parent") setScreen("onboard"); else setScreen("app"); };
@@ -4033,7 +4101,12 @@ export default function App() {
     else            setScreen("app");
   };
   const handleApplied = () => setScreen("app");
-  const logout = () => { localStorage.removeItem("neo_current"); setUser(null); setRole(null); setScreen("marketing"); };
+  const logout = () => {
+    localStorage.removeItem("neo_current");
+    localStorage.removeItem("neo_last_screen");
+    localStorage.removeItem("neo_parent_data");
+    setUser(null); setRole(null); setScreen("marketing");
+  };
 
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
