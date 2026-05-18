@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /labs-check.html
+
+Sitemap: https://neoschool.me/sitemap.xml
