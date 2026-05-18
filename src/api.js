@@ -70,6 +70,39 @@ export async function genJSON(prompt, maxT = 900) {
 }
 
 // ── Curriculum for parent onboarding ─────────────────────────────────────────
+import { LABS } from "./data.js";
+
+// Pick 2-3 relevant labs from our catalog for a given subject + grade
+function pickLabsForSubject(subjectName, gradeStr) {
+  const subjLower = subjectName.toLowerCase();
+  const gradeNum = parseInt((gradeStr || "").match(/\d+/)?.[0] || "3", 10);
+
+  // Match labs by topic keywords
+  const topicMatch = (lab) => {
+    const tx = (lab.topic + " " + lab.title + " " + (lab.skills || []).join(" ")).toLowerCase();
+    if (subjLower.includes("math") || subjLower.includes("number"))
+      return tx.includes("math") || tx.includes("fraction") || tx.includes("multipl") || tx.includes("divis") || tx.includes("addition") || tx.includes("subtract") || tx.includes("number");
+    if (subjLower.includes("science") || subjLower.includes("biology") || subjLower.includes("physic") || subjLower.includes("chem"))
+      return tx.includes("biology") || tx.includes("physics") || tx.includes("science") || tx.includes("nerve") || tx.includes("cardiac") || tx.includes("newton") || tx.includes("ohm");
+    if (subjLower.includes("read") || subjLower.includes("literac") || subjLower.includes("language"))
+      return tx.includes("read") || tx.includes("literac") || tx.includes("phonics");
+    return false;
+  };
+
+  // Grade-appropriate filter
+  const gradeMatch = (lab) => {
+    const m = (lab.grades || "").match(/(\d+)[\D]+(\d+)/);
+    if (!m) return true;
+    const min = parseInt(m[1], 10), max = parseInt(m[2], 10);
+    return gradeNum >= min - 1 && gradeNum <= max + 1;
+  };
+
+  const matches = LABS.filter(l => topicMatch(l) && gradeMatch(l));
+  // Shuffle a bit so different parents see different labs
+  const shuffled = matches.sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, 3).map(l => ({ id: l.id, title: l.title, emoji: l.emoji, url: l.url }));
+}
+
 export async function genCurriculum(form) {
   const name  = form.childName || "your child";
   const grade = form.grade || "3rd Grade";
@@ -97,6 +130,11 @@ Return ONLY this JSON (no extra text):
 Include 5 subjects and 4 workshops (Life skills: cooking, gardening, communication, financial literacy, entrepreneurship, emotional intelligence, survival skills).
 Prefer iframe-friendly tools: Zearn, PhET, Scratch, GeoGebra, Desmos, Code.org, Canva, Duolingo, CommonLit.
 For "uniqueGenius" — be SPECIFIC to ${name}'s grade and goals, not generic. Frame as their unique super-power.`, 1200);
+
+    // After getting the AI response, enrich each subject with specific labs from our catalog
+    if (c.subjects) {
+      c.subjects = c.subjects.map(s => ({ ...s, labs: pickLabsForSubject(s.name, grade) }));
+    }
     return c;
   } catch (e) {
     console.warn("genCurriculum used fallback:", e.message);
@@ -105,11 +143,11 @@ For "uniqueGenius" — be SPECIFIC to ${name}'s grade and goals, not generic. Fr
       morning: `${name} starts with a focused 2-hour academic block covering math and reading using AI-powered tools that adapt to their pace.`,
       afternoon: "Afternoons are for creative projects, outdoor exploration, and real-world skills that AI can never replace.",
       subjects: [
-        { name:"Math",    emoji:"🔢", tool:"Zearn",        focus:"Building strong number sense with adaptive daily practice.", mins:60 },
-        { name:"Reading", emoji:"📖", tool:"CommonLit",    focus:"Developing comprehension through engaging grade-level texts.", mins:45 },
-        { name:"Science", emoji:"🔬", tool:"PhET",         focus:"Hands-on inquiry using interactive simulations.", mins:30 },
-        { name:"Coding",  emoji:"💻", tool:"Scratch",      focus:"Building logical thinking through creative projects.", mins:30 },
-        { name:"Arts",    emoji:"🎨", tool:"Canva",        focus:"Creative expression and visual design thinking.", mins:30 },
+        { name:"Math",    emoji:"🔢", tool:"Zearn",        focus:"Building strong number sense with adaptive daily practice.", mins:60, labs: pickLabsForSubject("Math", grade) },
+        { name:"Reading", emoji:"📖", tool:"CommonLit",    focus:"Developing comprehension through engaging grade-level texts.", mins:45, labs: pickLabsForSubject("Reading", grade) },
+        { name:"Science", emoji:"🔬", tool:"PhET",         focus:"Hands-on inquiry using interactive simulations.", mins:30, labs: pickLabsForSubject("Science", grade) },
+        { name:"Coding",  emoji:"💻", tool:"Scratch",      focus:"Building logical thinking through creative projects.", mins:30, labs: [] },
+        { name:"Arts",    emoji:"🎨", tool:"Canva",        focus:"Creative expression and visual design thinking.", mins:30, labs: [] },
       ],
       workshops: [
         { name:"Cooking",                emoji:"🍳", cadence:"1x/week", desc:"Real-world math, fractions, and self-sufficiency through kitchen science." },

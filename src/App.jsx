@@ -755,6 +755,44 @@ function ParentOnboarding({ user, onDone }) {
                       </div>
                       <p style={{ fontSize: 12, color: "var(--mu)", lineHeight: 1.5, marginBottom: 6 }}>{s.focus}</p>
                       <PBar v={(s.mins / 90) * 100} />
+
+                      {/* Specific labs for this subject — from our 75-lab catalog */}
+                      {s.labs && s.labs.length > 0 && (
+                        <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid var(--p2)" }}>
+                          <p style={{ fontFamily:"'Geist Mono',monospace", fontSize: 9.5, color:"var(--mu)", letterSpacing:".08em", textTransform:"uppercase", marginBottom: 6 }}>
+                            🎮 {s.labs.length} hands-on labs included
+                          </p>
+                          <div style={{ display:"flex", flexWrap:"wrap", gap: 6 }}>
+                            {s.labs.map((lab, j) => (
+                              <a
+                                key={j}
+                                href={lab.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                style={{
+                                  display:"inline-flex",
+                                  alignItems:"center",
+                                  gap: 5,
+                                  background:"#fff",
+                                  border:"1px solid var(--p2)",
+                                  borderRadius: 8,
+                                  padding:"5px 9px",
+                                  fontSize: 11,
+                                  fontWeight: 500,
+                                  color:"var(--tx)",
+                                  textDecoration:"none",
+                                  transition:"all .15s"
+                                }}
+                                onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--or)"; e.currentTarget.style.color = "var(--or)"; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--p2)"; e.currentTarget.style.color = "var(--tx)"; }}>
+                                <span>{lab.emoji}</span>
+                                <span>{lab.title}</span>
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
 
@@ -830,6 +868,99 @@ function ParentOnboarding({ user, onDone }) {
 }
 
 // ── PARENT DASHBOARD ──────────────────────────────────────────────────────────
+// ── ACTIVITY TIMELINE — shows all saved sessions across labs ─────────────────
+function ActivityTimeline({ studentId, childName }) {
+  const mem = getMemory(studentId);
+  const sessions = (mem.sessions || []).slice().reverse();
+
+  return (
+    <div className="fu">
+      <div style={{ marginBottom:20 }}>
+        <p className="eyebrow" style={{ marginBottom:6 }}>Learning history</p>
+        <h2 style={{ fontFamily:"'Fraunces',serif", fontSize:24, fontWeight:400, letterSpacing:"-.012em", lineHeight:1.15 }}>
+          Everything {childName} has done
+        </h2>
+        <p style={{ fontFamily:"'Newsreader',serif", fontSize:14, color:"var(--mu)", marginTop:4, fontStyle:"italic" }}>
+          {sessions.length === 0
+            ? "No sessions yet — start a lab to see activity here."
+            : `${sessions.length} session${sessions.length === 1 ? "" : "s"} across ${new Set(sessions.map(s=>s.lab)).size} labs · ${Math.round(mem.totalMins)} minutes total`}
+        </p>
+      </div>
+
+      {/* Stats summary cards */}
+      {sessions.length > 0 && (
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:18 }}>
+          <div className="card" style={{ padding:"14px 16px" }}>
+            <p className="eyebrow" style={{ marginBottom:4 }}>Streak</p>
+            <p style={{ fontFamily:"'Fraunces',serif", fontSize:24, fontWeight:500, color:"var(--or)" }}>{mem.streak || 0} 🔥</p>
+            <p style={{ fontSize:11, color:"var(--mu)", marginTop:2 }}>days in a row</p>
+          </div>
+          <div className="card" style={{ padding:"14px 16px" }}>
+            <p className="eyebrow" style={{ marginBottom:4 }}>Velocity</p>
+            <p style={{ fontFamily:"'Fraunces',serif", fontSize:18, fontWeight:500, color:"var(--sg)", textTransform:"capitalize" }}>{mem.learningVelocity || "steady"}</p>
+            <p style={{ fontSize:11, color:"var(--mu)", marginTop:2 }}>last 5 sessions</p>
+          </div>
+        </div>
+      )}
+
+      {/* Strong/weak areas */}
+      {(mem.strongAreas?.length > 0 || mem.weakAreas?.length > 0) && (
+        <div className="card" style={{ marginBottom:14, padding:"14px 16px" }}>
+          {mem.strongAreas?.length > 0 && (
+            <div style={{ marginBottom: mem.weakAreas?.length > 0 ? 10 : 0 }}>
+              <p className="eyebrow" style={{ marginBottom:5, color:"var(--sg)" }}>✨ Strengths</p>
+              <p style={{ fontSize:13, color:"var(--tx)", lineHeight:1.5 }}>{mem.strongAreas.join(" · ")}</p>
+            </div>
+          )}
+          {mem.weakAreas?.length > 0 && (
+            <div>
+              <p className="eyebrow" style={{ marginBottom:5, color:"var(--or)" }}>🎯 Growth areas</p>
+              <p style={{ fontSize:13, color:"var(--tx)", lineHeight:1.5 }}>{mem.weakAreas.join(" · ")}</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Timeline of sessions */}
+      <p className="eyebrow" style={{ marginBottom:10, marginTop:18 }}>Recent sessions</p>
+      {sessions.length === 0 ? (
+        <div style={{ textAlign:"center", padding:"40px 20px", background:"var(--p)", borderRadius:14 }}>
+          <p style={{ fontSize:48, marginBottom:10 }}>🌱</p>
+          <p style={{ fontFamily:"'Fraunces',serif", fontStyle:"italic", color:"var(--mu)", fontSize:15 }}>
+            Once {childName} starts a lab, their activity will show up here.
+          </p>
+        </div>
+      ) : (
+        <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+          {sessions.slice(0, 30).map((s, i) => {
+            const date = new Date(s.timestamp);
+            const dateStr = date.toLocaleDateString(undefined, { month:"short", day:"numeric" });
+            const timeStr = date.toLocaleTimeString(undefined, { hour:"numeric", minute:"2-digit" });
+            const minsSpent = Math.round((s.duration || 0) / 60000);
+            const labInfo = LABS.find(l => l.id === s.lab);
+            return (
+              <div key={i} className="card" style={{ padding:"12px 14px", display:"flex", alignItems:"center", gap:12 }}>
+                <span style={{ fontSize:22 }}>{labInfo?.emoji || "📚"}</span>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <p style={{ fontFamily:"'Fraunces',serif", fontSize:14, fontWeight:500, color:"var(--tx)" }}>{labInfo?.title || s.lab}</p>
+                  <p style={{ fontFamily:"'Geist Mono',monospace", fontSize:10.5, color:"var(--mu)", letterSpacing:".04em", marginTop:2 }}>
+                    {dateStr} · {timeStr} · {minsSpent}m · {s.topic || labInfo?.topic || "—"}
+                  </p>
+                </div>
+                {s.score > 0 && (
+                  <div style={{ flexShrink:0, textAlign:"right" }}>
+                    <p style={{ fontFamily:"'Fraunces',serif", fontSize:18, fontWeight:500, color: s.score >= 70 ? "var(--sg)" : s.score >= 40 ? "var(--or)" : "var(--rd)" }}>{s.score}%</p>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ParentDashboard({ user, data }) {
   const [pulseScore, setPulseScore]  = useState(null);
   const [pulseWin, setPulseWin]      = useState("");
@@ -910,10 +1041,13 @@ function ParentDashboard({ user, data }) {
 
         {/* Tabs — refined editorial pill bar */}
         <div style={{ display:"flex", background:"var(--p)", padding:"4px", marginBottom:18, borderRadius:99, border:"1px solid var(--p2)" }}>
-          {[{id:"home",l:"Home"},{id:"coaching",l:"Parent Coaching"},{id:"future",l:"Future Explorer"}].map(t => (
+          {[{id:"home",l:"Home"},{id:"activity",l:"Activity"},{id:"coaching",l:"Coaching"},{id:"future",l:"Future"}].map(t => (
             <div key={t.id} onClick={() => setTab(t.id)} style={{ flex:1, textAlign:"center", padding:"8px 4px", borderRadius:99, cursor:"pointer", fontFamily:"'Fraunces',serif", fontSize:12.5, fontWeight:500, background:tab===t.id?"#fff":"transparent", color:tab===t.id?"var(--nv)":"var(--mu)", transition:"all .2s", letterSpacing:"-.005em", boxShadow: tab===t.id ? "var(--shadow-sm)" : "none" }}>{t.l}</div>
           ))}
         </div>
+
+        {/* ── ACTIVITY TAB ── all saved sessions across labs */}
+        {tab === "activity" && <ActivityTimeline studentId={user?.id || "demo"} childName={childName} />}
 
         {/* ── HOME TAB ── */}
         {tab === "home" && <>
@@ -4111,13 +4245,39 @@ export default function App() {
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
       {screen === "app" && (
-        <div style={{ background: "var(--nv)", padding: "9px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, zIndex: 10 }}>
-          <div onClick={() => { if (window.confirm("Go back to home?")) { setScreen("marketing"); setUser(null); setRole(null); } }} style={{ cursor: "pointer" }}><Logo l sz={13} /></div>
+        <div style={{ background: "var(--nv)", padding: "10px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, zIndex: 10 }}>
+          <button
+            onClick={() => { if (window.confirm("Return to the home page? Your work is auto-saved.")) { setScreen("marketing"); } }}
+            style={{
+              display:"flex",
+              alignItems:"center",
+              gap:8,
+              background:"rgba(255,255,255,.08)",
+              border:"1px solid rgba(255,255,255,.12)",
+              color:"#fff",
+              padding:"6px 14px 6px 10px",
+              borderRadius:99,
+              cursor:"pointer",
+              fontFamily:"'Fraunces',serif",
+              fontSize:13,
+              fontWeight:500,
+              letterSpacing:"-.005em",
+              transition:"all .18s"
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,.14)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,.08)"; }}>
+            <span style={{ fontSize:15, marginRight:2 }}>←</span> Home
+          </button>
+          <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+            <Logo l sz={12}/>
+          </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 11, color: "rgba(255,255,255,.45)", fontWeight: 500 }}>{user?.name}</span>
-            <span style={{ fontSize: 11, color: "rgba(255,255,255,.35)" }}>·</span>
-            <span style={{ fontSize: 11, color: "rgba(255,255,255,.45)", fontWeight: 500, textTransform: "capitalize" }}>{role}</span>
-            <button onClick={logout} style={{ background: "rgba(255,255,255,.1)", border: "none", cursor: "pointer", color: "rgba(255,255,255,.6)", fontSize: 11, padding: "5px 11px", borderRadius: 99 }}>Sign out</button>
+            <span style={{ fontFamily:"'Fraunces',serif", fontSize: 13, color: "rgba(255,255,255,.85)", fontWeight: 500 }}>{user?.name?.split(" ")[0]}</span>
+            <span style={{ fontFamily:"'Geist Mono',monospace", fontSize: 9.5, color: "rgba(255,255,255,.4)", textTransform:"uppercase", letterSpacing:".08em" }}>{role}</span>
+            <button onClick={logout}
+              style={{ background:"transparent", border:"1px solid rgba(255,255,255,.18)", cursor:"pointer", color:"rgba(255,255,255,.7)", fontSize:11, fontFamily:"'Geist Mono',monospace", padding:"5px 11px", borderRadius:99, letterSpacing:".04em" }}>
+              Sign out
+            </button>
           </div>
         </div>
       )}
