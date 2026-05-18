@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>neoschool · Missoula, Montana</title>
+<meta name="description" content="A microschool built for how kids actually learn. Missoula, Montana — Opening September 2026. Kindergarten + 1st Grade. Now enrolling founding families.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='42' fill='none' stroke='%231a1f3a' stroke-width='8'/%3E%3Cline x1='50' y1='8' x2='50' y2='92' stroke='%231a1f3a' stroke-width='8'/%3E%3Cline x1='8' y1='50' x2='92' y2='50' stroke='%231a1f3a' stroke-width='8'/%3E%3Ccircle cx='50' cy='50' r='10' fill='%23d9622b'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --cr:#faf4ed; --cr2:#f4ecdf;
+    --p:#f1ebe0; --p2:#e8dfd0; --p3:#ddd1bd;
+    --nv:#1a1f3a; --nv2:#252b4a;
+    --or:#c25420; --or2:#d9622b; --or3:#e8853f;
+    --sg:#4a7c6a; --rd:#a83d3d; --am:#c8940e; --pu:#7c4a9a;
+    --tx:#1a1612; --tx2:#3a3530; --mu:#7a7367;
+  }
+  html,body{font-family:'Newsreader',Georgia,serif;background:var(--cr);color:var(--tx);-webkit-font-smoothing:antialiased;line-height:1.6;font-size:16px}
+  body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.6 0 0 0 0 0.5 0 0 0 0 0.4 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:.5;mix-blend-mode:multiply}
+
+  .container{max-width:1100px;margin:0 auto;padding:0 24px;position:relative}
+
+  /* Top bar */
+  .topbar{background:var(--nv);color:#fff;padding:14px 0}
+  .topbar .container{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}
+  .brand-mark{width:26px;height:26px}
+  .brand-name{font-family:'Fraunces',serif;font-size:18px;font-weight:500;letter-spacing:-.01em}
+  .topbar-meta{font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.6)}
+  .topbar-cta{font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--or3);font-weight:500}
+
+  /* Hero */
+  .hero{padding:50px 0 30px}
+  .hero-image{width:100%;height:420px;border-radius:14px;background-image:url('/missoula/kids-flowers.jpg');background-size:cover;background-position:center 35%;background-color:var(--p);box-shadow:0 8px 32px rgba(26,31,58,.12)}
+  .hero-text{padding:40px 0 20px;max-width:760px;margin:0 auto;text-align:center}
+  .eyebrow{font-family:'Geist Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mu);margin-bottom:14px}
+  h1{font-family:'Fraunces',serif;font-size:clamp(40px,6vw,68px);font-weight:400;line-height:1.04;letter-spacing:-.02em;color:var(--nv);margin-bottom:18px}
+  h1 em{font-style:italic;font-weight:300;color:var(--or)}
+  .hero-sub{font-family:'Newsreader',serif;font-size:18px;line-height:1.55;color:var(--tx2);max-width:580px;margin:0 auto 26px;font-weight:300}
+  .pill-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:10px}
+  .pill{padding:8px 18px;background:var(--or);color:#fff;border-radius:99px;font-family:'Fraunces',serif;font-size:14px;font-weight:500;letter-spacing:-.005em}
+
+  /* Section */
+  section{padding:50px 0}
+  section h2{font-family:'Fraunces',serif;font-size:32px;font-weight:400;letter-spacing:-.015em;line-height:1.1;margin-bottom:8px;color:var(--nv)}
+  section h2 em{font-style:italic;color:var(--or);font-weight:300}
+  .section-eyebrow{font-family:'Geist Mono',monospace;font-size:11px;color:var(--or);letter-spacing:.12em;text-transform:uppercase;border-bottom:1.5px solid var(--or);display:inline-block;padding-bottom:4px;margin-bottom:18px}
+
+  /* A day at neoschool */
+  .day{background:#fff;border:1px solid var(--p2);border-radius:14px;padding:24px;display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+  .day-step{text-align:center;position:relative}
+  .day-step .accent{height:4px;background:var(--or);border-radius:99px;width:100%;margin-bottom:14px;opacity:.6}
+  .day-step:nth-child(1) .accent{background:var(--sg);width:30%;margin-left:auto;margin-right:auto}
+  .day-step:nth-child(2) .accent{background:var(--or);width:100%}
+  .day-step:nth-child(3) .accent{background:var(--or3);width:75%;margin-left:auto;margin-right:auto}
+  .day-step:nth-child(4) .accent{background:var(--pu);width:100%}
+  .day-step:nth-child(5) .accent{background:var(--am);width:50%;margin-left:auto;margin-right:auto}
+  .day-step .emoji{font-size:32px;margin-bottom:6px;display:block}
+  .day-step .name{font-family:'Fraunces',serif;font-weight:500;font-size:14.5px;margin-bottom:4px;line-height:1.2}
+  .day-step .time{font-family:'Geist Mono',monospace;font-size:10.5px;color:var(--mu);letter-spacing:.04em}
+  @media (max-width:720px){.day{grid-template-columns:repeat(2,1fr);gap:14px}}
+
+  /* Experience cards */
+  .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  @media (max-width:680px){.grid-2{grid-template-columns:1fr}}
+  .card{background:#fff;border:1px solid var(--p2);border-radius:14px;padding:22px 24px}
+  .card .ico{font-size:24px;margin-bottom:10px}
+  .card h3{font-family:'Fraunces',serif;font-size:18px;font-weight:500;margin-bottom:7px;letter-spacing:-.008em;color:var(--nv)}
+  .card p{font-family:'Newsreader',serif;font-size:14.5px;color:var(--tx2);line-height:1.6;font-weight:300}
+
+  /* Founder */
+  .founder{display:grid;grid-template-columns:1fr 1.2fr;gap:36px;align-items:center}
+  @media (max-width:780px){.founder{grid-template-columns:1fr}}
+  .founder-photo{width:100%;height:380px;border-radius:14px;background-image:url('/missoula/family.jpg');background-size:cover;background-position:center;box-shadow:0 8px 24px rgba(26,31,58,.1)}
+  .founder-text{font-family:'Newsreader',serif;font-size:16px;line-height:1.7;color:var(--tx2);font-weight:300}
+  .founder-text p{margin-bottom:16px}
+  .founder-sig{font-family:'Fraunces',serif;font-style:italic;font-size:18px;color:var(--or);margin-top:6px}
+
+  /* What's inside */
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media (max-width:680px){.grid-3{grid-template-columns:1fr 1fr}}
+  .inside-card{background:#fff;border:1px solid var(--p2);border-left:3px solid var(--or);border-radius:10px;padding:18px 20px;text-align:center}
+  .inside-card .h{font-family:'Fraunces',serif;font-size:16px;font-weight:600;margin-bottom:7px;color:var(--nv)}
+  .inside-card .h em{font-style:normal;color:var(--or);margin-right:5px}
+  .inside-card p{font-family:'Newsreader',serif;font-size:13px;color:var(--mu);line-height:1.55;font-weight:300}
+
+  /* Science */
+  .grid-4{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  @media (max-width:680px){.grid-4{grid-template-columns:1fr}}
+  .science-card{background:var(--p);border-radius:12px;padding:18px 20px}
+  .science-card h3{font-family:'Fraunces',serif;font-size:18px;font-weight:600;color:var(--or);margin-bottom:6px;letter-spacing:-.005em}
+  .science-card p{font-family:'Newsreader',serif;font-size:13.5px;color:var(--tx2);line-height:1.55;font-weight:300;margin-bottom:6px}
+  .science-card .src{font-family:'Geist Mono',monospace;font-size:10px;color:var(--mu);letter-spacing:.04em;text-transform:uppercase}
+
+  /* Apply form */
+  .apply{background:var(--nv);color:#fff;border-radius:18px;padding:40px;margin:30px 0;box-shadow:0 20px 60px -20px rgba(26,31,58,.4)}
+  .apply h2{color:#fff;margin-bottom:6px}
+  .apply h2 em{color:var(--or3)}
+  .apply-sub{font-family:'Newsreader',serif;font-style:italic;color:rgba(255,255,255,.7);font-size:16px;margin-bottom:28px;font-weight:300}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
+  @media (max-width:680px){.form-grid{grid-template-columns:1fr}}
+  label{display:block;font-family:'Geist Mono',monospace;font-size:10.5px;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px}
+  input,select,textarea{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#fff;padding:13px 16px;border-radius:10px;font-size:15px;font-family:'Newsreader',serif;outline:none;transition:all .18s}
+  input::placeholder,textarea::placeholder{color:rgba(255,255,255,.4);font-style:italic}
+  input:focus,select:focus,textarea:focus{border-color:var(--or3);background:rgba(255,255,255,.09);box-shadow:0 0 0 3px rgba(232,133,63,.18)}
+  textarea{resize:vertical;min-height:90px;line-height:1.5}
+  select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23ffffff80' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:42px}
+  select option{background:var(--nv);color:#fff}
+  .submit-btn{background:var(--or);color:#fff;border:none;padding:16px 32px;border-radius:99px;cursor:pointer;font-family:'Fraunces',serif;font-size:16px;font-weight:500;letter-spacing:-.005em;width:100%;transition:all .2s;margin-top:10px}
+  .submit-btn:hover{background:var(--or2);transform:translateY(-1px);box-shadow:0 8px 20px -6px rgba(217,98,43,.4)}
+  .submit-btn:disabled{opacity:.5;cursor:not-allowed}
+  .form-status{margin-top:14px;padding:12px 16px;border-radius:10px;font-family:'Newsreader',serif;font-size:14px;display:none}
+  .form-status.success{background:rgba(74,124,106,.2);color:#a8e0c4;border:1px solid rgba(74,124,106,.4);display:block}
+  .form-status.error{background:rgba(168,61,61,.2);color:#f0a4a4;border:1px solid rgba(168,61,61,.4);display:block}
+
+  /* Footer */
+  footer{background:var(--nv);color:#fff;padding:28px 0;margin-top:20px}
+  footer .container{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+  footer a{color:var(--or3);text-decoration:none;font-family:'Fraunces',serif;font-weight:500}
+  footer a:hover{color:#fff}
+  .footer-meta{font-family:'Newsreader',serif;font-style:italic;color:rgba(255,255,255,.55);font-size:14px;font-weight:300}
+
+  ::selection{background:rgba(194,84,32,.25);color:var(--nv)}
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="topbar">
+  <div class="container">
+    <a class="brand" href="/">
+      <svg class="brand-mark" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="40" fill="none" stroke="white" stroke-width="6"/>
+        <line x1="50" y1="10" x2="50" y2="90" stroke="white" stroke-width="6"/>
+        <line x1="10" y1="50" x2="90" y2="50" stroke="white" stroke-width="6"/>
+        <circle cx="50" cy="50" r="9" fill="#d9622b"/>
+      </svg>
+      <span class="brand-name">neoschool</span>
+    </a>
+    <span class="topbar-meta">Missoula, Montana · Opening Sept 2026</span>
+    <span class="topbar-cta">Now Enrolling · Founding Families</span>
+  </div>
+</div>
+
+<!-- Hero -->
+<div class="container hero">
+  <div class="hero-image"></div>
+  <div class="hero-text">
+    <p class="eyebrow">Built by the community, for the community</p>
+    <h1>A microschool built for how kids <em>actually</em> learn.</h1>
+    <p class="hero-sub">
+      neoschool brings together the best of classroom instruction and AI-adaptive learning.
+      Add hands-on life skills and real outdoor play, and kids have the time and space to grow their
+      knowledge, skills, and confidence.
+    </p>
+    <div class="pill-row">
+      <span class="pill">Kindergarten + 1st Grade</span>
+      <span class="pill">Mixed-Age Learning</span>
+      <span class="pill">10–12 students / class</span>
+      <span class="pill">Project-Based</span>
+    </div>
+  </div>
+</div>
+
+<!-- A day at neoschool -->
+<section class="container">
+  <p class="section-eyebrow">A day at neoschool</p>
+  <div class="day">
+    <div class="day-step"><div class="accent"></div><span class="emoji">🌳</span><div class="name">Morning<br>play</div><div class="time">30 min</div></div>
+    <div class="day-step"><div class="accent"></div><span class="emoji">🧠</span><div class="name">Personalized<br>academics</div><div class="time">2 hrs · 9–11am</div></div>
+    <div class="day-step"><div class="accent"></div><span class="emoji">🍎</span><div class="name">Outdoor play<br>+ lunch</div><div class="time">1.5 hrs · 11–12:30pm</div></div>
+    <div class="day-step"><div class="accent"></div><span class="emoji">🎨</span><div class="name">Real projects<br>+ life skills</div><div class="time">3 hrs · 12:30–3:30pm</div></div>
+    <div class="day-step"><div class="accent"></div><span class="emoji">☀️</span><div class="name">Outdoor<br>play</div><div class="time">1 hr · 3:30–4:30pm</div></div>
+  </div>
+</section>
+
+<!-- The neoschool experience -->
+<section class="container">
+  <p class="section-eyebrow">The neoschool experience</p>
+  <div class="grid-2">
+    <div class="card">
+      <div class="ico">🧠</div>
+      <h3>Personalized Academics</h3>
+      <p>Two focused hours blending AI-adaptive learning with proven classroom best practices: peer instruction, small-group activities, and real-time instructor feedback. Brain breaks between subjects.</p>
+    </div>
+    <div class="card">
+      <div class="ico">🔨</div>
+      <h3>Real-World Projects</h3>
+      <p>Hands-on projects that connect classroom learning to the world outside. Make, build, present, have fun.</p>
+    </div>
+    <div class="card">
+      <div class="ico">🍳</div>
+      <h3>Life Skills Workshops</h3>
+      <p>Conscious communication, emotion regulation, entrepreneurship, financial literacy, cooking, gardening, survival skills, and more.</p>
+    </div>
+    <div class="card">
+      <div class="ico">🌳</div>
+      <h3>Outdoor Play + Sports</h3>
+      <p>Unstructured time outside and sports every day. Dedicated forest days. Movement and free play improve attention.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Founder -->
+<section class="container">
+  <p class="section-eyebrow">Meet the founder</p>
+  <div class="founder">
+    <div class="founder-photo"></div>
+    <div class="founder-text">
+      <p>After considering traditional and alternative Kindergarten options for my son, I realized there was an opportunity to create a microschool where kids learn core academics at their own level and pace, and life skills that build real-world confidence and independence.</p>
+      <p>So I invited experienced educators (including Esther Wojcicki, educator and author of <em>How to Raise Successful People</em>), a community of families, and seasoned edtech entrepreneurs — the content providers behind AI tutors used by millions of students — to co-build the school we've all been dreaming of.</p>
+      <p>The first one opens in Missoula, where my kids are growing up as second generation Montanans. We'd love for your family to be part of it.</p>
+      <p class="founder-sig">— Jennie Yang</p>
+    </div>
+  </div>
+</section>
+
+<!-- What's inside -->
+<section class="container">
+  <p class="section-eyebrow">What's inside neoschool</p>
+  <div class="grid-3">
+    <div class="inside-card"><div class="h"><em>🎯</em>Powered by TRICK</div><p>Esther Wojcicki's proven framework for raising confident, self-directed kids</p></div>
+    <div class="inside-card"><div class="h"><em>🍎</em>Experienced educators</div><p>Passionate and engaging educators guide students through their learning journey</p></div>
+    <div class="inside-card"><div class="h"><em>📚</em>Educational library</div><p>Project-based learning games trusted by millions of kids online</p></div>
+    <div class="inside-card"><div class="h"><em>🏫</em>1000+ schools</div><p>Already use our content providers in daily teaching</p></div>
+    <div class="inside-card"><div class="h"><em>🤝</em>Community</div><p>Family events, parent coaching, and drop-in half days for homeschoolers</p></div>
+    <div class="inside-card"><div class="h"><em>📍</em>Missoula, MT</div><p>Local roots, second-generation Montanan founder, community-built</p></div>
+  </div>
+</section>
+
+<!-- Science -->
+<section class="container">
+  <p class="section-eyebrow">The learning science behind neoschool</p>
+  <div class="grid-4">
+    <div class="science-card">
+      <h3>2× learning gains</h3>
+      <p>AI tutoring produces 2× learning gains.</p>
+      <p class="src">Kestin et al., Scientific Reports, 2025</p>
+    </div>
+    <div class="science-card">
+      <h3>10–18 min per subject</h3>
+      <p>A kindergartner's attention span is roughly 10–18 minutes. Our short academic cycles with brain breaks are designed around this reality.</p>
+      <p class="src">Waterford.org, 2024</p>
+    </div>
+    <div class="science-card">
+      <h3>Learn by doing</h3>
+      <p>Project-based learning students outperform peers academically and develop stronger critical thinking, communication, and collaboration skills.</p>
+      <p class="src">Lucas Education Research, 2021–22 · Ferrero et al. 2021</p>
+    </div>
+    <div class="science-card">
+      <h3>Being outside = better attention</h3>
+      <p>Outdoor play improves attention in the classroom vs. indoor play. 3+ hrs/day linked to better school readiness.</p>
+      <p class="src">Koepp et al. 2022 · ScienceDirect 2024</p>
+    </div>
+  </div>
+</section>
+
+<!-- Apply / Register -->
+<section class="container" id="apply">
+  <div class="apply">
+    <p style="font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--or3);margin-bottom:10px;font-weight:500">Become a founding family</p>
+    <h2>Apply for <em>2026–2027</em></h2>
+    <p class="apply-sub">Kindergarten + 1st Grade · Limited spots available. We'll respond within 24 hours.</p>
+
+    <form id="applyForm" onsubmit="submitApplication(event)">
+      <div class="form-grid">
+        <div>
+          <label for="parentName">Parent name *</label>
+          <input id="parentName" name="parentName" type="text" required placeholder="Your full name">
+        </div>
+        <div>
+          <label for="email">Email *</label>
+          <input id="email" name="email" type="email" required placeholder="you@example.com">
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div>
+          <label for="phone">Phone</label>
+          <input id="phone" name="phone" type="tel" placeholder="(406) 555-0100">
+        </div>
+        <div>
+          <label for="childName">Child's name *</label>
+          <input id="childName" name="childName" type="text" required placeholder="Child's first name">
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div>
+          <label for="grade">Grade for 2026–27 *</label>
+          <select id="grade" name="grade" required>
+            <option value="">Select grade</option>
+            <option value="Kindergarten">Kindergarten</option>
+            <option value="1st Grade">1st Grade</option>
+            <option value="Other">Other (please specify in notes)</option>
+          </select>
+        </div>
+        <div>
+          <label for="situation">Current situation</label>
+          <select id="situation" name="situation">
+            <option value="">Select if applicable</option>
+            <option value="public">Public school</option>
+            <option value="private">Private school</option>
+            <option value="homeschool">Homeschooling</option>
+            <option value="preschool">Preschool / daycare</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-bottom:18px">
+        <label for="notes">What drew you to neoschool? (optional)</label>
+        <textarea id="notes" name="notes" placeholder="Tell us a bit about your child and what you're hoping for in their education..."></textarea>
+      </div>
+
+      <button type="submit" class="submit-btn" id="submitBtn">Apply for 2026–2027 →</button>
+
+      <div class="form-status" id="formStatus"></div>
+    </form>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="footer-meta">© neoschool · Missoula, MT · Opening Sept 2026</div>
+    <div style="font-family:'Newsreader',serif;color:rgba(255,255,255,.55);font-size:14px">
+      <a href="mailto:jennie@chiefmamaofficer.com">jennie@chiefmamaofficer.com</a>
+      &nbsp;·&nbsp;
+      <a href="/">Platform</a>
+    </div>
+  </div>
+</footer>
+
+<script type="module">
+  // Supabase client setup
+  const SUPABASE_URL = "https://dwpxsaamaehtmhsuuprg.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_eM_rkri5KfdnheOZyCNN3w_hqmN7M4k";
+
+  window.submitApplication = async function(e) {
+    e.preventDefault();
+    const form = document.getElementById("applyForm");
+    const btn = document.getElementById("submitBtn");
+    const status = document.getElementById("formStatus");
+    btn.disabled = true;
+    btn.textContent = "Submitting...";
+    status.className = "form-status";
+    status.style.display = "none";
+
+    const data = {
+      parent_name: form.parentName.value.trim(),
+      email: form.email.value.trim(),
+      phone: form.phone.value.trim() || null,
+      child_name: form.childName.value.trim(),
+      grade: form.grade.value,
+      campus: "Missoula",
+      situation: form.situation.value || null,
+      notes: form.notes.value.trim() || null,
+      source: "missoula-page",
+      submitted_at: new Date().toISOString(),
+    };
+
+    // 1. Save to Supabase `applications` table
+    let savedToSupabase = false;
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/applications`, {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+          "Content-Type": "application/json",
+          "Prefer": "return=minimal",
+        },
+        body: JSON.stringify({
+          form_data: data,
+          campus: "Missoula",
+          child_name: data.child_name,
+          grade: data.grade,
+          status: "new",
+        }),
+      });
+      if (res.ok) savedToSupabase = true;
+    } catch (err) { console.warn("Supabase save failed:", err); }
+
+    // 2. Always save to localStorage too (backup, parent can recover if needed)
+    try {
+      const local = JSON.parse(localStorage.getItem("neo_applications") || "[]");
+      local.push({ id: Date.now(), ...data });
+      localStorage.setItem("neo_applications", JSON.stringify(local));
+    } catch {}
+
+    // 3. Open a mailto with the application as fallback (works even with no DB)
+    const mailBody = `New neoschool Missoula application:\n\n` +
+      `Parent: ${data.parent_name}\n` +
+      `Email: ${data.email}\n` +
+      `Phone: ${data.phone || "—"}\n` +
+      `Child: ${data.child_name}\n` +
+      `Grade: ${data.grade}\n` +
+      `Situation: ${data.situation || "—"}\n\n` +
+      `Notes: ${data.notes || "—"}\n\n` +
+      `Submitted: ${data.submitted_at}\n` +
+      `Saved to Supabase: ${savedToSupabase ? "yes" : "no"}`;
+
+    status.classList.add("success");
+    status.style.display = "block";
+    status.innerHTML = `✨ <strong>Application received, ${data.parent_name.split(" ")[0]}!</strong><br>
+      We'll be in touch with you at <strong>${data.email}</strong> within 24 hours.
+      ${savedToSupabase ? "" : "<br><br>(Backup email link: <a href='mailto:jennie@chiefmamaofficer.com?subject=neoschool%20Missoula%20application&body=" + encodeURIComponent(mailBody) + "' style='color:#fff;text-decoration:underline'>send via email</a>)"}`;
+    btn.textContent = "Apply for 2026–2027 →";
+    btn.disabled = true;
+    form.reset();
+
+    // Scroll to status
+    setTimeout(() => status.scrollIntoView({ behavior:"smooth", block:"center" }), 100);
+
+    console.log("Application submitted:", data, "Saved to Supabase:", savedToSupabase);
+  };
+</script>
+
+</body>
+</html>
