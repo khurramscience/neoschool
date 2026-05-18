@@ -116,10 +116,14 @@ function Marketing({ onStart }) {
 
       {/* HERO — refined editorial pitch */}
       <section style={{ maxWidth: 960, margin: "0 auto", padding: "100px 32px 60px", textAlign: "center" }}>
-        <div className="fu" style={{ display: "inline-flex", alignItems: "center", gap: 9, background: "transparent", border:"1px solid var(--p2)", borderRadius: 99, padding: "7px 16px", marginBottom: 28 }}>
-          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--sg)", animation: "pu 2s infinite" }} />
-          <span className="eyebrow" style={{ color: "var(--tx2)", fontSize:10.5 }}>Now enrolling · Founding families</span>
-        </div>
+        <a href="/missoula.html" style={{ textDecoration:"none" }}>
+          <div className="fu" style={{ display: "inline-flex", alignItems: "center", gap: 9, background: "var(--or)", borderRadius: 99, padding: "8px 18px", marginBottom: 28, cursor:"pointer", transition:"all .2s" }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "var(--shadow-md)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#fff", animation: "pu 2s infinite" }} />
+            <span style={{ fontFamily:"'Geist Mono',monospace", fontSize:10.5, color:"#fff", letterSpacing:".12em", textTransform:"uppercase", fontWeight:500 }}>Missoula · Now Enrolling · Sept 2026 →</span>
+          </div>
+        </a>
         <h1 className="fu d1" style={{ fontFamily: "'Fraunces',serif", fontSize: "clamp(44px, 7vw, 78px)", fontWeight: 400, lineHeight: 1.02, letterSpacing:"-.025em", marginBottom: 24, color: "var(--nv)" }}>
           Any parent.<br/>
           Any teacher.<br/>
@@ -129,8 +133,9 @@ function Marketing({ onStart }) {
           The operating system for microschools — personalized curriculum, AI tutors, real growth tracking. Built by parents, for parents.
         </p>
         <div className="fu d3" style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
-          <button className="btn bo" style={{ fontSize: 15.5, padding: "15px 30px" }} onClick={() => onStart("director")}>Launch a campus →</button>
-          <button className="btn bg" style={{ fontSize: 15.5, padding: "15px 30px" }} onClick={() => onStart("parent")}>For parents</button>
+          <a href="/missoula.html" className="btn bo" style={{ fontSize: 15.5, padding: "15px 30px", textDecoration:"none" }}>Apply to Missoula →</a>
+          <button className="btn bg" style={{ fontSize: 15.5, padding: "15px 30px" }} onClick={() => onStart("parent")}>For families</button>
+          <button className="btn bg" style={{ fontSize: 15.5, padding: "15px 30px" }} onClick={() => onStart("director")}>Launch a campus</button>
         </div>
       </section>
 

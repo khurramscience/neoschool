@@ -52,6 +52,12 @@
   .password-screen button{padding:12px 28px;background:#c25420;color:#fff;border:none;border-radius:99px;font-family:'Fraunces',serif;font-size:14px;font-weight:500;cursor:pointer}
   .status-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:12px;color:#7a7367;font-family:'Geist Mono',monospace;letter-spacing:.04em}
   .source-tag{display:inline-block;padding:2px 7px;background:#f1ebe0;border-radius:6px;font-family:'Geist Mono',monospace;font-size:9.5px;color:#7a7367;letter-spacing:.04em;text-transform:uppercase}
+  .field-label{font-family:'Geist Mono',monospace;font-size:10px;font-weight:500;color:#7a7367;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+  .stage-changer{display:flex;gap:6px;flex-wrap:wrap}
+  .stage-changer .pill{padding:5px 12px;font-size:11px}
+  .stage-changer .pill.on{background:#c25420;border-color:#c25420;color:#fff}
+  .expanded-row td{padding:0}
+  @media(max-width:680px){table{font-size:12px}td,th{padding:8px}}
 </style>
 </head>
 <body>
@@ -210,6 +216,52 @@
     render();
   }
 
+  function escape(s) {
+    return String(s || "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
+  }
+
+  const STAGES = ["new", "reviewing", "accepted", "waitlisted", "rejected"];
+  let expandedId = null;
+
+  function toggleExpand(id) {
+    expandedId = expandedId === id ? null : id;
+    render();
+  }
+
+  async function changeStatus(id, newStatus, source, evt) {
+    if (evt) evt.stopPropagation();
+    const app = allApps.find(a => a.id == id);
+    if (!app) return;
+    app.status = newStatus;
+
+    // Save to Supabase if it's a Supabase row
+    if (source === "supabase") {
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/applications?id=eq.${id}`, {
+          method: "PATCH",
+          headers: {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+            "Prefer": "return=minimal",
+          },
+          body: JSON.stringify({ status: newStatus }),
+        });
+      } catch (e) { console.warn("Status update failed:", e); }
+    } else {
+      // Update localStorage
+      try {
+        const local = JSON.parse(localStorage.getItem("neo_applications") || "[]");
+        const idx = local.findIndex(l => l.id == id);
+        if (idx >= 0) {
+          local[idx].status = newStatus;
+          localStorage.setItem("neo_applications", JSON.stringify(local));
+        }
+      } catch {}
+    }
+    render();
+  }
+
   function render() {
     const search = document.getElementById("searchBox").value.toLowerCase();
     const filtered = allApps.filter(a => {
@@ -236,34 +288,54 @@
 
     let html = `<table><thead><tr>
       <th>Family</th><th>Child</th><th>Grade</th><th>Campus</th>
-      <th>Stage</th><th>When</th><th>Notes</th>
+      <th>Stage</th><th>When</th><th style="width:24px"></th>
     </tr></thead><tbody>`;
 
     for (const a of filtered) {
       const d = new Date(a.submitted_at);
       const days = Math.floor((Date.now() - d.getTime()) / 86400000);
-      const whenStr = days === 0 ? `today ${d.toLocaleTimeString(undefined, {hour:"numeric",minute:"2-digit"})}` : days === 1 ? "yesterday" : `${days} days ago`;
-      const stageClass = `stage-${a.status || "new"}`;
-      html += `<tr>
+      const whenStr = days === 0 ? `today ${d.toLocaleTimeString(undefined, {hour:"numeric",minute:"2-digit"})}` : days === 1 ? "yesterday" : `${days}d ago`;
+      const isExpanded = expandedId == a.id;
+
+      html += `<tr style="cursor:pointer" onclick="toggleExpand('${a.id}')">
         <td>
           <div class="name">${escape(a.parent_name)}</div>
-          <div class="email">${escape(a.email)} ${a.phone ? "· " + escape(a.phone) : ""}</div>
-          ${a.form_source ? `<div style="margin-top:4px"><span class="source-tag">${escape(a.form_source)}</span></div>` : ""}
+          <div class="email">${escape(a.email)}</div>
         </td>
         <td>${escape(a.child_name)}</td>
         <td>${escape(a.grade)}</td>
         <td>${escape(a.campus)}</td>
-        <td><span class="stage ${stageClass}">${escape(a.status || "new")}</span></td>
-        <td class="when">${whenStr}<br><span style="font-size:9px;opacity:.6">${a.source}</span></td>
-        <td class="notes">${escape(a.notes || "—")}</td>
+        <td><span class="stage stage-${a.status || "new"}">${escape(a.status || "new")}</span></td>
+        <td class="when">${whenStr}</td>
+        <td style="text-align:right;color:#7a7367">${isExpanded ? "▾" : "▸"}</td>
       </tr>`;
+
+      if (isExpanded) {
+        html += `<tr class="expanded-row"><td colspan="7" style="background:#faf4ed;padding:18px 24px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px 30px;margin-bottom:14px">
+            ${a.email && a.email !== "—" ? `<div><div class="field-label">Email</div><div><a href="mailto:${escape(a.email)}" style="color:#c25420">${escape(a.email)}</a></div></div>` : ""}
+            ${a.phone ? `<div><div class="field-label">Phone</div><div><a href="tel:${escape(a.phone)}" style="color:#c25420">${escape(a.phone)}</a></div></div>` : ""}
+            ${a.situation ? `<div><div class="field-label">Current situation</div><div style="text-transform:capitalize">${escape(a.situation)}</div></div>` : ""}
+            ${a.form_source ? `<div><div class="field-label">Source</div><div>${escape(a.form_source)}</div></div>` : ""}
+            <div><div class="field-label">Storage</div><div>${a.source}</div></div>
+            <div><div class="field-label">Submitted</div><div>${d.toLocaleString()}</div></div>
+          </div>
+          ${a.notes ? `<div style="margin-bottom:14px"><div class="field-label">What drew them to neoschool</div><div style="font-family:'Newsreader',serif;font-size:14px;line-height:1.6;color:#1a1612;font-style:italic;border-left:2px solid #c25420;padding-left:14px">"${escape(a.notes)}"</div></div>` : ""}
+          <div>
+            <div class="field-label">Change stage</div>
+            <div class="stage-changer">
+              ${STAGES.map(s => `<button class="pill ${a.status === s ? 'on' : ''}" onclick="changeStatus('${a.id}', '${s}', '${a.source}', event)">${s}</button>`).join("")}
+            </div>
+          </div>
+          <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+            ${a.email && a.email !== "—" ? `<a href="mailto:${escape(a.email)}?subject=Welcome%20to%20neoschool%20Missoula&body=Hi%20${escape((a.parent_name || '').split(' ')[0])}%2C%0A%0AThanks%20so%20much%20for%20applying%20to%20neoschool%20Missoula.%20I%27d%20love%20to%20learn%20more%20about%20%20${escape(a.child_name)}.%20What%27s%20a%20good%20time%20to%20chat%20this%20week%3F%0A%0AWarmly%2C%0AJennie" class="btn">✉ Reply via email</a>` : ""}
+            ${a.phone ? `<a href="tel:${escape(a.phone)}" class="btn btn-secondary">☏ Call ${escape(a.phone)}</a>` : ""}
+          </div>
+        </td></tr>`;
+      }
     }
     html += `</tbody></table>`;
     c.innerHTML = html;
-  }
-
-  function escape(s) {
-    return String(s || "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
   }
 
   function exportCSV() {
