@@ -108,9 +108,10 @@ function Marketing({ onStart }) {
     <div style={{ height: "100%", overflowY: "auto", background: "var(--cr)" }}>
       <nav style={{ position: "sticky", top: 0, zIndex: 100, background: "rgba(250,244,237,.92)", backdropFilter: "blur(12px)", borderBottom: "1px solid var(--p2)", padding: "14px 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <Logo sz={16} />
-        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          <span style={{ fontSize: 12, color: "var(--mu)", fontWeight: 500 }}>The OS for microschools</span>
-          <button className="btn bn sm" onClick={() => onStart("parent")}>Get started →</button>
+        <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
+          <span style={{ fontFamily:"'Geist Mono',monospace", fontSize: 10.5, color: "var(--mu)", letterSpacing:".08em", textTransform:"uppercase" }}>The OS for microschools</span>
+          <a href="/missoula.html" className="btn bo sm" style={{ textDecoration:"none" }}>Apply to Missoula →</a>
+          <button className="btn bg sm" onClick={() => onStart("parent")}>Sign in</button>
         </div>
       </nav>
 
