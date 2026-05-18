@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>neoschool · Admin · Applications</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='42' fill='none' stroke='%231a1f3a' stroke-width='8'/%3E%3Cline x1='50' y1='8' x2='50' y2='92' stroke='%231a1f3a' stroke-width='8'/%3E%3Cline x1='8' y1='50' x2='92' y2='50' stroke='%231a1f3a' stroke-width='8'/%3E%3Ccircle cx='50' cy='50' r='10' fill='%23d9622b'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Newsreader:wght@300;400;500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Newsreader',Georgia,serif;background:#faf4ed;color:#1a1612;padding:30px 24px;max-width:1280px;margin:0 auto;font-size:15px;line-height:1.5}
+  h1{font-family:'Fraunces',serif;font-size:36px;font-weight:400;letter-spacing:-.015em;line-height:1.1;margin-bottom:6px;color:#1a1f3a}
+  h1 em{font-style:italic;color:#c25420;font-weight:300}
+  .sub{font-family:'Newsreader',serif;color:#7a7367;margin-bottom:24px;font-weight:300;font-style:italic}
+  .eyebrow{font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#c25420}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
+  @media(max-width:680px){.stats{grid-template-columns:repeat(2,1fr)}}
+  .stat{background:#fff;border:1px solid #e8dfd0;border-radius:12px;padding:14px 16px}
+  .stat-num{font-family:'Fraunces',serif;font-size:28px;font-weight:500;color:#1a1f3a;letter-spacing:-.01em;margin-bottom:2px}
+  .stat-label{font-family:'Geist Mono',monospace;font-size:10px;color:#7a7367;letter-spacing:.06em;text-transform:uppercase}
+  .controls{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+  .controls input{background:#fff;border:1px solid #e8dfd0;border-radius:8px;padding:8px 12px;font-family:'Newsreader',serif;font-size:14px;flex:1;min-width:200px;outline:none}
+  .controls input:focus{border-color:#c25420}
+  .pill{padding:7px 14px;background:#f1ebe0;border:1px solid #e8dfd0;border-radius:99px;font-family:'Geist Mono',monospace;font-size:11px;cursor:pointer;color:#3a3530;font-weight:500;transition:all .15s}
+  .pill:hover{border-color:#c25420;color:#c25420}
+  .pill.on{background:#1a1f3a;border-color:#1a1f3a;color:#fff}
+  .btn{background:#c25420;color:#fff;border:none;padding:8px 16px;border-radius:99px;font-family:'Fraunces',serif;font-weight:500;font-size:13px;cursor:pointer;letter-spacing:-.005em}
+  .btn:hover{background:#a8431a}
+  .btn-secondary{background:transparent;color:#1a1f3a;border:1px solid #e8dfd0}
+  .btn-secondary:hover{border-color:#c25420;color:#c25420}
+  table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e8dfd0;font-size:13px}
+  th{background:#f1ebe0;text-align:left;padding:10px 12px;font-family:'Geist Mono',monospace;font-size:10px;font-weight:500;color:#7a7367;letter-spacing:.06em;text-transform:uppercase}
+  td{padding:12px;border-bottom:1px solid #f1ebe0;vertical-align:top}
+  tr:hover{background:#faf4ed}
+  tr:last-child td{border-bottom:none}
+  .name{font-family:'Fraunces',serif;font-size:14px;font-weight:500;color:#1a1f3a}
+  .email{font-family:'Geist Mono',monospace;font-size:10.5px;color:#7a7367;letter-spacing:.02em;margin-top:2px}
+  .stage{display:inline-block;padding:3px 10px;border-radius:99px;font-family:'Geist Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+  .stage-new{background:rgba(124,74,154,.15);color:#7c4a9a}
+  .stage-reviewing{background:rgba(217,98,43,.15);color:#c25420}
+  .stage-accepted{background:rgba(74,124,106,.18);color:#4a7c6a}
+  .stage-waitlisted{background:rgba(45,110,168,.15);color:#2d6ea8}
+  .stage-rejected{background:rgba(168,61,61,.15);color:#a83d3d}
+  .when{font-family:'Geist Mono',monospace;font-size:10.5px;color:#7a7367}
+  .notes{color:#3a3530;font-size:12.5px;line-height:1.5;max-width:280px}
+  .empty{padding:60px;text-align:center;background:#fff;border:1px solid #e8dfd0;border-radius:14px;color:#7a7367;font-style:italic;font-size:15px}
+  .password-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;text-align:center}
+  .password-screen h1{margin-bottom:12px}
+  .password-screen p{margin-bottom:18px;color:#7a7367}
+  .password-screen input{width:280px;padding:13px 16px;border:1px solid #e8dfd0;border-radius:10px;font-family:'Newsreader',serif;font-size:15px;text-align:center;letter-spacing:.05em;margin-bottom:10px;outline:none}
+  .password-screen input:focus{border-color:#c25420}
+  .password-screen button{padding:12px 28px;background:#c25420;color:#fff;border:none;border-radius:99px;font-family:'Fraunces',serif;font-size:14px;font-weight:500;cursor:pointer}
+  .status-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:12px;color:#7a7367;font-family:'Geist Mono',monospace;letter-spacing:.04em}
+  .source-tag{display:inline-block;padding:2px 7px;background:#f1ebe0;border-radius:6px;font-family:'Geist Mono',monospace;font-size:9.5px;color:#7a7367;letter-spacing:.04em;text-transform:uppercase}
+</style>
+</head>
+<body>
+
+<div id="passwordScreen" class="password-screen" style="display:none">
+  <h1>neoschool <em>admin</em></h1>
+  <p>Enter password to view applications</p>
+  <input type="password" id="pwInput" placeholder="••••••••" autofocus>
+  <button onclick="checkPassword()">Enter</button>
+  <p style="font-size:12px;margin-top:14px"><em>Password is shared securely with admins.</em></p>
+</div>
+
+<div id="adminUI" style="display:none">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px;flex-wrap:wrap;gap:14px">
+    <div>
+      <p class="eyebrow" style="margin-bottom:6px">Admin · Applications</p>
+      <h1>Founding family <em>applications</em></h1>
+      <p class="sub">Every parent who's applied to neoschool · synced from Supabase + this device's localStorage</p>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-secondary" onclick="exportCSV()">↓ Export CSV</button>
+      <button class="btn" onclick="refresh()">↻ Refresh</button>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-num" id="totalCount">—</div><div class="stat-label">Total applications</div></div>
+    <div class="stat"><div class="stat-num" id="newCount">—</div><div class="stat-label">New · need review</div></div>
+    <div class="stat"><div class="stat-num" id="missoulaCount">—</div><div class="stat-label">Missoula campus</div></div>
+    <div class="stat"><div class="stat-num" id="todayCount">—</div><div class="stat-label">Today</div></div>
+  </div>
+
+  <div class="controls">
+    <input id="searchBox" type="text" placeholder="Search by name, email, or notes…" oninput="render()">
+    <button class="pill on" data-filter="All" onclick="setFilter(this,'All')">All</button>
+    <button class="pill" data-filter="new" onclick="setFilter(this,'new')">New</button>
+    <button class="pill" data-filter="reviewing" onclick="setFilter(this,'reviewing')">Reviewing</button>
+    <button class="pill" data-filter="accepted" onclick="setFilter(this,'accepted')">Accepted</button>
+    <button class="pill" data-filter="waitlisted" onclick="setFilter(this,'waitlisted')">Waitlisted</button>
+  </div>
+
+  <div class="status-bar">
+    <span id="resultsCount">Loading…</span>
+    <span id="lastSync">—</span>
+  </div>
+
+  <div id="tableContainer"></div>
+</div>
+
+<script>
+  const SUPABASE_URL = "https://dwpxsaamaehtmhsuuprg.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_eM_rkri5KfdnheOZyCNN3w_hqmN7M4k";
+  const ADMIN_PW = "neoschool2026"; // Simple password — change anytime in code
+
+  let allApps = [];
+  let currentFilter = "All";
+
+  // Password gate
+  if (localStorage.getItem("neo_admin_auth") === ADMIN_PW) {
+    showAdmin();
+  } else {
+    document.getElementById("passwordScreen").style.display = "flex";
+  }
+
+  function checkPassword() {
+    const pw = document.getElementById("pwInput").value;
+    if (pw === ADMIN_PW) {
+      localStorage.setItem("neo_admin_auth", pw);
+      showAdmin();
+    } else {
+      alert("Wrong password");
+      document.getElementById("pwInput").value = "";
+    }
+  }
+
+  document.addEventListener("keypress", e => {
+    if (e.key === "Enter" && document.getElementById("passwordScreen").style.display !== "none") {
+      checkPassword();
+    }
+  });
+
+  function showAdmin() {
+    document.getElementById("passwordScreen").style.display = "none";
+    document.getElementById("adminUI").style.display = "block";
+    refresh();
+  }
+
+  async function refresh() {
+    document.getElementById("resultsCount").textContent = "Loading…";
+    const apps = [];
+
+    // 1. Pull from Supabase
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/applications?order=submitted_at.desc&limit=200`, {
+        headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` },
+      });
+      if (r.ok) {
+        const rows = await r.json();
+        for (const row of rows) {
+          const fd = row.form_data || {};
+          apps.push({
+            id: row.id,
+            source: "supabase",
+            parent_name: fd.parent_name || fd.parentName || "—",
+            email:       fd.email || "—",
+            phone:       fd.phone || "",
+            child_name:  row.child_name || fd.child_name || fd.childName || "—",
+            grade:       row.grade || fd.grade || "—",
+            campus:      row.campus || fd.campus || "—",
+            situation:   fd.situation || "",
+            notes:       fd.notes || "",
+            submitted_at: row.submitted_at || fd.submitted_at,
+            status:      row.status || "new",
+            form_source: fd.source || "",
+          });
+        }
+      }
+    } catch (e) { console.warn("Supabase fetch failed:", e); }
+
+    // 2. Pull from this device's localStorage (backup submissions)
+    try {
+      const local = JSON.parse(localStorage.getItem("neo_applications") || "[]");
+      for (const l of local) {
+        // Don't double-count if already in Supabase (rough dedup by email + child_name)
+        if (apps.some(a => a.email === l.email && a.child_name === l.child_name && Math.abs(new Date(a.submitted_at) - new Date(l.submitted_at)) < 60000)) continue;
+        apps.push({
+          id: l.id,
+          source: "localStorage",
+          parent_name: l.parent_name || l.parentName || "—",
+          email:       l.email || "—",
+          phone:       l.phone || "",
+          child_name:  l.child_name || l.childName || "—",
+          grade:       l.grade || "—",
+          campus:      l.campus || "—",
+          situation:   l.situation || "",
+          notes:       l.notes || "",
+          submitted_at: l.submitted_at,
+          status:      "new",
+          form_source: l.source || "",
+        });
+      }
+    } catch (e) { console.warn("localStorage parse failed:", e); }
+
+    // Sort by submitted_at desc
+    apps.sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at));
+    allApps = apps;
+
+    document.getElementById("lastSync").textContent = `Last sync: ${new Date().toLocaleTimeString()}`;
+    render();
+  }
+
+  function setFilter(el, f) {
+    currentFilter = f;
+    document.querySelectorAll(".pill").forEach(p => p.classList.remove("on"));
+    el.classList.add("on");
+    render();
+  }
+
+  function render() {
+    const search = document.getElementById("searchBox").value.toLowerCase();
+    const filtered = allApps.filter(a => {
+      if (currentFilter !== "All" && a.status !== currentFilter) return false;
+      if (!search) return true;
+      const blob = `${a.parent_name} ${a.email} ${a.child_name} ${a.notes}`.toLowerCase();
+      return blob.includes(search);
+    });
+
+    // Update stats
+    document.getElementById("totalCount").textContent = allApps.length;
+    document.getElementById("newCount").textContent   = allApps.filter(a => a.status === "new").length;
+    document.getElementById("missoulaCount").textContent = allApps.filter(a => (a.campus || "").toLowerCase().includes("missoula")).length;
+    const today = new Date().toDateString();
+    document.getElementById("todayCount").textContent = allApps.filter(a => a.submitted_at && new Date(a.submitted_at).toDateString() === today).length;
+
+    document.getElementById("resultsCount").textContent = `${filtered.length} shown · ${allApps.length} total`;
+
+    const c = document.getElementById("tableContainer");
+    if (filtered.length === 0) {
+      c.innerHTML = `<div class="empty">No applications match this filter.<br><br>Submissions will appear here when families apply at <strong>neoschool.me/missoula.html</strong>.</div>`;
+      return;
+    }
+
+    let html = `<table><thead><tr>
+      <th>Family</th><th>Child</th><th>Grade</th><th>Campus</th>
+      <th>Stage</th><th>When</th><th>Notes</th>
+    </tr></thead><tbody>`;
+
+    for (const a of filtered) {
+      const d = new Date(a.submitted_at);
+      const days = Math.floor((Date.now() - d.getTime()) / 86400000);
+      const whenStr = days === 0 ? `today ${d.toLocaleTimeString(undefined, {hour:"numeric",minute:"2-digit"})}` : days === 1 ? "yesterday" : `${days} days ago`;
+      const stageClass = `stage-${a.status || "new"}`;
+      html += `<tr>
+        <td>
+          <div class="name">${escape(a.parent_name)}</div>
+          <div class="email">${escape(a.email)} ${a.phone ? "· " + escape(a.phone) : ""}</div>
+          ${a.form_source ? `<div style="margin-top:4px"><span class="source-tag">${escape(a.form_source)}</span></div>` : ""}
+        </td>
+        <td>${escape(a.child_name)}</td>
+        <td>${escape(a.grade)}</td>
+        <td>${escape(a.campus)}</td>
+        <td><span class="stage ${stageClass}">${escape(a.status || "new")}</span></td>
+        <td class="when">${whenStr}<br><span style="font-size:9px;opacity:.6">${a.source}</span></td>
+        <td class="notes">${escape(a.notes || "—")}</td>
+      </tr>`;
+    }
+    html += `</tbody></table>`;
+    c.innerHTML = html;
+  }
+
+  function escape(s) {
+    return String(s || "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
+  }
+
+  function exportCSV() {
+    const rows = [["Submitted","Parent","Email","Phone","Child","Grade","Campus","Situation","Notes","Status","Source"]];
+    for (const a of allApps) {
+      rows.push([
+        a.submitted_at, a.parent_name, a.email, a.phone, a.child_name, a.grade,
+        a.campus, a.situation, a.notes, a.status, a.form_source || a.source
+      ]);
+    }
+    const csv = rows.map(r => r.map(c => `"${String(c || "").replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `neoschool-applications-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+</script>
+
+</body>
+</html>
