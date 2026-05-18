@@ -3293,7 +3293,41 @@ function ApplicationScreen({ user, data, onDone }) {
               ))}
               <div style={{ display:"flex", gap:8 }}>
                 <button className="btn bg" onClick={() => setStep(3)}>← Back</button>
-                <button className="btn bo" style={{ flex:1 }} onClick={() => setSubmitted(true)} disabled={!canSubmit}>Submit application →</button>
+                <button className="btn bo" style={{ flex:1 }} onClick={async () => {
+                  // Save application to Supabase + localStorage
+                  const payload = {
+                    parent_name: user?.name || "Unknown",
+                    email: user?.email || "",
+                    child_name: childName,
+                    grade: data?.form?.grade || "",
+                    city: data?.form?.city || "",
+                    campus: form.campus || data?.form?.city || "Unknown",
+                    situation: data?.form?.situation || null,
+                    goals: data?.form?.goals || [],
+                    concerns: data?.form?.concerns || "",
+                    plan: form.plan,
+                    submitted_at: new Date().toISOString(),
+                  };
+                  // Try Supabase
+                  try {
+                    const url = import.meta.env.VITE_SUPABASE_URL;
+                    const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
+                    if (url && key) {
+                      await fetch(`${url}/rest/v1/applications`, {
+                        method:"POST",
+                        headers:{ "apikey":key, "Authorization":`Bearer ${key}`, "Content-Type":"application/json", "Prefer":"return=minimal" },
+                        body: JSON.stringify({ form_data: payload, campus: payload.campus, child_name: childName, grade: payload.grade, status:"new" })
+                      });
+                    }
+                  } catch (e) { console.warn("Supabase submit failed:", e); }
+                  // Always save locally too
+                  try {
+                    const local = JSON.parse(localStorage.getItem("neo_applications") || "[]");
+                    local.push({ id: Date.now(), ...payload });
+                    localStorage.setItem("neo_applications", JSON.stringify(local));
+                  } catch {}
+                  setSubmitted(true);
+                }} disabled={!canSubmit}>Submit application →</button>
               </div>
               <button className="btn bg fw" onClick={onDone}>Skip — explore the platform first</button>
             </div>
