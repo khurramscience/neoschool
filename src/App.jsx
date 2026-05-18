@@ -151,22 +151,43 @@ function Marketing({ onStart }) {
 
       {/* FOUNDING CAMPUSES — first cohort */}
       <section style={{ maxWidth: 1040, margin: "0 auto", padding: "10px 24px 60px" }}>
-        <p style={{ fontSize:11, fontWeight:700, color:"var(--or)", textTransform:"uppercase", letterSpacing:".1em", marginBottom:8, textAlign:"center" }}>Founding campuses · opening 2026</p>
-        <h2 className="fu" style={{ fontFamily: "'Fraunces',serif", fontSize: 32, fontWeight: 500, textAlign: "center", marginBottom: 8 }}>Where neoschool is opening first.</h2>
-        <p className="fu d1 mu" style={{ textAlign:"center", fontSize:14, marginBottom:32, lineHeight:1.65, maxWidth:540, margin:"0 auto 32px" }}>
+        <p style={{ fontSize:11, fontWeight:700, color:"var(--or)", textTransform:"uppercase", letterSpacing:".1em", marginBottom:8, textAlign:"center", fontFamily:"'Geist Mono',monospace" }}>Founding campuses · opening 2026</p>
+        <h2 className="fu" style={{ fontFamily: "'Fraunces',serif", fontSize: 34, fontWeight: 400, textAlign: "center", marginBottom: 8, letterSpacing:"-.015em" }}>Where neoschool is <em style={{ fontStyle:"italic", color:"var(--or)", fontWeight:300 }}>opening first</em>.</h2>
+        <p className="fu d1 mu" style={{ textAlign:"center", fontSize:15, marginBottom:40, lineHeight:1.65, maxWidth:560, margin:"0 auto 40px", fontFamily:"'Newsreader',serif", fontWeight:300, fontStyle:"italic" }}>
           The first cohort of neoschool campuses. Each runs the same model — built for how kids actually learn.
         </p>
+
+        {/* Missoula featured card with photo — full width */}
+        <a href="/missoula.html" style={{ display:"block", textDecoration:"none", color:"inherit", marginBottom:18 }}>
+          <div className="card fu" style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 0,
+            padding: 0,
+            overflow: "hidden",
+            borderTop: "3px solid var(--or)",
+            background: "linear-gradient(135deg, #fff8f0, #fff)",
+            cursor: "pointer",
+            transition: "all .25s",
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 12px 30px -8px rgba(217,98,43,.25)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
+            <div style={{ height: 280, backgroundImage: "url('/missoula/kids-flowers.jpg')", backgroundSize: "cover", backgroundPosition: "center 75%" }} />
+            <div style={{ padding: "28px 30px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+              <p style={{ fontFamily:"'Geist Mono',monospace", fontSize:10.5, color:"var(--or)", letterSpacing:".12em", textTransform:"uppercase", marginBottom:10, fontWeight:500 }}>🟢 Now enrolling · Founding Families</p>
+              <h3 style={{ fontFamily:"'Fraunces',serif", fontSize:30, fontWeight:400, letterSpacing:"-.015em", marginBottom:6, color:"var(--nv)" }}>Missoula, <em style={{ fontStyle:"italic", color:"var(--or)", fontWeight:300 }}>Montana</em></h3>
+              <p style={{ fontFamily:"'Newsreader',serif", fontSize:15, color:"var(--tx2)", lineHeight:1.5, marginBottom:14, fontWeight:300 }}>Kindergarten + 1st Grade · Opening September 2026 · 10–12 students per class</p>
+              <p style={{ fontFamily:"'Geist Mono',monospace", fontSize:11, color:"var(--mu)", letterSpacing:".06em", marginBottom:14 }}>Stewarded by a second-generation Missoulian family</p>
+              <span className="btn bo" style={{ fontSize:14, padding:"11px 22px", display:"inline-flex", width:"fit-content", alignItems:"center", gap:6 }}>
+                Apply for 2026–27 →
+              </span>
+            </div>
+          </div>
+        </a>
+
+        <p style={{ fontFamily:"'Geist Mono',monospace", fontSize:10, color:"var(--mu)", textAlign:"center", letterSpacing:".1em", textTransform:"uppercase", marginBottom:14 }}>Coming next</p>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(220px, 1fr))", gap:14 }}>
           {[
-            {
-              name: "Missoula",
-              region: "Montana",
-              status: "Now enrolling",
-              date: "Sept 2026",
-              grades: "K + 1st",
-              action: "apply",
-              flagship: true,
-            },
             {
               name: "Palo Alto",
               region: "California",
@@ -2409,20 +2430,25 @@ function CurriculumBuilder({ userId, onNeedCredits }) {
 
   return (
     <div style={{ maxWidth: 720 }}>
-      <h2 className="h2" style={{ marginBottom: 4 }}>📚 Curriculum Builder</h2>
-      <p className="mu" style={{ fontSize: 12, marginBottom: 14 }}>
-        Select one or multiple subjects. AI builds a connected weekly plan.
+      <p className="eyebrow" style={{ marginBottom:6 }}>Curriculum builder</p>
+      <h2 style={{ fontFamily:"'Fraunces',serif", fontSize: 30, fontWeight: 400, letterSpacing:"-.015em", marginBottom: 6, color: "var(--nv)" }}>
+        Build a <em style={{ fontStyle:"italic", color:"var(--or)", fontWeight:300 }}>connected weekly plan</em>
+      </h2>
+      <p style={{ fontFamily:"'Newsreader',serif", fontSize: 14.5, color: "var(--mu)", marginBottom: 18, fontStyle:"italic", fontWeight:300, lineHeight:1.55 }}>
+        Pick one or multiple subjects. The AI weaves them together across the week so projects and themes connect.
       </p>
 
       {/* Mode toggle: Builder | Library */}
-      <div style={{ display:"flex", gap:0, marginBottom:14, background:"var(--p)", borderRadius:10, padding:3, width:"fit-content" }}>
-        {[["builder","✨ Build new"], ["library", `📂 Library${library.length?" ("+library.length+")":""}`]].map(([id, label]) => (
+      <div style={{ display:"flex", gap:0, marginBottom:18, background:"var(--p)", borderRadius:99, padding:4, width:"fit-content", border:"1px solid var(--p2)" }}>
+        {[["builder","✨ Build new"], ["library", `📂 Library${library.length?" · "+library.length:""}`]].map(([id, label]) => (
           <button key={id} onClick={() => setMode(id)} style={{
-            padding:"7px 16px", fontSize:12, fontWeight:600, borderRadius:8,
+            padding:"8px 18px", fontSize:12.5, fontFamily:"'Fraunces',serif", fontWeight:500, borderRadius:99,
             background: mode === id ? "#fff" : "transparent",
             color: mode === id ? "var(--or)" : "var(--mu)",
             border: "none", cursor: "pointer",
             boxShadow: mode === id ? "0 1px 3px rgba(0,0,0,.08)" : "none",
+            letterSpacing:"-.005em",
+            transition:"all .2s",
           }}>{label}</button>
         ))}
       </div>
