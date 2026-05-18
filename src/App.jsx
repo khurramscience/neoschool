@@ -414,8 +414,51 @@ function Marketing({ onStart }) {
         <p style={{ fontSize: 12, color: "var(--mu)", marginTop: 18 }}>Questions? <strong>admissions@neoschool.me</strong> · neoschool.me</p>
       </section>
 
+      {/* Sticky floating Apply CTA — appears on scroll past hero */}
+      <StickyApplyButton />
+
       {showInterestForm && <CampusInterestForm onClose={() => setShowInterestForm(false)} />}
     </div>
+  );
+}
+
+// ── STICKY APPLY BUTTON ─────────────────────────────────────────────────────
+function StickyApplyButton() {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setVisible(window.scrollY > 600);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return (
+    <a
+      href="/missoula.html"
+      style={{
+        position: "fixed",
+        bottom: visible ? 24 : -100,
+        right: 24,
+        background: "var(--or)",
+        color: "#fff",
+        padding: "14px 24px",
+        borderRadius: 99,
+        fontFamily: "'Fraunces', serif",
+        fontWeight: 500,
+        fontSize: 14,
+        textDecoration: "none",
+        boxShadow: "0 8px 24px -4px rgba(217,98,43,.5)",
+        zIndex: 1000,
+        transition: "all .3s cubic-bezier(.2,.8,.2,1)",
+        opacity: visible ? 1 : 0,
+        letterSpacing: "-.005em",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+      }}
+      onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.background = "var(--or2)"; }}
+      onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.background = "var(--or)"; }}>
+      Apply to Missoula →
+    </a>
   );
 }
 

@@ -52,6 +52,8 @@
   .password-screen button{padding:12px 28px;background:#c25420;color:#fff;border:none;border-radius:99px;font-family:'Fraunces',serif;font-size:14px;font-weight:500;cursor:pointer}
   .status-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:12px;color:#7a7367;font-family:'Geist Mono',monospace;letter-spacing:.04em}
   .source-tag{display:inline-block;padding:2px 7px;background:#f1ebe0;border-radius:6px;font-family:'Geist Mono',monospace;font-size:9.5px;color:#7a7367;letter-spacing:.04em;text-transform:uppercase}
+  .new-badge{display:inline-block;background:var(--or,#c25420);color:#fff;font-family:'Geist Mono',monospace;font-size:8.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border-radius:99px;vertical-align:middle;margin-left:6px;animation:pulse-new 2s infinite}
+  @keyframes pulse-new{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.85;transform:scale(1.04)}}
   .field-label{font-family:'Geist Mono',monospace;font-size:10px;font-weight:500;color:#7a7367;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
   .stage-changer{display:flex;gap:6px;flex-wrap:wrap}
   .stage-changer .pill{padding:5px 12px;font-size:11px}
@@ -306,6 +308,10 @@
     const today = new Date().toDateString();
     document.getElementById("todayCount").textContent = allApps.filter(a => a.submitted_at && new Date(a.submitted_at).toDateString() === today).length;
 
+    // Update document title with last-24h count for visible browser-tab notification
+    const last24h = allApps.filter(a => a.submitted_at && (Date.now() - new Date(a.submitted_at).getTime()) < 86400000).length;
+    document.title = last24h > 0 ? `(${last24h}) neoschool · Admin` : "neoschool · Admin · Applications";
+
     document.getElementById("resultsCount").textContent = `${filtered.length} shown · ${allApps.length} total`;
 
     const c = document.getElementById("tableContainer");
@@ -321,13 +327,17 @@
 
     for (const a of filtered) {
       const d = new Date(a.submitted_at);
-      const days = Math.floor((Date.now() - d.getTime()) / 86400000);
-      const whenStr = days === 0 ? `today ${d.toLocaleTimeString(undefined, {hour:"numeric",minute:"2-digit"})}` : days === 1 ? "yesterday" : `${days}d ago`;
+      const hours = (Date.now() - d.getTime()) / 3600000;
+      const days = Math.floor(hours / 24);
+      const whenStr = hours < 1 ? `${Math.floor(hours * 60)}m ago` :
+                       hours < 24 ? `${Math.floor(hours)}h ago` :
+                       days === 1 ? "yesterday" : `${days}d ago`;
+      const isNew = hours < 24;
       const isExpanded = expandedId == a.id;
 
-      html += `<tr style="cursor:pointer" onclick="toggleExpand('${a.id}')">
+      html += `<tr style="cursor:pointer${isNew ? ';background:rgba(217,98,43,.04)' : ''}" onclick="toggleExpand('${a.id}')">
         <td>
-          <div class="name">${escape(a.parent_name)}</div>
+          <div class="name">${escape(a.parent_name)} ${isNew ? '<span class="new-badge">NEW</span>' : ''}</div>
           <div class="email">${escape(a.email)}</div>
         </td>
         <td>${escape(a.child_name)}</td>
