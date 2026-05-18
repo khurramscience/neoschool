@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>neoschool Missoula · A school for the post-AI generation</title>
+<meta name="description" content="A microschool in Missoula, Montana for Kindergarten and 1st Grade. Personalized academics, AI tutors, life skills workshops, and real outdoor play. Opening September 2026.">
+<meta name="theme-color" content="#FAF6F0">
+
+<!-- Fonts: Instrument Sans (display) + Source Serif 4 (prose) + IBM Plex Mono (labels) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,300;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%236B5CE7'/%3E%3Ccircle cx='50' cy='50' r='14' fill='%23FAF6F0'/%3E%3C/svg%3E">
+
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+  /* ── DESIGN TOKENS (warm parent variant per design DNA doc) ── */
+  :root {
+    /* Backgrounds — warm cream foundation, Anthropic register */
+    --bg-cream:    #FAF6F0;
+    --bg-ivory:    #F0EBE3;
+    --bg-card:     #FFFFFF;
+    --bg-dark:     #141413;   /* warm near-black */
+
+    /* Text — warm-biased */
+    --tx-primary:  #2A2622;
+    --tx-body:     #3A3530;
+    --tx-muted:    #7A7268;
+    --tx-faint:    #B0AAA0;
+    --tx-onDark:   #FAF6F0;
+
+    /* Brand anchor — IRIS VIOLET (immutable across variants) */
+    --violet:      #6B5CE7;
+    --violet-hover:#5849D4;
+    --violet-soft: rgba(107,92,231,.10);
+
+    /* Warm secondary accent — for CTAs that feel inviting not institutional */
+    --coral:       #D4856A;
+    --coral-deep:  #C97B5A;
+    --coral-soft:  rgba(212,133,106,.08);
+
+    /* Borders */
+    --line:        #E8E4DC;
+    --line-soft:   rgba(42,38,34,.06);
+  }
+
+  html, body {
+    background: var(--bg-cream);
+    color: var(--tx-body);
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 17px;
+    line-height: 1.65;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body::selection, ::selection { background: var(--violet-soft); color: var(--violet); }
+
+  /* Subtle warm texture overlay */
+  body::after {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.7 0 0 0 0 0.6 0 0 0 0 0.5 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: .35; mix-blend-mode: multiply;
+  }
+
+  .container { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
+  @media(max-width:680px){ .container { padding: 0 20px; } }
+
+  /* ── TYPOGRAPHY ── */
+  h1, h2, h3 { font-family: 'Instrument Sans', system-ui, sans-serif; color: var(--tx-primary); letter-spacing: -.02em; }
+  h1 { font-size: clamp(40px, 5.5vw, 68px); font-weight: 600; line-height: 1.05; }
+  h2 { font-size: clamp(28px, 3.5vw, 40px); font-weight: 600; line-height: 1.1; letter-spacing: -.018em; }
+  h3 { font-size: 20px; font-weight: 600; line-height: 1.25; letter-spacing: -.01em; }
+
+  /* Serif emphasis — promoted to display per design DNA */
+  .serif-display { font-family: 'Source Serif 4', Georgia, serif; font-weight: 400; }
+  .serif-italic { font-family: 'Source Serif 4', Georgia, serif; font-style: italic; font-weight: 300; }
+
+  /* Mono labels */
+  .label { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--tx-muted); }
+  .label-violet { color: var(--violet); }
+
+  p { color: var(--tx-body); }
+  a { color: var(--violet); text-decoration: none; transition: color .2s; }
+  a:hover { color: var(--violet-hover); }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(250,246,240,.85);
+    backdrop-filter: blur(14px) saturate(140%);
+    border-bottom: 1px solid var(--line-soft);
+    padding: 16px 0;
+  }
+  nav .container { display: flex; align-items: center; justify-content: space-between; }
+  nav .brand { display: flex; align-items: center; gap: 9px; color: var(--tx-primary); font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 17px; letter-spacing: -.01em; }
+  nav .mark { width: 22px; height: 22px; background: var(--violet); border-radius: 6px; position: relative; }
+  nav .mark::after { content: ''; position: absolute; inset: 6px; background: var(--bg-cream); border-radius: 2px; }
+  nav .nav-links { display: flex; align-items: center; gap: 28px; }
+  nav .nav-links a { color: var(--tx-body); font-family: 'Instrument Sans', sans-serif; font-size: 14px; font-weight: 500; }
+  nav .nav-links a:hover { color: var(--violet); }
+  nav .apply-btn {
+    background: var(--violet); color: #fff; padding: 9px 18px; border-radius: 14px;
+    font-family: 'Instrument Sans', sans-serif; font-size: 14px; font-weight: 600;
+    transition: all .2s; letter-spacing: -.005em;
+  }
+  nav .apply-btn:hover { background: var(--violet-hover); color: #fff; transform: translateY(-1px); }
+  @media(max-width:680px){ nav .nav-links { gap: 14px; } nav .nav-links a:not(.apply-btn) { display: none; } }
+
+  /* ── HERO — manifesto scroll style ── */
+  .hero { padding: 140px 0 120px; }
+  .hero .eyebrow { margin-bottom: 28px; }
+  .hero h1 { margin-bottom: 36px; max-width: 920px; }
+  .hero h1 em { font-family: 'Source Serif 4', serif; font-style: italic; font-weight: 300; color: var(--violet); }
+  .hero .sub { font-family: 'Source Serif 4', serif; font-size: 20px; line-height: 1.55; color: var(--tx-body); max-width: 620px; margin-bottom: 44px; font-weight: 300; }
+  .hero .cta-row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+
+  .btn-primary {
+    background: var(--violet); color: #fff;
+    padding: 14px 26px; border-radius: 14px;
+    font-family: 'Instrument Sans', sans-serif; font-size: 15px; font-weight: 600;
+    border: none; cursor: pointer; transition: all .2s; letter-spacing: -.005em;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-primary:hover { background: var(--violet-hover); color: #fff; transform: translateY(-1px); box-shadow: 0 12px 28px -8px rgba(107,92,231,.4); }
+  .btn-secondary {
+    background: transparent; color: var(--tx-primary);
+    padding: 14px 26px; border-radius: 14px;
+    font-family: 'Instrument Sans', sans-serif; font-size: 15px; font-weight: 500;
+    border: 1px solid var(--line); cursor: pointer; transition: all .2s;
+  }
+  .btn-secondary:hover { border-color: var(--tx-primary); color: var(--tx-primary); }
+  .btn-coral {
+    background: var(--coral); color: #fff; padding: 14px 26px; border-radius: 14px;
+    font-family: 'Instrument Sans', sans-serif; font-size: 15px; font-weight: 600;
+    border: none; cursor: pointer; transition: all .2s; letter-spacing: -.005em;
+  }
+  .btn-coral:hover { background: var(--coral-deep); }
+
+  /* ── SECTION ── */
+  section { padding: 110px 0; border-top: 1px solid var(--line-soft); }
+  section .section-head { margin-bottom: 52px; }
+  section .section-head .num { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--violet); font-weight: 500; letter-spacing: .12em; margin-bottom: 12px; }
+  section .section-head h2 { margin-bottom: 14px; max-width: 760px; }
+  section .section-head h2 em { font-family: 'Source Serif 4', serif; font-style: italic; font-weight: 300; color: var(--coral); }
+  section .section-head .lead { font-family: 'Source Serif 4', serif; font-size: 19px; color: var(--tx-body); max-width: 620px; font-weight: 300; line-height: 1.55; }
+
+  /* ── A DAY AT NEOSCHOOL — numbered scroll narrative ── */
+  .day-block {
+    display: grid; grid-template-columns: 100px 1fr; gap: 32px; align-items: start;
+    padding: 36px 0; border-bottom: 1px solid var(--line-soft);
+  }
+  .day-block:last-child { border-bottom: none; }
+  .day-block .time { font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 500; color: var(--tx-muted); letter-spacing: .04em; padding-top: 4px; }
+  .day-block .content h3 { margin-bottom: 8px; }
+  .day-block .content p { font-family: 'Source Serif 4', serif; font-size: 16px; color: var(--tx-body); font-weight: 300; max-width: 580px; line-height: 1.6; }
+  @media(max-width:680px){ .day-block { grid-template-columns: 1fr; gap: 8px; } .day-block .time { font-size: 11px; } }
+
+  /* ── EXPERIENCE CARDS ── */
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  @media(max-width:680px){ .grid-2 { grid-template-columns: 1fr; gap: 18px; } }
+
+  .exp-card {
+    background: var(--bg-card); border-radius: 16px; padding: 36px;
+    border: 1px solid var(--line); transition: all .25s;
+  }
+  .exp-card:hover { border-color: var(--violet); transform: translateY(-2px); box-shadow: 0 16px 40px -16px rgba(42,38,34,.12); }
+  .exp-card .label { color: var(--violet); margin-bottom: 14px; }
+  .exp-card h3 { margin-bottom: 12px; }
+  .exp-card p { font-family: 'Source Serif 4', serif; font-size: 15.5px; line-height: 1.6; color: var(--tx-body); font-weight: 300; }
+
+  /* ── FOUNDER — Anthropic-style warm photography section ── */
+  .founder { display: grid; grid-template-columns: 1fr 1.1fr; gap: 56px; align-items: center; }
+  @media(max-width:780px){ .founder { grid-template-columns: 1fr; gap: 36px; } }
+  .founder-photo {
+    width: 100%; aspect-ratio: 4/5;
+    background-image: url('/missoula/family.jpg');
+    background-size: cover; background-position: center;
+    border-radius: 20px;
+  }
+  .founder-text { font-family: 'Source Serif 4', serif; font-size: 17.5px; line-height: 1.7; color: var(--tx-body); font-weight: 300; }
+  .founder-text p { margin-bottom: 18px; }
+  .founder-text .sig { font-family: 'Source Serif 4', serif; font-style: italic; font-size: 17px; color: var(--violet); font-weight: 400; margin-top: 8px; }
+
+  /* ── DARK SECTION — one moment of frontier seriousness per design DNA ── */
+  .dark-section {
+    background: var(--bg-dark);
+    border-radius: 24px;
+    padding: 96px 56px;
+    margin: 110px 0;
+    color: var(--tx-onDark);
+    position: relative; overflow: hidden;
+  }
+  .dark-section .label { color: rgba(250,246,240,.5); }
+  .dark-section h2 { color: var(--tx-onDark); max-width: 820px; }
+  .dark-section h2 em { color: var(--violet); }
+  .dark-section .lead { color: rgba(250,246,240,.75); }
+  .dark-section::before {
+    content: ''; position: absolute; top: -50%; right: -20%; width: 800px; height: 800px;
+    background: radial-gradient(circle, rgba(107,92,231,.15) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-top: 56px; position: relative; }
+  @media(max-width:680px){ .stats-row { grid-template-columns: 1fr; gap: 32px; } .dark-section { padding: 56px 28px; margin: 60px 0; }}
+  .stat .num { font-family: 'Instrument Sans', sans-serif; font-size: clamp(40px, 5vw, 56px); font-weight: 700; color: var(--violet); letter-spacing: -.025em; line-height: 1; margin-bottom: 10px; }
+  .stat .num em { font-family: 'Source Serif 4', serif; font-style: italic; font-weight: 300; }
+  .stat p { font-family: 'Source Serif 4', serif; font-size: 15px; line-height: 1.55; color: rgba(250,246,240,.7); font-weight: 300; }
+  .stat .src { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: rgba(250,246,240,.4); letter-spacing: .04em; margin-top: 8px; }
+
+  /* ── ADMISSIONS PROCESS ── */
+  .process { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 56px; }
+  @media(max-width:780px){ .process { grid-template-columns: repeat(2, 1fr); } }
+  @media(max-width:480px){ .process { grid-template-columns: 1fr; } }
+  .step {
+    background: var(--bg-card); border-radius: 16px; padding: 32px 26px;
+    border: 1px solid var(--line); transition: all .2s;
+  }
+  .step:hover { border-color: var(--violet); }
+  .step .num { font-family: 'Source Serif 4', serif; font-size: 36px; color: var(--violet); font-style: italic; font-weight: 300; line-height: 1; margin-bottom: 12px; }
+  .step h3 { font-size: 16px; font-weight: 600; }
+
+  /* Important details */
+  .details {
+    background: var(--bg-ivory); border-radius: 20px; padding: 44px 48px;
+  }
+  .details .label { margin-bottom: 24px; }
+  .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 48px; }
+  @media(max-width:680px){ .details { padding: 28px 22px; } .details-grid { grid-template-columns: 1fr; } }
+  .detail .key { font-family: 'Instrument Sans', sans-serif; font-size: 15px; font-weight: 600; color: var(--tx-primary); margin-bottom: 4px; letter-spacing: -.005em; }
+  .detail .val { font-family: 'Source Serif 4', serif; font-size: 15px; color: var(--tx-body); font-weight: 300; line-height: 1.55; }
+  .detail .val em { font-style: italic; font-weight: 400; color: var(--violet); }
+
+  /* ── FAQ ── */
+  .faq-cat { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--violet); letter-spacing: .12em; text-transform: uppercase; font-weight: 500; margin: 40px 0 16px; padding-bottom: 10px; border-bottom: 1px solid var(--line-soft); }
+  .faq-cat:first-of-type { margin-top: 8px; }
+  details { background: var(--bg-card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; transition: all .2s; margin-bottom: 8px; }
+  details[open] { border-color: var(--violet); }
+  summary { cursor: pointer; padding: 22px 26px; list-style: none; display: flex; justify-content: space-between; align-items: center;
+    font-family: 'Instrument Sans', sans-serif; font-size: 16.5px; font-weight: 600; color: var(--tx-primary); letter-spacing: -.005em;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; color: var(--violet); font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 300; transition: transform .2s; }
+  details[open] summary::after { content: '−'; }
+  summary:hover { color: var(--violet); }
+  details > div { padding: 0 26px 24px; font-family: 'Source Serif 4', serif; font-size: 16px; line-height: 1.7; color: var(--tx-body); font-weight: 300; }
+  details > div strong { font-weight: 500; color: var(--tx-primary); }
+
+  /* ── APPLY FORM ── */
+  .apply-section {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 24px;
+    padding: 56px 48px; margin: 60px 0;
+  }
+  @media(max-width:680px){ .apply-section { padding: 32px 24px; } }
+  .apply-section h2 { margin-bottom: 8px; }
+  .apply-section .lead { margin-bottom: 36px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-bottom: 20px; }
+  @media(max-width:680px){ .form-grid { grid-template-columns: 1fr; gap: 16px; } }
+  .field label { display: block; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; font-weight: 500; color: var(--tx-muted); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; }
+  .field input, .field select, .field textarea {
+    width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 14px;
+    font-family: 'Source Serif 4', serif; font-size: 16px; color: var(--tx-primary); background: var(--bg-cream);
+    outline: none; transition: all .2s; line-height: 1.5; font-weight: 400;
+  }
+  .field input::placeholder, .field textarea::placeholder { color: var(--tx-faint); font-style: italic; font-weight: 300; }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color: var(--violet); background: #fff;
+    box-shadow: 0 0 0 4px var(--violet-soft);
+  }
+  .field textarea { resize: vertical; min-height: 100px; }
+  .field select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237A7268' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 18px center; padding-right: 44px; }
+  .submit-row { margin-top: 14px; }
+  .submit-btn {
+    background: var(--violet); color: #fff; border: none;
+    padding: 18px 36px; border-radius: 14px;
+    font-family: 'Instrument Sans', sans-serif; font-size: 16px; font-weight: 600;
+    cursor: pointer; width: 100%; transition: all .25s; letter-spacing: -.005em;
+  }
+  .submit-btn:hover { background: var(--violet-hover); transform: translateY(-1px); box-shadow: 0 14px 32px -10px rgba(107,92,231,.5); }
+
+  /* SUCCESS STATE */
+  .success-state { text-align: center; padding: 60px 20px; }
+  .success-state .sun { width: 80px; height: 80px; border-radius: 50%; background: var(--violet); margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; }
+  .success-state .sun::after { content: ''; width: 32px; height: 32px; border: 3px solid #fff; border-radius: 50%; border-top-color: transparent; border-right-color: transparent; transform: rotate(45deg); margin-top: 4px; }
+  .success-state h2 { margin-bottom: 16px; }
+  .success-state .msg { font-family: 'Source Serif 4', serif; font-size: 18px; line-height: 1.6; color: var(--tx-body); font-weight: 300; max-width: 480px; margin: 0 auto 8px; }
+  .success-state .email-line { font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--tx-muted); letter-spacing: .06em; margin-top: 24px; }
+  .success-state .again-btn { margin-top: 32px; background: transparent; color: var(--violet); border: 1px solid var(--violet); padding: 12px 24px; border-radius: 14px; font-family: 'Instrument Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; }
+  .success-state .again-btn:hover { background: var(--violet-soft); }
+
+  /* ── TESTIMONIAL ── */
+  .quote-block {
+    text-align: center; padding: 80px 40px; max-width: 880px; margin: 0 auto;
+  }
+  .quote-block p {
+    font-family: 'Source Serif 4', serif; font-size: clamp(22px, 2.6vw, 30px); line-height: 1.4;
+    color: var(--tx-primary); font-weight: 300; font-style: italic; letter-spacing: -.015em; margin-bottom: 28px;
+  }
+  .quote-block .attr { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--violet); }
+
+  /* ── STICKY APPLY ── */
+  .sticky-apply {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--violet); color: #fff;
+    padding: 14px 22px; border-radius: 14px;
+    font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 14px;
+    box-shadow: 0 12px 32px -8px rgba(107,92,231,.5);
+    z-index: 1000; transition: all .3s cubic-bezier(.2,.8,.2,1);
+    opacity: 0; transform: translateY(20px); pointer-events: none; letter-spacing: -.005em;
+  }
+  .sticky-apply.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .sticky-apply:hover { background: var(--violet-hover); color: #fff; transform: translateY(-2px); box-shadow: 0 16px 40px -8px rgba(107,92,231,.55); }
+  @media(max-width:680px){ .sticky-apply { bottom: 16px; right: 16px; padding: 12px 18px; font-size: 13.5px; } }
+
+  /* ── FOOTER ── */
+  footer { background: var(--bg-dark); color: var(--tx-onDark); padding: 56px 0; margin-top: 80px; }
+  footer .container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px; }
+  footer .ftxt { font-family: 'Source Serif 4', serif; font-size: 14px; color: rgba(250,246,240,.55); font-weight: 300; }
+  footer a { color: var(--violet); }
+  footer a:hover { color: var(--coral); }
+
+  /* Preview ribbon */
+  .preview-ribbon {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    background: var(--coral); color: #fff;
+    padding: 8px 18px; text-align: center;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; font-weight: 500;
+  }
+  .preview-ribbon a { color: #fff; text-decoration: underline; }
+  body { padding-top: 32px; }
+</style>
+</head>
+<body>
+
+<div class="preview-ribbon">
+  Preview · iris-violet variant · <a href="/missoula.html">← View current live version</a>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="container">
+    <a class="brand" href="/">
+      <span class="mark"></span>
+      <span>neoschool</span>
+    </a>
+    <div class="nav-links">
+      <a href="#philosophy">Philosophy</a>
+      <a href="#day">A day</a>
+      <a href="#admissions">Admissions</a>
+      <a href="#apply" class="apply-btn">Apply for 2026</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO — manifesto style -->
+<section class="hero" style="border-top: none;">
+  <div class="container">
+    <p class="label label-violet">neoschool · Missoula, Montana</p>
+    <h1>A school for the <em>post-AI</em> generation.</h1>
+    <p class="sub">When AI can teach reading, math, and science faster than any classroom — what should school actually become? A microschool built for how kids really learn. Opening September 2026 in Missoula. Now enrolling Kindergarten and 1st Grade.</p>
+    <div class="cta-row">
+      <a href="#apply" class="btn-primary">Apply for 2026–27 →</a>
+      <a href="#philosophy" class="btn-secondary">Read the philosophy</a>
+    </div>
+  </div>
+</section>
+
+<!-- DARK SECTION — the research/AI section -->
+<section style="padding: 0; border: none;">
+  <div class="container">
+    <div class="dark-section">
+      <p class="label">01 · The research</p>
+      <h2>AI tutoring delivers <em>2× learning gains</em> over best-practice classroom instruction.</h2>
+      <p class="lead" style="font-family: 'Source Serif 4', serif; font-size: 18px; max-width: 620px; margin-top: 18px;">
+        We're not betting on AI replacing school. We're betting on AI doing what it does best — patient, adaptive, personalized practice — so that humans can do what humans do best.
+      </p>
+      <div class="stats-row">
+        <div class="stat">
+          <div class="num">2<em>×</em></div>
+          <p>Learning gains from AI tutoring vs. classroom instruction</p>
+          <p class="src">Kestin et al., Scientific Reports 2025</p>
+        </div>
+        <div class="stat">
+          <div class="num">10–18<em>min</em></div>
+          <p>Optimal attention span for a kindergartner. Our blocks match it.</p>
+          <p class="src">Waterford.org, 2024</p>
+        </div>
+        <div class="stat">
+          <div class="num">3+<em>hr</em></div>
+          <p>Daily outdoor play that correlates with better attention &amp; school readiness.</p>
+          <p class="src">Koepp et al. 2022 · ScienceDirect 2024</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PHILOSOPHY -->
+<section id="philosophy">
+  <div class="container">
+    <div class="section-head">
+      <p class="label label-violet">02 · The philosophy</p>
+      <h2>Built for <em>how kids actually learn</em>.</h2>
+      <p class="lead">Not how schools have always been organized — how learning actually happens. Two focused hours of academics. Three hours of real projects. Daily outdoor play. AI tutors that adapt. Educators that connect.</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="exp-card">
+        <p class="label">Personalized academics</p>
+        <h3>Two focused hours</h3>
+        <p>AI-adaptive learning blended with proven classroom practices: peer instruction, small-group activities, real-time educator feedback. Brain breaks between subjects, never longer than 18 minutes at a stretch.</p>
+      </div>
+      <div class="exp-card">
+        <p class="label">Real-world projects</p>
+        <h3>Make, build, present</h3>
+        <p>Hands-on projects that connect what they're learning to the world outside the classroom. Cooking introduces fractions. Gardens introduce biology. Entrepreneurship introduces math.</p>
+      </div>
+      <div class="exp-card">
+        <p class="label">Life skills workshops</p>
+        <h3>What school usually skips</h3>
+        <p>Cooking, gardening, survival skills, financial literacy, public speaking, entrepreneurship, emotion regulation. Local Missoula experts teach what matters in the real world.</p>
+      </div>
+      <div class="exp-card">
+        <p class="label">Outdoor play + sports</p>
+        <h3>Unstructured time outside</h3>
+        <p>Daily forest days. Movement-based learning. The research is unambiguous: 3+ hours of outdoor play measurably improves attention, attendance, and school readiness.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- A DAY -->
+<section id="day">
+  <div class="container">
+    <div class="section-head">
+      <p class="label label-violet">03 · A typical day</p>
+      <h2>From <em>8:30am to 4:30pm</em>.</h2>
+      <p class="lead">Long enough that working families don't need separate childcare. Structured enough that kids feel rhythm and progress. Loose enough that play, curiosity, and life happen.</p>
+    </div>
+
+    <div>
+      <div class="day-block">
+        <div class="time">8:30 — 9:00am</div>
+        <div class="content">
+          <h3>Morning play</h3>
+          <p>Arrival window. Free play, conversation, breakfast. Settling into the day before academics begin.</p>
+        </div>
+      </div>
+      <div class="day-block">
+        <div class="time">9:00 — 11:00am</div>
+        <div class="content">
+          <h3>Personalized academics</h3>
+          <p>Two hours of rotation: small-group instruction, AI-adaptive practice, hands-on activities. Reading, writing, math, science. Brain breaks every 15–20 minutes.</p>
+        </div>
+      </div>
+      <div class="day-block">
+        <div class="time">11:00 — 12:30pm</div>
+        <div class="content">
+          <h3>Outdoor play + lunch</h3>
+          <p>Outside first, lunch second. Movement before food. Built around what we know about attention and learning.</p>
+        </div>
+      </div>
+      <div class="day-block">
+        <div class="time">12:30 — 3:30pm</div>
+        <div class="content">
+          <h3>Real projects + life skills</h3>
+          <p>Three hours of project-based learning and weekly workshops. This is what kids will remember decades later.</p>
+        </div>
+      </div>
+      <div class="day-block">
+        <div class="time">3:30 — 4:30pm</div>
+        <div class="content">
+          <h3>Outdoor play</h3>
+          <p>End the day moving. Sports, free play, forest exploration. Working parents pick up at 4:30 or by arrangement.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOUNDER -->
+<section>
+  <div class="container">
+    <div class="section-head">
+      <p class="label label-violet">04 · The founder</p>
+      <h2>Built by parents, for parents.</h2>
+    </div>
+    <div class="founder">
+      <div class="founder-photo"></div>
+      <div class="founder-text">
+        <p>After considering traditional and alternative Kindergarten options for my son, I realized there was an opportunity to create a microschool where kids learn core academics at their own level and pace, and life skills that build real-world confidence and independence.</p>
+        <p>So I invited experienced educators — including Esther Wojcicki, author of <em>How to Raise Successful People</em> — a community of families, and seasoned edtech entrepreneurs (the content providers behind AI tutors used by millions of students) to co-build the school we've all been dreaming of.</p>
+        <p>The first one opens in Missoula, where my kids are growing up as second-generation Montanans. We'd love for your family to be part of it.</p>
+        <p class="sig">— Jennie Yang</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIAL -->
+<section style="border-top: none; padding: 60px 0;">
+  <div class="container">
+    <div class="quote-block">
+      <p>"When parents and educators come together to design a school around how kids actually learn — curious, hands-on, outside, alongside trusted adults — you get a generation that's confident, kind, and ready for whatever comes next."</p>
+      <p class="attr">Esther Wojcicki · Author, <em style="text-transform: none; letter-spacing: 0; font-family: 'Source Serif 4', serif; font-style: italic; color: var(--tx-primary)">How to Raise Successful People</em> · advisor to neoschool</p>
+    </div>
+  </div>
+</section>
+
+<!-- ADMISSIONS -->
+<section id="admissions">
+  <div class="container">
+    <div class="section-head">
+      <p class="label label-violet">05 · Admissions</p>
+      <h2>What to <em>expect</em>.</h2>
+      <p class="lead">A simple, personal four-step process. We're a small founding cohort — every family matters.</p>
+    </div>
+
+    <div class="process">
+      <div class="step"><div class="num">i</div><h3>Submit Application</h3></div>
+      <div class="step"><div class="num">ii</div><h3>Meet with the Founder</h3></div>
+      <div class="step"><div class="num">iii</div><h3>Finalize Enrollment</h3></div>
+      <div class="step"><div class="num">iv</div><h3>Welcome to the Founding Family Community</h3></div>
+    </div>
+
+    <div class="details">
+      <p class="label label-violet">Important details</p>
+      <div class="details-grid">
+        <div class="detail"><div class="key">📚 Enrollment</div><div class="val">Open for <em>Kindergarten and 1st Grade</em></div></div>
+        <div class="detail"><div class="key">💰 Tuition</div><div class="val"><em>$15,000</em> per school year</div></div>
+        <div class="detail"><div class="key">📅 School Year</div><div class="val"><em>September 2026 – June 2027</em></div></div>
+        <div class="detail"><div class="key">🗓 First Tuition Payment</div><div class="val">Due <em>September 1, 2026</em></div></div>
+        <div class="detail"><div class="key">🔒 Deposit</div><div class="val">Once admission is offered, a <em>$500 refundable deposit</em> secures your child's spot. Deducted from the first month's tuition.</div></div>
+        <div class="detail"><div class="key">📆 Monthly Payments</div><div class="val">10 equal payments, <em>September through June</em></div></div>
+        <div class="detail" style="grid-column: 1 / -1"><div class="key">💉 Immunization Requirements</div><div class="val">All students must comply with immunization requirements mandated by the Montana Department of Health. Each student must provide immunization records or an approved exemption before enrollment.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section>
+  <div class="container">
+    <div class="section-head">
+      <p class="label label-violet">06 · Frequently asked questions</p>
+      <h2>Good questions, <em>honest answers</em>.</h2>
+      <p class="lead">Click any question. If yours isn't here, <a href="mailto:jennie@chiefmamaofficer.com">email Jennie</a>.</p>
+    </div>
+
+    <p class="faq-cat">The neoschool model</p>
+    <details><summary>Is the neoschool model proven?</summary><div>Yes. The 2-hour academics model is used by microschools nationally with strong outcomes on third-party assessments. The AI tutoring component is backed by a 2025 Harvard RCT (Kestin et al., <em>Scientific Reports</em>) showing AI tutoring produces 2× learning gains vs. best-practice classroom instruction.</div></details>
+    <details><summary>Will kids be sitting on screens for 2 hours straight?</summary><div>Not at all. The 2-hour academic block is short, mastery-based cycles — typically 10–15 minutes per subject, with brain breaks and movement in between. Screens are one tool among many.</div></details>
+    <details><summary>How long is the neoschool day?</summary><div>8:30am–4:30pm, fully included in tuition. Working-family friendly.</div></details>
+
+    <p class="faq-cat">Academics</p>
+    <details><summary>Do students still learn reading, math, and science?</summary><div>Absolutely. Reading, writing, math, and science are the foundation of the 2-hour daily academic block. What's different is <em>how</em>: AI tutors adapt to each child's exact level and pace.</div></details>
+    <details><summary>Do students really learn more in only 2 hours a day?</summary><div>The research says yes. A 2025 Harvard RCT found AI tutoring produces 2× learning gains compared to best-practice classroom instruction.</div></details>
+
+    <p class="faq-cat">AI &amp; technology</p>
+    <details><summary>Is the AI tutor replacing the teacher?</summary><div>No. For K and 1st grade, neoschool is <strong>instructor-led first</strong>. Educators are in the room every day, leading small-group instruction. The AI tutor supplements — freeing educators to spend more time mentoring and connecting.</div></details>
+    <details><summary>How does neoschool approach AI safety for young children?</summary><div>Thoughtfully. We use age-appropriate, education-specific AI tools — not general-purpose chatbots. Screen time is intentional and time-limited. We follow COPPA guidelines.</div></details>
+
+    <p class="faq-cat">Tuition &amp; enrollment</p>
+    <details><summary>How much does it cost to apply?</summary><div>Nothing. Applying is completely free.</div></details>
+    <details><summary>What does tuition cover?</summary><div>The complete school day (8:30am–4:30pm), all academic instruction, AI tutor access, life skills workshops, healthy snacks, sports, forest days, field trips, materials, and the neoschool digital platform. No hidden fees.</div></details>
+    <details><summary>Do you offer part-time for homeschooling families?</summary><div>Yes — half-day drop-in enrollment includes life skills workshops, outdoor play, and the neoschool community. <a href="mailto:jennie@chiefmamaofficer.com">Reach out</a> for details.</div></details>
+  </div>
+</section>
+
+<!-- APPLY -->
+<section id="apply" style="padding-bottom: 80px;">
+  <div class="container">
+    <div class="apply-section">
+      <!-- Success state -->
+      <div id="successState" class="success-state" style="display:none">
+        <div class="sun"></div>
+        <h2>Application received</h2>
+        <p class="msg">Thank you, <span id="successName" style="color: var(--violet); font-weight: 500; font-style: normal">there</span>. Jennie will personally respond within 24 hours.</p>
+        <p class="email-line">Confirmation on its way to <span id="successEmail" style="color: var(--tx-primary)"></span></p>
+        <button class="again-btn" onclick="resetForm()">+ Submit another application</button>
+      </div>
+
+      <!-- Form state -->
+      <div id="formState">
+        <p class="label label-violet">07 · Become a founding family</p>
+        <h2>Apply for <em>2026–2027</em>.</h2>
+        <p class="lead">Kindergarten + 1st Grade · Limited spots available. We'll respond within 24 hours.</p>
+
+        <form id="applyForm" onsubmit="submitApplication(event)" style="margin-top: 36px">
+          <div class="form-grid">
+            <div class="field"><label>Parent name *</label><input id="parentName" type="text" required placeholder="Your full name"></div>
+            <div class="field"><label>Email *</label><input id="email" type="email" required placeholder="you@example.com"></div>
+          </div>
+          <div class="form-grid">
+            <div class="field"><label>Phone</label><input id="phone" type="tel" placeholder="(406) 555-0100"></div>
+            <div class="field"><label>Child's name *</label><input id="childName" type="text" required placeholder="Child's first name"></div>
+          </div>
+          <div class="form-grid">
+            <div class="field"><label>Grade for 2026–27 *</label>
+              <select id="grade" required>
+                <option value="">Select grade</option>
+                <option value="Kindergarten">Kindergarten</option>
+                <option value="1st Grade">1st Grade</option>
+                <option value="Other">Other (specify in notes)</option>
+              </select>
+            </div>
+            <div class="field"><label>Current situation</label>
+              <select id="situation">
+                <option value="">Select if applicable</option>
+                <option value="public">Public school</option>
+                <option value="private">Private school</option>
+                <option value="homeschool">Homeschooling</option>
+                <option value="preschool">Preschool / daycare</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="field" style="margin-bottom: 18px">
+            <label>What drew you to neoschool? (optional)</label>
+            <textarea id="notes" placeholder="Tell us a bit about your child and what you're hoping for in their education…"></textarea>
+          </div>
+          <div class="submit-row">
+            <button type="submit" class="submit-btn">Apply for 2026–2027 →</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<a href="#apply" class="sticky-apply" id="stickyApply">Apply →</a>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <span class="ftxt">© neoschool · Missoula, Montana · Opening Sept 2026</span>
+    <span class="ftxt"><a href="mailto:jennie@chiefmamaofficer.com">jennie@chiefmamaofficer.com</a> · <a href="/">Platform</a> · <a href="/missoula.html">View current version</a></span>
+  </div>
+</footer>
+
+<script type="module">
+  const SUPABASE_URL = "https://dwpxsaamaehtmhsuuprg.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_eM_rkri5KfdnheOZyCNN3w_hqmN7M4k";
+
+  // Sticky apply visibility
+  const stickyBtn = document.getElementById("stickyApply");
+  const applySection = document.getElementById("apply");
+  function updateSticky() {
+    if (!stickyBtn) return;
+    const scrolled = window.scrollY;
+    const applyTop = applySection ? applySection.offsetTop - window.innerHeight + 200 : Infinity;
+    if (scrolled > 800 && scrolled < applyTop) stickyBtn.classList.add("visible");
+    else stickyBtn.classList.remove("visible");
+  }
+  window.addEventListener("scroll", updateSticky, { passive: true });
+  updateSticky();
+
+  window.submitApplication = async function(e) {
+    e.preventDefault();
+    const form = document.getElementById("applyForm");
+    const data = {
+      parent_name: form.parentName.value.trim(),
+      email: form.email.value.trim(),
+      phone: form.phone.value.trim() || null,
+      child_name: form.childName.value.trim(),
+      grade: form.grade.value,
+      campus: "Missoula",
+      situation: form.situation.value || null,
+      notes: form.notes.value.trim() || null,
+      source: "missoula-v2-preview",
+      submitted_at: new Date().toISOString(),
+    };
+
+    // localStorage sync first (guaranteed)
+    try {
+      const local = JSON.parse(localStorage.getItem("neo_applications") || "[]");
+      local.push({ id: Date.now(), ...data });
+      localStorage.setItem("neo_applications", JSON.stringify(local));
+    } catch {}
+
+    // Show success immediately (optimistic UI)
+    document.getElementById("successName").textContent = data.parent_name.split(" ")[0] || "there";
+    document.getElementById("successEmail").textContent = data.email;
+    document.getElementById("formState").style.display = "none";
+    document.getElementById("successState").style.display = "block";
+    document.getElementById("stickyApply")?.classList.remove("visible");
+
+    setTimeout(() => document.getElementById("apply").scrollIntoView({ behavior: "smooth", block: "center" }), 50);
+
+    // Network calls in parallel, background
+    Promise.all([
+      fetch(`${SUPABASE_URL}/functions/v1/submit-application`, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(data) }).catch(() => null),
+      fetch(`${SUPABASE_URL}/rest/v1/applications`, { method: "POST", headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json", "Prefer": "return=minimal" }, body: JSON.stringify({ form_data: data, campus: "Missoula", child_name: data.child_name, grade: data.grade, status: "new" }) }).catch(() => null),
+    ]);
+  };
+
+  window.resetForm = function() {
+    document.getElementById("applyForm").reset();
+    document.getElementById("successState").style.display = "none";
+    document.getElementById("formState").style.display = "block";
+    setTimeout(() => { document.getElementById("parentName").focus(); document.getElementById("apply").scrollIntoView({ behavior: "smooth", block: "start" }); }, 50);
+  };
+</script>
+
+</body>
+</html>
