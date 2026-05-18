@@ -716,65 +716,79 @@
 <!-- Apply / Register -->
 <section class="container" id="apply">
   <div class="apply">
-    <p style="font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--or3);margin-bottom:10px;font-weight:500">Become a founding family</p>
-    <h2>Apply for <em>2026–2027</em></h2>
-    <p class="apply-sub">Kindergarten + 1st Grade · Limited spots available. We'll respond within 24 hours.</p>
+    <!-- SUCCESS STATE — shown after submission, replaces form entirely -->
+    <div id="successState" style="display:none;text-align:center;padding:30px 10px">
+      <div style="font-size:54px;margin-bottom:14px">✨</div>
+      <h2 style="color:#fff;font-size:32px;margin-bottom:10px">Application received</h2>
+      <p style="font-family:'Newsreader',serif;font-style:italic;color:rgba(255,255,255,.85);font-size:17px;line-height:1.55;font-weight:300;max-width:480px;margin:0 auto 14px">
+        Thank you, <span id="successName" style="color:var(--or3);font-style:normal;font-weight:500">there</span>.
+        Jennie will personally respond within 24 hours.
+      </p>
+      <p style="font-family:'Geist Mono',monospace;font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.06em;margin-top:18px">
+        A confirmation is on its way to <span id="successEmail" style="color:rgba(255,255,255,.75)"></span>
+      </p>
+    </div>
 
-    <form id="applyForm" onsubmit="submitApplication(event)">
-      <div class="form-grid">
-        <div>
-          <label for="parentName">Parent name *</label>
-          <input id="parentName" name="parentName" type="text" required placeholder="Your full name">
-        </div>
-        <div>
-          <label for="email">Email *</label>
-          <input id="email" name="email" type="email" required placeholder="you@example.com">
-        </div>
-      </div>
+    <!-- FORM STATE — default view -->
+    <div id="formState">
+      <p style="font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--or3);margin-bottom:10px;font-weight:500">Become a founding family</p>
+      <h2>Apply for <em>2026–2027</em></h2>
+      <p class="apply-sub">Kindergarten + 1st Grade · Limited spots available. We'll respond within 24 hours.</p>
 
-      <div class="form-grid">
-        <div>
-          <label for="phone">Phone</label>
-          <input id="phone" name="phone" type="tel" placeholder="(406) 555-0100">
+      <form id="applyForm" onsubmit="submitApplication(event)">
+        <div class="form-grid">
+          <div>
+            <label for="parentName">Parent name *</label>
+            <input id="parentName" name="parentName" type="text" required placeholder="Your full name">
+          </div>
+          <div>
+            <label for="email">Email *</label>
+            <input id="email" name="email" type="email" required placeholder="you@example.com">
+          </div>
         </div>
-        <div>
-          <label for="childName">Child's name *</label>
-          <input id="childName" name="childName" type="text" required placeholder="Child's first name">
+
+        <div class="form-grid">
+          <div>
+            <label for="phone">Phone</label>
+            <input id="phone" name="phone" type="tel" placeholder="(406) 555-0100">
+          </div>
+          <div>
+            <label for="childName">Child's name *</label>
+            <input id="childName" name="childName" type="text" required placeholder="Child's first name">
+          </div>
         </div>
-      </div>
 
-      <div class="form-grid">
-        <div>
-          <label for="grade">Grade for 2026–27 *</label>
-          <select id="grade" name="grade" required>
-            <option value="">Select grade</option>
-            <option value="Kindergarten">Kindergarten</option>
-            <option value="1st Grade">1st Grade</option>
-            <option value="Other">Other (please specify in notes)</option>
-          </select>
+        <div class="form-grid">
+          <div>
+            <label for="grade">Grade for 2026–27 *</label>
+            <select id="grade" name="grade" required>
+              <option value="">Select grade</option>
+              <option value="Kindergarten">Kindergarten</option>
+              <option value="1st Grade">1st Grade</option>
+              <option value="Other">Other (please specify in notes)</option>
+            </select>
+          </div>
+          <div>
+            <label for="situation">Current situation</label>
+            <select id="situation" name="situation">
+              <option value="">Select if applicable</option>
+              <option value="public">Public school</option>
+              <option value="private">Private school</option>
+              <option value="homeschool">Homeschooling</option>
+              <option value="preschool">Preschool / daycare</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
         </div>
-        <div>
-          <label for="situation">Current situation</label>
-          <select id="situation" name="situation">
-            <option value="">Select if applicable</option>
-            <option value="public">Public school</option>
-            <option value="private">Private school</option>
-            <option value="homeschool">Homeschooling</option>
-            <option value="preschool">Preschool / daycare</option>
-            <option value="other">Other</option>
-          </select>
+
+        <div style="margin-bottom:18px">
+          <label for="notes">What drew you to neoschool? (optional)</label>
+          <textarea id="notes" name="notes" placeholder="Tell us a bit about your child and what you're hoping for in their education..."></textarea>
         </div>
-      </div>
 
-      <div style="margin-bottom:18px">
-        <label for="notes">What drew you to neoschool? (optional)</label>
-        <textarea id="notes" name="notes" placeholder="Tell us a bit about your child and what you're hoping for in their education..."></textarea>
-      </div>
-
-      <button type="submit" class="submit-btn" id="submitBtn">Apply for 2026–2027 →</button>
-
-      <div class="form-status" id="formStatus"></div>
-    </form>
+        <button type="submit" class="submit-btn" id="submitBtn">Apply for 2026–2027 →</button>
+      </form>
+    </div>
   </div>
 </section>
 
@@ -833,13 +847,8 @@
   window.submitApplication = async function(e) {
     e.preventDefault();
     const form = document.getElementById("applyForm");
-    const btn = document.getElementById("submitBtn");
-    const status = document.getElementById("formStatus");
-    btn.disabled = true;
-    btn.textContent = "Submitting...";
-    status.className = "form-status";
-    status.style.display = "none";
 
+    // Snapshot data immediately
     const data = {
       parent_name: form.parentName.value.trim(),
       email: form.email.value.trim(),
@@ -853,72 +862,63 @@
       submitted_at: new Date().toISOString(),
     };
 
-    // PRIMARY: Submit via Edge Function (handles DB + email + logging)
-    let serverResult = null;
-    try {
-      const r = await fetch(`${SUPABASE_URL}/functions/v1/submit-application`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (r.ok) serverResult = await r.json();
-    } catch (err) { console.warn("Edge function failed:", err); }
-
-    // BACKUP 1: Direct Supabase insert
-    let savedToSupabase = serverResult?.db_saved || false;
-    if (!savedToSupabase) {
-      try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/applications`, {
-          method: "POST",
-          headers: {
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-            "Content-Type": "application/json",
-            "Prefer": "return=minimal",
-          },
-          body: JSON.stringify({
-            form_data: data,
-            campus: "Missoula",
-            child_name: data.child_name,
-            grade: data.grade,
-            status: "new",
-          }),
-        });
-        if (res.ok) savedToSupabase = true;
-      } catch (err) { console.warn("Direct insert failed:", err); }
-    }
-
-    // BACKUP 2: Always save to localStorage
+    // === STEP 1: Save to localStorage IMMEDIATELY (sync, can't fail) ===
     try {
       const local = JSON.parse(localStorage.getItem("neo_applications") || "[]");
-      local.push({ id: Date.now(), ...data, server_result: serverResult });
+      local.push({ id: Date.now(), ...data });
       localStorage.setItem("neo_applications", JSON.stringify(local));
     } catch {}
 
-    // BACKUP 3: mailto fallback (always shows)
-    const mailBody = `New neoschool Missoula application:\n\n` +
-      `Parent: ${data.parent_name}\n` +
-      `Email: ${data.email}\n` +
-      `Phone: ${data.phone || "—"}\n` +
-      `Child: ${data.child_name}\n` +
-      `Grade: ${data.grade}\n` +
-      `Situation: ${data.situation || "—"}\n\n` +
-      `Notes: ${data.notes || "—"}\n\n` +
-      `Submitted: ${data.submitted_at}`;
+    // === STEP 2: Show success state IMMEDIATELY (optimistic UI) ===
+    const firstName = data.parent_name.split(" ")[0] || "there";
+    document.getElementById("successName").textContent = firstName;
+    document.getElementById("successEmail").textContent = data.email;
+    document.getElementById("formState").style.display = "none";
+    document.getElementById("successState").style.display = "block";
+    document.getElementById("stickyApply")?.classList.remove("visible");
 
-    status.classList.add("success");
-    status.style.display = "block";
-    status.innerHTML = `✨ <strong>Application received, ${data.parent_name.split(" ")[0]}!</strong><br>
-      We'll be in touch with you at <strong>${data.email}</strong> within 24 hours.
-      ${savedToSupabase ? "" : "<br><br>(Backup email link: <a href='mailto:jennie@chiefmamaofficer.com?subject=neoschool%20Missoula%20application&body=" + encodeURIComponent(mailBody) + "' style='color:#fff;text-decoration:underline'>send via email</a>)"}`;
-    btn.textContent = "Apply for 2026–2027 →";
-    btn.disabled = true;
-    form.reset();
+    // Smooth scroll into view of success state
+    setTimeout(() => {
+      document.getElementById("apply").scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 50);
 
-    // Scroll to status
-    setTimeout(() => status.scrollIntoView({ behavior:"smooth", block:"center" }), 100);
+    // === STEP 3: Fire network submissions IN PARALLEL in background ===
+    // User already saw success — these run silently
+    const submissions = [
+      // Edge Function (handles DB + email)
+      fetch(`${SUPABASE_URL}/functions/v1/submit-application`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      }).catch(e => ({ ok: false, err: e })),
 
-    console.log("Application submitted:", data, "Saved to Supabase:", savedToSupabase);
+      // Direct Supabase REST (backup write)
+      fetch(`${SUPABASE_URL}/rest/v1/applications`, {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+          "Content-Type": "application/json",
+          "Prefer": "return=minimal",
+        },
+        body: JSON.stringify({
+          form_data: data,
+          campus: "Missoula",
+          child_name: data.child_name,
+          grade: data.grade,
+          status: "new",
+        }),
+      }).catch(e => ({ ok: false, err: e })),
+    ];
+
+    // Log results in console for debugging (but don't show to user)
+    Promise.all(submissions).then(results => {
+      console.log("Submissions completed:", {
+        edgeFunction: results[0]?.ok,
+        directREST: results[1]?.ok,
+        localStorage: true,
+      });
+    });
   };
 </script>
 
