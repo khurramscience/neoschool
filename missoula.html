@@ -123,6 +123,37 @@
   .footer-meta{font-family:'Newsreader',serif;font-style:italic;color:rgba(255,255,255,.55);font-size:14px;font-weight:300}
 
   ::selection{background:rgba(194,84,32,.25);color:var(--nv)}
+  /* Mobile improvements — large tap targets, readable type */
+  @media(max-width:680px){
+    html,body{font-size:15px}
+    body{padding:0}
+    .container{padding:0 18px}
+    .topbar{padding:10px 0;flex-direction:column;gap:6px;text-align:center}
+    .topbar .container{gap:10px;flex-direction:column}
+    .topbar-meta,.topbar-cta{font-size:9.5px}
+    .hero{padding:28px 0 16px}
+    .hero-image{height:240px;background-position:center 30%}
+    .hero-text{padding:24px 0 14px}
+    h1{font-size:34px !important;line-height:1.05;letter-spacing:-.018em}
+    .hero-sub{font-size:15.5px;margin-bottom:18px}
+    .pill{padding:6px 12px;font-size:12.5px}
+    section{padding:30px 0}
+    section h2{font-size:24px}
+    .day{padding:16px;gap:14px;grid-template-columns:repeat(2,1fr) !important}
+    .day-step:last-child{grid-column:span 2;max-width:50%;margin:0 auto}
+    .day-step .emoji{font-size:28px}
+    .grid-2,.grid-3,.grid-4{grid-template-columns:1fr !important;gap:10px !important}
+    .grid-3 .inside-card,.grid-4 .science-card{padding:14px 16px}
+    .founder{gap:22px}
+    .founder-photo{height:300px}
+    .apply{padding:24px 20px;border-radius:14px}
+    .apply h2{font-size:26px;line-height:1.1}
+    .form-grid{grid-template-columns:1fr !important;gap:14px}
+    .submit-btn{padding:18px 28px;font-size:16px}
+    input,select,textarea{padding:14px 14px;font-size:16px}
+    footer{padding:20px 0}
+    footer .container{flex-direction:column;gap:8px;text-align:center}
+  }
 </style>
 </head>
 <body>
