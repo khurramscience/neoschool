@@ -5,6 +5,24 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>neoschool · Missoula, Montana</title>
 <meta name="description" content="A microschool built for how kids actually learn. Missoula, Montana — Opening September 2026. Kindergarten + 1st Grade. Now enrolling founding families.">
+
+<!-- Open Graph / social sharing -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://neoschool.me/missoula.html">
+<meta property="og:title" content="neoschool Missoula · A microschool built for how kids actually learn">
+<meta property="og:description" content="Opening September 2026 in Missoula, Montana. Personalized academics + life skills + real outdoor play. Now enrolling founding families for Kindergarten and 1st grade.">
+<meta property="og:image" content="https://neoschool.me/missoula/kids-flowers.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="neoschool">
+
+<!-- Twitter card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="neoschool Missoula · Opening Sept 2026">
+<meta name="twitter:description" content="A microschool built for how kids actually learn. Now enrolling founding families.">
+<meta name="twitter:image" content="https://neoschool.me/missoula/kids-flowers.jpg">
+
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='42' fill='none' stroke='%231a1f3a' stroke-width='8'/%3E%3Cline x1='50' y1='8' x2='50' y2='92' stroke='%231a1f3a' stroke-width='8'/%3E%3Cline x1='8' y1='50' x2='92' y2='50' stroke='%231a1f3a' stroke-width='8'/%3E%3Ccircle cx='50' cy='50' r='10' fill='%23d9622b'/%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -122,13 +140,37 @@
   .topbar-apply{background:var(--or);color:#fff;padding:7px 16px;border-radius:99px;font-family:'Fraunces',serif;font-size:13px;font-weight:500;text-decoration:none;letter-spacing:-.005em;transition:all .2s;display:inline-block}
   .topbar-apply:hover{background:var(--or2);transform:translateY(-1px);box-shadow:0 4px 14px rgba(217,98,43,.4)}
 
-  /* Admissions process — 4 steps */
-  .process-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:36px}
+  /* Admissions process — 4 steps with connecting lines */
+  .process-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:36px;position:relative}
   @media(max-width:780px){.process-grid{grid-template-columns:repeat(2,1fr)}}
   @media(max-width:480px){.process-grid{grid-template-columns:1fr}}
-  .process-step{background:#fff;border:1px solid var(--p2);border-radius:14px;padding:22px 20px;position:relative;text-align:center}
-  .process-step .num{font-family:'Fraunces',serif;font-size:34px;font-weight:300;color:var(--or);line-height:1;margin-bottom:8px}
-  .process-step h3{font-family:'Fraunces',serif;font-size:15px;font-weight:600;color:var(--nv);line-height:1.25;letter-spacing:-.005em}
+  .process-step{background:#fff;border:1px solid var(--p2);border-radius:14px;padding:24px 20px;position:relative;text-align:center;z-index:2}
+  .process-step .num{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;background:var(--or);color:#fff;font-family:'Fraunces',serif;font-size:20px;font-weight:500;line-height:1;margin-bottom:14px}
+  .process-step h3{font-family:'Fraunces',serif;font-size:15px;font-weight:600;color:var(--nv);line-height:1.3;letter-spacing:-.005em}
+  /* Connecting line between steps on desktop */
+  @media(min-width:781px){
+    .process-grid::before{content:'';position:absolute;top:45px;left:6%;right:6%;height:2px;background:var(--or);opacity:.25;z-index:1}
+  }
+
+  /* Sticky floating Apply button — appears on scroll past hero */
+  .sticky-apply{position:fixed;bottom:24px;right:24px;background:var(--or);color:#fff;padding:14px 24px;border-radius:99px;font-family:'Fraunces',serif;font-weight:500;font-size:14px;text-decoration:none;box-shadow:0 8px 24px -4px rgba(217,98,43,.5);z-index:1000;transition:all .25s cubic-bezier(.2,.8,.2,1);opacity:0;transform:translateY(20px);pointer-events:none;letter-spacing:-.005em}
+  .sticky-apply.visible{opacity:1;transform:translateY(0);pointer-events:auto}
+  .sticky-apply:hover{transform:translateY(-2px);box-shadow:0 12px 28px -4px rgba(217,98,43,.6);background:var(--or2)}
+  @media(max-width:680px){.sticky-apply{bottom:16px;right:16px;padding:13px 20px;font-size:13.5px}}
+
+  /* Smooth scroll */
+  html{scroll-behavior:smooth}
+
+  /* Section fade-in on scroll */
+  .reveal{opacity:0;transform:translateY(24px);transition:opacity .8s ease,transform .8s ease}
+  .reveal.visible{opacity:1;transform:translateY(0)}
+
+  /* Quote/testimonial */
+  .quote-section{background:linear-gradient(180deg,#faf4ed 0%,#f4ecdf 100%);padding:60px 40px;border-radius:18px;margin:30px 0;text-align:center}
+  .quote-text{font-family:'Fraunces',serif;font-style:italic;font-weight:300;font-size:24px;line-height:1.4;color:var(--nv);letter-spacing:-.01em;max-width:680px;margin:0 auto 22px}
+  .quote-text::before{content:'\\201C';font-size:60px;color:var(--or);line-height:0;vertical-align:-30px;margin-right:6px;opacity:.6}
+  .quote-author{font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--or)}
+  @media(max-width:680px){.quote-section{padding:36px 24px}.quote-text{font-size:18px}}
 
   /* Important details */
   .details-card{background:var(--p);border-radius:14px;padding:30px 32px}
@@ -190,6 +232,8 @@
 </style>
 </head>
 <body>
+
+<a href="#apply" class="sticky-apply" id="stickyApply">Apply for 2026 →</a>
 
 <!-- Top bar -->
 <div class="topbar">
@@ -278,6 +322,14 @@
       <p>The first one opens in Missoula, where my kids are growing up as second generation Montanans. We'd love for your family to be part of it.</p>
       <p class="founder-sig">— Jennie Yang</p>
     </div>
+  </div>
+</section>
+
+<!-- Testimonial quote — Esther Wojcicki -->
+<section class="container">
+  <div class="quote-section">
+    <p class="quote-text">When parents and educators come together to design a school around how kids actually learn — curious, hands-on, outside, alongside trusted adults — you get a generation that's confident, kind, and ready for whatever comes next.</p>
+    <p class="quote-author">— Esther Wojcicki · Educator, author of <em style="font-family:'Fraunces',serif;font-style:italic">How to Raise Successful People</em> · advisor to neoschool</p>
   </div>
 </section>
 
@@ -530,6 +582,41 @@
 </footer>
 
 <script type="module">
+  // Show sticky apply button after user scrolls past hero
+  const stickyBtn = document.getElementById("stickyApply");
+  const applySection = document.getElementById("apply");
+  const heroSection = document.querySelector(".hero");
+
+  function updateStickyVisibility() {
+    if (!stickyBtn || !heroSection) return;
+    const heroBottom = heroSection.offsetTop + heroSection.offsetHeight;
+    const applyTop = applySection ? applySection.offsetTop - window.innerHeight + 200 : Infinity;
+    // Show after hero, hide when apply form is in view
+    const scrolled = window.scrollY;
+    if (scrolled > heroBottom && scrolled < applyTop) {
+      stickyBtn.classList.add("visible");
+    } else {
+      stickyBtn.classList.remove("visible");
+    }
+  }
+
+  window.addEventListener("scroll", updateStickyVisibility, { passive: true });
+  updateStickyVisibility();
+
+  // Reveal sections on scroll
+  const observer = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("visible");
+        observer.unobserve(entry.target);
+      }
+    }
+  }, { threshold: 0.08, rootMargin: "0px 0px -80px 0px" });
+  document.querySelectorAll("section").forEach(s => {
+    s.classList.add("reveal");
+    observer.observe(s);
+  });
+
   // Supabase client setup
   const SUPABASE_URL = "https://dwpxsaamaehtmhsuuprg.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_eM_rkri5KfdnheOZyCNN3w_hqmN7M4k";
