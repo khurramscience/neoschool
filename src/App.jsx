@@ -3546,8 +3546,11 @@ function CampusApplicationsTable({ filter }) {
           };
           const sm = stageMap[a.status] || stageMap["new"];
           const d = new Date(a.submitted_at);
-          const days = Math.floor((Date.now() - d.getTime()) / 86400000);
-          const lastStr = days === 0 ? "today" : days === 1 ? "yesterday" : `${days} days ago`;
+          const hoursSince = (Date.now() - d.getTime()) / 3600000;
+          const days = Math.floor(hoursSince / 24);
+          const lastStr = hoursSince < 1 ? `${Math.floor(hoursSince * 60)}m ago`
+                        : hoursSince < 24 ? `${Math.floor(hoursSince)}h ago`
+                        : days === 1 ? "yesterday" : `${days}d ago`;
           return {
             family: (fd.parent_name || fd.parentName || "—").split(" ").slice(-1)[0],
             child:  a.child_name || fd.child_name || fd.childName || "—",
@@ -3558,6 +3561,7 @@ function CampusApplicationsTable({ filter }) {
             last:   lastStr,
             next:   a.status === "new" ? "Review application" : "Follow up",
             email:  fd.email || "",
+            isNew:  hoursSince < 24,
           };
         }));
       }
@@ -3581,8 +3585,12 @@ function CampusApplicationsTable({ filter }) {
             {filtered.length === 0 ? (
               <tr><td colSpan={7} style={{ padding:30, textAlign:"center", color:"var(--mu)", fontStyle:"italic" }}>No applications matching this filter.</td></tr>
             ) : filtered.map((f,i) => (
-              <tr key={i} style={{ borderBottom:"1px solid var(--p2)", cursor:"pointer" }} onMouseOver={e => e.currentTarget.style.background="var(--p)"} onMouseOut={e => e.currentTarget.style.background="#fff"}>
-                <td style={{ padding:"10px 11px", fontWeight:600 }}>{f.family}{f.email && <div style={{ fontSize:10, color:"var(--mu)", fontWeight:400 }}>{f.email}</div>}</td>
+              <tr key={i} style={{ borderBottom:"1px solid var(--p2)", cursor:"pointer", background: f.isNew ? "rgba(217,98,43,.04)" : "#fff" }} onMouseOver={e => e.currentTarget.style.background="var(--p)"} onMouseOut={e => e.currentTarget.style.background = f.isNew ? "rgba(217,98,43,.04)" : "#fff"}>
+                <td style={{ padding:"10px 11px", fontWeight:600 }}>
+                  {f.family}
+                  {f.isNew && <span style={{ display:"inline-block", marginLeft:6, background:"var(--or)", color:"#fff", fontSize:8.5, fontWeight:600, letterSpacing:".08em", textTransform:"uppercase", padding:"2px 6px", borderRadius:99, fontFamily:"'Geist Mono',monospace", animation:"pu 2s infinite" }}>NEW</span>}
+                  {f.email && <div style={{ fontSize:10, color:"var(--mu)", fontWeight:400 }}>{f.email}</div>}
+                </td>
                 <td style={{ padding:"10px 11px" }}>{f.child}</td>
                 <td style={{ padding:"10px 11px", color:"var(--mu)" }}>{f.grade}</td>
                 <td style={{ padding:"10px 11px" }}><span style={{ background:f.stageColor+"22", color:f.stageColor, padding:"3px 9px", borderRadius:99, fontSize:11, fontWeight:600 }}>{f.stage}</span></td>
