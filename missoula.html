@@ -32,9 +32,9 @@
   .topbar-cta{font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--or3);font-weight:500}
 
   /* Hero */
-  .hero{padding:50px 0 30px}
-  .hero-image{width:100%;height:420px;border-radius:14px;background-image:url('/missoula/kids-flowers.jpg');background-size:cover;background-position:center 35%;background-color:var(--p);box-shadow:0 8px 32px rgba(26,31,58,.12)}
-  .hero-text{padding:40px 0 20px;max-width:760px;margin:0 auto;text-align:center}
+  .hero{padding:60px 0 30px}
+  .hero-image{width:100%;height:480px;border-radius:14px;background-image:url('/missoula/kids-flowers.jpg');background-size:cover;background-position:center 75%;background-color:var(--p);box-shadow:0 8px 32px rgba(26,31,58,.12)}
+  .hero-text{padding:54px 0 24px;max-width:760px;margin:0 auto;text-align:center}
   .eyebrow{font-family:'Geist Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mu);margin-bottom:14px}
   h1{font-family:'Fraunces',serif;font-size:clamp(40px,6vw,68px);font-weight:400;line-height:1.04;letter-spacing:-.02em;color:var(--nv);margin-bottom:18px}
   h1 em{font-style:italic;font-weight:300;color:var(--or)}
@@ -43,10 +43,10 @@
   .pill{padding:8px 18px;background:var(--or);color:#fff;border-radius:99px;font-family:'Fraunces',serif;font-size:14px;font-weight:500;letter-spacing:-.005em}
 
   /* Section */
-  section{padding:50px 0}
-  section h2{font-family:'Fraunces',serif;font-size:32px;font-weight:400;letter-spacing:-.015em;line-height:1.1;margin-bottom:8px;color:var(--nv)}
+  section{padding:72px 0}
+  section h2{font-family:'Fraunces',serif;font-size:34px;font-weight:400;letter-spacing:-.015em;line-height:1.1;margin-bottom:10px;color:var(--nv)}
   section h2 em{font-style:italic;color:var(--or);font-weight:300}
-  .section-eyebrow{font-family:'Geist Mono',monospace;font-size:11px;color:var(--or);letter-spacing:.12em;text-transform:uppercase;border-bottom:1.5px solid var(--or);display:inline-block;padding-bottom:4px;margin-bottom:18px}
+  .section-eyebrow{font-family:'Geist Mono',monospace;font-size:11px;color:var(--or);letter-spacing:.12em;text-transform:uppercase;border-bottom:1.5px solid var(--or);display:inline-block;padding-bottom:4px;margin-bottom:24px}
 
   /* A day at neoschool */
   .day{background:#fff;border:1px solid var(--p2);border-radius:14px;padding:24px;display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
@@ -116,7 +116,40 @@
   .form-status.error{background:rgba(168,61,61,.2);color:#f0a4a4;border:1px solid rgba(168,61,61,.4);display:block}
 
   /* Footer */
-  footer{background:var(--nv);color:#fff;padding:28px 0;margin-top:20px}
+  footer{background:var(--nv);color:#fff;padding:36px 0;margin-top:30px}
+
+  /* Top bar Apply CTA */
+  .topbar-apply{background:var(--or);color:#fff;padding:7px 16px;border-radius:99px;font-family:'Fraunces',serif;font-size:13px;font-weight:500;text-decoration:none;letter-spacing:-.005em;transition:all .2s;display:inline-block}
+  .topbar-apply:hover{background:var(--or2);transform:translateY(-1px);box-shadow:0 4px 14px rgba(217,98,43,.4)}
+
+  /* Admissions process — 4 steps */
+  .process-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:36px}
+  @media(max-width:780px){.process-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:480px){.process-grid{grid-template-columns:1fr}}
+  .process-step{background:#fff;border:1px solid var(--p2);border-radius:14px;padding:22px 20px;position:relative;text-align:center}
+  .process-step .num{font-family:'Fraunces',serif;font-size:34px;font-weight:300;color:var(--or);line-height:1;margin-bottom:8px}
+  .process-step h3{font-family:'Fraunces',serif;font-size:15px;font-weight:600;color:var(--nv);line-height:1.25;letter-spacing:-.005em}
+
+  /* Important details */
+  .details-card{background:var(--p);border-radius:14px;padding:30px 32px}
+  .details-card h3{font-family:'Geist Mono',monospace;font-size:11px;color:var(--or);letter-spacing:.12em;text-transform:uppercase;margin-bottom:16px;font-weight:500}
+  .details-list{display:grid;grid-template-columns:1fr 1fr;gap:18px 32px}
+  @media(max-width:680px){.details-list{grid-template-columns:1fr}}
+  .detail-item .label{font-family:'Fraunces',serif;font-size:15px;font-weight:600;color:var(--nv);margin-bottom:4px;letter-spacing:-.005em}
+  .detail-item .value{font-family:'Newsreader',serif;font-size:14px;color:var(--tx2);line-height:1.55;font-weight:400}
+  .detail-item .value em{color:var(--or);font-style:italic;font-weight:500}
+
+  /* FAQ accordion */
+  .faq-list{display:flex;flex-direction:column;gap:8px;margin-top:18px}
+  details{background:#fff;border:1px solid var(--p2);border-radius:10px;overflow:hidden;transition:border-color .2s}
+  details[open]{border-color:var(--or)}
+  details summary{cursor:pointer;padding:16px 22px;font-family:'Fraunces',serif;font-size:16px;font-weight:500;color:var(--nv);list-style:none;display:flex;justify-content:space-between;align-items:center;letter-spacing:-.005em;line-height:1.35}
+  details summary::-webkit-details-marker{display:none}
+  details summary::after{content:'+';font-family:'Geist Mono',monospace;font-size:20px;color:var(--or);font-weight:300;transition:transform .2s}
+  details[open] summary::after{content:'−'}
+  details summary:hover{color:var(--or)}
+  details > div{padding:0 22px 18px;font-family:'Newsreader',serif;font-size:14.5px;line-height:1.7;color:var(--tx2);font-weight:300}
+
   footer .container{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
   footer a{color:var(--or3);text-decoration:none;font-family:'Fraunces',serif;font-weight:500}
   footer a:hover{color:#fff}
@@ -171,7 +204,7 @@
       <span class="brand-name">neoschool</span>
     </a>
     <span class="topbar-meta">Missoula, Montana · Opening Sept 2026</span>
-    <span class="topbar-cta">Now Enrolling · Founding Families</span>
+    <a href="#apply" class="topbar-apply">Apply Now →</a>
   </div>
 </div>
 
@@ -257,7 +290,7 @@
     <div class="inside-card"><div class="h"><em>📚</em>Educational library</div><p>Project-based learning games trusted by millions of kids online</p></div>
     <div class="inside-card"><div class="h"><em>🏫</em>1000+ schools</div><p>Already use our content providers in daily teaching</p></div>
     <div class="inside-card"><div class="h"><em>🤝</em>Community</div><p>Family events, parent coaching, and drop-in half days for homeschoolers</p></div>
-    <div class="inside-card"><div class="h"><em>📍</em>Missoula, MT</div><p>Local roots, second-generation Montanan founder, community-built</p></div>
+    <div class="inside-card"><div class="h"><em>📍</em>Missoula, MT</div><p>Local roots, community-built, stewarded by a second-generation Missoulian family</p></div>
   </div>
 </section>
 
@@ -285,6 +318,137 @@
       <p>Outdoor play improves attention in the classroom vs. indoor play. 3+ hrs/day linked to better school readiness.</p>
       <p class="src">Koepp et al. 2022 · ScienceDirect 2024</p>
     </div>
+  </div>
+</section>
+
+<!-- Admissions & Enrollment -->
+<section class="container">
+  <p class="section-eyebrow">Admissions & Enrollment</p>
+  <h2>What to <em>expect</em></h2>
+  <p style="font-family:'Newsreader',serif;font-size:16px;color:var(--mu);margin-bottom:30px;font-weight:300;max-width:600px">A simple, personal four-step process. We're a small founding cohort — every family matters.</p>
+
+  <!-- 4 steps -->
+  <div class="process-grid">
+    <div class="process-step">
+      <div class="num">1</div>
+      <h3>Submit Application</h3>
+    </div>
+    <div class="process-step">
+      <div class="num">2</div>
+      <h3>Meet with the Founder of neoschool Missoula</h3>
+    </div>
+    <div class="process-step">
+      <div class="num">3</div>
+      <h3>Finalize Enrollment</h3>
+    </div>
+    <div class="process-step">
+      <div class="num">4</div>
+      <h3>Welcome to the neoschool Founding Family Community</h3>
+    </div>
+  </div>
+
+  <!-- Important Details -->
+  <div class="details-card">
+    <h3>Important Details</h3>
+    <div class="details-list">
+      <div class="detail-item">
+        <div class="label">📚 Enrollment</div>
+        <div class="value">Open for <em>Kindergarten and 1st Grade</em></div>
+      </div>
+      <div class="detail-item">
+        <div class="label">💰 Tuition</div>
+        <div class="value"><em>$15,000</em> per school year</div>
+      </div>
+      <div class="detail-item">
+        <div class="label">🔒 Deposit</div>
+        <div class="value">Once admission is offered, a <em>$500 refundable deposit</em> secures your child's spot. Deducted from the first month's tuition payment.</div>
+      </div>
+      <div class="detail-item">
+        <div class="label">📆 Monthly Payments</div>
+        <div class="value">10 equal payments, <em>September through June</em></div>
+      </div>
+      <div class="detail-item">
+        <div class="label">🗓️ First Tuition Payment</div>
+        <div class="value">Due <em>September 1, 2026</em></div>
+      </div>
+      <div class="detail-item">
+        <div class="label">📅 School Year</div>
+        <div class="value"><em>September 2026 – June 2027</em></div>
+      </div>
+      <div class="detail-item" style="grid-column:1/-1">
+        <div class="label">💉 Immunization Requirements</div>
+        <div class="value">neoschool requires all students to comply with immunization requirements mandated by the Montana Department of Health. Each student must provide immunization records or an approved exemption before enrollment. Exemptions must adhere to Montana state guidelines.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="container">
+  <p class="section-eyebrow">Frequently asked questions</p>
+  <h2>Good questions, <em>honest answers</em></h2>
+  <p style="font-family:'Newsreader',serif;font-size:16px;color:var(--mu);margin-bottom:18px;font-weight:300;max-width:620px">Click any question. If yours isn't here, <a href="mailto:jennie@chiefmamaofficer.com" style="color:var(--or)">email Jennie</a>.</p>
+
+  <div class="faq-list">
+    <details>
+      <summary>Who is neoschool for?</summary>
+      <div>neoschool Missoula is built for curious Kindergarten and 1st grade students whose families want personalized academics, hands-on life skills, and meaningful outdoor time — without the constraints of traditional school. We welcome a mix of children new to school and those transitioning from public, private, homeschool, or preschool settings.</div>
+    </details>
+
+    <details>
+      <summary>How is neoschool different from traditional school?</summary>
+      <div>Three key differences: <strong>(1)</strong> Two-hour personalized academic block instead of all-day desk learning, where AI-adaptive tools meet each child at their level. <strong>(2)</strong> Daily life-skills workshops — cooking, financial literacy, conscious communication, gardening — that traditional schools rarely teach. <strong>(3)</strong> Real outdoor play and forest days, because attention and learning improve when kids move and get fresh air.</div>
+    </details>
+
+    <details>
+      <summary>What does a typical day look like?</summary>
+      <div>30 minutes of morning play → 2 hours of personalized academics (9:00–11:00am) → 1.5 hours outdoor play and lunch (11:00am–12:30pm) → 3 hours of real projects and life skills (12:30–3:30pm) → 1 hour outdoor play (3:30–4:30pm). Brain breaks every 15–20 minutes during academic blocks.</div>
+    </details>
+
+    <details>
+      <summary>Is this a microschool? Are you accredited?</summary>
+      <div>Yes — neoschool Missoula operates as a private microschool. Montana's regulatory framework supports private schools and microschools, and we comply with state requirements. Accreditation is a multi-year process we will pursue as the school matures. Our educational outcomes are tracked rigorously through our content providers (used by 1000+ schools) and presented to families in clear progress reports.</div>
+    </details>
+
+    <details>
+      <summary>What's the student-to-teacher ratio?</summary>
+      <div>10–12 students per class with mixed-age learning (Kindergarten + 1st grade together). At least one lead educator and one assistant per classroom, ensuring meaningful 1:1 attention. Small enough to know every child deeply.</div>
+    </details>
+
+    <details>
+      <summary>What curriculum do you use?</summary>
+      <div>A blend of best-in-class providers: AI-adaptive math (Zearn, Synthesis Tutor), reading (Amira Learning, CommonLit), hands-on science (PhET, Mystery Science), coding (Scratch, Code.org), and original neoschool project-based learning units. Everything aligns with Common Core and the Montana Content Standards, but we go far beyond them.</div>
+    </details>
+
+    <details>
+      <summary>Do you offer financial aid or sibling discounts?</summary>
+      <div>As a founding cohort program, we're committed to keeping neoschool accessible. We offer limited need-based financial aid and sibling discounts. Please mention your situation in the application and Jennie will discuss options personally.</div>
+    </details>
+
+    <details>
+      <summary>Is lunch provided? What about snacks?</summary>
+      <div>Families pack lunches and morning snacks. We're working on a healthy lunch program for the 2027–2028 school year. Garden produce from our on-campus garden (which kids help plant and tend) supplements snack time.</div>
+    </details>
+
+    <details>
+      <summary>What if my child has learning differences?</summary>
+      <div>neoschool's adaptive academic model is naturally suited to children with diverse learning profiles. Our 1:1 AI tutoring meets kids exactly where they are, and our 10–12 student classroom allows for individualized support. We're not a special-education program — but for many neurodivergent kids, our approach works far better than traditional school. Let's discuss your child during the admissions meeting.</div>
+    </details>
+
+    <details>
+      <summary>Can homeschool families drop in part-time?</summary>
+      <div>Yes — we offer drop-in half days for homeschooling families. This is a great way to access community, life-skills workshops, and outdoor play without a full enrollment commitment. Contact us for half-day pricing.</div>
+    </details>
+
+    <details>
+      <summary>When and where will the campus open?</summary>
+      <div>Opening September 2026 in Missoula, Montana. Final location is being secured now and will be communicated to applying families. We are exploring options in central Missoula with outdoor space and easy access to natural areas.</div>
+    </details>
+
+    <details>
+      <summary>What if I miss the application deadline?</summary>
+      <div>We accept applications on a rolling basis until our founding cohort is full. Apply as soon as you can — early applicants have the best chance at securing a spot for September 2026.</div>
+    </details>
   </div>
 </section>
 
