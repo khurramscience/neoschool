@@ -249,7 +249,7 @@ function Marketing({ onStart }) {
               ...heroFade(300), fontSize:11, fontWeight:600, textTransform:"uppercase",
               letterSpacing:"0.25em", color:"#fff", textShadow:"0 2px 8px rgba(0,0,0,0.9)",
             }}>
-              Missoula, Montana · Kindergarten + 1st Grade · September 2026
+              Any parent · Any teacher · Launch a school
             </p>
 
             <h1 className="font-body text-hero" style={{
@@ -260,17 +260,16 @@ function Marketing({ onStart }) {
             </h1>
 
             <p className="font-heading" style={{
-              ...heroFade(900), marginTop:24, maxWidth:520, fontSize:18,
+              ...heroFade(900), marginTop:24, maxWidth:560, fontSize:18,
               color:"rgba(255,255,255,.9)", textShadow:"0 2px 8px rgba(0,0,0,0.9)", lineHeight:1.5,
             }}>
-              AI-powered academics in two hours. Real projects, real coaches, and real childhood
-              the rest of it. Opening September 2026.
+              The operating system for microschools — personalized AI curriculum, real-world projects, real growth tracking. Built by parents, for parents.
             </p>
 
             <a href="/missoula.html" className="btn-iris" style={{
               ...heroFade(1200), marginTop:40, padding:"14px 32px", fontSize:13.5,
             }}>
-              Apply for Missoula → 2026
+              Apply to a school near you →
             </a>
 
             <button onClick={() => onStart("parent")} className="font-heading" style={{
@@ -665,29 +664,176 @@ function Marketing({ onStart }) {
 
       </main>
 
-      <footer style={{ background: bg, borderTop:`1px solid ${borderSubtle}`, padding:"40px 24px" }}>
-        <div style={{ margin:"0 auto", maxWidth:1080, display:"flex", flexDirection:"column", alignItems:"center", gap:24 }}>
-          <img src="/neoschool-logo.png" alt="neoschool" style={{ height:80 }}/>
-          <span className="font-heading" style={{ fontSize:12, color: textMuted }}>Missoula, Montana</span>
-          <div style={{ display:"flex", gap:24, flexWrap:"wrap", justifyContent:"center" }}>
-            {[
-              { label:"jennie@chiefmamaofficer.com", href:"mailto:jennie@chiefmamaofficer.com" },
-              { label:"Missoula campus",            href:"/missoula.html" },
-              { label:"Instagram",                  href:"https://www.instagram.com/neoschool" },
-            ].map(link => (
-              <a key={link.label} href={link.href}
-                {...(link.href.startsWith("http") ? { target:"_blank", rel:"noopener noreferrer" } : {})}
-                className="font-heading" style={{ fontSize:12, color: textMuted, textDecoration:"none", transition:"color 350ms" }}
-                onMouseEnter={e => e.currentTarget.style.color = textPrimary}
-                onMouseLeave={e => e.currentTarget.style.color = textMuted}>
-                {link.label}
-              </a>
-            ))}
+      {/* ─── READY TO LAUNCH — final CTA ─── */}
+      <SectionReveal>
+        {(isVisible) => {
+          const r = (d) => ({
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? "translateY(0)" : "translateY(16px)",
+            filter: isVisible ? "blur(0px)" : "blur(4px)",
+            transition: `opacity 600ms cubic-bezier(0.22,1,0.36,1) ${d}ms, transform 600ms cubic-bezier(0.22,1,0.36,1) ${d}ms, filter 600ms cubic-bezier(0.22,1,0.36,1) ${d}ms`,
+          });
+          return (
+            <section style={{ background: bgSecondary, padding:"120px 0" }}>
+              <div style={{ margin:"0 auto", maxWidth:680, padding:"0 24px", textAlign:"center" }}>
+                <p className="text-overline" style={{ ...r(0), color: coral, marginBottom:16 }}>
+                  Ready to launch?
+                </p>
+                <h2 className="font-body text-section-heading" style={{
+                  ...r(80), fontWeight:400, color: textPrimary, marginBottom:20,
+                  textWrap:"balance",
+                }}>
+                  Whether you're a <em style={{ fontStyle:"italic", color: iris, fontWeight:300 }}>parent</em> looking for a campus, a <em style={{ fontStyle:"italic", color: iris, fontWeight:300 }}>guide</em> wanting to facilitate, or a <em style={{ fontStyle:"italic", color: iris, fontWeight:300 }}>founder</em> ready to open one — the platform is ready.
+                </h2>
+                <p className="font-body" style={{
+                  ...r(160), fontSize:18, color: textSecondary, lineHeight:1.55,
+                  marginBottom:40, fontStyle:"italic",
+                }}>
+                  Apply to enroll in our founding campus in Missoula, opening September 2026. Or sign in to use the platform from anywhere.
+                </p>
+                <div style={{ ...r(240), display:"flex", gap:14, justifyContent:"center", flexWrap:"wrap" }}>
+                  <a href="/missoula.html" className="btn-iris" style={{ padding:"14px 32px", fontSize:13.5 }}>
+                    Apply to Missoula →
+                  </a>
+                  <button onClick={() => onStart("parent")} style={{
+                    background:"transparent", color: textPrimary,
+                    padding:"14px 28px", borderRadius:12,
+                    fontFamily:"'Instrument Sans',sans-serif", fontSize:13, fontWeight:500,
+                    textTransform:"uppercase", letterSpacing:".08em",
+                    border:`1px solid ${borderSubtle}`, cursor:"pointer",
+                    transition:"all 250ms",
+                  }}
+                    onMouseEnter={e=>{e.currentTarget.style.borderColor=textPrimary;e.currentTarget.style.background="rgba(42,38,34,.03)";}}
+                    onMouseLeave={e=>{e.currentTarget.style.borderColor=borderSubtle;e.currentTarget.style.background="transparent";}}>
+                    Get started →
+                  </button>
+                </div>
+                <p className="font-heading" style={{
+                  ...r(320), marginTop:32, fontSize:13, color: textMuted,
+                }}>
+                  Questions? <a href="mailto:jennie@chiefmamaofficer.com" style={{ color: iris }}>jennie@chiefmamaofficer.com</a>
+                </p>
+              </div>
+            </section>
+          );
+        }}
+      </SectionReveal>
+
+      <footer style={{ background: bg, borderTop:`1px solid ${borderSubtle}`, padding:"56px 24px 40px" }}>
+        <div style={{ margin:"0 auto", maxWidth:1080 }}>
+          {/* Top row — logo + columns */}
+          <div style={{
+            display:"grid",
+            gridTemplateColumns:"repeat(auto-fit, minmax(200px, 1fr))",
+            gap:32, marginBottom:48,
+          }}>
+            {/* Brand column */}
+            <div>
+              <img src="/neoschool-logo.png" alt="neoschool" style={{ height:90, marginBottom:14 }}/>
+              <p className="font-body" style={{
+                fontSize:14, color: textSecondary, lineHeight:1.55, maxWidth:260,
+              }}>
+                The operating system for microschools. Built by parents, for parents.
+              </p>
+            </div>
+
+            {/* Campuses column */}
+            <div>
+              <p className="text-overline" style={{ color: iris, marginBottom:14 }}>Campuses</p>
+              <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                <a href="/missoula.html" className="font-heading" style={{
+                  fontSize:13.5, color: textPrimary, textDecoration:"none", fontWeight:500,
+                  transition:"color 250ms",
+                }}
+                  onMouseEnter={e=>e.currentTarget.style.color=iris}
+                  onMouseLeave={e=>e.currentTarget.style.color=textPrimary}>
+                  Missoula, Montana
+                </a>
+                <span className="font-heading" style={{ fontSize:13.5, color: textMuted }}>
+                  Berkeley, CA (waitlist)
+                </span>
+                <span className="font-heading" style={{ fontSize:13.5, color: textMuted }}>
+                  Palo Alto, CA (waitlist)
+                </span>
+              </div>
+            </div>
+
+            {/* Platform column */}
+            <div>
+              <p className="text-overline" style={{ color: iris, marginBottom:14 }}>Platform</p>
+              <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                <button onClick={()=>onStart("parent")} className="font-heading" style={{
+                  fontSize:13.5, color: textPrimary, background:"none", border:"none",
+                  cursor:"pointer", padding:0, textAlign:"left", fontWeight:500,
+                }}
+                  onMouseEnter={e=>e.currentTarget.style.color=iris}
+                  onMouseLeave={e=>e.currentTarget.style.color=textPrimary}>
+                  For parents
+                </button>
+                <button onClick={()=>onStart("guide")} className="font-heading" style={{
+                  fontSize:13.5, color: textPrimary, background:"none", border:"none",
+                  cursor:"pointer", padding:0, textAlign:"left", fontWeight:500,
+                }}
+                  onMouseEnter={e=>e.currentTarget.style.color=iris}
+                  onMouseLeave={e=>e.currentTarget.style.color=textPrimary}>
+                  For guides
+                </button>
+                <button onClick={()=>onStart("director")} className="font-heading" style={{
+                  fontSize:13.5, color: textPrimary, background:"none", border:"none",
+                  cursor:"pointer", padding:0, textAlign:"left", fontWeight:500,
+                }}
+                  onMouseEnter={e=>e.currentTarget.style.color=iris}
+                  onMouseLeave={e=>e.currentTarget.style.color=textPrimary}>
+                  Launch a campus
+                </button>
+              </div>
+            </div>
+
+            {/* Contact column */}
+            <div>
+              <p className="text-overline" style={{ color: iris, marginBottom:14 }}>Contact</p>
+              <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                <a href="mailto:jennie@chiefmamaofficer.com" className="font-heading" style={{
+                  fontSize:13.5, color: textPrimary, textDecoration:"none", fontWeight:500,
+                  transition:"color 250ms", wordBreak:"break-word",
+                }}
+                  onMouseEnter={e=>e.currentTarget.style.color=iris}
+                  onMouseLeave={e=>e.currentTarget.style.color=textPrimary}>
+                  jennie@chiefmamaofficer.com
+                </a>
+                <a href="https://www.instagram.com/neoschool" target="_blank" rel="noopener noreferrer" className="font-heading" style={{
+                  fontSize:13.5, color: textPrimary, textDecoration:"none", fontWeight:500,
+                  transition:"color 250ms",
+                }}
+                  onMouseEnter={e=>e.currentTarget.style.color=iris}
+                  onMouseLeave={e=>e.currentTarget.style.color=textPrimary}>
+                  Instagram
+                </a>
+                <a href="https://www.linkedin.com/company/neoschool" target="_blank" rel="noopener noreferrer" className="font-heading" style={{
+                  fontSize:13.5, color: textPrimary, textDecoration:"none", fontWeight:500,
+                  transition:"color 250ms",
+                }}
+                  onMouseEnter={e=>e.currentTarget.style.color=iris}
+                  onMouseLeave={e=>e.currentTarget.style.color=textPrimary}>
+                  LinkedIn
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom row — copyright */}
+          <div style={{
+            paddingTop:24, borderTop:`1px solid ${borderSubtle}`,
+            display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:12,
+          }}>
+            <p className="font-heading" style={{ fontSize:11, color: textMuted }}>
+              © 2026 neoschool · Built for the post-AI world.
+            </p>
+            <p className="font-heading" style={{ fontSize:11, color: textMuted }}>
+              In collaboration with Esther Wojcicki · TRICK framework
+            </p>
           </div>
         </div>
-        <p className="font-heading" style={{ marginTop:32, fontSize:11, textAlign:"center", color: textMuted, opacity:.5 }}>
-          © 2026 neoschool · Built for the post-AI world.
-        </p>
       </footer>
 
       <style>{`
