@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Projectile Motion — neoschool</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,sans-serif;background:linear-gradient(180deg,#87ceeb 0%,#b8e0f0 60%,#d4a574 100%);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+  header{background:rgba(255,255,255,.9);backdrop-filter:blur(8px);padding:14px 20px;border-bottom:1px solid rgba(0,0,0,.08);display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+  h1{font-size:18px;font-weight:600;color:#2A2622}
+  .stat{display:flex;flex-direction:column;font-family:'IBM Plex Mono',monospace}
+  .stat label{font-size:10px;color:#6B5CE7;text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+  .stat value{font-size:16px;color:#2A2622;font-weight:700}
+  .controls{background:rgba(255,255,255,.85);padding:14px 20px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;border-bottom:1px solid rgba(0,0,0,.06)}
+  .control{display:flex;flex-direction:column;gap:4px;min-width:120px}
+  .control label{font-size:11px;color:#564E48;font-weight:600;font-family:system-ui;display:flex;justify-content:space-between}
+  .control label span{color:#6B5CE7;font-family:'IBM Plex Mono',monospace}
+  input[type=range]{width:100%;accent-color:#6B5CE7}
+  button{background:#6B5CE7;color:#fff;border:none;padding:10px 22px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;transition:all .2s}
+  button:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(107,92,231,.3)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  button.secondary{background:transparent;color:#6B5CE7;border:1px solid #6B5CE7}
+  #canvas{flex:1;display:block;cursor:crosshair}
+  .target-info{position:absolute;top:auto;bottom:20px;right:20px;background:rgba(255,255,255,.95);padding:12px 16px;border-radius:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#2A2622;border:1px solid rgba(0,0,0,.08)}
+  .hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(42,38,34,.85);color:#fff;padding:14px 22px;border-radius:10px;font-size:14px;backdrop-filter:blur(8px);pointer-events:none;opacity:1;transition:opacity .4s}
+  .hint.hide{opacity:0}
+</style>
+</head>
+<body>
+<header>
+  <h1>🚀 Projectile Motion</h1>
+  <div class="stat"><label>Score</label><value id="score">0</value></div>
+  <div class="stat"><label>Hits</label><value id="hits">0/0</value></div>
+  <div class="stat"><label>Max H</label><value id="maxh">0 m</value></div>
+  <div class="stat"><label>Range</label><value id="range">0 m</value></div>
+</header>
+
+<div class="controls">
+  <div class="control">
+    <label>Angle <span id="angle-v">45°</span></label>
+    <input id="angle" type="range" min="5" max="85" value="45"/>
+  </div>
+  <div class="control">
+    <label>Speed <span id="speed-v">25 m/s</span></label>
+    <input id="speed" type="range" min="10" max="60" value="25"/>
+  </div>
+  <div class="control">
+    <label>Gravity <span id="grav-v">9.8 m/s²</span></label>
+    <input id="grav" type="range" min="1" max="25" value="98" step="1"/>
+  </div>
+  <button id="launch">Launch ↗</button>
+  <button id="reset" class="secondary">Reset</button>
+</div>
+
+<canvas id="canvas"></canvas>
+<div class="hint" id="hint">Drag the angle/speed sliders, then click Launch to hit the 🎯 target</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const $ = id => document.getElementById(id);
+
+let W=0, H=0, scale=4; // pixels per meter
+let hint = $('hint');
+let hintTimer = setTimeout(() => hint.classList.add('hide'), 4000);
+
+function resize() {
+  W = canvas.width = canvas.clientWidth = window.innerWidth;
+  H = canvas.height = canvas.clientHeight = window.innerHeight - 160;
+  scale = Math.min(W / 120, H / 40); // shows ~120m horizontally
+  if (!projectile) draw();
+}
+window.addEventListener('resize', resize);
+
+// Launcher position
+const launcherX = 60;
+const launcherY = H => H - 30;
+const groundY = H => H - 20;
+
+let projectile = null;
+let trail = [];
+let landed = [];
+let target = { x: 70, hit: false };
+let score = 0, hits = 0, attempts = 0;
+let maxHeight = 0;
+
+function postState(extra={}) {
+  // Knowledge-graph + tutor postMessage bridge
+  window.parent.postMessage({
+    type: 'sim-state',
+    sim: 'projectile-motion',
+    state: {
+      angle: parseInt($('angle').value),
+      speed: parseInt($('speed').value),
+      gravity: parseInt($('grav').value) / 10,
+      score, hits, attempts, maxHeight,
+      lastLanding: landed[landed.length-1] || null,
+      ...extra,
+    }
+  }, '*');
+}
+
+function newTarget() {
+  target.x = 40 + Math.random() * 70;
+  target.hit = false;
+}
+
+function launch() {
+  if (projectile) return;
+  attempts++;
+  const angle = parseInt($('angle').value) * Math.PI / 180;
+  const speed = parseInt($('speed').value);
+  const g = parseInt($('grav').value) / 10;
+  projectile = { x: 0, y: 0, vx: speed * Math.cos(angle), vy: speed * Math.sin(angle), g, t: 0 };
+  trail = [];
+  maxHeight = 0;
+  postState({event: 'launch'});
+}
+
+function reset() {
+  projectile = null;
+  trail = [];
+  landed = [];
+  score = 0; hits = 0; attempts = 0;
+  maxHeight = 0;
+  newTarget();
+  updateUI();
+}
+
+function updateUI() {
+  $('score').textContent = score;
+  $('hits').textContent = `${hits}/${attempts}`;
+  $('maxh').textContent = maxHeight.toFixed(1) + ' m';
+  $('range').textContent = (landed[landed.length-1]?.x || 0).toFixed(1) + ' m';
+  $('angle-v').textContent = $('angle').value + '°';
+  $('speed-v').textContent = $('speed').value + ' m/s';
+  $('grav-v').textContent = (parseInt($('grav').value)/10).toFixed(1) + ' m/s²';
+}
+
+function tick(dt) {
+  if (!projectile) return;
+  projectile.t += dt;
+  projectile.x += projectile.vx * dt;
+  projectile.vy -= projectile.g * dt;
+  projectile.y += projectile.vy * dt;
+  if (projectile.y > maxHeight) maxHeight = projectile.y;
+  trail.push({x: projectile.x, y: projectile.y});
+  if (trail.length > 200) trail.shift();
+  if (projectile.y <= 0 && projectile.t > 0.05) {
+    const landingX = projectile.x;
+    landed.push({x: landingX, t: projectile.t});
+    const hitTarget = Math.abs(landingX - target.x) < 4;
+    if (hitTarget) {
+      target.hit = true;
+      score += 100;
+      hits++;
+      postState({event: 'hit', landingX, targetX: target.x});
+      setTimeout(() => newTarget(), 800);
+    } else {
+      postState({event: 'miss', landingX, targetX: target.x, distance: Math.abs(landingX - target.x)});
+    }
+    projectile = null;
+    updateUI();
+  }
+}
+
+function w2s(x, y) { // world to screen
+  return [launcherX + x * scale, H - 20 - y * scale];
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+
+  // Sky gradient (already on body)
+  // Ground line
+  ctx.fillStyle = '#8B6F47';
+  ctx.fillRect(0, H - 20, W, 20);
+  ctx.fillStyle = '#A8825D';
+  ctx.fillRect(0, H - 20, W, 4);
+
+  // Distance markers every 10m
+  ctx.strokeStyle = 'rgba(42,38,34,.15)';
+  ctx.lineWidth = 1;
+  ctx.fillStyle = 'rgba(42,38,34,.4)';
+  ctx.font = '10px IBM Plex Mono, monospace';
+  for (let d = 10; d <= 120; d += 10) {
+    const [sx, sy] = w2s(d, 0);
+    ctx.beginPath();
+    ctx.moveTo(sx, sy);
+    ctx.lineTo(sx, sy - 6);
+    ctx.stroke();
+    ctx.fillText(d + 'm', sx + 2, sy - 7);
+  }
+
+  // Target
+  const [tx, ty] = w2s(target.x, 0);
+  if (!target.hit) {
+    ctx.fillStyle = '#C25420';
+    ctx.beginPath();
+    ctx.arc(tx, ty - 12, 14, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(tx, ty - 12, 8, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = '#C25420';
+    ctx.beginPath();
+    ctx.arc(tx, ty - 12, 4, 0, Math.PI*2);
+    ctx.fill();
+  } else {
+    ctx.font = '24px sans-serif';
+    ctx.fillText('💥', tx - 12, ty - 6);
+  }
+
+  // Launcher
+  const [lx, ly] = w2s(0, 0);
+  const angle = parseInt($('angle').value) * Math.PI / 180;
+  ctx.save();
+  ctx.translate(lx, ly);
+  ctx.rotate(-angle);
+  ctx.fillStyle = '#2A2622';
+  ctx.fillRect(0, -6, 36, 12);
+  ctx.fillStyle = '#6B5CE7';
+  ctx.fillRect(30, -4, 6, 8);
+  ctx.restore();
+  ctx.fillStyle = '#2A2622';
+  ctx.beginPath();
+  ctx.arc(lx, ly, 12, 0, Math.PI*2);
+  ctx.fill();
+
+  // Trail (dotted)
+  if (trail.length > 1) {
+    ctx.strokeStyle = 'rgba(107,92,231,.5)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([4, 6]);
+    ctx.beginPath();
+    const [sx0, sy0] = w2s(trail[0].x, trail[0].y);
+    ctx.moveTo(sx0, sy0);
+    for (let i = 1; i < trail.length; i++) {
+      const [sx, sy] = w2s(trail[i].x, trail[i].y);
+      ctx.lineTo(sx, sy);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Projectile (cannonball)
+  if (projectile) {
+    const [px, py] = w2s(projectile.x, projectile.y);
+    ctx.fillStyle = '#2A2622';
+    ctx.beginPath();
+    ctx.arc(px, py, 6, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.7)';
+    ctx.beginPath();
+    ctx.arc(px - 2, py - 2, 2, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  // Previous landings (faded)
+  landed.slice(-5).forEach((l, i) => {
+    const [lx, ly] = w2s(l.x, 0);
+    ctx.fillStyle = `rgba(42,38,34,${.1 + i * .1})`;
+    ctx.beginPath();
+    ctx.arc(lx, ly - 4, 4, 0, Math.PI*2);
+    ctx.fill();
+  });
+}
+
+// Animation loop
+let lastT = 0;
+function frame(t) {
+  const dt = Math.min(0.05, (t - lastT) / 1000);
+  lastT = t;
+  if (projectile) {
+    // multiple steps for stability
+    const steps = 4;
+    for (let i = 0; i < steps; i++) tick(dt / steps);
+  }
+  draw();
+  requestAnimationFrame(frame);
+}
+
+// Wiring
+['angle','speed','grav'].forEach(id => {
+  $(id).addEventListener('input', () => { updateUI(); draw(); postState(); });
+});
+$('launch').addEventListener('click', launch);
+$('reset').addEventListener('click', reset);
+
+// Init
+resize();
+newTarget();
+updateUI();
+requestAnimationFrame(frame);
+
+// Tell parent we loaded
+window.parent.postMessage({ type: 'sim-loaded', sim: 'projectile-motion' }, '*');
+</script>
+</body>
+</html>
