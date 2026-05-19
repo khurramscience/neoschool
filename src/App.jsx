@@ -87,399 +87,394 @@ function PaymentModal({ userId, onClose }) {
 
 // ── MARKETING LANDING ─────────────────────────────────────────────────────────
 function Marketing({ onStart }) {
-  const [hoveredCard, setHoveredCard] = useState(null);
   const [showInterestForm, setShowInterestForm] = useState(false);
-  const tracks = [
-    { id:"parent",   icon:"👩‍👧", headline:"For Families.",    sub:"Find a neoschool campus, or use the platform at home. Personalized AI curriculum + a community of families.", cta:"For parents", color:"#d9622b" },
-    { id:"guide",    icon:"🏕️", headline:"For Guides.",       sub:"Facilitate, don't lecture. The platform handles data, comms, and adaptation — you focus 100% on the humans.", cta:"For Guides", color:"#4a7c6a" },
-    { id:"director", icon:"🏛️", headline:"Launch a campus.",  sub:"Open a neoschool campus in your community. Curriculum, tools, comms, enrollment — all in one box.", cta:"For Directors", color:"#2d6ea8" },
-  ];
-  const stats = ["The OS for microschools","19 AI tutors","14 interactive labs","38 embedded tools","Renaissance-style trajectories","COPPA & FERPA compliant","Curriculum builder for any age","Founding campuses opening 2026"];
-  const values = [
-    { v:"Curiosity",            emoji:"🔬" },
-    { v:"Collaboration",        emoji:"🤝" },
-    { v:"Love of learning",     emoji:"💛" },
-    { v:"Intrinsic motivation", emoji:"⚡" },
-    { v:"Resilience",           emoji:"🌱" },
-    { v:"Self-awareness",       emoji:"🪞" },
-  ];
+
+  // ── Dark frontier variant — design DNA from Lovable + research doc ──
+  const D = {
+    bg:        "#0a0a12",           // primary dark
+    bg2:       "#13131C",           // surface
+    bg3:       "#1A1A26",           // raised
+    line:      "rgba(255,255,255,.08)",
+    line2:     "rgba(255,255,255,.14)",
+    tx:        "#F5F5F0",           // off-white, warm-biased
+    tx2:       "rgba(245,245,240,.7)",
+    tx3:       "rgba(245,245,240,.5)",
+    tx4:       "rgba(245,245,240,.3)",
+    violet:    "#6B5CE7",           // iris violet — brand anchor
+    violetHvr: "#7C6FF0",
+    violetSoft:"rgba(107,92,231,.12)",
+    coral:     "#D4856A",           // secondary warm accent
+  };
+
+  const SectionLabel = ({ num, children }) => (
+    <p style={{
+      fontFamily:"'IBM Plex Mono','Geist Mono',ui-monospace,monospace",
+      fontSize:11, fontWeight:500, letterSpacing:".18em", textTransform:"uppercase",
+      color: D.violet, marginBottom:18,
+    }}>
+      <span style={{ color: D.tx3, marginRight:14 }}>{num}</span>
+      {children}
+    </p>
+  );
 
   return (
-    <div style={{ height: "100%", overflowY: "auto", background: "var(--cr)" }}>
-      <nav style={{ position: "sticky", top: 0, zIndex: 100, background: "rgba(250,244,237,.92)", backdropFilter: "blur(12px)", borderBottom: "1px solid var(--p2)", padding: "14px 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <Logo sz={16} />
-        <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
-          <span style={{ fontFamily:"'Geist Mono',monospace", fontSize: 10.5, color: "var(--mu)", letterSpacing:".08em", textTransform:"uppercase" }}>The OS for microschools</span>
-          <a href="/missoula.html" className="btn bo sm" style={{ textDecoration:"none" }}>Apply to Missoula →</a>
-          <button className="btn bg sm" onClick={() => onStart("parent")}>Sign in</button>
+    <div style={{
+      overflowY:"auto", height:"100%", width:"100%",
+      background: D.bg, color: D.tx,
+      fontFamily:"'Source Serif 4','Source Serif Pro',Georgia,serif",
+      fontSize:17, lineHeight:1.65, fontWeight:400,
+    }}>
+
+      {/* ─── NAV ─────────────────────────────────────────────── */}
+      <nav style={{
+        position:"sticky", top:0, zIndex:100,
+        background:"rgba(10,10,18,.85)", backdropFilter:"blur(14px) saturate(140%)",
+        borderBottom:`1px solid ${D.line}`,
+        padding:"16px 32px",
+        display:"flex", alignItems:"center", justifyContent:"space-between",
+      }}>
+        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+          <div style={{ width:24, height:24, background: D.violet, borderRadius:6, position:"relative" }}>
+            <div style={{ position:"absolute", inset:7, background: D.bg, borderRadius:2 }}/>
+          </div>
+          <span style={{
+            fontFamily:"'Instrument Sans',system-ui,sans-serif",
+            fontWeight:600, fontSize:16, letterSpacing:".02em",
+            textTransform:"uppercase", color: D.tx,
+          }}>neoschool</span>
+        </div>
+        <div style={{ display:"flex", alignItems:"center", gap:24 }}>
+          <a href="#philosophy" style={{ color: D.tx2, fontFamily:"'Instrument Sans',sans-serif", fontSize:14, fontWeight:500, textDecoration:"none", transition:"color .15s" }}
+            onMouseEnter={e=>e.currentTarget.style.color=D.tx}
+            onMouseLeave={e=>e.currentTarget.style.color=D.tx2}>Philosophy</a>
+          <a href="#campuses" style={{ color: D.tx2, fontFamily:"'Instrument Sans',sans-serif", fontSize:14, fontWeight:500, textDecoration:"none", transition:"color .15s" }}
+            onMouseEnter={e=>e.currentTarget.style.color=D.tx}
+            onMouseLeave={e=>e.currentTarget.style.color=D.tx2}>Campuses</a>
+          <a href="/missoula.html" style={{ color: D.tx2, fontFamily:"'Instrument Sans',sans-serif", fontSize:14, fontWeight:500, textDecoration:"none", transition:"color .15s" }}
+            onMouseEnter={e=>e.currentTarget.style.color=D.tx}
+            onMouseLeave={e=>e.currentTarget.style.color=D.tx2}>Missoula</a>
+          <button onClick={()=>onStart("parent")} style={{
+            background:"transparent", color: D.tx2, border:"none",
+            fontFamily:"'Instrument Sans',sans-serif", fontSize:14, fontWeight:500,
+            cursor:"pointer", padding:0,
+          }}
+            onMouseEnter={e=>e.currentTarget.style.color=D.tx}
+            onMouseLeave={e=>e.currentTarget.style.color=D.tx2}>Sign in</button>
+          <a href="/missoula.html" style={{
+            background: D.violet, color:"#fff", padding:"9px 18px", borderRadius:12,
+            fontFamily:"'Instrument Sans',sans-serif", fontSize:14, fontWeight:600,
+            textDecoration:"none", transition:"all .2s", letterSpacing:"-.005em",
+          }}
+            onMouseEnter={e=>{e.currentTarget.style.background=D.violetHvr;e.currentTarget.style.transform="translateY(-1px)";}}
+            onMouseLeave={e=>{e.currentTarget.style.background=D.violet;e.currentTarget.style.transform="translateY(0)";}}>Apply for 2026</a>
         </div>
       </nav>
 
-      {/* HERO — refined editorial pitch */}
-      <section style={{ maxWidth: 960, margin: "0 auto", padding: "100px 32px 60px", textAlign: "center" }}>
-        <a href="/missoula.html" style={{ textDecoration:"none" }}>
-          <div className="fu" style={{ display: "inline-flex", alignItems: "center", gap: 9, background: "var(--or)", borderRadius: 99, padding: "8px 18px", marginBottom: 28, cursor:"pointer", transition:"all .2s" }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "var(--shadow-md)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#fff", animation: "pu 2s infinite" }} />
-            <span style={{ fontFamily:"'Geist Mono',monospace", fontSize:10.5, color:"#fff", letterSpacing:".12em", textTransform:"uppercase", fontWeight:500 }}>Missoula · Now Enrolling · Sept 2026 →</span>
-          </div>
-        </a>
-        <h1 className="fu d1" style={{ fontFamily: "'Fraunces',serif", fontSize: "clamp(44px, 7vw, 78px)", fontWeight: 400, lineHeight: 1.02, letterSpacing:"-.025em", marginBottom: 24, color: "var(--nv)" }}>
-          Any parent.<br/>
-          Any teacher.<br/>
-          <em style={{ color: "var(--or)", fontWeight:300, fontStyle:"italic" }}>Launch a school.</em>
+      {/* ─── HERO — manifesto ──────────────────────────────────── */}
+      <section style={{ maxWidth:1100, margin:"0 auto", padding:"140px 32px 120px" }}>
+        <SectionLabel num="">neoschool · Post-AI education</SectionLabel>
+        <h1 style={{
+          fontFamily:"'Instrument Sans','Inter',sans-serif",
+          fontSize:"clamp(48px, 7vw, 84px)", fontWeight:600,
+          lineHeight:1.02, letterSpacing:"-.028em",
+          color: D.tx, marginBottom:40, maxWidth:920,
+        }}>
+          The school built for the <em style={{
+            fontFamily:"'Source Serif 4',Georgia,serif", fontStyle:"italic", fontWeight:300, color: D.violet,
+          }}>post-AI</em> world.
         </h1>
-        <p className="fu d2" style={{ fontFamily:"'Newsreader',serif", fontSize: 19, color: "var(--tx2)", lineHeight: 1.55, maxWidth: 600, margin: "0 auto 36px", fontWeight:300 }}>
-          The operating system for microschools — personalized curriculum, AI tutors, real growth tracking. Built by parents, for parents.
+        <p style={{
+          fontFamily:"'Source Serif 4',Georgia,serif",
+          fontSize:21, lineHeight:1.5, color: D.tx2, fontWeight:300,
+          maxWidth:640, marginBottom:48,
+        }}>
+          AI-powered academics in two hours. Real projects, real coaches, real childhood.
+          A microschool model designed for how kids actually learn — opening September 2026.
         </p>
-        <div className="fu d3" style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
-          <a href="/missoula.html" className="btn bo" style={{ fontSize: 15.5, padding: "15px 30px", textDecoration:"none" }}>Apply to Missoula →</a>
-          <button className="btn bg" style={{ fontSize: 15.5, padding: "15px 30px" }} onClick={() => onStart("parent")}>For families</button>
-          <button className="btn bg" style={{ fontSize: 15.5, padding: "15px 30px" }} onClick={() => onStart("director")}>Launch a campus</button>
+        <div style={{ display:"flex", gap:14, flexWrap:"wrap", alignItems:"center" }}>
+          <a href="/missoula.html" style={{
+            background: D.violet, color:"#fff", padding:"16px 30px", borderRadius:14,
+            fontFamily:"'Instrument Sans',sans-serif", fontSize:15.5, fontWeight:600,
+            textDecoration:"none", transition:"all .2s", letterSpacing:"-.005em",
+            display:"inline-flex", alignItems:"center", gap:8,
+          }}
+            onMouseEnter={e=>{e.currentTarget.style.background=D.violetHvr;e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow="0 16px 38px -10px rgba(107,92,231,.5)";}}
+            onMouseLeave={e=>{e.currentTarget.style.background=D.violet;e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="none";}}>
+            Apply for 2026 →
+          </a>
+          <button onClick={()=>onStart("director")} style={{
+            background:"transparent", color: D.tx, padding:"15px 28px", borderRadius:14,
+            fontFamily:"'Instrument Sans',sans-serif", fontSize:15.5, fontWeight:500,
+            border:`1px solid ${D.line2}`, cursor:"pointer", transition:"all .2s",
+          }}
+            onMouseEnter={e=>{e.currentTarget.style.borderColor=D.tx;}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor=D.line2;}}>
+            Launch a campus
+          </button>
+          <button onClick={()=>onStart("parent")} style={{
+            background:"transparent", color: D.tx2, padding:"15px 20px",
+            fontFamily:"'Instrument Sans',sans-serif", fontSize:15, fontWeight:500,
+            border:"none", cursor:"pointer", transition:"color .15s",
+          }}
+            onMouseEnter={e=>{e.currentTarget.style.color=D.tx;}}
+            onMouseLeave={e=>{e.currentTarget.style.color=D.tx2;}}>
+            Sign in →
+          </button>
         </div>
       </section>
 
-      {/* Ticker */}
-      <div style={{ overflow: "hidden", borderTop: "1px solid var(--nv2)", borderBottom: "1px solid var(--nv2)", padding: "14px 0", background: "var(--nv)", marginBottom: 80 }}>
-        <div style={{ display: "flex", gap: 48, animation: "marquee 28s linear infinite", whiteSpace: "nowrap" }}>
-          {[...stats, ...stats].map((s, i) => (
-            <span key={i} style={{ fontFamily:"'Geist Mono',monospace", fontSize: 11.5, fontWeight: 500, color: "rgba(255,255,255,.55)", flexShrink: 0, letterSpacing:".06em", textTransform:"uppercase" }}>✦ {s}</span>
+      {/* ─── 01 · THE THESIS ───────────────────────────────────── */}
+      <section id="philosophy" style={{ maxWidth:980, margin:"0 auto", padding:"100px 32px", borderTop:`1px solid ${D.line}` }}>
+        <SectionLabel num="01">The thesis</SectionLabel>
+        <p style={{
+          fontFamily:"'Source Serif 4',Georgia,serif", fontSize:"clamp(26px,3vw,38px)",
+          lineHeight:1.32, fontWeight:300, color: D.tx, letterSpacing:"-.018em",
+          maxWidth:820,
+        }}>
+          When AI can teach reading, math, and science faster than any classroom,
+          school becomes <em style={{ fontStyle:"italic", color: D.violet }}>what only humans can give</em> —
+          relationships, real projects, hands in dirt, time in forests, the slow art of becoming someone.
+        </p>
+      </section>
+
+      {/* ─── 02 · A DAY ────────────────────────────────────────── */}
+      <section style={{ maxWidth:980, margin:"0 auto", padding:"100px 32px", borderTop:`1px solid ${D.line}` }}>
+        <SectionLabel num="02">A typical day</SectionLabel>
+        <h2 style={{
+          fontFamily:"'Instrument Sans',sans-serif", fontSize:"clamp(32px,4vw,48px)",
+          fontWeight:600, lineHeight:1.08, letterSpacing:"-.022em",
+          color: D.tx, marginBottom:14,
+        }}>
+          From 8:30am to <em style={{ fontFamily:"'Source Serif 4',serif", fontStyle:"italic", fontWeight:300, color: D.coral }}>4:30pm</em>.
+        </h2>
+        <p style={{ fontFamily:"'Source Serif 4',serif", fontSize:18, color: D.tx2, fontWeight:300, marginBottom:48, maxWidth:560 }}>
+          Long enough for working families. Structured enough for rhythm. Loose enough for childhood.
+        </p>
+        {[
+          { time:"8:30 — 9:00am",   title:"Morning play",                desc:"Free arrival, breakfast, settling in." },
+          { time:"9:00 — 11:00am",  title:"Personalized academics",      desc:"Two hours: small groups, AI-adaptive practice, brain breaks every 15 minutes." },
+          { time:"11:00 — 12:30pm", title:"Outdoor play + lunch",        desc:"Movement before food. Built on what we know about attention." },
+          { time:"12:30 — 3:30pm",  title:"Real projects + life skills", desc:"Three hours of hands-on work. The thing kids remember decades later." },
+          { time:"3:30 — 4:30pm",   title:"Outdoor play",                desc:"End the day moving. Sports, forest, free play." },
+        ].map((s,i)=>(
+          <div key={i} style={{
+            display:"grid", gridTemplateColumns:"160px 1fr", gap:32,
+            padding:"28px 0", borderBottom:i<4?`1px solid ${D.line}`:"none",
+          }}>
+            <div style={{ fontFamily:"'IBM Plex Mono','Geist Mono',monospace", fontSize:13, color: D.tx3, letterSpacing:".04em", paddingTop:4 }}>{s.time}</div>
+            <div>
+              <h3 style={{ fontFamily:"'Instrument Sans',sans-serif", fontSize:21, fontWeight:600, color: D.tx, marginBottom:6, letterSpacing:"-.01em" }}>{s.title}</h3>
+              <p style={{ fontFamily:"'Source Serif 4',serif", fontSize:16.5, color: D.tx2, fontWeight:300, maxWidth:560 }}>{s.desc}</p>
+            </div>
+          </div>
+        ))}
+      </section>
+
+      {/* ─── 03 · RESEARCH ─────────────────────────────────────── */}
+      <section style={{ maxWidth:1100, margin:"0 auto", padding:"100px 32px", borderTop:`1px solid ${D.line}` }}>
+        <SectionLabel num="03">The research</SectionLabel>
+        <h2 style={{
+          fontFamily:"'Instrument Sans',sans-serif", fontSize:"clamp(32px,4vw,48px)",
+          fontWeight:600, lineHeight:1.08, letterSpacing:"-.022em",
+          color: D.tx, marginBottom:14, maxWidth:840,
+        }}>
+          AI tutoring delivers <em style={{ fontFamily:"'Source Serif 4',serif", fontStyle:"italic", fontWeight:300, color: D.violet }}>2× learning gains</em> over classroom instruction.
+        </h2>
+        <p style={{ fontFamily:"'Source Serif 4',serif", fontSize:18, color: D.tx2, fontWeight:300, marginBottom:64, maxWidth:600 }}>
+          We're not betting on AI replacing school. We're betting on AI doing what it does best, so humans can do what humans do best.
+        </p>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))", gap:32 }}>
+          {[
+            { n:"2×",     u:"learning gains",     d:"AI tutoring vs. best-practice classroom instruction.", src:"Kestin et al., Scientific Reports 2025" },
+            { n:"10–18",  u:"min attention span", d:"A kindergartner's true focus window. Our blocks match it.", src:"Waterford.org, 2024" },
+            { n:"3+",     u:"hours outdoor",      d:"Daily outdoor play correlates with better attention and school readiness.", src:"Koepp et al. 2022 · ScienceDirect 2024" },
+          ].map((s,i)=>(
+            <div key={i} style={{ padding:"32px 28px", background: D.bg2, borderRadius:16, border:`1px solid ${D.line}` }}>
+              <div style={{
+                fontFamily:"'Instrument Sans',sans-serif", fontSize:64, fontWeight:700,
+                color: D.violet, letterSpacing:"-.03em", lineHeight:1, marginBottom:4,
+              }}>{s.n}</div>
+              <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:11, color: D.tx3, letterSpacing:".08em", textTransform:"uppercase", marginBottom:18 }}>{s.u}</div>
+              <p style={{ fontFamily:"'Source Serif 4',serif", fontSize:15.5, lineHeight:1.55, color: D.tx2, fontWeight:300, marginBottom:14 }}>{s.d}</p>
+              <p style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:10.5, color: D.tx4, letterSpacing:".04em" }}>{s.src}</p>
+            </div>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* FOUNDING CAMPUSES — first cohort */}
-      <section style={{ maxWidth: 1040, margin: "0 auto", padding: "10px 24px 60px" }}>
-        <p style={{ fontSize:11, fontWeight:700, color:"var(--or)", textTransform:"uppercase", letterSpacing:".1em", marginBottom:8, textAlign:"center", fontFamily:"'Geist Mono',monospace" }}>Founding campuses · opening 2026</p>
-        <h2 className="fu" style={{ fontFamily: "'Fraunces',serif", fontSize: 34, fontWeight: 400, textAlign: "center", marginBottom: 8, letterSpacing:"-.015em" }}>Where neoschool is <em style={{ fontStyle:"italic", color:"var(--or)", fontWeight:300 }}>opening first</em>.</h2>
-        <p className="fu d1 mu" style={{ textAlign:"center", fontSize:15, marginBottom:40, lineHeight:1.65, maxWidth:560, margin:"0 auto 40px", fontFamily:"'Newsreader',serif", fontWeight:300, fontStyle:"italic" }}>
-          The first cohort of neoschool campuses. Each runs the same model — built for how kids actually learn.
+      {/* ─── 04 · FOUNDING CAMPUSES ────────────────────────────── */}
+      <section id="campuses" style={{ maxWidth:1100, margin:"0 auto", padding:"100px 32px", borderTop:`1px solid ${D.line}` }}>
+        <SectionLabel num="04">Founding campuses · 2026</SectionLabel>
+        <h2 style={{
+          fontFamily:"'Instrument Sans',sans-serif", fontSize:"clamp(32px,4vw,48px)",
+          fontWeight:600, lineHeight:1.08, letterSpacing:"-.022em",
+          color: D.tx, marginBottom:14,
+        }}>
+          Where neoschool is <em style={{ fontFamily:"'Source Serif 4',serif", fontStyle:"italic", fontWeight:300, color: D.coral }}>opening first</em>.
+        </h2>
+        <p style={{ fontFamily:"'Source Serif 4',serif", fontSize:18, color: D.tx2, fontWeight:300, marginBottom:48, maxWidth:560 }}>
+          The first cohort. Each campus runs the same model — built for how kids actually learn.
         </p>
 
-        {/* Missoula featured card with photo — full width */}
-        <a href="/missoula.html" style={{ display:"block", textDecoration:"none", color:"inherit", marginBottom:18 }}>
-          <div className="card fu" style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 0,
-            padding: 0,
-            overflow: "hidden",
-            borderTop: "3px solid var(--or)",
-            background: "linear-gradient(135deg, #fff8f0, #fff)",
-            cursor: "pointer",
-            transition: "all .25s",
+        {/* Missoula featured card */}
+        <a href="/missoula.html" style={{ textDecoration:"none", color:"inherit", display:"block", marginBottom:18 }}>
+          <div style={{
+            display:"grid", gridTemplateColumns:"1.1fr 1fr", gap:0, overflow:"hidden",
+            borderRadius:20, background: D.bg2, border:`1px solid ${D.line}`,
+            transition:"all .25s", cursor:"pointer",
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 12px 30px -8px rgba(217,98,43,.25)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
-            <div style={{ height: 280, backgroundImage: "url('/missoula/kids-flowers.jpg')", backgroundSize: "cover", backgroundPosition: "center 75%" }} />
-            <div style={{ padding: "28px 30px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-              <p style={{ fontFamily:"'Geist Mono',monospace", fontSize:10.5, color:"var(--or)", letterSpacing:".12em", textTransform:"uppercase", marginBottom:10, fontWeight:500 }}>🟢 Now enrolling · Founding Families</p>
-              <h3 style={{ fontFamily:"'Fraunces',serif", fontSize:30, fontWeight:400, letterSpacing:"-.015em", marginBottom:6, color:"var(--nv)" }}>Missoula, <em style={{ fontStyle:"italic", color:"var(--or)", fontWeight:300 }}>Montana</em></h3>
-              <p style={{ fontFamily:"'Newsreader',serif", fontSize:15, color:"var(--tx2)", lineHeight:1.5, marginBottom:14, fontWeight:300 }}>Kindergarten + 1st Grade · Opening September 2026 · 10–12 students per class</p>
-              <p style={{ fontFamily:"'Geist Mono',monospace", fontSize:11, color:"var(--mu)", letterSpacing:".06em", marginBottom:14 }}>Stewarded by a second-generation Missoulian family</p>
-              <span className="btn bo" style={{ fontSize:14, padding:"11px 22px", display:"inline-flex", width:"fit-content", alignItems:"center", gap:6 }}>
-                Apply for 2026–27 →
-              </span>
+            onMouseEnter={e=>{e.currentTarget.style.borderColor=D.violet;e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 24px 60px -20px rgba(107,92,231,.3)";}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor=D.line;e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="none";}}>
+            <div style={{ minHeight:340, backgroundImage:"url('/missoula/kids-flowers.jpg')", backgroundSize:"cover", backgroundPosition:"center 75%" }}/>
+            <div style={{ padding:"42px 44px", display:"flex", flexDirection:"column", justifyContent:"center" }}>
+              <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:18 }}>
+                <span style={{ width:8, height:8, borderRadius:"50%", background: D.violet, animation:"pu 2s infinite" }}/>
+                <span style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:11, color: D.violet, letterSpacing:".14em", textTransform:"uppercase", fontWeight:500 }}>Now enrolling · Founding families</span>
+              </div>
+              <h3 style={{ fontFamily:"'Instrument Sans',sans-serif", fontSize:36, fontWeight:600, color: D.tx, letterSpacing:"-.022em", lineHeight:1.05, marginBottom:10 }}>
+                Missoula, <em style={{ fontFamily:"'Source Serif 4',serif", fontStyle:"italic", fontWeight:300, color: D.coral }}>Montana</em>
+              </h3>
+              <p style={{ fontFamily:"'Source Serif 4',serif", fontSize:16, color: D.tx2, fontWeight:300, lineHeight:1.55, marginBottom:18 }}>
+                Kindergarten + 1st Grade · 10–12 students per class · Opening September 2026.
+              </p>
+              <p style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:11, color: D.tx3, letterSpacing:".06em", marginBottom:22 }}>Stewarded by a second-generation Missoulian family</p>
+              <span style={{
+                background: D.violet, color:"#fff", padding:"13px 24px", borderRadius:14,
+                fontFamily:"'Instrument Sans',sans-serif", fontSize:14.5, fontWeight:600,
+                width:"fit-content", letterSpacing:"-.005em",
+              }}>Apply for 2026–27 →</span>
             </div>
           </div>
         </a>
 
-        <p style={{ fontFamily:"'Geist Mono',monospace", fontSize:10, color:"var(--mu)", textAlign:"center", letterSpacing:".1em", textTransform:"uppercase", marginBottom:14 }}>Coming next</p>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(220px, 1fr))", gap:14 }}>
+        <p style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:11, color: D.tx3, letterSpacing:".14em", textTransform:"uppercase", margin:"28px 0 14px", textAlign:"center" }}>Coming next</p>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))", gap:12 }}>
           {[
-            {
-              name: "Palo Alto",
-              region: "California",
-              status: "Waitlist open",
-              date: "Jan 2027",
-              grades: "K + 1st",
-              action: "waitlist",
-              flagship: false,
-            },
-            {
-              name: "Berkeley",
-              region: "California",
-              status: "Waitlist open",
-              date: "Jan 2027",
-              grades: "K + 1st",
-              action: "waitlist",
-              flagship: false,
-            },
-            {
-              name: "San Francisco",
-              region: "California",
-              status: "Waitlist open",
-              date: "Jan 2027",
-              grades: "K + 1st",
-              action: "waitlist",
-              flagship: false,
-            },
-          ].map((c,i) => {
-            const isMissoula = c.name === "Missoula";
-            const onCardClick = () => {
-              if (isMissoula) window.location.href = "/missoula.html";
-              else onStart("parent");
-            };
-            return (
-              <div key={i} className={`card fu d${i+1}`} onClick={onCardClick} style={{
-                textDecoration: "none", color: "inherit",
-                padding: "20px 18px",
-                borderTop: c.flagship ? "3px solid var(--or)" : "1px solid var(--p2)",
-                background: c.flagship ? "linear-gradient(135deg,#fff8f0,#fff)" : "#fff",
-                cursor: "pointer",
-              }}>
-                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:9 }}>
-                  <span style={{ fontSize:10, fontWeight:700, padding:"3px 8px", borderRadius:99,
-                                 color: c.flagship ? "var(--sg)" : "var(--mu)",
-                                 background: c.flagship ? "#dff2ea" : "var(--p)" }}>
-                    {c.flagship ? "✦ " : ""}{c.status}
-                  </span>
-                  {c.flagship && <span style={{ fontSize:9, color:"var(--or)", fontWeight:700, textTransform:"uppercase", letterSpacing:".06em" }}>Flagship</span>}
-                </div>
-                <h3 style={{ fontFamily:"'Fraunces',serif", fontSize:20, fontWeight:500, marginBottom:2 }}>{c.name}</h3>
-                <p style={{ fontSize:11.5, color:"var(--mu)", marginBottom:10 }}>{c.region}</p>
-                <div style={{ display:"flex", gap:6, marginBottom:10, flexWrap:"wrap" }}>
-                  <span style={{ fontSize:10.5, background:"var(--p)", color:"var(--mu)", padding:"2px 7px", borderRadius:6, fontWeight:600 }}>📅 {c.date}</span>
-                  <span style={{ fontSize:10.5, background:"var(--p)", color:"var(--mu)", padding:"2px 7px", borderRadius:6, fontWeight:600 }}>🎓 {c.grades}</span>
-                </div>
-                {c.action === "apply" ? (
-                  <span style={{ fontSize:12.5, fontWeight:600, color:"var(--or)" }}>Apply now →</span>
-                ) : (
-                  <span style={{ fontSize:12.5, fontWeight:600, color:"var(--mu)" }}>Join waitlist →</span>
-                )}
-              </div>
-            );
-          })}
+            { name:"Berkeley",  status:"Waitlist open", date:"Jan 2027" },
+            { name:"Palo Alto", status:"Waitlist open", date:"Jan 2027" },
+            { name:"SF",        status:"Waitlist open", date:"Sept 2027" },
+          ].map((c,i)=>(
+            <div key={i} onClick={()=>onStart("parent")} style={{
+              padding:"24px", background: D.bg2, borderRadius:14, border:`1px solid ${D.line}`,
+              cursor:"pointer", transition:"all .2s",
+            }}
+              onMouseEnter={e=>{e.currentTarget.style.borderColor=D.line2;}}
+              onMouseLeave={e=>{e.currentTarget.style.borderColor=D.line;}}>
+              <p style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:10, color: D.tx3, letterSpacing:".1em", textTransform:"uppercase", marginBottom:8 }}>{c.status}</p>
+              <h4 style={{ fontFamily:"'Instrument Sans',sans-serif", fontSize:20, fontWeight:600, color: D.tx, letterSpacing:"-.01em", marginBottom:4 }}>{c.name}</h4>
+              <p style={{ fontFamily:"'Source Serif 4',serif", fontSize:13, color: D.tx3, fontWeight:300 }}>{c.date}</p>
+            </div>
+          ))}
+          <div onClick={()=>setShowInterestForm(true)} style={{
+            padding:"24px", background:"transparent", borderRadius:14, border:`1px dashed ${D.line2}`,
+            cursor:"pointer", transition:"all .2s", display:"flex", flexDirection:"column", justifyContent:"center",
+          }}
+            onMouseEnter={e=>{e.currentTarget.style.borderColor=D.violet;}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor=D.line2;}}>
+            <p style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:10, color: D.violet, letterSpacing:".1em", textTransform:"uppercase", marginBottom:8 }}>+ Your city?</p>
+            <h4 style={{ fontFamily:"'Instrument Sans',sans-serif", fontSize:16, fontWeight:500, color: D.tx2, letterSpacing:"-.005em" }}>Launch a campus in your community</h4>
+          </div>
         </div>
-        <p style={{ textAlign:"center", marginTop:20, fontSize:13, color:"var(--mu)" }}>
-          Don't see your city? <button onClick={() => setShowInterestForm(true)} style={{ background:"none", border:"none", color:"var(--or)", fontWeight:600, cursor:"pointer", textDecoration:"underline", fontSize:13 }}>Launch a campus in your community →</button>
+      </section>
+
+      {/* ─── 05 · FOR FAMILIES, GUIDES, DIRECTORS ──────────────── */}
+      <section style={{ maxWidth:1100, margin:"0 auto", padding:"100px 32px", borderTop:`1px solid ${D.line}` }}>
+        <SectionLabel num="05">Three ways to join</SectionLabel>
+        <h2 style={{
+          fontFamily:"'Instrument Sans',sans-serif", fontSize:"clamp(32px,4vw,48px)",
+          fontWeight:600, lineHeight:1.08, letterSpacing:"-.022em",
+          color: D.tx, marginBottom:48,
+        }}>
+          The platform <em style={{ fontFamily:"'Source Serif 4',serif", fontStyle:"italic", fontWeight:300, color: D.violet }}>is for everyone</em>.
+        </h2>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))", gap:18 }}>
+          {[
+            { id:"parent",   label:"For families",       desc:"Find a campus, or use the platform at home. AI tutors, 75+ labs, real growth tracking.", cta:"Sign in as a parent →" },
+            { id:"guide",    label:"For guides",         desc:"Facilitate, don't lecture. The platform handles data, comms, and adaptation.", cta:"Sign in as a guide →" },
+            { id:"director", label:"Launch a campus",    desc:"Open a neoschool in your community. Curriculum, tools, comms, enrollment — all in one box.", cta:"Apply to launch →" },
+          ].map(t=>(
+            <button key={t.id} onClick={()=>onStart(t.id)} style={{
+              padding:"32px 28px", background: D.bg2, borderRadius:16,
+              border:`1px solid ${D.line}`, cursor:"pointer", textAlign:"left",
+              color:"inherit", transition:"all .25s", fontFamily:"inherit",
+              display:"flex", flexDirection:"column", gap:14,
+            }}
+              onMouseEnter={e=>{e.currentTarget.style.borderColor=D.violet;e.currentTarget.style.transform="translateY(-2px)";}}
+              onMouseLeave={e=>{e.currentTarget.style.borderColor=D.line;e.currentTarget.style.transform="translateY(0)";}}>
+              <p style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:11, color: D.violet, letterSpacing:".12em", textTransform:"uppercase", fontWeight:500 }}>{t.label}</p>
+              <p style={{ fontFamily:"'Source Serif 4',serif", fontSize:16, color: D.tx2, fontWeight:300, lineHeight:1.55, flex:1 }}>{t.desc}</p>
+              <p style={{ fontFamily:"'Instrument Sans',sans-serif", fontSize:14, color: D.tx, fontWeight:500, letterSpacing:"-.005em" }}>{t.cta}</p>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* ─── FOUNDER QUOTE ─────────────────────────────────────── */}
+      <section style={{ maxWidth:880, margin:"0 auto", padding:"100px 32px", borderTop:`1px solid ${D.line}`, textAlign:"center" }}>
+        <p style={{
+          fontFamily:"'Source Serif 4',Georgia,serif", fontStyle:"italic", fontWeight:300,
+          fontSize:"clamp(22px,2.6vw,30px)", lineHeight:1.4, color: D.tx,
+          letterSpacing:"-.015em", marginBottom:28,
+        }}>
+          "When parents and educators come together to design a school around how kids actually learn —
+          curious, hands-on, outside, alongside trusted adults — you get a generation that's
+          confident, kind, and ready for whatever comes next."
+        </p>
+        <p style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:11, color: D.violet, letterSpacing:".12em", textTransform:"uppercase" }}>
+          Esther Wojcicki · Advisor to neoschool
         </p>
       </section>
 
-      {/* THE neoschool MODEL — what every campus runs */}
-      <section style={{ maxWidth: 980, margin: "0 auto", padding: "30px 24px 60px" }}>
-        <p style={{ fontSize:11, fontWeight:700, color:"var(--or)", textTransform:"uppercase", letterSpacing:".1em", marginBottom:8, textAlign:"center" }}>The neoschool model</p>
-        <h2 className="fu" style={{ fontFamily:"'Fraunces',serif", fontSize:30, fontWeight:500, textAlign:"center", marginBottom:14 }}>Four pillars. One day that works.</h2>
-        <p className="fu d1 mu" style={{ textAlign:"center", fontSize:14, marginBottom:32, lineHeight:1.7, maxWidth:560, margin:"0 auto 32px" }}>The neoschool model — built for how kids actually learn.</p>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(2, 1fr)", gap:16 }}>
-          {[
-            { emoji:"🧠", title:"Smart Academics",       desc:"Two focused hours of instructor-led and AI-adaptive core learning each day, personalized to each child's pace. Brain breaks between subjects keep energy high." },
-            { emoji:"🛠️", title:"Real-World Projects",    desc:"Hands-on projects that connect classroom learning to the world outside. Make, build, present, defend." },
-            { emoji:"🍳", title:"Life Skills Workshops", desc:"Conscious communication, emotional intelligence, entrepreneurship, financial literacy, cooking, gardening, and survival skills. Skills traditional school skips." },
-            { emoji:"🌳", title:"Free Outdoor Play",     desc:"Unstructured time outside every day. Because rest, movement, and boredom are part of learning." },
-          ].map((p,i) => (
-            <div key={i} className={`card fu d${i+1}`} style={{ padding:"22px" }}>
-              <div style={{ fontSize:30, marginBottom:10 }}>{p.emoji}</div>
-              <h3 style={{ fontFamily:"'Fraunces',serif", fontSize:19, fontWeight:500, marginBottom:8 }}>{p.title}</h3>
-              <p style={{ fontSize:13, color:"var(--mu)", lineHeight:1.65 }}>{p.desc}</p>
+      {/* ─── CTA ───────────────────────────────────────────────── */}
+      <section style={{ maxWidth:980, margin:"0 auto", padding:"120px 32px", borderTop:`1px solid ${D.line}`, textAlign:"center" }}>
+        <SectionLabel num="06">Become a founding family</SectionLabel>
+        <h2 style={{
+          fontFamily:"'Instrument Sans',sans-serif", fontSize:"clamp(40px,5.5vw,68px)",
+          fontWeight:600, lineHeight:1.05, letterSpacing:"-.025em",
+          color: D.tx, marginBottom:24, maxWidth:760, margin:"0 auto 24px",
+        }}>
+          Apply for the <em style={{ fontFamily:"'Source Serif 4',serif", fontStyle:"italic", fontWeight:300, color: D.violet }}>2026–27</em> cohort.
+        </h2>
+        <p style={{ fontFamily:"'Source Serif 4',serif", fontSize:19, color: D.tx2, fontWeight:300, marginBottom:40, maxWidth:560, margin:"0 auto 40px" }}>
+          Kindergarten + 1st Grade in Missoula. Limited spots. We'll respond within 24 hours.
+        </p>
+        <a href="/missoula.html" style={{
+          background: D.violet, color:"#fff", padding:"18px 36px", borderRadius:14,
+          fontFamily:"'Instrument Sans',sans-serif", fontSize:16, fontWeight:600,
+          textDecoration:"none", letterSpacing:"-.005em",
+          display:"inline-flex", alignItems:"center", gap:8, transition:"all .2s",
+        }}
+          onMouseEnter={e=>{e.currentTarget.style.background=D.violetHvr;e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow="0 18px 44px -12px rgba(107,92,231,.5)";}}
+          onMouseLeave={e=>{e.currentTarget.style.background=D.violet;e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="none";}}>
+          Apply to Missoula →
+        </a>
+      </section>
+
+      {/* ─── FOOTER ────────────────────────────────────────────── */}
+      <footer style={{
+        background: D.bg2, padding:"56px 32px", marginTop:40, borderTop:`1px solid ${D.line}`,
+      }}>
+        <div style={{ maxWidth:1100, margin:"0 auto", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:24 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+            <div style={{ width:22, height:22, background: D.violet, borderRadius:6, position:"relative" }}>
+              <div style={{ position:"absolute", inset:6, background: D.bg2, borderRadius:2 }}/>
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 12 CORE COMPETENCIES (replaces 6 values) */}
-      <section style={{ maxWidth: 1040, margin: "0 auto", padding: "10px 24px 60px" }}>
-        <p style={{ fontSize:11, fontWeight:700, color:"var(--or)", textTransform:"uppercase", letterSpacing:".1em", marginBottom:8, textAlign:"center" }}>What neoschool builds in students</p>
-        <h2 className="fu" style={{ fontFamily:"'Fraunces',serif", fontSize:30, fontWeight:500, marginBottom:8, textAlign:"center" }}>The next generation of conscious leaders.</h2>
-        <p className="fu d1 mu" style={{ textAlign:"center", fontSize:14, marginBottom:32, lineHeight:1.65, maxWidth:560, margin:"0 auto 32px" }}>12 core competencies organized in 3 dimensions. Measured by growth over time — not grades.</p>
-
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(3, 1fr)", gap:14 }}>
-          {[
-            {
-              dim: "Who I am",
-              color: "#7c4a9a", bg: "#f3eaf6",
-              items: [
-                { emoji:"🪞", v:"Self-awareness",        sub:"Feelings & strengths" },
-                { emoji:"⚡", v:"Intrinsic motivation",  sub:"Drive from within" },
-                { emoji:"🌱", v:"Resilience",            sub:"Bounce back, try again" },
-                { emoji:"🧭", v:"Agency",                sub:"Make decisions, own outcomes" },
-              ],
-            },
-            {
-              dim: "How I learn",
-              color: "#4a7c6a", bg: "#dff2ea",
-              items: [
-                { emoji:"🔬", v:"Curiosity",             sub:"Ask questions, wonder" },
-                { emoji:"💛", v:"Love of learning",      sub:"Find joy in discovery" },
-                { emoji:"✏️", v:"Creative problem solving", sub:"New ways through challenges" },
-                { emoji:"💬", v:"Communication",         sub:"Express ideas, listen well" },
-              ],
-            },
-            {
-              dim: "How I show up",
-              color: "#c8940e", bg: "#fdf3d0",
-              items: [
-                { emoji:"🤝", v:"Collaboration",          sub:"Work toward shared goals" },
-                { emoji:"🫂", v:"Empathy",                sub:"See others' perspectives" },
-                { emoji:"🚀", v:"Initiative & follow-through", sub:"Start things, finish things" },
-                { emoji:"🔄", v:"Adaptability",           sub:"Flex when plans change" },
-              ],
-            },
-          ].map((col, ci) => (
-            <div key={ci}>
-              <p style={{ textAlign:"center", fontSize:12, fontWeight:700, color:col.color, marginBottom:11, textTransform:"none" }}>{col.dim}</p>
-              {col.items.map((it, i) => (
-                <div key={i} className={`fu d${ci*4+i+1}`} style={{ background:col.bg, borderRadius:12, padding:"12px 14px", marginBottom:8, borderLeft:`3px solid ${col.color}` }}>
-                  <div style={{ display:"flex", gap:9, alignItems:"flex-start" }}>
-                    <span style={{ fontSize:18 }}>{it.emoji}</span>
-                    <div style={{ flex:1 }}>
-                      <div style={{ fontSize:13, fontWeight:700, color:col.color, marginBottom:2 }}>{it.v}</div>
-                      <div style={{ fontSize:11, color:"var(--tx)", lineHeight:1.4 }}>{it.sub}</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-
-        {/* Measured how? */}
-        <div style={{ marginTop:32, paddingTop:28, borderTop:"1px solid var(--p2)" }}>
-          <p style={{ textAlign:"center", fontSize:11, fontWeight:700, color:"var(--or)", textTransform:"uppercase", letterSpacing:".1em", marginBottom:8 }}>Measured how?</p>
-          <h3 className="fu" style={{ fontFamily:"'Fraunces',serif", fontSize:22, fontWeight:500, marginBottom:20, textAlign:"center" }}>Growth over time — not grades.</h3>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(3, 1fr)", gap:14, marginBottom:20 }}>
-            {[
-              { color:"#7c4a9a", bg:"#f3eaf6", t:"Guide observations", d:"Weekly narrative check-ins" },
-              { color:"#4a7c6a", bg:"#dff2ea", t:"Student reflection",  d:"Self-rating + examples" },
-              { color:"#c8940e", bg:"#fdf3d0", t:"Portfolio evidence",  d:"Projects, peer feedback" },
-            ].map((m,i) => (
-              <div key={i} className={`fu d${i+1}`} style={{ background:m.bg, borderRadius:12, padding:"16px 18px", textAlign:"center", borderLeft:`3px solid ${m.color}` }}>
-                <div style={{ fontSize:14, fontWeight:700, color:m.color, marginBottom:5 }}>{m.t}</div>
-                <div style={{ fontSize:12, color:"var(--mu)" }}>{m.d}</div>
-              </div>
-            ))}
+            <span style={{
+              fontFamily:"'Instrument Sans',sans-serif", fontWeight:600, fontSize:14,
+              letterSpacing:".02em", textTransform:"uppercase", color: D.tx,
+            }}>neoschool</span>
+            <span style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:11, color: D.tx3, letterSpacing:".08em", marginLeft:12 }}>Missoula · Sept 2026</span>
           </div>
-          <div style={{ background:"var(--p)", borderRadius:12, padding:"14px 18px", textAlign:"center" }}>
-            <div style={{ fontSize:12.5, fontWeight:700, marginBottom:5 }}>Progress report: growth over time, not grades</div>
-            <div style={{ fontSize:12, color:"var(--mu)" }}>With support  →  Sometimes  →  Often  →  Consistently</div>
+          <div style={{ fontFamily:"'Source Serif 4',serif", fontSize:14, color: D.tx3, fontWeight:300 }}>
+            <a href="mailto:jennie@chiefmamaofficer.com" style={{ color: D.violet, textDecoration:"none" }}>jennie@chiefmamaofficer.com</a>
+            &nbsp;·&nbsp;
+            <a href="/missoula.html" style={{ color: D.tx2, textDecoration:"none" }}>Missoula campus</a>
           </div>
         </div>
-      </section>
-
-      {/* THE SCIENCE — moved BEFORE platform per parent feedback */}
-      <section style={{ background:"var(--p)", padding:"70px 24px" }}>
-        <div style={{ maxWidth:900, margin:"0 auto" }}>
-          <p style={{ fontSize:11, fontWeight:700, color:"var(--or)", textTransform:"uppercase", letterSpacing:".1em", marginBottom:8, textAlign:"center" }}>The science behind the model</p>
-          <h2 className="fu" style={{ fontFamily:"'Fraunces',serif", fontSize:28, fontWeight:500, textAlign:"center", marginBottom:12 }}>What the research actually says.</h2>
-          <p className="fu d1 mu" style={{ textAlign:"center", fontSize:14, marginBottom:34, lineHeight:1.7, maxWidth:620, margin:"0 auto 34px" }}>
-            What the research really tells us about young learners.
-          </p>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(3, 1fr)", gap:16 }}>
-            {[
-              { stat:"10–15 min", desc:"natural focus window for ages 5–7. Our 2-hour block uses short cycles with brain breaks, never 2 hours at a desk.", source:"Attention Span Development in Early Years" },
-              { stat:"Learn by doing", desc:"Children ages 5–7 are natural constructors of knowledge. PBL matches how they actually learn.", source:"Buck Institute · Ferrero et al., 2021" },
-              { stat:"AAP endorsed", desc:"Daily unstructured outdoor play is a developmental non-negotiable. Core to learning, not a break from it.", source:"NAEYC · Bento & Dias, 2017" },
-            ].map((s,i) => (
-              <div key={i} className={`fu d${i+1}`} style={{ background:"#fff", borderRadius:13, padding:"20px 18px" }}>
-                <div style={{ fontFamily:"'Fraunces',serif", fontSize:22, fontWeight:500, color:"var(--or)", marginBottom:9 }}>{s.stat}</div>
-                <p style={{ fontSize:13, color:"var(--tx)", lineHeight:1.65, marginBottom:10 }}>{s.desc}</p>
-                <p style={{ fontSize:10, color:"var(--mu)", fontStyle:"italic" }}>Source: {s.source}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* THE PLATFORM — what makes it possible (moved BELOW science) */}
-      <section style={{ background:"var(--nv)", padding:"70px 32px" }}>
-        <div style={{ maxWidth:920, margin:"0 auto" }}>
-          <p style={{ fontSize:11, fontWeight:700, color:"rgba(255,255,255,.45)", textTransform:"uppercase", letterSpacing:".1em", marginBottom:8, textAlign:"center" }}>The neoschool platform</p>
-          <h2 className="fu" style={{ fontFamily: "'Fraunces',serif", fontSize: 30, fontWeight: 500, color: "#fff", textAlign: "center", marginBottom: 36 }}>
-            Everything to run a school. In one box.
-          </h2>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(220px, 1fr))", gap:14 }}>
-            {[
-              { i:"📚", t:"Curriculum Builder", d:"AI-generated curricula for any age, any subject. Day-by-day Mon–Fri schedules." },
-              { i:"🤖", t:"19 AI Tutors",        d:"Subject-specific tutors using Socratic method. Adapt to each child's grade." },
-              { i:"🔬", t:"38 Interactive Tools",d:"PhET, GeoGebra, Desmos, Khan Academy, Scratch — embedded directly." },
-              { i:"📈", t:"Student Trajectories",d:"Renaissance-style growth tracking. Percentile, grade equiv, exam readiness." },
-              { i:"💌", t:"Parent Comms",        d:"Personalized weekly updates. NPS surveys. Google Drive photos in newsletters." },
-              { i:"🎯", t:"Live Insights",       d:"Real-time growth opportunities when a student needs support. Cross-subject memory across activities." },
-            ].map((f,i) => (
-              <div key={i} className={`fu d${i+1}`} style={{ background:"rgba(255,255,255,.07)", borderRadius:13, padding:"20px 18px" }}>
-                <div style={{ fontSize:26, marginBottom:8 }}>{f.i}</div>
-                <div style={{ fontFamily:"'Fraunces',serif", fontSize:18, color:"#fff", marginBottom:6 }}>{f.t}</div>
-                <p style={{ fontSize:12.5, color:"rgba(255,255,255,.68)", lineHeight:1.65 }}>{f.d}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* THREE TRACKS */}
-      <section style={{ maxWidth: 980, margin: "0 auto", padding: "70px 24px 70px" }}>
-        <h2 className="fu" style={{ fontFamily: "'Fraunces',serif", fontSize: 30, fontWeight: 500, textAlign: "center", marginBottom: 30 }}>Three paths into neoschool.</h2>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18 }}>
-          {tracks.map((t, i) => (
-            <div key={t.id} className={`card fu d${i + 1}`}
-              style={{ cursor: "pointer", padding: "28px 24px", transition: "transform .2s,box-shadow .2s", transform: hoveredCard === t.id ? "translateY(-6px)" : "", boxShadow: hoveredCard === t.id ? "0 16px 40px rgba(0,0,0,.12)" : "" }}
-              onMouseEnter={() => setHoveredCard(t.id)} onMouseLeave={() => setHoveredCard(null)}
-              onClick={() => onStart(t.id)}>
-              <div style={{ fontSize: 34, marginBottom: 12 }}>{t.icon}</div>
-              <h3 style={{ fontFamily: "'Fraunces',serif", fontSize: 22, fontWeight: 500, marginBottom: 9, color: t.color }}>{t.headline}</h3>
-              <p style={{ fontSize: 13, color: "var(--mu)", lineHeight: 1.65, marginBottom: 18 }}>{t.sub}</p>
-              <button className="btn bn sm" style={{ background: t.color }}>{t.cta} →</button>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* FINAL CTA */}
-      <section style={{ maxWidth: 720, margin: "0 auto", padding: "10px 32px 70px", textAlign: "center" }}>
-        <h2 className="fu" style={{ fontFamily: "'Fraunces',serif", fontSize: 32, fontWeight: 500, marginBottom: 16 }}>Ready to launch?</h2>
-        <p className="fu d1 mu" style={{ fontSize: 15, marginBottom: 28, lineHeight: 1.7 }}>Whether you're a parent looking for a campus, a Guide wanting to facilitate, or a founder ready to open one — the platform's ready.</p>
-        <div className="fu d2" style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap:"wrap" }}>
-          <button className="btn bo" style={{ fontSize: 15, padding: "14px 28px" }} onClick={() => onStart("parent")}>Get started →</button>
-        </div>
-        <p style={{ fontSize: 12, color: "var(--mu)", marginTop: 18 }}>Questions? <strong>admissions@neoschool.me</strong> · neoschool.me</p>
-      </section>
-
-      {/* Sticky floating Apply CTA — appears on scroll past hero */}
-      <StickyApplyButton />
+      </footer>
 
       {showInterestForm && <CampusInterestForm onClose={() => setShowInterestForm(false)} />}
     </div>
-  );
-}
-
-// ── STICKY APPLY BUTTON ─────────────────────────────────────────────────────
-function StickyApplyButton() {
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const onScroll = () => setVisible(window.scrollY > 600);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-  return (
-    <a
-      href="/missoula.html"
-      style={{
-        position: "fixed",
-        bottom: visible ? 24 : -100,
-        right: 24,
-        background: "var(--or)",
-        color: "#fff",
-        padding: "14px 24px",
-        borderRadius: 99,
-        fontFamily: "'Fraunces', serif",
-        fontWeight: 500,
-        fontSize: 14,
-        textDecoration: "none",
-        boxShadow: "0 8px 24px -4px rgba(217,98,43,.5)",
-        zIndex: 1000,
-        transition: "all .3s cubic-bezier(.2,.8,.2,1)",
-        opacity: visible ? 1 : 0,
-        letterSpacing: "-.005em",
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-      }}
-      onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.background = "var(--or2)"; }}
-      onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.background = "var(--or)"; }}>
-      Apply to Missoula →
-    </a>
   );
 }
 
