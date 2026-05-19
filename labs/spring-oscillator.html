@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Spring Oscillator — neoschool</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,sans-serif;background:linear-gradient(180deg,#faf6f0 0%,#e8dcc8 100%);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+  header{background:rgba(255,255,255,.92);backdrop-filter:blur(8px);padding:14px 20px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+  h1{font-size:18px;font-weight:600;color:#2A2622}
+  .stat{display:flex;flex-direction:column;font-family:'IBM Plex Mono',monospace}
+  .stat label{font-size:10px;color:#6B5CE7;text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+  .stat value{font-size:16px;color:#2A2622;font-weight:700}
+  .controls{background:rgba(255,255,255,.85);padding:14px 20px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;border-bottom:1px solid rgba(0,0,0,.06)}
+  .control{display:flex;flex-direction:column;gap:4px;min-width:130px}
+  .control label{font-size:11px;color:#564E48;font-weight:600;display:flex;justify-content:space-between}
+  .control label span{color:#6B5CE7;font-family:'IBM Plex Mono',monospace}
+  input[type=range]{width:100%;accent-color:#6B5CE7}
+  button{background:#6B5CE7;color:#fff;border:none;padding:10px 22px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;transition:all .2s}
+  button:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(107,92,231,.3)}
+  button.secondary{background:transparent;color:#6B5CE7;border:1px solid #6B5CE7}
+  #canvas{flex:1;display:block;cursor:grab}
+  #canvas:active{cursor:grabbing}
+  .formula{position:absolute;bottom:20px;right:20px;background:rgba(255,255,255,.95);padding:14px 18px;border-radius:10px;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.7;border:1px solid rgba(0,0,0,.08);max-width:260px}
+  .formula b{color:#6B5CE7}
+</style>
+</head>
+<body>
+<header>
+  <h1>🪀 Spring Oscillator</h1>
+  <div class="stat"><label>Period T</label><value id="period">— s</value></div>
+  <div class="stat"><label>Frequency</label><value id="freq">— Hz</value></div>
+  <div class="stat"><label>KE</label><value id="ke">0 J</value></div>
+  <div class="stat"><label>PE</label><value id="pe">0 J</value></div>
+  <div class="stat"><label>Total</label><value id="tot">0 J</value></div>
+</header>
+
+<div class="controls">
+  <div class="control">
+    <label>Mass m <span id="mass-v">1.0 kg</span></label>
+    <input id="mass" type="range" min="2" max="50" value="10"/>
+  </div>
+  <div class="control">
+    <label>Stiffness k <span id="k-v">20 N/m</span></label>
+    <input id="k" type="range" min="5" max="100" value="20"/>
+  </div>
+  <div class="control">
+    <label>Damping b <span id="damp-v">0.00</span></label>
+    <input id="damp" type="range" min="0" max="50" value="0"/>
+  </div>
+  <div class="control">
+    <label>Initial x₀ <span id="amp-v">80 cm</span></label>
+    <input id="amp" type="range" min="20" max="180" value="80"/>
+  </div>
+  <button id="release">Release ↓</button>
+  <button id="reset" class="secondary">Reset</button>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<div class="formula">
+  <b>F</b> = −kx (Hooke's law)<br>
+  <b>T</b> = 2π √(m/k)<br>
+  <b>KE</b> = ½mv²<br>
+  <b>PE</b> = ½kx²
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const $ = id => document.getElementById(id);
+
+let W=0, H=0;
+function resize() {
+  W = canvas.width = canvas.clientWidth = window.innerWidth;
+  H = canvas.height = canvas.clientHeight = window.innerHeight - 160;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// State: spring is horizontal, mass slides on frictionless surface
+let x = 0.8;       // displacement (m) from equilibrium
+let v = 0;
+let running = false;
+let dragging = false;
+let history = []; // for the x-t graph
+
+function getParams() {
+  return {
+    m: parseInt($('mass').value) / 10,
+    k: parseInt($('k').value),
+    b: parseInt($('damp').value) / 500,
+    A: parseInt($('amp').value) / 100,
+  };
+}
+
+function postState() {
+  const p = getParams();
+  const T = 2 * Math.PI * Math.sqrt(p.m / p.k);
+  const KE = 0.5 * p.m * v * v;
+  const PE = 0.5 * p.k * x * x;
+  window.parent.postMessage({
+    type: 'sim-state',
+    sim: 'spring-oscillator',
+    state: {
+      mass: p.m, stiffness: p.k, damping: p.b,
+      amplitude: Math.abs(x),
+      displacement: x, velocity: v,
+      period: T, frequency: 1/T,
+      KE, PE, totalEnergy: KE + PE,
+      force: -p.k * x,
+    }
+  }, '*');
+}
+
+function updateUI() {
+  const p = getParams();
+  const T = 2 * Math.PI * Math.sqrt(p.m / p.k);
+  const KE = 0.5 * p.m * v * v;
+  const PE = 0.5 * p.k * x * x;
+  $('period').textContent = T.toFixed(2) + ' s';
+  $('freq').textContent = (1/T).toFixed(2) + ' Hz';
+  $('ke').textContent = KE.toFixed(2) + ' J';
+  $('pe').textContent = PE.toFixed(2) + ' J';
+  $('tot').textContent = (KE+PE).toFixed(2) + ' J';
+  $('mass-v').textContent = p.m.toFixed(1) + ' kg';
+  $('k-v').textContent = p.k + ' N/m';
+  $('damp-v').textContent = p.b.toFixed(3);
+  $('amp-v').textContent = ($('amp').value) + ' cm';
+}
+
+let last = 0;
+function frame(now) {
+  const dt = Math.min(0.033, (now - last) / 1000);
+  last = now;
+  if (running && !dragging) {
+    const p = getParams();
+    const sub = 8;
+    for (let i = 0; i < sub; i++) {
+      const sdt = dt / sub;
+      const a = (-p.k * x - p.b * v) / p.m;
+      v += a * sdt;
+      x += v * sdt;
+    }
+    history.push({ t: history.length, x });
+    if (history.length > 240) history.shift();
+    updateUI();
+    postState();
+  }
+  draw();
+  requestAnimationFrame(frame);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  const p = getParams();
+  const equilibriumX = W * 0.45;
+  const wallX = 80;
+  const cy = H / 2;
+  const pxPerM = 200; // pixels per meter for displacement
+  const massX = equilibriumX + x * pxPerM;
+
+  // Ground
+  ctx.fillStyle = 'rgba(42,38,34,.1)';
+  ctx.fillRect(0, cy + 32, W, 2);
+
+  // Wall (fixed support)
+  ctx.fillStyle = '#2A2622';
+  ctx.fillRect(wallX - 20, cy - 50, 12, 100);
+  // Hatching on wall
+  ctx.strokeStyle = 'rgba(42,38,34,.4)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 5; i++) {
+    ctx.beginPath();
+    ctx.moveTo(wallX - 28, cy - 40 + i * 22);
+    ctx.lineTo(wallX - 20, cy - 50 + i * 22);
+    ctx.stroke();
+  }
+
+  // Equilibrium marker (dashed vertical)
+  ctx.strokeStyle = 'rgba(107,92,231,.3)';
+  ctx.setLineDash([4, 6]);
+  ctx.beginPath();
+  ctx.moveTo(equilibriumX, cy - 60);
+  ctx.lineTo(equilibriumX, cy + 60);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(107,92,231,.5)';
+  ctx.font = '10px IBM Plex Mono, monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('x=0', equilibriumX, cy + 80);
+
+  // Draw spring as a zigzag from wall to mass
+  const coils = 16;
+  const springStart = wallX - 8;
+  const springEnd = massX - 22;
+  const springLen = springEnd - springStart;
+  const coilH = 14;
+  ctx.strokeStyle = '#6B5CE7';
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(springStart, cy);
+  for (let i = 0; i < coils; i++) {
+    const t1 = (i + 0.5) / coils;
+    const t2 = (i + 1) / coils;
+    ctx.lineTo(springStart + t1 * springLen, cy + (i % 2 ? -coilH : coilH));
+    ctx.lineTo(springStart + t2 * springLen, cy);
+  }
+  ctx.stroke();
+
+  // Mass block
+  const blockW = 44, blockH = 44;
+  ctx.fillStyle = 'rgba(0,0,0,.18)';
+  ctx.fillRect(massX - blockW/2 + 3, cy - blockH/2 + 3, blockW, blockH);
+  const g = ctx.createLinearGradient(0, cy - blockH/2, 0, cy + blockH/2);
+  g.addColorStop(0, '#a89be8');
+  g.addColorStop(1, '#6B5CE7');
+  ctx.fillStyle = g;
+  ctx.fillRect(massX - blockW/2, cy - blockH/2, blockW, blockH);
+  ctx.strokeStyle = '#2A2622';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(massX - blockW/2, cy - blockH/2, blockW, blockH);
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 13px system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillText('m', massX, cy + 5);
+
+  // Force arrow
+  const F = -p.k * x;
+  if (Math.abs(F) > 0.5) {
+    const aMag = Math.min(60, Math.abs(F) * 4);
+    const dir = F > 0 ? 1 : -1;
+    const x1 = massX + dir * (blockW/2);
+    const x2 = x1 + dir * aMag;
+    ctx.strokeStyle = '#dd5555';
+    ctx.fillStyle = '#dd5555';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(x1, cy);
+    ctx.lineTo(x2, cy);
+    ctx.stroke();
+    // arrowhead
+    ctx.beginPath();
+    ctx.moveTo(x2, cy);
+    ctx.lineTo(x2 - dir * 8, cy - 5);
+    ctx.lineTo(x2 - dir * 8, cy + 5);
+    ctx.closePath();
+    ctx.fill();
+    ctx.font = '11px IBM Plex Mono, monospace';
+    ctx.fillText(`F=${F.toFixed(1)}N`, x2 + dir * 24, cy - 8);
+  }
+
+  // x(t) graph at bottom
+  if (history.length > 1) {
+    const graphY = H - 30;
+    const graphH = 40;
+    ctx.strokeStyle = 'rgba(0,0,0,.08)';
+    ctx.beginPath();
+    ctx.moveTo(0, graphY); ctx.lineTo(W, graphY);
+    ctx.stroke();
+    ctx.strokeStyle = '#6B5CE7';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    const startX = 20, endX = W - 20;
+    history.forEach((pt, i) => {
+      const gx = startX + (i / history.length) * (endX - startX);
+      const gy = graphY - pt.x * 18;
+      if (i === 0) ctx.moveTo(gx, gy);
+      else ctx.lineTo(gx, gy);
+    });
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(0,0,0,.4)';
+    ctx.font = '10px IBM Plex Mono, monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('x(t)', 22, graphY - 26);
+  }
+
+  ctx.textAlign = 'left';
+}
+
+// Drag the mass to set initial position
+canvas.addEventListener('mousedown', e => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const equilibriumX = W * 0.45;
+  const blockX = equilibriumX + x * 200;
+  if (Math.abs(mx - blockX) < 30) {
+    dragging = true;
+    running = false;
+    v = 0;
+  }
+});
+canvas.addEventListener('mousemove', e => {
+  if (dragging) {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const equilibriumX = W * 0.45;
+    x = (mx - equilibriumX) / 200;
+    x = Math.max(-1.5, Math.min(1.5, x));
+    updateUI();
+  }
+});
+canvas.addEventListener('mouseup', () => { dragging = false; });
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.touches[0].clientX - rect.left;
+  const equilibriumX = W * 0.45;
+  const blockX = equilibriumX + x * 200;
+  if (Math.abs(mx - blockX) < 40) { dragging = true; running = false; v = 0; }
+});
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (dragging) {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.touches[0].clientX - rect.left;
+    const equilibriumX = W * 0.45;
+    x = (mx - equilibriumX) / 200;
+    x = Math.max(-1.5, Math.min(1.5, x));
+    updateUI();
+  }
+});
+canvas.addEventListener('touchend', () => { dragging = false; });
+
+['mass','k','damp','amp'].forEach(id => {
+  $(id).addEventListener('input', () => { updateUI(); postState(); });
+});
+$('release').addEventListener('click', () => {
+  const p = getParams();
+  x = p.A; v = 0; running = true; history = [];
+  postState();
+});
+$('reset').addEventListener('click', () => {
+  running = false; x = 0; v = 0; history = [];
+  updateUI();
+});
+
+updateUI();
+postState();
+requestAnimationFrame(frame);
+
+window.parent.postMessage({ type: 'sim-loaded', sim: 'spring-oscillator' }, '*');
+</script>
+</body>
+</html>

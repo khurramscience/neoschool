@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Newton's Cradle — neoschool</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,sans-serif;background:linear-gradient(180deg,#faf6f0 0%,#e8dcc8 100%);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+  header{background:rgba(255,255,255,.92);backdrop-filter:blur(8px);padding:14px 20px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+  h1{font-size:18px;font-weight:600;color:#2A2622}
+  .stat{display:flex;flex-direction:column;font-family:'IBM Plex Mono',monospace}
+  .stat label{font-size:10px;color:#6B5CE7;text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+  .stat value{font-size:16px;color:#2A2622;font-weight:700}
+  .controls{background:rgba(255,255,255,.85);padding:14px 20px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;border-bottom:1px solid rgba(0,0,0,.06)}
+  .control{display:flex;flex-direction:column;gap:4px;min-width:130px}
+  .control label{font-size:11px;color:#564E48;font-weight:600;display:flex;justify-content:space-between}
+  .control label span{color:#6B5CE7;font-family:'IBM Plex Mono',monospace}
+  input[type=range]{width:100%;accent-color:#6B5CE7}
+  button{background:#6B5CE7;color:#fff;border:none;padding:10px 22px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;transition:all .2s}
+  button:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(107,92,231,.3)}
+  button.secondary{background:transparent;color:#6B5CE7;border:1px solid #6B5CE7}
+  #canvas{flex:1;display:block;cursor:grab}
+  #canvas:active{cursor:grabbing}
+  .formula{position:absolute;bottom:20px;right:20px;background:rgba(255,255,255,.95);padding:14px 18px;border-radius:10px;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.7;border:1px solid rgba(0,0,0,.08);max-width:260px}
+  .formula b{color:#6B5CE7}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎱 Newton's Cradle</h1>
+  <div class="stat"><label>Balls swung</label><value id="swung">0</value></div>
+  <div class="stat"><label>Σp (momentum)</label><value id="mom">0 kg·m/s</value></div>
+  <div class="stat"><label>Σ KE</label><value id="ke">0 J</value></div>
+  <div class="stat"><label>Collisions</label><value id="coll">0</value></div>
+</header>
+
+<div class="controls">
+  <div class="control">
+    <label># balls <span id="n-v">5</span></label>
+    <input id="n" type="range" min="3" max="7" value="5" step="1"/>
+  </div>
+  <div class="control">
+    <label>Lift # balls <span id="lift-v">1</span></label>
+    <input id="lift" type="range" min="0" max="3" value="1" step="1"/>
+  </div>
+  <div class="control">
+    <label>Angle <span id="ang-v">35°</span></label>
+    <input id="ang" type="range" min="10" max="60" value="35"/>
+  </div>
+  <div class="control">
+    <label>Elasticity <span id="elas-v">0.99</span></label>
+    <input id="elas" type="range" min="80" max="100" value="99"/>
+  </div>
+  <button id="release">Release ↓</button>
+  <button id="reset" class="secondary">Reset</button>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<div class="formula">
+  <b>p</b> = m·v (momentum)<br>
+  <b>KE</b> = ½mv²<br>
+  Lift 2 → 2 swing out<br>
+  Lift 3 → 3 swing out<br>
+  <span style="color:#2D8B5F">Conservation rules!</span>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const $ = id => document.getElementById(id);
+const g = 9.8;
+const ballMass = 1;
+const ballRadius = 22;
+const stringLen = 1.2; // meters
+const ballSpacing = ballRadius * 2 + 1;
+
+let W=0, H=0;
+function resize() {
+  W = canvas.width = canvas.clientWidth = window.innerWidth;
+  H = canvas.height = canvas.clientHeight = window.innerHeight - 160;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// Each ball: { angle, angleV }  angle in rad, 0 = straight down
+let balls = [];
+let collisions = 0;
+let dragging = false;
+let dragIdx = -1;
+let lastCollisionAt = -1; // ball idx
+let scale = 200; // pixels per meter
+
+function initBalls() {
+  const n = parseInt($('n').value);
+  balls = [];
+  for (let i = 0; i < n; i++) {
+    balls.push({ angle: 0, angleV: 0, idx: i });
+  }
+}
+
+function getParams() {
+  return {
+    n: parseInt($('n').value),
+    lift: parseInt($('lift').value),
+    liftAngle: parseInt($('ang').value) * Math.PI / 180,
+    elas: parseInt($('elas').value) / 100,
+  };
+}
+
+function totals() {
+  const p = balls.reduce((s, b) => s + ballMass * stringLen * b.angleV, 0);
+  const ke = balls.reduce((s, b) => s + 0.5 * ballMass * Math.pow(stringLen * b.angleV, 2), 0);
+  return { p, ke };
+}
+
+function postState(evt) {
+  const t = totals();
+  window.parent.postMessage({
+    type: 'sim-state',
+    sim: 'newtons-cradle',
+    state: {
+      ballCount: balls.length,
+      lifted: balls.filter(b => Math.abs(b.angle) > 0.05).length,
+      totalMomentum: t.p,
+      totalKE: t.ke,
+      collisions,
+      elasticity: getParams().elas,
+      angles: balls.map(b => b.angle * 180 / Math.PI),
+      velocities: balls.map(b => stringLen * b.angleV),
+      event: evt || undefined,
+    }
+  }, '*');
+}
+
+function updateUI() {
+  const p = getParams();
+  const t = totals();
+  $('n-v').textContent = p.n;
+  $('lift-v').textContent = p.lift;
+  $('ang-v').textContent = ($('ang').value) + '°';
+  $('elas-v').textContent = p.elas.toFixed(2);
+  $('mom').textContent = t.p.toFixed(2) + ' kg·m/s';
+  $('ke').textContent = t.ke.toFixed(2) + ' J';
+  $('swung').textContent = balls.filter(b => Math.abs(b.angle) > 0.05).length;
+  $('coll').textContent = collisions;
+}
+
+let last = 0;
+function frame(now) {
+  const dt = Math.min(0.033, (now - last) / 1000);
+  last = now;
+  if (!dragging) {
+    const p = getParams();
+    const sub = 8;
+    for (let s = 0; s < sub; s++) {
+      const sdt = dt / sub;
+      // Pendulum motion
+      for (const b of balls) {
+        const a = -(g / stringLen) * Math.sin(b.angle);
+        b.angleV += a * sdt;
+        b.angle += b.angleV * sdt;
+      }
+      // Collisions — adjacent balls "touch" when in equilibrium (angle ~ 0)
+      // Newton's cradle effect: pulses transmit through the chain
+      for (let i = 0; i < balls.length - 1; i++) {
+        const A = balls[i], B = balls[i+1];
+        // Touching condition: both near equilibrium, A moving right or B moving left
+        if (Math.abs(A.angle) < 0.06 && Math.abs(B.angle) < 0.06) {
+          // Relative velocity at contact
+          const vA = stringLen * A.angleV; // tangential velocity (positive = right)
+          const vB = stringLen * B.angleV;
+          if (vA > vB) {
+            // Elastic collision (equal masses): swap velocities, scaled by elasticity
+            const e = p.elas;
+            const newVA = (1 - e) * vA + e * vB;
+            const newVB = e * vA + (1 - e) * vB;
+            A.angleV = newVA / stringLen;
+            B.angleV = newVB / stringLen;
+            if (i !== lastCollisionAt) { collisions++; lastCollisionAt = i; }
+          }
+        }
+      }
+    }
+    // Tiny damping (air friction)
+    for (const b of balls) b.angleV *= 0.9985;
+    updateUI();
+    postState();
+  }
+  draw();
+  requestAnimationFrame(frame);
+}
+
+function pivotY() { return 80; }
+function pivotX(i) {
+  const totalW = balls.length * ballSpacing;
+  return W/2 - totalW/2 + i * ballSpacing + ballSpacing/2;
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+
+  // Frame / top bar
+  const pY = pivotY();
+  const totalW = balls.length * ballSpacing;
+  const frameX1 = W/2 - totalW/2;
+  const frameX2 = W/2 + totalW/2;
+  ctx.fillStyle = '#2A2622';
+  ctx.fillRect(frameX1 - 30, pY - 6, totalW + 60, 8);
+  // Vertical posts
+  ctx.fillRect(frameX1 - 30, pY - 6, 6, 80);
+  ctx.fillRect(frameX2 + 24, pY - 6, 6, 80);
+
+  // Draw balls and strings
+  balls.forEach((b, i) => {
+    const px = pivotX(i);
+    const py = pY;
+    const bx = px + Math.sin(b.angle) * stringLen * scale;
+    const by = py + Math.cos(b.angle) * stringLen * scale;
+    // String
+    ctx.strokeStyle = 'rgba(42,38,34,.5)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(px, py);
+    ctx.lineTo(bx, by);
+    ctx.stroke();
+    // Ball
+    const grad = ctx.createRadialGradient(bx - ballRadius/3, by - ballRadius/3, 2, bx, by, ballRadius);
+    grad.addColorStop(0, '#eee');
+    grad.addColorStop(0.4, '#aaa');
+    grad.addColorStop(1, '#555');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(bx, by, ballRadius, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = '#2A2622';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    // Pivot point
+    ctx.fillStyle = '#444';
+    ctx.beginPath();
+    ctx.arc(px, py, 3, 0, Math.PI*2);
+    ctx.fill();
+    // Velocity arrow if moving
+    const vT = stringLen * b.angleV * scale;
+    if (Math.abs(vT) > 8) {
+      const aLen = Math.min(60, Math.abs(vT) * 0.6);
+      const aDir = vT > 0 ? 1 : -1;
+      ctx.strokeStyle = '#dd5555';
+      ctx.fillStyle = '#dd5555';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(bx, by);
+      ctx.lineTo(bx + aDir * aLen, by);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(bx + aDir * aLen, by);
+      ctx.lineTo(bx + aDir * (aLen - 7), by - 4);
+      ctx.lineTo(bx + aDir * (aLen - 7), by + 4);
+      ctx.closePath();
+      ctx.fill();
+    }
+  });
+
+  // Title under cradle
+  ctx.fillStyle = 'rgba(42,38,34,.4)';
+  ctx.font = '11px IBM Plex Mono, monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('Drag any ball to lift, then release', W/2, pY + stringLen * scale + 40);
+}
+
+// Drag interaction
+canvas.addEventListener('mousedown', e => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  for (let i = 0; i < balls.length; i++) {
+    const b = balls[i];
+    const px = pivotX(i);
+    const py = pivotY();
+    const bx = px + Math.sin(b.angle) * stringLen * scale;
+    const by = py + Math.cos(b.angle) * stringLen * scale;
+    if (Math.hypot(mx - bx, my - by) < ballRadius + 6) {
+      dragging = true; dragIdx = i;
+      break;
+    }
+  }
+});
+canvas.addEventListener('mousemove', e => {
+  if (dragging && dragIdx >= 0) {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const px = pivotX(dragIdx), py = pivotY();
+    const ang = Math.atan2(mx - px, my - py);
+    balls[dragIdx].angle = Math.max(-1.2, Math.min(1.2, ang));
+    balls[dragIdx].angleV = 0;
+    // If leftmost/rightmost lifted, also lift adjacent ones (cradle behavior)
+    const liftN = parseInt($('lift').value);
+    if (dragIdx === 0 && liftN > 1) {
+      for (let i = 1; i < liftN; i++) {
+        balls[i].angle = balls[0].angle * Math.max(0, 1 - i * 0.02);
+      }
+    }
+    updateUI();
+  }
+});
+canvas.addEventListener('mouseup', () => { dragging = false; dragIdx = -1; });
+
+function release() {
+  const p = getParams();
+  initBalls();
+  // Lift the leftmost p.lift balls
+  for (let i = 0; i < p.lift && i < balls.length; i++) {
+    balls[i].angle = -p.liftAngle * (1 - i * 0.001);
+    balls[i].angleV = 0;
+  }
+  collisions = 0;
+  postState('release');
+}
+
+['n','lift','ang','elas'].forEach(id => {
+  $(id).addEventListener('input', () => { updateUI(); postState(); });
+});
+$('n').addEventListener('change', initBalls);
+$('release').addEventListener('click', release);
+$('reset').addEventListener('click', () => { initBalls(); collisions = 0; updateUI(); });
+
+initBalls();
+updateUI();
+postState();
+requestAnimationFrame(frame);
+
+window.parent.postMessage({ type: 'sim-loaded', sim: 'newtons-cradle' }, '*');
+</script>
+</body>
+</html>

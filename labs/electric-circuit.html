@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Electric Circuit — neoschool</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,sans-serif;background:linear-gradient(180deg,#181410 0%,#241f1a 100%);height:100vh;overflow:hidden;color:#f0e8d8;display:flex;flex-direction:column}
+  header{background:rgba(255,255,255,.06);backdrop-filter:blur(8px);padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+  h1{font-size:18px;font-weight:600}
+  .stat{display:flex;flex-direction:column;font-family:'IBM Plex Mono',monospace}
+  .stat label{font-size:10px;color:#ffcf66;text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+  .stat value{font-size:16px;font-weight:700}
+  .controls{background:rgba(255,255,255,.04);padding:14px 20px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.06)}
+  .control{display:flex;flex-direction:column;gap:4px;min-width:140px}
+  .control label{font-size:11px;color:rgba(255,255,255,.7);font-weight:600;display:flex;justify-content:space-between}
+  .control label span{color:#ffcf66;font-family:'IBM Plex Mono',monospace}
+  input[type=range]{width:100%;accent-color:#ffcf66}
+  button{background:#ffcf66;color:#241f1a;border:none;padding:10px 22px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;transition:all .2s}
+  button:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(255,207,102,.3)}
+  button.secondary{background:transparent;color:#ffcf66;border:1px solid #ffcf66}
+  .switch{display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,.85);cursor:pointer;user-select:none}
+  .switch input{accent-color:#ffcf66;width:18px;height:18px}
+  #canvas{flex:1;display:block}
+  .formula{position:absolute;bottom:20px;right:20px;background:rgba(20,15,10,.92);padding:14px 18px;border-radius:10px;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.7;border:1px solid rgba(255,207,102,.3);max-width:280px}
+  .formula b{color:#ffcf66}
+  .config{position:absolute;top:90px;left:20px;background:rgba(20,15,10,.85);padding:10px 14px;border-radius:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;border:1px solid rgba(255,207,102,.2);display:flex;gap:14px}
+  .config label{display:flex;align-items:center;gap:6px;cursor:pointer}
+  .config input{accent-color:#ffcf66}
+</style>
+</head>
+<body>
+<header>
+  <h1>💡 Electric Circuit</h1>
+  <div class="stat"><label>Voltage V</label><value id="v-stat">— V</value></div>
+  <div class="stat"><label>Current I</label><value id="i-stat">— A</value></div>
+  <div class="stat"><label>Total R</label><value id="r-stat">— Ω</value></div>
+  <div class="stat"><label>Power</label><value id="p-stat">— W</value></div>
+</header>
+
+<div class="controls">
+  <div class="control">
+    <label>Battery <span id="v-v">9 V</span></label>
+    <input id="v" type="range" min="1" max="24" value="9"/>
+  </div>
+  <div class="control">
+    <label>R₁ resistor <span id="r1-v">10 Ω</span></label>
+    <input id="r1" type="range" min="1" max="50" value="10"/>
+  </div>
+  <div class="control">
+    <label>R₂ resistor <span id="r2-v">20 Ω</span></label>
+    <input id="r2" type="range" min="1" max="50" value="20"/>
+  </div>
+  <label class="switch">
+    <input type="checkbox" id="sw" checked> Switch CLOSED
+  </label>
+  <button id="reset" class="secondary">Reset</button>
+</div>
+
+<div class="config">
+  <label><input type="radio" name="cfg" value="series" checked> Series</label>
+  <label><input type="radio" name="cfg" value="parallel"> Parallel</label>
+  <label><input type="radio" name="cfg" value="single"> R₁ only</label>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<div class="formula">
+  <b>V</b> = I·R (Ohm's law)<br>
+  <b>Series:</b> R = R₁ + R₂<br>
+  <b>Parallel:</b> 1/R = 1/R₁ + 1/R₂<br>
+  <b>P</b> = V·I = I²·R
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const $ = id => document.getElementById(id);
+
+let W=0, H=0, t=0;
+function resize() {
+  W = canvas.width = canvas.clientWidth = window.innerWidth;
+  H = canvas.height = canvas.clientHeight = window.innerHeight - 160;
+}
+window.addEventListener('resize', resize);
+resize();
+
+function getParams() {
+  return {
+    V: parseInt($('v').value),
+    R1: parseInt($('r1').value),
+    R2: parseInt($('r2').value),
+    closed: $('sw').checked,
+    config: document.querySelector('input[name=cfg]:checked').value,
+  };
+}
+
+function compute() {
+  const p = getParams();
+  if (!p.closed) return { V: p.V, I: 0, R: Infinity, P: 0, I1: 0, I2: 0, valid: false };
+  let R, I, I1 = 0, I2 = 0;
+  switch (p.config) {
+    case 'series': R = p.R1 + p.R2; I = p.V / R; I1 = I; I2 = I; break;
+    case 'parallel': R = 1 / (1/p.R1 + 1/p.R2); I = p.V / R; I1 = p.V / p.R1; I2 = p.V / p.R2; break;
+    case 'single': R = p.R1; I = p.V / R; I1 = I; I2 = 0; break;
+  }
+  return { V: p.V, I, R, P: p.V * I, I1, I2, valid: true };
+}
+
+function postState() {
+  const p = getParams();
+  const r = compute();
+  window.parent.postMessage({
+    type: 'sim-state',
+    sim: 'electric-circuit',
+    state: {
+      voltage: p.V, R1: p.R1, R2: p.R2,
+      configuration: p.config, switchClosed: p.closed,
+      totalResistance: r.R, totalCurrent: r.I,
+      power: r.P, currentR1: r.I1, currentR2: r.I2,
+      brightness: Math.min(1, r.I / 1.5),
+    }
+  }, '*');
+}
+
+function updateUI() {
+  const p = getParams();
+  const r = compute();
+  $('v-v').textContent = p.V + ' V';
+  $('r1-v').textContent = p.R1 + ' Ω';
+  $('r2-v').textContent = p.R2 + ' Ω';
+  $('v-stat').textContent = p.V + ' V';
+  $('i-stat').textContent = r.valid ? r.I.toFixed(2) + ' A' : '0 A';
+  $('r-stat').textContent = r.valid ? r.R.toFixed(1) + ' Ω' : '∞';
+  $('p-stat').textContent = r.valid ? r.P.toFixed(2) + ' W' : '0 W';
+  $('sw').parentElement.lastChild.textContent = ' Switch ' + (p.closed ? 'CLOSED' : 'OPEN');
+}
+
+let last = 0;
+function frame(now) {
+  const dt = (now - last) / 1000;
+  last = now;
+  t += dt * (compute().I || 0) * 2; // electron flow rate
+  draw();
+  requestAnimationFrame(frame);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  const p = getParams();
+  const r = compute();
+  const cx = W / 2;
+  const cy = H / 2;
+  const w = Math.min(W - 100, 720);
+  const h = Math.min(H - 80, 360);
+  const left = cx - w/2, right = cx + w/2;
+  const top = cy - h/2, bot = cy + h/2;
+
+  // Draw circuit based on config
+  ctx.strokeStyle = r.valid ? '#ffcf66' : '#665543';
+  ctx.lineWidth = 3;
+
+  if (p.config === 'series' || p.config === 'single') {
+    // Rectangle loop
+    ctx.beginPath();
+    ctx.moveTo(left, top); ctx.lineTo(right, top);
+    ctx.lineTo(right, bot); ctx.lineTo(left, bot); ctx.closePath();
+    ctx.stroke();
+  } else {
+    // Parallel — battery left, bulb right, two resistor branches between
+    ctx.beginPath();
+    ctx.moveTo(left, top); ctx.lineTo(left + w*0.3, top);
+    ctx.moveTo(left + w*0.7, top); ctx.lineTo(right, top);
+    ctx.moveTo(left + w*0.3, top); ctx.lineTo(left + w*0.3, top - 30);
+    ctx.lineTo(left + w*0.7, top - 30); ctx.lineTo(left + w*0.7, top);
+    ctx.moveTo(left, top); ctx.lineTo(left, bot);
+    ctx.lineTo(right, bot); ctx.lineTo(right, top);
+    ctx.stroke();
+  }
+
+  // Battery (on left side)
+  drawBattery(left, cy - 30, p.V);
+
+  // Switch (bottom)
+  drawSwitch(cx + 90, bot, p.closed);
+
+  // Bulb (right side)
+  drawBulb(right, cy, r.brightness, r.valid);
+
+  // Resistors based on config
+  if (p.config === 'series') {
+    drawResistor((left + cx)/2 + 40, top, '90deg', p.R1, 'R₁');
+    drawResistor((right + cx)/2 - 40, top, '90deg', p.R2, 'R₂');
+  } else if (p.config === 'parallel') {
+    drawResistor(left + w*0.3 + (w*0.4)/3, top - 30, '0deg', p.R1, 'R₁');
+    drawResistor(left + w*0.3 + 2*(w*0.4)/3, top, '0deg', p.R2, 'R₂');
+  } else {
+    drawResistor(cx, top, '0deg', p.R1, 'R₁');
+  }
+
+  // Current flow animation (yellow dots)
+  if (r.valid && r.I > 0.01) {
+    drawCurrentDots(left, right, top, bot, p.config, t, r.I);
+  }
+}
+
+function drawBattery(x, y, V) {
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 16px IBM Plex Mono, monospace';
+  ctx.textAlign = 'center';
+  // Long line (+), short line (-)
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(x - 10, y - 18); ctx.lineTo(x - 10, y + 18); // long
+  ctx.stroke();
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(x + 4, y - 10); ctx.lineTo(x + 4, y + 10); // short
+  ctx.stroke();
+  ctx.fillStyle = '#ffcf66';
+  ctx.fillText('+', x - 22, y - 24);
+  ctx.fillText('−', x + 16, y - 24);
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 13px IBM Plex Mono, monospace';
+  ctx.fillText(V + 'V', x, y + 50);
+}
+
+function drawSwitch(x, y, closed) {
+  // gap in the wire — when closed, line connects
+  ctx.fillStyle = '#241f1a';
+  ctx.fillRect(x - 22, y - 6, 44, 12);
+  ctx.strokeStyle = '#ffcf66';
+  ctx.lineWidth = 3;
+  if (closed) {
+    ctx.beginPath();
+    ctx.moveTo(x - 22, y); ctx.lineTo(x + 22, y);
+    ctx.stroke();
+  } else {
+    // open switch — diagonal
+    ctx.beginPath();
+    ctx.moveTo(x - 22, y); ctx.lineTo(x - 5, y);
+    ctx.moveTo(x + 22, y); ctx.lineTo(x + 5, y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x - 5, y); ctx.lineTo(x + 8, y - 15);
+    ctx.stroke();
+  }
+  ctx.fillStyle = '#ffcf66';
+  ctx.font = '11px IBM Plex Mono, monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('SW', x, y + 22);
+}
+
+function drawBulb(x, y, brightness, on) {
+  // Halo (glow)
+  if (on && brightness > 0.01) {
+    const gl = ctx.createRadialGradient(x, y, 5, x, y, 50 + 40 * brightness);
+    gl.addColorStop(0, `rgba(255, 220, 100, ${brightness * 0.8})`);
+    gl.addColorStop(0.4, `rgba(255, 207, 102, ${brightness * 0.4})`);
+    gl.addColorStop(1, 'transparent');
+    ctx.fillStyle = gl;
+    ctx.beginPath();
+    ctx.arc(x, y, 50 + 40 * brightness, 0, Math.PI*2);
+    ctx.fill();
+  }
+  // Bulb body
+  ctx.fillStyle = on && brightness > 0.05 ? `rgba(255, 240, 180, ${0.3 + brightness * 0.7})` : 'rgba(180,180,180,0.4)';
+  ctx.beginPath();
+  ctx.arc(x, y, 22, 0, Math.PI*2);
+  ctx.fill();
+  ctx.strokeStyle = '#ffcf66';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  // Filament zigzag
+  ctx.strokeStyle = on && brightness > 0.05 ? '#fff' : '#666';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(x - 10, y - 4);
+  for (let i = 0; i < 6; i++) {
+    ctx.lineTo(x - 10 + (i+1) * 3.3, y + (i % 2 ? -4 : 4));
+  }
+  ctx.stroke();
+  // Base
+  ctx.fillStyle = '#888';
+  ctx.fillRect(x - 8, y + 18, 16, 6);
+  ctx.fillRect(x - 6, y + 22, 12, 4);
+  // Label
+  ctx.fillStyle = '#ffcf66';
+  ctx.font = 'bold 11px IBM Plex Mono, monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('💡', x, y + 50);
+}
+
+function drawResistor(x, y, rotation, value, label) {
+  ctx.save();
+  ctx.translate(x, y);
+  if (rotation === '90deg') ctx.rotate(0);
+  // Zigzag — horizontal resistor
+  const w = 40, h = 12;
+  // Background block to mask wire
+  ctx.fillStyle = '#241f1a';
+  ctx.fillRect(-w/2, -h, w, h*2);
+  ctx.strokeStyle = '#ffcf66';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(-w/2, 0);
+  ctx.lineTo(-w/2 + 4, -h);
+  ctx.lineTo(-w/4, h);
+  ctx.lineTo(0, -h);
+  ctx.lineTo(w/4, h);
+  ctx.lineTo(w/2 - 4, -h);
+  ctx.lineTo(w/2, 0);
+  ctx.stroke();
+  ctx.fillStyle = '#ffcf66';
+  ctx.font = 'bold 11px IBM Plex Mono, monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(label + '=' + value + 'Ω', 0, -h - 8);
+  ctx.restore();
+}
+
+function drawCurrentDots(left, right, top, bot, config, t, I) {
+  const dotSize = 3;
+  ctx.fillStyle = '#ffcf66';
+  // Series/single: one loop
+  if (config === 'series' || config === 'single') {
+    const perimeter = 2 * (right - left + bot - top);
+    const nDots = Math.min(40, Math.max(8, Math.round(perimeter / 30)));
+    for (let i = 0; i < nDots; i++) {
+      const pos = ((i / nDots) + t / 5) % 1;
+      const [x, y] = posOnRect(left, right, top, bot, pos);
+      ctx.beginPath();
+      ctx.arc(x, y, dotSize, 0, Math.PI*2);
+      ctx.fill();
+    }
+  } else {
+    // Parallel: dots on each branch
+    const w = right - left;
+    // Main loop (battery to junction left, junction right to bulb back to battery)
+    const mainPath = [
+      [left, top, left + w*0.3, top],
+      [left + w*0.7, top, right, top],
+      [right, top, right, bot],
+      [right, bot, left, bot],
+      [left, bot, left, top],
+    ];
+    const lengths = mainPath.map(([x1,y1,x2,y2]) => Math.hypot(x2-x1, y2-y1));
+    const totalLen = lengths.reduce((a,b)=>a+b, 0);
+    const nDots = 20;
+    for (let i = 0; i < nDots; i++) {
+      let pos = ((i / nDots) + t / 5) % 1;
+      let target = pos * totalLen;
+      for (let seg = 0; seg < mainPath.length; seg++) {
+        if (target <= lengths[seg]) {
+          const [x1, y1, x2, y2] = mainPath[seg];
+          const fr = target / lengths[seg];
+          const x = x1 + (x2 - x1) * fr;
+          const y = y1 + (y2 - y1) * fr;
+          ctx.beginPath();
+          ctx.arc(x, y, dotSize, 0, Math.PI*2);
+          ctx.fill();
+          break;
+        }
+        target -= lengths[seg];
+      }
+    }
+  }
+}
+
+function posOnRect(left, right, top, bot, t) {
+  const w = right - left, h = bot - top;
+  const peri = 2*(w + h);
+  let d = t * peri;
+  if (d < w) return [left + d, top];
+  d -= w;
+  if (d < h) return [right, top + d];
+  d -= h;
+  if (d < w) return [right - d, bot];
+  d -= w;
+  return [left, bot - d];
+}
+
+['v','r1','r2'].forEach(id => $(id).addEventListener('input', () => { updateUI(); postState(); }));
+$('sw').addEventListener('change', () => { updateUI(); postState(); });
+document.querySelectorAll('input[name=cfg]').forEach(r => r.addEventListener('change', () => { updateUI(); postState(); }));
+$('reset').addEventListener('click', () => { $('v').value = 9; $('r1').value = 10; $('r2').value = 20; $('sw').checked = true; updateUI(); postState(); });
+
+updateUI();
+postState();
+requestAnimationFrame(frame);
+
+window.parent.postMessage({ type: 'sim-loaded', sim: 'electric-circuit' }, '*');
+</script>
+</body>
+</html>

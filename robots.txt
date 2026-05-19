@@ -1,6 +1,4 @@
 User-agent: *
 Allow: /
 Disallow: /admin.html
-Disallow: /labs-check.html
-Disallow: /missoula-v2.html
 Sitemap: https://neoschool.me/sitemap.xml
