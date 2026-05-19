@@ -5,6 +5,7 @@ import { claude, genJSON, genCurriculum, genMultiCurriculum, genBriefing, genPar
 import { getMemory, saveSession, saveTutorFeedback, buildRecommendations, buildCrossContext } from "./memory.js";
 import { getCredits, useCredits, addCredits, PLANS, COSTS } from "./credits.js";
 import { getTutorConfig, saveTutorConfig } from "./tutorConfig.js";
+import { getStudentGraph, recordLabVisit, recordLabEvent, getRecommendations as kgRecs, getSkillsSummary, getStudentPath, getGraphData } from "./knowledgeGraph.js";
 
 // ── SHARED ────────────────────────────────────────────────────────────────────
 const Logo = ({ l, sz = 16 }) => (
@@ -664,14 +665,79 @@ function Marketing({ onStart }) {
           }}
         </SectionReveal>
 
+        {/* ─── LEARNING SCIENCE — mirrored from Missoula page ─── */}
+        <SectionReveal>
+          {(isVisible) => {
+            const r = (d) => ({
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? "translateY(0)" : "translateY(16px)",
+              filter: isVisible ? "blur(0px)" : "blur(4px)",
+              transition: `opacity 500ms cubic-bezier(0.22,1,0.36,1) ${d}ms, transform 500ms cubic-bezier(0.22,1,0.36,1) ${d}ms, filter 500ms cubic-bezier(0.22,1,0.36,1) ${d}ms`,
+            });
+            const research = [
+              { stat:"2×",       title:"learning gains",          body:"AI tutoring produces 2× learning gains compared to best-practice classroom instruction.", src:"Kestin et al., Scientific Reports, 2025" },
+              { stat:"10–18",    title:"min per subject",         body:"A kindergartner's attention span is roughly 10–18 minutes. Our short academic cycles with brain breaks are designed around this reality.", src:"Waterford.org, 2024" },
+              { stat:"+",        title:"Learn by doing",          body:"Project-based learning students outperform peers academically and develop stronger critical thinking, communication, and collaboration skills.", src:"Lucas Education Research, 2021–22" },
+              { stat:"3 hr",     title:"Outside = better focus",  body:"Outdoor play improves attention in the classroom vs. indoor play. 3+ hrs/day linked to better school readiness.", src:"Koepp et al. 2022 · ScienceDirect 2024" },
+            ];
+            return (
+              <section style={{ background: bg, padding:"120px 0" }}>
+                <div style={{ position:"relative", margin:"0 auto", maxWidth:1080, padding:"0 24px" }}>
+                  <p className="text-overline" style={{ ...r(0), color: coral, marginBottom:16, textAlign:"center" }}>
+                    The learning science behind neoschool
+                  </p>
+                  <h2 className="font-body text-section-heading" style={{
+                    ...r(80), fontWeight:400, color: textPrimary, textAlign:"center",
+                    marginBottom:48, maxWidth:680, margin:"0 auto 48px",
+                  }}>
+                    Built on what works.
+                  </h2>
+                  <div style={{
+                    display:"grid",
+                    gridTemplateColumns:"repeat(auto-fit, minmax(220px, 1fr))",
+                    gap:14,
+                  }}>
+                    {research.map((rs, i) => (
+                      <div key={i} style={{
+                        ...r(160 + i * 100),
+                        background: bgSecondary, borderRadius:12, padding:"24px 22px",
+                        border:`1px solid ${borderSubtle}`,
+                      }}>
+                        <p className="font-body" style={{
+                          fontSize: 36, fontWeight:300, color: coral,
+                          lineHeight: 1, letterSpacing: "-.02em", marginBottom:6,
+                          fontStyle:"italic",
+                        }}>{rs.stat}</p>
+                        <h3 className="font-heading" style={{
+                          fontSize:14, fontWeight:600, color: textPrimary,
+                          marginBottom:8, letterSpacing:"-.005em",
+                        }}>{rs.title}</h3>
+                        <p className="font-body" style={{
+                          fontSize:13.5, color: textSecondary, lineHeight:1.55,
+                          marginBottom:10,
+                        }}>{rs.body}</p>
+                        <p className="font-heading" style={{
+                          fontSize:10, color: textMuted,
+                          letterSpacing:".04em", textTransform:"uppercase",
+                          fontFamily:"'IBM Plex Mono',monospace",
+                        }}>{rs.src}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            );
+          }}
+        </SectionReveal>
+
         {/* ─── PHOTO BAND — Montana family/community ─── */}
         <SectionReveal>
           {(isVisible) => (
             <section style={{
-              height:"clamp(320px, 50vh, 540px)",
+              height:"clamp(380px, 60vh, 620px)",
               backgroundImage:"url('/missoula/family.jpg')",
               backgroundSize:"cover",
-              backgroundPosition:"center 30%",
+              backgroundPosition:"center top",
               backgroundAttachment:"fixed",
               position:"relative",
               opacity: isVisible ? 1 : 0,
@@ -679,24 +745,24 @@ function Marketing({ onStart }) {
             }}>
               <div style={{
                 position:"absolute", inset:0,
-                background:"linear-gradient(to bottom, rgba(20,20,18,0) 0%, rgba(20,20,18,0.15) 50%, rgba(20,20,18,0.55) 100%)",
+                background:"linear-gradient(to bottom, rgba(20,20,18,0) 0%, rgba(20,20,18,0.2) 50%, rgba(20,20,18,0.7) 100%)",
               }}/>
               <div style={{
-                position:"absolute", bottom:32, left:0, right:0,
+                position:"absolute", bottom:40, left:0, right:0,
                 textAlign:"center", padding:"0 24px",
               }}>
                 <p className="font-body" style={{
-                  fontSize:"clamp(20px,2.4vw,28px)", fontStyle:"italic",
-                  color:"rgba(255,255,255,.95)", textShadow:"0 2px 12px rgba(0,0,0,.6)",
-                  fontWeight:300, lineHeight:1.4, maxWidth:760, margin:"0 auto",
+                  fontSize:"clamp(20px,2.4vw,30px)", fontStyle:"italic",
+                  color:"rgba(255,255,255,.95)", textShadow:"0 2px 12px rgba(0,0,0,.7)",
+                  fontWeight:300, lineHeight:1.4, maxWidth:780, margin:"0 auto",
                   letterSpacing:"-.01em",
                 }}>
-                  "We're building the school we wished existed when our own kids started."
+                  "We're preparing our kids for the world that's coming — not the one we grew up in."
                 </p>
                 <p className="font-heading" style={{
                   marginTop:14, fontSize:12, fontWeight:500,
                   textTransform:"uppercase", letterSpacing:".14em",
-                  color:"rgba(255,255,255,.7)", textShadow:"0 2px 8px rgba(0,0,0,.9)",
+                  color:"rgba(255,255,255,.75)", textShadow:"0 2px 8px rgba(0,0,0,.9)",
                 }}>
                   Founding families · Missoula 2026
                 </p>
@@ -993,6 +1059,41 @@ function SectionReveal({ children }) {
     return () => observer.disconnect();
   }, []);
   return <div ref={ref}>{children(isVisible)}</div>;
+}
+
+// ── TUTOR MESSAGE — renders LaTeX math inline via KaTeX (loaded via CDN) ─────
+function TutorMessage({ content, isUser }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!ref.current) return;
+    // Try to render LaTeX if KaTeX auto-render is available
+    if (window.renderMathInElement) {
+      try {
+        window.renderMathInElement(ref.current, {
+          delimiters: [
+            { left: "\\(", right: "\\)", display: false },
+            { left: "\\[", right: "\\]", display: true },
+            { left: "$$", right: "$$", display: true },
+          ],
+          throwOnError: false,
+          errorColor: "#cc6666",
+        });
+      } catch (e) { /* swallow */ }
+    }
+  }, [content]);
+  return (
+    <div ref={ref} style={{
+      fontSize: 14.5, lineHeight: 1.55,
+      fontFamily: "'Source Serif 4',serif",
+      background: isUser ? "hsl(50 10% 9%)" : "var(--cr)",
+      color: isUser ? "#fff" : "var(--tx)",
+      padding: "10px 14px",
+      borderRadius: isUser ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+      maxWidth: "92%",
+      whiteSpace: "pre-wrap",
+      wordBreak: "break-word",
+    }}>{content}</div>
+  );
 }
 
 // ── CAMPUS INTEREST FORM ─────────────────────────────────────────────────────
@@ -1941,9 +2042,48 @@ function LabPlayer({ lab, userId, onBack }) {
   const [ratings, setRatings] = useState({});
   const [showPay, setShowPay] = useState(false);
   const [sessionStart] = useState(Date.now());
+  const [simState, setSimState] = useState(null); // postMessage bridge: knows current sim state
   const chatRef = useRef();
   const tutorCfg = getTutorConfig(lab.id, lab);
   const mem = getMemory(userId || "demo");
+
+  // ── Record lab visit in knowledge graph ──
+  useEffect(() => {
+    recordLabVisit(userId || "demo", lab.id, lab);
+  }, [lab.id, userId]);
+
+  // ── postMessage bridge: receive state updates from the sim iframe ──
+  useEffect(() => {
+    const onMsg = (e) => {
+      if (!e.data || typeof e.data !== "object") return;
+      if (e.data.type === "sim-loaded" && e.data.sim) {
+        // Sim loaded — could log or send greeting
+      }
+      if (e.data.type === "sim-state" && e.data.state) {
+        setSimState(e.data.state);
+        // Record meaningful events to knowledge graph
+        if (e.data.state.event === "hit" || e.data.state.event === "completed") {
+          recordLabEvent(userId || "demo", lab.id, {
+            type: "breakthrough",
+            topic: e.data.state.event,
+          });
+        } else if (e.data.state.event === "miss" && e.data.state.distance > 20) {
+          recordLabEvent(userId || "demo", lab.id, {
+            type: "struggle",
+            topic: "accuracy",
+          });
+        }
+        if (e.data.state.score && e.data.state.score > (simState?.score || 0)) {
+          recordLabEvent(userId || "demo", lab.id, {
+            type: "score",
+            score: e.data.state.score,
+          });
+        }
+      }
+    };
+    window.addEventListener("message", onMsg);
+    return () => window.removeEventListener("message", onMsg);
+  }, [lab.id, userId, simState?.score]);
 
   // Grade mismatch detection
   const studentGrade = mem.sessions?.[0]?.studentGrade
@@ -1985,6 +2125,16 @@ function LabPlayer({ lab, userId, onBack }) {
     const evtCtx = `Session: ${Math.round((Date.now()-sessionStart)/1000)}s. Clicks: ${events.filter(e=>e.t==="click").length}. Score: ${score??"-"}. Recent: ${events.slice(-3).map(e=>e.action||e.t).join(", ")}`;
     const crossCtx = buildCrossContext(mem);
 
+    // Live simulation state (postMessage bridge) — tutor knows exactly what's happening
+    let simCtx = "";
+    if (simState) {
+      const entries = Object.entries(simState)
+        .filter(([k,v]) => v !== null && v !== undefined && typeof v !== "object")
+        .map(([k,v]) => `${k}: ${typeof v === "number" ? Number(v).toFixed(2) : v}`)
+        .join(", ");
+      simCtx = `\n\nLIVE SIMULATION STATE: ${entries}. Use these specific numbers in your response — reference exactly what the student is doing right now.`;
+    }
+
     // Grade-adaptive tutor context
     let gradeCtx = "";
     if (isAboveGrade) {
@@ -1993,7 +2143,7 @@ function LabPlayer({ lab, userId, onBack }) {
       gradeCtx = `\n\nGRADE ADAPTATION: This student (${studentGrade}) is reviewing material below their grade level. They may need a quick challenge or extension question to stay engaged. Ask them to explain it as if teaching a younger student.`;
     }
 
-    const sys = `${tutorCfg.system}${gradeCtx}\n\nSESSION CONTEXT: ${evtCtx}\nSTUDENT CROSS-SUBJECT MEMORY: ${crossCtx}`;
+    const sys = `${tutorCfg.system}${gradeCtx}${simCtx}\n\nSESSION CONTEXT: ${evtCtx}\nSTUDENT CROSS-SUBJECT MEMORY: ${crossCtx}`;
     const m = { role:"user", content:inp.trim() };
     const all = [...msgs, m];
     setMsgs(all); setInp(""); setTyping(true);
@@ -2123,17 +2273,7 @@ function LabPlayer({ lab, userId, onBack }) {
                   display:"flex", flexDirection:"column",
                   alignItems: m.role==="user" ? "flex-end" : "flex-start",
                 }}>
-                  <div style={{
-                    fontSize: 14.5, lineHeight: 1.55,
-                    fontFamily: "'Source Serif 4',serif",
-                    background: m.role === "user" ? "hsl(50 10% 9%)" : "var(--cr)",
-                    color: m.role === "user" ? "#fff" : "var(--tx)",
-                    padding:"10px 14px",
-                    borderRadius: m.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-                    maxWidth: "92%",
-                    whiteSpace:"pre-wrap",
-                    wordBreak:"break-word",
-                  }}>{m.content}</div>
+                  <TutorMessage content={m.content} isUser={m.role === "user"} />
                   {m.role==="assistant" && m.id && (
                     <div style={{ display:"flex", gap:6, marginTop:6, marginLeft:4 }}>
                       <button onClick={()=>rateMsg(m.id,"good")} style={{

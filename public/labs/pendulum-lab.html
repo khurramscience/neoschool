@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Pendulum Lab — neoschool</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,sans-serif;background:linear-gradient(180deg,#0a1428 0%,#1a2848 60%,#2a3a5a 100%);height:100vh;overflow:hidden;color:#fff;display:flex;flex-direction:column}
+  header{background:rgba(255,255,255,.08);backdrop-filter:blur(8px);padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+  h1{font-size:18px;font-weight:600}
+  .stat{display:flex;flex-direction:column;font-family:'IBM Plex Mono',monospace}
+  .stat label{font-size:10px;color:#a89be8;text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+  .stat value{font-size:16px;font-weight:700}
+  .controls{background:rgba(255,255,255,.06);padding:14px 20px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.08)}
+  .control{display:flex;flex-direction:column;gap:4px;min-width:120px}
+  .control label{font-size:11px;color:rgba(255,255,255,.7);font-weight:600;display:flex;justify-content:space-between}
+  .control label span{color:#a89be8;font-family:'IBM Plex Mono',monospace}
+  input[type=range]{width:100%;accent-color:#6B5CE7}
+  button{background:#6B5CE7;color:#fff;border:none;padding:10px 22px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;transition:all .2s}
+  button:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(107,92,231,.4)}
+  button.secondary{background:transparent;color:#a89be8;border:1px solid #a89be8}
+  #canvas{flex:1;display:block;cursor:grab}
+  #canvas:active{cursor:grabbing}
+  .formula{position:absolute;bottom:20px;right:20px;background:rgba(20,30,60,.9);padding:14px 18px;border-radius:10px;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.6;border:1px solid rgba(107,92,231,.3)}
+  .formula b{color:#a89be8}
+</style>
+</head>
+<body>
+<header>
+  <h1>🌀 Pendulum Lab</h1>
+  <div class="stat"><label>Period T</label><value id="period">— s</value></div>
+  <div class="stat"><label>Frequency</label><value id="freq">— Hz</value></div>
+  <div class="stat"><label>Energy</label><value id="energy">0 J</value></div>
+  <div class="stat"><label>Swings</label><value id="swings">0</value></div>
+</header>
+
+<div class="controls">
+  <div class="control">
+    <label>Length L <span id="len-v">100 cm</span></label>
+    <input id="len" type="range" min="20" max="200" value="100"/>
+  </div>
+  <div class="control">
+    <label>Mass m <span id="mass-v">1.0 kg</span></label>
+    <input id="mass" type="range" min="1" max="50" value="10"/>
+  </div>
+  <div class="control">
+    <label>Gravity g <span id="grav-v">9.8 m/s²</span></label>
+    <input id="grav" type="range" min="1" max="25" value="98"/>
+  </div>
+  <div class="control">
+    <label>Damping <span id="damp-v">0.05</span></label>
+    <input id="damp" type="range" min="0" max="50" value="5"/>
+  </div>
+  <button id="release">Release ↓</button>
+  <button id="reset" class="secondary">Reset</button>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<div class="formula">
+  <b>T</b> = 2π √(L/g)<br>
+  <b>L</b> = length · <b>g</b> = gravity<br>
+  <b>Note:</b> mass doesn't change T!
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const $ = id => document.getElementById(id);
+
+let W=0, H=0;
+function resize() {
+  W = canvas.width = canvas.clientWidth = window.innerWidth;
+  H = canvas.height = canvas.clientHeight = window.innerHeight - 160;
+}
+window.addEventListener('resize', resize);
+resize();
+
+let angle = Math.PI / 4; // 45° from vertical
+let angleV = 0;
+let dragging = false;
+let swings = 0;
+let lastSign = 1;
+let running = false;
+
+function getParams() {
+  return {
+    L: parseInt($('len').value) / 100,  // m
+    m: parseInt($('mass').value) / 10,   // kg
+    g: parseInt($('grav').value) / 10,   // m/s²
+    c: parseInt($('damp').value) / 1000, // damping
+  };
+}
+
+function postState() {
+  const p = getParams();
+  const T = 2 * Math.PI * Math.sqrt(p.L / p.g);
+  const f = 1 / T;
+  const ke = 0.5 * p.m * Math.pow(p.L * angleV, 2);
+  const pe = p.m * p.g * p.L * (1 - Math.cos(angle));
+  window.parent.postMessage({
+    type: 'sim-state',
+    sim: 'pendulum-lab',
+    state: {
+      L: p.L, m: p.m, g: p.g, damping: p.c,
+      angleDeg: angle * 180 / Math.PI,
+      angularVelocity: angleV,
+      period: T, frequency: f,
+      kineticEnergy: ke, potentialEnergy: pe, totalEnergy: ke + pe,
+      swings,
+    }
+  }, '*');
+}
+
+function updateUI() {
+  const p = getParams();
+  const T = 2 * Math.PI * Math.sqrt(p.L / p.g);
+  $('period').textContent = T.toFixed(2) + ' s';
+  $('freq').textContent = (1/T).toFixed(2) + ' Hz';
+  const ke = 0.5 * p.m * Math.pow(p.L * angleV, 2);
+  const pe = p.m * p.g * p.L * (1 - Math.cos(angle));
+  $('energy').textContent = (ke + pe).toFixed(2) + ' J';
+  $('swings').textContent = swings;
+  $('len-v').textContent = $('len').value + ' cm';
+  $('mass-v').textContent = (parseInt($('mass').value)/10).toFixed(1) + ' kg';
+  $('grav-v').textContent = (parseInt($('grav').value)/10).toFixed(1) + ' m/s²';
+  $('damp-v').textContent = (parseInt($('damp').value)/1000).toFixed(3);
+}
+
+let last = 0;
+function frame(t) {
+  const dt = Math.min(0.033, (t - last) / 1000);
+  last = t;
+
+  if (running && !dragging) {
+    const p = getParams();
+    const subSteps = 8;
+    for (let i = 0; i < subSteps; i++) {
+      const sdt = dt / subSteps;
+      const aAcc = -(p.g / p.L) * Math.sin(angle) - p.c * angleV;
+      angleV += aAcc * sdt;
+      angle += angleV * sdt;
+    }
+    // Count swings (sign change of angle = half period)
+    const sign = Math.sign(angle);
+    if (sign !== 0 && sign !== lastSign) {
+      swings++;
+      lastSign = sign;
+    }
+    if (Math.abs(angleV) < 0.005 && Math.abs(angle) < 0.01) {
+      running = false; angleV = 0; angle = 0;
+    }
+    updateUI();
+    postState();
+  }
+
+  draw();
+  requestAnimationFrame(frame);
+}
+
+const pivotX = () => W / 2;
+const pivotY = () => 60;
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  const p = getParams();
+  const px = pivotX(), py = pivotY();
+  const scale = Math.min(W, H * 1.5) / 5; // pixels per meter visual scale
+  const bobX = px + p.L * scale * Math.sin(angle);
+  const bobY = py + p.L * scale * Math.cos(angle);
+
+  // Arc indicator at pivot
+  ctx.strokeStyle = 'rgba(168,155,232,.2)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.arc(px, py, p.L * scale, Math.PI/2 - 1, Math.PI/2 + 1);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  // Vertical reference
+  ctx.beginPath();
+  ctx.moveTo(px, py);
+  ctx.lineTo(px, py + p.L * scale + 30);
+  ctx.stroke();
+
+  // Pivot point + ceiling
+  ctx.fillStyle = '#8b7fc7';
+  ctx.fillRect(px - 60, 0, 120, 12);
+  ctx.fillStyle = '#a89be8';
+  ctx.beginPath();
+  ctx.arc(px, py, 6, 0, Math.PI*2);
+  ctx.fill();
+
+  // String/rod
+  ctx.strokeStyle = '#e0d6ff';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(px, py);
+  ctx.lineTo(bobX, bobY);
+  ctx.stroke();
+
+  // Bob (mass varies size)
+  const bobR = 14 + p.m * 3;
+  const grad = ctx.createRadialGradient(bobX - bobR/3, bobY - bobR/3, 2, bobX, bobY, bobR);
+  grad.addColorStop(0, '#fff');
+  grad.addColorStop(0.3, '#a89be8');
+  grad.addColorStop(1, '#6B5CE7');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(bobX, bobY, bobR, 0, Math.PI*2);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(0,0,0,.3)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Velocity arrow
+  if (running && Math.abs(angleV) > 0.1) {
+    const vMag = Math.abs(p.L * angleV * scale * 0.4);
+    const dirX = Math.cos(angle) * Math.sign(angleV);
+    const dirY = -Math.sin(angle) * Math.sign(angleV);
+    ctx.strokeStyle = '#a8e6cf';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(bobX, bobY);
+    ctx.lineTo(bobX + dirX * vMag, bobY + dirY * vMag);
+    ctx.stroke();
+  }
+
+  // Angle label
+  ctx.fillStyle = 'rgba(255,255,255,.5)';
+  ctx.font = '12px IBM Plex Mono, monospace';
+  ctx.fillText(`θ = ${(angle * 180 / Math.PI).toFixed(1)}°`, 20, H - 20);
+}
+
+// Drag interaction
+function getAngleFromPointer(e) {
+  const rect = canvas.getBoundingClientRect();
+  const x = (e.clientX || e.touches?.[0]?.clientX) - rect.left;
+  const y = (e.clientY || e.touches?.[0]?.clientY) - rect.top;
+  return Math.atan2(x - pivotX(), y - pivotY());
+}
+
+canvas.addEventListener('mousedown', e => { dragging = true; running = false; angle = getAngleFromPointer(e); angleV = 0; });
+canvas.addEventListener('mousemove', e => { if (dragging) { angle = getAngleFromPointer(e); updateUI(); }});
+canvas.addEventListener('mouseup', () => { dragging = false; });
+canvas.addEventListener('touchstart', e => { e.preventDefault(); dragging = true; running = false; angle = getAngleFromPointer(e); angleV = 0; });
+canvas.addEventListener('touchmove', e => { e.preventDefault(); if (dragging) { angle = getAngleFromPointer(e); updateUI(); }});
+canvas.addEventListener('touchend', () => { dragging = false; });
+
+['len','mass','grav','damp'].forEach(id => {
+  $(id).addEventListener('input', () => { updateUI(); postState(); });
+});
+$('release').addEventListener('click', () => {
+  running = true;
+  swings = 0;
+  lastSign = Math.sign(angle) || 1;
+  postState();
+});
+$('reset').addEventListener('click', () => {
+  running = false;
+  angle = Math.PI / 4;
+  angleV = 0;
+  swings = 0;
+  updateUI();
+});
+
+updateUI();
+requestAnimationFrame(frame);
+
+window.parent.postMessage({ type: 'sim-loaded', sim: 'pendulum-lab' }, '*');
+</script>
+</body>
+</html>
