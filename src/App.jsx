@@ -280,7 +280,7 @@ function Marketing({ onStart }) {
               ...heroFade(900), marginTop:24, maxWidth:560, fontSize:18,
               color:"rgba(255,255,255,.9)", textShadow:"0 2px 8px rgba(0,0,0,0.9)", lineHeight:1.5,
             }}>
-              The operating system for microschools — personalized AI curriculum, real-world projects, real growth tracking. Built by parents, for parents.
+              The operating system for microschools — personalized AI curriculum, real-world projects, real growth tracking. Built by the community, for the community.
             </p>
 
             <div style={{
@@ -940,7 +940,7 @@ function Marketing({ onStart }) {
               <p className="font-body" style={{
                 fontSize:14, color: textSecondary, lineHeight:1.55, maxWidth:260,
               }}>
-                The operating system for microschools. Built by parents, for parents. The school built for the post-AI world.
+                The operating system for microschools. Built by the community, for the community. The school built for the post-AI world.
               </p>
             </div>
 
