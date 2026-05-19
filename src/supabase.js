@@ -8,24 +8,42 @@
 
 let _client = null;
 let _enabled = false;
+let _ready = null;
 
 const url = import.meta.env.VITE_SUPABASE_URL;
 const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (url && key) {
-  try {
-    // Dynamic import so we don't break the bundle when not configured
-    const mod = await import("@supabase/supabase-js");
-    _client = mod.createClient(url, key);
-    _enabled = true;
-    console.log("✅ Supabase connected:", url);
-  } catch (e) {
-    console.warn("Supabase failed to load — falling back to localStorage:", e.message);
-  }
+  // Dynamic import so we don't break the bundle when not configured.
+  // Returns a promise — _client becomes available asynchronously.
+  _ready = import("@supabase/supabase-js")
+    .then((mod) => {
+      _client = mod.createClient(url, key);
+      _enabled = true;
+      // Re-export the live binding for any code that captured it before init
+      try { Object.defineProperty(exportedSupabase, "current", { value: _client, writable: true }); } catch {}
+      console.log("✅ Supabase connected:", url);
+      return _client;
+    })
+    .catch((e) => {
+      console.warn("Supabase failed to load — falling back to localStorage:", e.message);
+      return null;
+    });
 }
 
-export const supabase = _client;
-export const supabaseEnabled = _enabled;
+// Live-binding container so consumers always see the current client
+const exportedSupabase = new Proxy({}, {
+  get(_, prop) {
+    if (!_client) return undefined;
+    const v = _client[prop];
+    return typeof v === "function" ? v.bind(_client) : v;
+  },
+  has(_, prop) { return _client ? prop in _client : false; },
+});
+
+export const supabase = exportedSupabase;
+export const supabaseEnabled = () => _enabled;
+export const supabaseReady = () => _ready || Promise.resolve(null);
 
 // ── High-level helpers ────────────────────────────────────────────────────────
 export async function signInMagicLink(email) {

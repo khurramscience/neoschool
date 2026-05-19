@@ -240,3 +240,85 @@ CREATE INDEX IF NOT EXISTS idx_memories_student_id   ON public.memories(student_
 --   SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';
 -- You should see 10 tables.
 -- ════════════════════════════════════════════════════════════════════════════
+
+-- ════════════════════════════════════════════════════════════════════════════
+-- KNOWLEDGE GRAPH TABLES (added round 7)
+-- These mirror the localStorage shape from src/knowledgeGraph.js
+-- Sync flushes from client every 30s via supabaseSync.js
+-- ════════════════════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS public.kg_lab_visits (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  student_id  text NOT NULL,
+  lab_id      text NOT NULL,
+  lab_topic   text,
+  created_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_kg_visits_student ON public.kg_lab_visits(student_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_kg_visits_lab ON public.kg_lab_visits(lab_id);
+
+CREATE TABLE IF NOT EXISTS public.kg_lab_events (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  student_id  text NOT NULL,
+  lab_id      text NOT NULL,
+  event_type  text NOT NULL,
+  payload     jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_kg_events_student ON public.kg_lab_events(student_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_kg_events_lab ON public.kg_lab_events(lab_id);
+CREATE INDEX IF NOT EXISTS idx_kg_events_type ON public.kg_lab_events(event_type);
+
+CREATE TABLE IF NOT EXISTS public.kg_mcq_results (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  student_id  text NOT NULL,
+  lab_id      text NOT NULL,
+  mcq_id      text NOT NULL,
+  chosen      int  NOT NULL,
+  correct     boolean NOT NULL,
+  concept     text,
+  created_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_kg_mcq_student ON public.kg_mcq_results(student_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS public.kg_edges (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  student_id  text NOT NULL,
+  from_lab    text NOT NULL,
+  to_lab      text NOT NULL,
+  edge_type   text NOT NULL,
+  weight      float NOT NULL DEFAULT 1.0,
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (student_id, from_lab, to_lab, edge_type)
+);
+CREATE INDEX IF NOT EXISTS idx_kg_edges_student ON public.kg_edges(student_id);
+
+CREATE TABLE IF NOT EXISTS public.tutor_turns (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  student_id  text NOT NULL,
+  lab_id      text NOT NULL,
+  role        text NOT NULL,
+  content     text NOT NULL,
+  created_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_tutor_turns_student ON public.tutor_turns(student_id, created_at DESC);
+
+-- RLS: each student can read/write only their own rows
+ALTER TABLE public.kg_lab_visits ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.kg_lab_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.kg_mcq_results ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.kg_edges ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.tutor_turns ENABLE ROW LEVEL SECURITY;
+
+-- For now: permissive policies (anonymous writes ok during onboarding).
+-- Tighten once auth is enforced.
+DROP POLICY IF EXISTS kg_visits_anon ON public.kg_lab_visits;
+CREATE POLICY kg_visits_anon ON public.kg_lab_visits FOR ALL USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS kg_events_anon ON public.kg_lab_events;
+CREATE POLICY kg_events_anon ON public.kg_lab_events FOR ALL USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS kg_mcq_anon ON public.kg_mcq_results;
+CREATE POLICY kg_mcq_anon ON public.kg_mcq_results FOR ALL USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS kg_edges_anon ON public.kg_edges;
+CREATE POLICY kg_edges_anon ON public.kg_edges FOR ALL USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS tutor_turns_anon ON public.tutor_turns;
+CREATE POLICY tutor_turns_anon ON public.tutor_turns FOR ALL USING (true) WITH CHECK (true);

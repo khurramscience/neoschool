@@ -6,6 +6,8 @@ import { getMemory, saveSession, saveTutorFeedback, buildRecommendations, buildC
 import { getCredits, useCredits, addCredits, PLANS, COSTS } from "./credits.js";
 import { getTutorConfig, saveTutorConfig } from "./tutorConfig.js";
 import { getStudentGraph, recordLabVisit, recordLabEvent, getRecommendations as kgRecs, getSkillsSummary, getStudentPath, getGraphData } from "./knowledgeGraph.js";
+import { generateMCQ, shouldSpawnMCQ, recordMCQResult, getMCQStats } from "./mcqGenerator.js";
+import { startSyncLoop, flushSync, getSyncStatus } from "./supabaseSync.js";
 
 // ── SHARED ────────────────────────────────────────────────────────────────────
 const Logo = ({ l, sz = 16 }) => (
@@ -158,26 +160,38 @@ function Marketing({ onStart }) {
             }}/>
           </a>
 
-          <div className="nav-desktop" style={{ display:"none", alignItems:"center", gap:40 }}>
+          <div className="nav-desktop" style={{ display:"none", alignItems:"center", gap:32 }}>
             {[
               { label:"Our approach", action:() => scrollTo("approach") },
               { label:"Afternoons",   action:() => scrollTo("afternoons") },
               { label:"Who we are",   action:() => scrollTo("who-we-are") },
-              { label:"Apply",        action:() => window.location.href = "/missoula.html" },
-              { label:"Sign in",      action:() => onStart("parent") },
+              { label:"Campuses",     action:() => scrollTo("campuses") },
             ].map(item => (
               <button key={item.label} onClick={item.action} className="text-nav" style={{
-                color: scrolled ? textSecondary : "rgba(255,255,255,.75)",
+                color: scrolled ? textSecondary : "rgba(255,255,255,.85)",
                 background:"none", border:"none", cursor:"pointer", padding:0,
                 transition:"color 350ms",
               }}
                 onMouseEnter={e => e.currentTarget.style.color = scrolled ? textPrimary : "#fff"}
-                onMouseLeave={e => e.currentTarget.style.color = scrolled ? textSecondary : "rgba(255,255,255,.75)"}>
+                onMouseLeave={e => e.currentTarget.style.color = scrolled ? textSecondary : "rgba(255,255,255,.85)"}>
                 {item.label}
               </button>
             ))}
+            {/* Sign in — styled as outlined pill button so it's clearly clickable */}
+            <button onClick={() => onStart("parent")} className="text-nav" style={{
+              padding:"8px 18px", borderRadius:10,
+              background: scrolled ? "transparent" : "rgba(255,255,255,.1)",
+              border: `1.5px solid ${scrolled ? iris : "rgba(255,255,255,.55)"}`,
+              color: scrolled ? iris : "#fff",
+              cursor:"pointer", transition:"all 250ms",
+              backdropFilter: scrolled ? "none" : "blur(6px)",
+            }}
+              onMouseEnter={e => { if (scrolled) { e.currentTarget.style.background = iris; e.currentTarget.style.color = "#fff"; } else { e.currentTarget.style.background = "rgba(255,255,255,.22)"; e.currentTarget.style.borderColor = "#fff"; }}}
+              onMouseLeave={e => { if (scrolled) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = iris; } else { e.currentTarget.style.background = "rgba(255,255,255,.1)"; e.currentTarget.style.borderColor = "rgba(255,255,255,.55)"; }}}>
+              Sign in
+            </button>
             <a href="/missoula.html" className="btn-iris" style={{ padding:"10px 22px" }}>
-              Apply for 2026
+              Apply →
             </a>
           </div>
 
@@ -267,21 +281,40 @@ function Marketing({ onStart }) {
               The operating system for microschools — personalized AI curriculum, real-world projects, real growth tracking. Built by parents, for parents.
             </p>
 
-            <a href="/missoula.html" className="btn-iris" style={{
-              ...heroFade(1200), marginTop:40, padding:"14px 32px", fontSize:13.5,
+            <div style={{
+              ...heroFade(1200),
+              marginTop:40,
+              display:"flex", gap:14, alignItems:"center", flexWrap:"wrap",
+              justifyContent:"center",
             }}>
-              Apply to a school near you →
-            </a>
+              <a href="/missoula.html" className="btn-iris" style={{
+                padding:"15px 30px", fontSize:13.5,
+                boxShadow:"0 12px 32px rgba(107,92,231,.35)",
+              }}>
+                Apply to a school near you →
+              </a>
+              <button onClick={() => onStart("parent")} className="font-heading" style={{
+                padding:"14px 28px", fontSize:13.5,
+                background:"rgba(255,255,255,.12)",
+                border:"1.5px solid rgba(255,255,255,.55)",
+                color:"#fff", borderRadius:12,
+                textTransform:"uppercase", letterSpacing:".08em", fontWeight:500,
+                cursor:"pointer", backdropFilter:"blur(8px)",
+                transition:"all 250ms",
+              }}
+                onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,.22)"; e.currentTarget.style.borderColor = "#fff"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,.12)"; e.currentTarget.style.borderColor = "rgba(255,255,255,.55)"; e.currentTarget.style.transform = "translateY(0)"; }}>
+                Sign in to platform →
+              </button>
+            </div>
 
-            <button onClick={() => onStart("parent")} className="font-heading" style={{
-              ...heroFade(1400), marginTop:16, fontSize:14,
-              color:"rgba(255,255,255,.5)", textShadow:"0 2px 8px rgba(0,0,0,0.9)",
-              background:"none", border:"none", cursor:"pointer", transition:"color 350ms",
-            }}
-              onMouseEnter={e => e.currentTarget.style.color = "rgba(255,255,255,.75)"}
-              onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,.5)"}>
-              or sign in to the platform →
-            </button>
+            <p className="font-heading" style={{
+              ...heroFade(1400), marginTop:18, fontSize:12,
+              color:"rgba(255,255,255,.65)", textShadow:"0 2px 8px rgba(0,0,0,0.9)",
+              letterSpacing:".04em",
+            }}>
+              Already a student, guide, or director? Sign in above.
+            </p>
           </div>
 
           <div style={{
@@ -1096,6 +1129,103 @@ function TutorMessage({ content, isUser }) {
   );
 }
 
+// ── MCQ CARD — interactive 3-choice quiz inside the tutor chat ───────────────
+function MCQCard({ mcq, onAnswer }) {
+  const [picked, setPicked] = useState(mcq.answered ?? null);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (containerRef.current && window.renderMathInElement) {
+      try {
+        window.renderMathInElement(containerRef.current, {
+          delimiters: [
+            { left: "\\(", right: "\\)", display: false },
+            { left: "\\[", right: "\\]", display: true },
+            { left: "$$", right: "$$", display: true },
+          ],
+          throwOnError: false,
+        });
+      } catch (e) {}
+    }
+  }, [mcq.id, picked]);
+
+  const isAnswered = picked !== null;
+  return (
+    <div ref={containerRef} style={{
+      width: "100%", maxWidth: "100%",
+      background: "linear-gradient(135deg, rgba(107,92,231,0.06), rgba(168,155,232,0.10))",
+      border: "1px solid rgba(107,92,231,0.3)",
+      borderRadius: 14,
+      padding: "14px 16px",
+      marginTop: 4,
+    }}>
+      <p style={{
+        fontFamily: "'IBM Plex Mono',monospace",
+        fontSize: 10, fontWeight: 600, letterSpacing: ".08em",
+        textTransform: "uppercase", color: "hsl(248 74% 62%)",
+        marginBottom: 8,
+      }}>Quick check ✦</p>
+      <p style={{
+        fontFamily: "'Source Serif 4',serif",
+        fontSize: 14.5, lineHeight: 1.45, color: "var(--tx)",
+        marginBottom: 12, fontWeight: 500,
+      }}>{mcq.question}</p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        {mcq.choices.map((choice, idx) => {
+          const isPicked = picked === idx;
+          const isCorrectChoice = idx === mcq.correct;
+          let bg = "var(--cr)";
+          let border = "var(--p2)";
+          let color = "var(--tx)";
+          if (isAnswered) {
+            if (isCorrectChoice) { bg = "rgba(45,139,95,.15)"; border = "#2D8B5F"; color = "#1f5e40"; }
+            else if (isPicked) { bg = "rgba(194,84,32,.12)"; border = "#C25420"; color = "#a23f10"; }
+            else { bg = "var(--cr)"; border = "var(--p2)"; color = "var(--mu)"; }
+          }
+          return (
+            <button
+              key={idx}
+              onClick={() => {
+                if (isAnswered) return;
+                setPicked(idx);
+                onAnswer(idx);
+              }}
+              disabled={isAnswered}
+              style={{
+                textAlign: "left",
+                background: bg, color, cursor: isAnswered ? "default" : "pointer",
+                padding: "10px 14px", borderRadius: 10,
+                border: `1px solid ${border}`,
+                fontFamily: "'Source Serif 4',serif",
+                fontSize: 13.5, lineHeight: 1.4,
+                transition: "all 200ms",
+                opacity: isAnswered && !isPicked && !isCorrectChoice ? 0.55 : 1,
+                display: "flex", alignItems: "flex-start", gap: 8,
+              }}
+              onMouseEnter={e => { if (!isAnswered) { e.currentTarget.style.borderColor = "hsl(248 74% 62%)"; e.currentTarget.style.background = "#fff"; }}}
+              onMouseLeave={e => { if (!isAnswered) { e.currentTarget.style.borderColor = border; e.currentTarget.style.background = bg; }}}
+            >
+              <span>{choice}</span>
+              {isAnswered && isCorrectChoice && <span style={{ marginLeft: "auto", fontSize: 16 }}>✓</span>}
+              {isAnswered && isPicked && !isCorrectChoice && <span style={{ marginLeft: "auto", fontSize: 16 }}>✗</span>}
+            </button>
+          );
+        })}
+      </div>
+      {isAnswered && mcq.explanation && (
+        <p style={{
+          marginTop: 12, fontSize: 12.5,
+          fontFamily: "'Source Serif 4',serif", fontStyle: "italic",
+          color: picked === mcq.correct ? "#1f5e40" : "var(--mu)",
+          lineHeight: 1.5,
+        }}>
+          {picked === mcq.correct ? "✓ " : "→ "}{mcq.explanation}
+        </p>
+      )}
+    </div>
+  );
+}
+
 // ── JOURNEY VIEW — Knowledge Graph visualization ─────────────────────────────
 function JourneyView({ studentId, allLabs, onOpenLab }) {
   const [tick, setTick] = useState(0);
@@ -1604,11 +1734,55 @@ function ParentOnboarding({ user, onDone }) {
     catch { return null; }
   })();
 
-  const [step, setStep] = useState(savedSession?.curriculum ? 4 : 1);
-  const [form, setForm] = useState(savedSession?.form || { childName: "", grade: "", city: "", situation: "", goals: [], concerns: "", schoolType: "campus" });
+  // ── Try to prefill from Missoula application submission ──
+  // If the user just submitted an application, we have their child info already.
+  // Don't ask twice.
+  const prefillFromApp = (() => {
+    try {
+      const apps = JSON.parse(localStorage.getItem("neo_applications") || "[]");
+      const mine = user?.email
+        ? apps.filter(a => (a.email || "").toLowerCase() === (user.email || "").toLowerCase())
+        : apps;
+      const latest = mine[mine.length - 1];
+      if (!latest) return null;
+      const childFirst = (latest.child_name || latest.childName || "").split(" ")[0] || "";
+      // Map application grade strings to onboarding grade keys
+      const gradeMap = {
+        "Pre-K": "K", "Pre-K/Kindergarten": "K", "Kindergarten": "K",
+        "1st Grade": "1", "2nd Grade": "2", "3rd Grade": "3",
+        "4th Grade": "4", "5th Grade": "5", "6th Grade": "6",
+      };
+      return {
+        childName: childFirst,
+        grade: gradeMap[latest.grade] || latest.grade || "",
+        city: latest.city || latest.campus || "Missoula",
+        situation: latest.situation || "",
+        schoolType: "campus",
+        goals: [], concerns: latest.notes || "",
+      };
+    } catch { return null; }
+  })();
+
+  const hasCompleteAppData = prefillFromApp
+    && prefillFromApp.childName
+    && prefillFromApp.grade
+    && prefillFromApp.city
+    && prefillFromApp.situation;
+
+  const initialForm = savedSession?.form
+    || prefillFromApp
+    || { childName: "", grade: "", city: "", situation: "", goals: [], concerns: "", schoolType: "campus" };
+
+  // Skip step 1 if we already have the application data — go straight to goals (step 2)
+  const initialStep = savedSession?.curriculum ? 4
+    : (hasCompleteAppData ? 2 : 1);
+
+  const [step, setStep] = useState(initialStep);
+  const [form, setForm] = useState(initialForm);
   const [curriculum, setCurriculum] = useState(savedSession?.curriculum || null);
   const [loading, setLoading] = useState(false);
   const [activeTool, setActiveTool] = useState(null);
+  const [prefillBanner, setPrefillBanner] = useState(hasCompleteAppData);
   const ref = useRef();
   const up = (k, v) => setForm(f => ({ ...f, [k]: v }));
   const tog = (key, val) => setForm(f => ({ ...f, [key]: f[key].includes(val) ? f[key].filter(x => x !== val) : [...f[key], val] }));
@@ -1663,6 +1837,36 @@ function ParentOnboarding({ user, onDone }) {
           <span style={{ fontSize: 10, fontWeight: 700, color: "var(--mu)", padding: "3px 9px", background: "var(--p)", borderRadius: 99, textTransform: "uppercase", letterSpacing: ".05em" }}>California</span>
         </div>
         <div className="card">
+          {prefillBanner && (
+            <div style={{
+              background:"linear-gradient(135deg, rgba(45,139,95,.08), rgba(107,92,231,.06))",
+              border:"1px solid rgba(45,139,95,.25)", borderRadius:12,
+              padding:"14px 18px", marginBottom:18,
+              display:"flex", alignItems:"flex-start", gap:12,
+            }}>
+              <span style={{ fontSize:20, lineHeight:1 }}>✨</span>
+              <div style={{ flex:1 }}>
+                <p style={{
+                  fontFamily:"'Instrument Sans',sans-serif", fontSize:13.5, fontWeight:600,
+                  color:"#1f5e40", marginBottom:4,
+                }}>
+                  Welcome back, {form.childName ? `${form.childName}'s family` : "applicant"}!
+                </p>
+                <p style={{
+                  fontSize:12.5, color:"var(--mu)", lineHeight:1.5,
+                }}>
+                  We recognized your Missoula application — we've pre-filled your child's info so you can skip ahead.
+                  <button onClick={() => { setPrefillBanner(false); setStep(1); }} style={{
+                    background:"none", border:"none", color:"#1f5e40", cursor:"pointer",
+                    textDecoration:"underline", padding:0, marginLeft:4, fontSize:12.5,
+                  }}>Edit anyway</button>
+                </p>
+              </div>
+              <button onClick={() => setPrefillBanner(false)} style={{
+                background:"none", border:"none", cursor:"pointer", color:"var(--mu)", fontSize:16, padding:0,
+              }}>×</button>
+            </div>
+          )}
           <StBar s={step} />
           {step === 1 && (
             <div>
@@ -2380,6 +2584,8 @@ function LabPlayer({ lab, userId, onBack }) {
   const [showPay, setShowPay] = useState(false);
   const [sessionStart] = useState(Date.now());
   const [simState, setSimState] = useState(null); // postMessage bridge: knows current sim state
+  const [lastMCQAt, setLastMCQAt] = useState(0);
+  const [ttsEnabled, setTtsEnabled] = useState(() => localStorage.getItem("neo_tts_enabled") === "1");
   const chatRef = useRef();
   const tutorCfg = getTutorConfig(lab.id, lab);
   const mem = getMemory(userId || "demo");
@@ -2486,8 +2692,50 @@ function LabPlayer({ lab, userId, onBack }) {
     setMsgs(all); setInp(""); setTyping(true);
     try {
       const r = await claude(sys, all.map(x => ({ role:x.role, content:x.content })), 180);
-      setMsgs(p => [...p, { role:"assistant", content:r, id:Date.now() }]);
-    } catch { setMsgs(p => [...p, { role:"assistant", content:"What have you noticed so far in this lab?" }]); }
+      const newMsgs = [...all, { role:"assistant", content:r, id:Date.now() }];
+      setMsgs(newMsgs);
+
+      // Speak the reply if TTS is enabled (browser-native, no API needed)
+      if (ttsEnabled && window.speechSynthesis) {
+        try {
+          window.speechSynthesis.cancel();
+          // Strip LaTeX for speech (just read the words)
+          const speakText = r
+            .replace(/\\\(([^)]+)\\\)/g, " $1 ")
+            .replace(/\\\[([^\]]+)\\\]/g, " $1 ")
+            .replace(/\$\$([^$]+)\$\$/g, " $1 ")
+            .replace(/[\\_^{}]/g, "");
+          const utt = new SpeechSynthesisUtterance(speakText);
+          utt.rate = 1.0;
+          utt.pitch = 1.05;
+          // Prefer warmer voice if available
+          const voices = window.speechSynthesis.getVoices();
+          const preferred = voices.find(v => /samantha|jenny|allison|google.*female|female/i.test(v.name)) || voices.find(v => v.lang.startsWith("en"));
+          if (preferred) utt.voice = preferred;
+          window.speechSynthesis.speak(utt);
+        } catch (e) {}
+      }
+
+      // Auto-spawn an MCQ after a substantive explanation
+      if (shouldSpawnMCQ(newMsgs, lastMCQAt)) {
+        try {
+          const concept = r.slice(0, 200);
+          const mcq = await generateMCQ({
+            labId: lab.id,
+            topic: lab.topic,
+            concept,
+            gradeLevel: studentGrade,
+            recentExchange: newMsgs.slice(-3).map(m => `${m.role}: ${m.content}`).join("\n"),
+          });
+          if (mcq) {
+            setMsgs(p => [...p, { role:"mcq", mcq, id: Date.now() + 1 }]);
+            setLastMCQAt(Date.now());
+          }
+        } catch (e) { /* MCQ failed silently — chat continues */ }
+      }
+    } catch {
+      setMsgs(p => [...p, { role:"assistant", content:"What have you noticed so far in this lab?" }]);
+    }
     setTyping(false);
     setTimeout(() => chatRef.current?.scrollTo({ top:99999, behavior:"smooth" }), 80);
   };
@@ -2576,6 +2824,37 @@ function LabPlayer({ lab, userId, onBack }) {
                 fontFamily:"'IBM Plex Mono',monospace",
                 letterSpacing:".06em", textTransform:"uppercase",
               }}>1 cr/msg</span>
+              <button onClick={() => {
+                const next = !ttsEnabled;
+                setTtsEnabled(next);
+                localStorage.setItem("neo_tts_enabled", next ? "1" : "0");
+                if (!next && window.speechSynthesis) window.speechSynthesis.cancel();
+              }} style={{
+                background: ttsEnabled ? "hsl(248 74% 62%)" : "transparent",
+                color: ttsEnabled ? "#fff" : "var(--mu)",
+                border: `1px solid ${ttsEnabled ? "hsl(248 74% 62%)" : "var(--p2)"}`,
+                borderRadius: 8, padding: "4px 8px",
+                cursor: "pointer", fontSize: 11,
+                fontFamily: "'IBM Plex Mono',monospace",
+                letterSpacing: ".04em",
+                display: "flex", alignItems: "center", gap: 4,
+                transition: "all 150ms",
+              }} title={ttsEnabled ? "Tutor reads aloud — click to mute" : "Tap to have the tutor read aloud"}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                  {ttsEnabled ? (
+                    <>
+                      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                      <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                    </>
+                  ) : (
+                    <>
+                      <line x1="23" y1="9" x2="17" y2="15"/>
+                      <line x1="17" y1="9" x2="23" y2="15"/>
+                    </>
+                  )}
+                </svg>
+              </button>
             </div>
             {msgs.length <= 1 && (
               <div style={{ padding:"14px 18px", flexShrink:0, borderBottom:"1px solid var(--p2)" }}>
@@ -2609,8 +2888,27 @@ function LabPlayer({ lab, userId, onBack }) {
                 <div key={i} style={{
                   display:"flex", flexDirection:"column",
                   alignItems: m.role==="user" ? "flex-end" : "flex-start",
+                  width: "100%",
                 }}>
-                  <TutorMessage content={m.content} isUser={m.role === "user"} />
+                  {m.role === "mcq" ? (
+                    <MCQCard
+                      mcq={m.mcq}
+                      onAnswer={(idx) => {
+                        const correct = recordMCQResult(m.mcq, idx, userId || "demo", lab.id);
+                        const followup = correct
+                          ? `Right! ${m.mcq.explanation} What part of the simulation made that clear?`
+                          : (m.mcq.misconception_hints?.[idx] || `Not quite. ${m.mcq.misconception_hints?.[idx] || "What were you assuming there?"}`);
+                        setMsgs(p => [...p.map(x => x.id === m.id ? { ...x, mcqAnswered: idx, mcqCorrect: correct } : x), { role:"assistant", content: followup, id: Date.now() }]);
+                        if (correct) {
+                          recordLabEvent(userId || "demo", lab.id, { type: "breakthrough", topic: m.mcq.concept || "mcq" });
+                        } else {
+                          recordLabEvent(userId || "demo", lab.id, { type: "struggle", topic: m.mcq.concept || "mcq" });
+                        }
+                      }}
+                    />
+                  ) : (
+                    <TutorMessage content={m.content} isUser={m.role === "user"} />
+                  )}
                   {m.role==="assistant" && m.id && (
                     <div style={{ display:"flex", gap:6, marginTop:6, marginLeft:4 }}>
                       <button onClick={()=>rateMsg(m.id,"good")} style={{
@@ -5564,6 +5862,8 @@ export default function App() {
     }
     const lastScreen = localStorage.getItem("neo_last_screen");
     if (lastScreen && saved) setScreen(lastScreen);
+    // Start opportunistic Supabase sync loop — flushes queued events when SQL is reachable
+    startSyncLoop(30000);
   }, []);
 
   // Persist screen + parent data on change so users keep state across reloads/navigation

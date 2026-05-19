@@ -1,6 +1,9 @@
 // ── KNOWLEDGE GRAPH ─────────────────────────────────────────────────────────
 // Each student has a per-lab graph: nodes = labs, edges = prerequisite/unlock chains.
-// Stored client-side for now; syncs to Supabase once SQL endpoint is restored.
+// Stored client-side as the source of truth; queues every event for opportunistic
+// Supabase sync (see supabaseSync.js).
+
+import { queueSync } from "./supabaseSync.js";
 
 const KG_KEY = "neo_knowledge_graph_v1";
 
@@ -102,6 +105,8 @@ export function recordLabVisit(studentId, labId, labMeta = {}) {
 
   g[studentId].updatedAt = Date.now();
   writeGraph(g);
+  // Queue for opportunistic Supabase sync
+  queueSync({ type: "lab_visit", studentId, labId, topic: labMeta.topic });
   return node;
 }
 
@@ -136,6 +141,8 @@ export function recordLabEvent(studentId, labId, event) {
 
   g[studentId].updatedAt = Date.now();
   writeGraph(g);
+  // Queue for opportunistic Supabase sync
+  queueSync({ type: "lab_event", studentId, labId, eventType: event.type, payload: event });
   return node;
 }
 
