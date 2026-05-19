@@ -87,426 +87,445 @@ function PaymentModal({ userId, onClose }) {
 
 // ── MARKETING LANDING ─────────────────────────────────────────────────────────
 function Marketing({ onStart }) {
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [heroLoaded, setHeroLoaded] = useState(false);
   const [showInterestForm, setShowInterestForm] = useState(false);
 
-  // ── Scroll-triggered reveal animations ──
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("visible");
-            observer.unobserve(entry.target);
-          }
-        }
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -80px 0px" }
-    );
-    document.querySelectorAll(".reveal-on-scroll, .reveal-stagger").forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
+    const t = setTimeout(() => setHeroLoaded(true), 100);
+    return () => clearTimeout(t);
   }, []);
 
-  // ── Dark frontier variant — design DNA from Lovable + research doc ──
-  const D = {
-    bg:        "#0a0a12",           // primary dark
-    bg2:       "#13131C",           // surface
-    bg3:       "#1A1A26",           // raised
-    line:      "rgba(255,255,255,.08)",
-    line2:     "rgba(255,255,255,.14)",
-    tx:        "#F5F5F0",           // off-white, warm-biased
-    tx2:       "rgba(245,245,240,.7)",
-    tx3:       "rgba(245,245,240,.5)",
-    tx4:       "rgba(245,245,240,.3)",
-    violet:    "#6B5CE7",           // iris violet — brand anchor
-    violetHvr: "#7C6FF0",
-    violetSoft:"rgba(107,92,231,.12)",
-    coral:     "#D4856A",           // secondary warm accent
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 100);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const heroFade = (delay) => ({
+    opacity: heroLoaded ? 1 : 0,
+    transform: heroLoaded ? "translateY(0)" : "translateY(20px)",
+    filter: heroLoaded ? "blur(0px)" : "blur(4px)",
+    transition: `opacity 700ms cubic-bezier(0.22,1,0.36,1) ${delay}ms, transform 700ms cubic-bezier(0.22,1,0.36,1) ${delay}ms, filter 700ms cubic-bezier(0.22,1,0.36,1) ${delay}ms`,
+  });
+
+  const scrollTo = (id) => {
+    setMenuOpen(false);
+    const el = document.getElementById(id);
+    if (el) {
+      const y = el.getBoundingClientRect().top + window.scrollY - 72;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
   };
 
-  const SectionLabel = ({ num, children }) => (
-    <p style={{
-      fontFamily:"'IBM Plex Mono','Geist Mono',ui-monospace,monospace",
-      fontSize:11, fontWeight:500, letterSpacing:".18em", textTransform:"uppercase",
-      color: D.violet, marginBottom:18,
-    }}>
-      <span style={{ color: D.tx3, marginRight:14 }}>{num}</span>
-      {children}
-    </p>
-  );
+  const bg = "hsl(34 33% 96%)";
+  const bgSecondary = "hsl(30 22% 92%)";
+  const bgDark = "hsl(50 10% 9%)";
+  const textPrimary = "hsl(30 10% 14%)";
+  const textSecondary = "hsl(28 8% 44%)";
+  const textMuted = "hsl(30 7% 66%)";
+  const textOnDark = "hsl(40 8% 92%)";
+  const iris = "hsl(248 74% 62%)";
+  const coral = "hsl(18 52% 62%)";
+  const borderSubtle = "rgba(42,38,34,.06)";
 
   return (
-    <div style={{
+    <div className="lovable-root" style={{
       overflowY:"auto", height:"100%", width:"100%",
-      background: D.bg, color: D.tx,
-      fontFamily:"'Source Serif 4','Source Serif Pro',Georgia,serif",
-      fontSize:17, lineHeight:1.65, fontWeight:400,
+      background: bg, color: textPrimary,
+      fontFamily:"'Source Serif 4', Georgia, serif",
+      overflowWrap:"break-word", WebkitFontSmoothing:"antialiased",
     }}>
 
-      {/* ─── NAV ─────────────────────────────────────────────── */}
+      <a href="#main-content" className="skip-to-content">Skip to content</a>
+
       <nav style={{
-        position:"sticky", top:0, zIndex:100,
-        background:"rgba(10,10,18,.85)", backdropFilter:"blur(14px) saturate(140%)",
-        borderBottom:`1px solid ${D.line}`,
-        padding:"16px 32px",
-        display:"flex", alignItems:"center", justifyContent:"space-between",
+        position:"fixed", top:0, left:0, right:0, zIndex:50, transition:"all 300ms",
+        backgroundColor: scrolled ? "rgba(250,246,240,.9)" : "transparent",
+        backdropFilter: scrolled ? "blur(16px)" : "none",
+        borderBottom: scrolled ? `1px solid ${borderSubtle}` : "1px solid transparent",
       }}>
-        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          <div style={{ width:24, height:24, background: D.violet, borderRadius:6, position:"relative" }}>
-            <div style={{ position:"absolute", inset:7, background: D.bg, borderRadius:2 }}/>
+        <div style={{
+          margin:"0 auto", maxWidth:1080, padding:"0 24px",
+          height:72, display:"flex", alignItems:"center", justifyContent:"space-between",
+        }}>
+          <a href="/" aria-label="neoschool home" style={{ display:"flex", alignItems:"center" }}>
+            <img src="/neoschool-logo.png" alt="neoschool" style={{
+              height:80, transition:"filter 300ms",
+              filter: scrolled ? "none" : "brightness(0) invert(1)",
+            }}/>
+          </a>
+
+          <div className="nav-desktop" style={{ display:"none", alignItems:"center", gap:40 }}>
+            {[
+              { label:"Our approach", action:() => scrollTo("approach") },
+              { label:"Afternoons",   action:() => scrollTo("afternoons") },
+              { label:"Who we are",   action:() => scrollTo("who-we-are") },
+              { label:"Apply",        action:() => window.location.href = "/missoula.html" },
+              { label:"Sign in",      action:() => onStart("parent") },
+            ].map(item => (
+              <button key={item.label} onClick={item.action} className="text-nav" style={{
+                color: scrolled ? textSecondary : "rgba(255,255,255,.75)",
+                background:"none", border:"none", cursor:"pointer", padding:0,
+                transition:"color 350ms",
+              }}
+                onMouseEnter={e => e.currentTarget.style.color = scrolled ? textPrimary : "#fff"}
+                onMouseLeave={e => e.currentTarget.style.color = scrolled ? textSecondary : "rgba(255,255,255,.75)"}>
+                {item.label}
+              </button>
+            ))}
+            <a href="/missoula.html" className="btn-iris" style={{ padding:"10px 22px" }}>
+              Apply for 2026
+            </a>
           </div>
-          <span style={{
-            fontFamily:"'Instrument Sans',system-ui,sans-serif",
-            fontWeight:600, fontSize:16, letterSpacing:".02em",
-            textTransform:"uppercase", color: D.tx,
-          }}>neoschool</span>
-        </div>
-        <div style={{ display:"flex", alignItems:"center", gap:24 }}>
-          <a href="#philosophy" style={{ color: D.tx2, fontFamily:"'Instrument Sans',sans-serif", fontSize:14, fontWeight:500, textDecoration:"none", transition:"color .15s" }}
-            onMouseEnter={e=>e.currentTarget.style.color=D.tx}
-            onMouseLeave={e=>e.currentTarget.style.color=D.tx2}>Philosophy</a>
-          <a href="#campuses" style={{ color: D.tx2, fontFamily:"'Instrument Sans',sans-serif", fontSize:14, fontWeight:500, textDecoration:"none", transition:"color .15s" }}
-            onMouseEnter={e=>e.currentTarget.style.color=D.tx}
-            onMouseLeave={e=>e.currentTarget.style.color=D.tx2}>Campuses</a>
-          <a href="/missoula.html" style={{ color: D.tx2, fontFamily:"'Instrument Sans',sans-serif", fontSize:14, fontWeight:500, textDecoration:"none", transition:"color .15s" }}
-            onMouseEnter={e=>e.currentTarget.style.color=D.tx}
-            onMouseLeave={e=>e.currentTarget.style.color=D.tx2}>Missoula</a>
-          <button onClick={()=>onStart("parent")} style={{
-            background:"transparent", color: D.tx2, border:"none",
-            fontFamily:"'Instrument Sans',sans-serif", fontSize:14, fontWeight:500,
-            cursor:"pointer", padding:0,
-          }}
-            onMouseEnter={e=>e.currentTarget.style.color=D.tx}
-            onMouseLeave={e=>e.currentTarget.style.color=D.tx2}>Sign in</button>
-          <a href="/missoula.html" style={{
-            background: D.violet, color:"#fff", padding:"9px 18px", borderRadius:12,
-            fontFamily:"'Instrument Sans',sans-serif", fontSize:14, fontWeight:600,
-            textDecoration:"none", transition:"all .2s", letterSpacing:"-.005em",
-          }}
-            onMouseEnter={e=>{e.currentTarget.style.background=D.violetHvr;e.currentTarget.style.transform="translateY(-1px)";}}
-            onMouseLeave={e=>{e.currentTarget.style.background=D.violet;e.currentTarget.style.transform="translateY(0)";}}>Apply for 2026</a>
+
+          <button onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? "Close menu" : "Open menu"} className="nav-mobile-btn" style={{
+            display:"flex", flexDirection:"column", gap:6,
+            background:"transparent", border:"none", cursor:"pointer", padding:8,
+          }}>
+            <span style={{
+              display:"block", height:1, width:20,
+              backgroundColor: scrolled || menuOpen ? textPrimary : "#fff",
+              transform: menuOpen ? "translateY(3.5px) rotate(45deg)" : "none",
+              transition:"all 300ms",
+            }}/>
+            <span style={{
+              display:"block", height:1, width:20,
+              backgroundColor: scrolled || menuOpen ? textPrimary : "#fff",
+              transform: menuOpen ? "translateY(-2.5px) rotate(-45deg)" : "none",
+              transition:"all 300ms",
+            }}/>
+          </button>
         </div>
       </nav>
 
-      {/* ─── HERO — manifesto ──────────────────────────────────── */}
-      <section style={{ position:"relative", overflow:"hidden" }}>
-        <div className="hero-mesh"/>
-        <div className="dark-grain"/>
-        <div className="hero-stagger" style={{ position:"relative", maxWidth:1100, margin:"0 auto", padding:"140px 32px 120px", zIndex:1 }}>
-          <SectionLabel num="">neoschool · Post-AI education</SectionLabel>
-          <h1 style={{
-            fontFamily:"'Instrument Sans','Inter',sans-serif",
-            fontSize:"clamp(48px, 7vw, 84px)", fontWeight:600,
-            lineHeight:1.02, letterSpacing:"-.028em",
-            color: D.tx, marginBottom:40, maxWidth:920,
-          }}>
-            The school built for the <em style={{
-              fontFamily:"'Source Serif 4',Georgia,serif", fontStyle:"italic", fontWeight:300, color: D.violet,
-            }}>post-AI</em> world.
-          </h1>
-          <p style={{
-            fontFamily:"'Source Serif 4',Georgia,serif",
-            fontSize:21, lineHeight:1.5, color: D.tx2, fontWeight:300,
-            maxWidth:640, marginBottom:48,
-          }}>
-            AI-powered academics in two hours. Real projects, real coaches, real childhood.
-            A microschool model designed for how kids actually learn — opening September 2026.
-          </p>
-          <div style={{ display:"flex", gap:14, flexWrap:"wrap", alignItems:"center" }}>
-            <a href="/missoula.html" className="btn-violet-glow" style={{
-              background: D.violet, color:"#fff", padding:"16px 30px", borderRadius:14,
-              fontFamily:"'Instrument Sans',sans-serif", fontSize:15.5, fontWeight:600,
-              textDecoration:"none", transition:"all .2s", letterSpacing:"-.005em",
-              display:"inline-flex", alignItems:"center", gap:8,
-            }}
-              onMouseEnter={e=>{e.currentTarget.style.background=D.violetHvr;e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow="0 16px 38px -10px rgba(107,92,231,.5)";}}
-              onMouseLeave={e=>{e.currentTarget.style.background=D.violet;e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="none";}}>
-              Apply for 2026 →
-            </a>
-            <button onClick={()=>onStart("director")} style={{
-              background:"transparent", color: D.tx, padding:"15px 28px", borderRadius:14,
-              fontFamily:"'Instrument Sans',sans-serif", fontSize:15.5, fontWeight:500,
-              border:`1px solid ${D.line2}`, cursor:"pointer", transition:"all .2s",
-            }}
-              onMouseEnter={e=>{e.currentTarget.style.borderColor=D.tx;e.currentTarget.style.background="rgba(255,255,255,.03)";}}
-              onMouseLeave={e=>{e.currentTarget.style.borderColor=D.line2;e.currentTarget.style.background="transparent";}}>
-              Launch a campus
-            </button>
-            <button onClick={()=>onStart("parent")} style={{
-              background:"transparent", color: D.tx2, padding:"15px 20px",
-              fontFamily:"'Instrument Sans',sans-serif", fontSize:15, fontWeight:500,
-              border:"none", cursor:"pointer", transition:"color .15s",
-            }}
-              onMouseEnter={e=>{e.currentTarget.style.color=D.tx;}}
-              onMouseLeave={e=>{e.currentTarget.style.color=D.tx2;}}>
-              Sign in →
-            </button>
-          </div>
-        </div>
-        {/* Scroll indicator at bottom of hero */}
-        <div className="scroll-down" style={{
-          position:"absolute", bottom:30, left:"50%", transform:"translateX(-50%)",
-          fontFamily:"'IBM Plex Mono',monospace", fontSize:10, color: D.tx3,
-          letterSpacing:".14em", textTransform:"uppercase", textAlign:"center",
-          zIndex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:8,
-        }}>
-          <span>Scroll</span>
-          <span style={{ fontSize:14 }}>↓</span>
-        </div>
-      </section>
-
-      {/* ─── 01 · THE THESIS ───────────────────────────────────── */}
-      <section id="philosophy" className="reveal-on-scroll" style={{ maxWidth:980, margin:"0 auto", padding:"100px 32px", borderTop:`1px solid ${D.line}` }}>
-        <SectionLabel num="01">The thesis</SectionLabel>
-        <p style={{
-          fontFamily:"'Source Serif 4',Georgia,serif", fontSize:"clamp(26px,3vw,38px)",
-          lineHeight:1.32, fontWeight:300, color: D.tx, letterSpacing:"-.018em",
-          maxWidth:820,
-        }}>
-          When AI can teach reading, math, and science faster than any classroom,
-          school becomes <em style={{ fontStyle:"italic", color: D.violet }}>what only humans can give</em> —
-          relationships, real projects, hands in dirt, time in forests, the slow art of becoming someone.
-        </p>
-      </section>
-
-      {/* ─── 02 · A DAY ────────────────────────────────────────── */}
-      <section className="reveal-on-scroll" style={{ maxWidth:980, margin:"0 auto", padding:"100px 32px", borderTop:`1px solid ${D.line}` }}>
-        <SectionLabel num="02">A typical day</SectionLabel>
-        <h2 style={{
-          fontFamily:"'Instrument Sans',sans-serif", fontSize:"clamp(32px,4vw,48px)",
-          fontWeight:600, lineHeight:1.08, letterSpacing:"-.022em",
-          color: D.tx, marginBottom:14,
-        }}>
-          From 8:30am to <em style={{ fontFamily:"'Source Serif 4',serif", fontStyle:"italic", fontWeight:300, color: D.coral }}>4:30pm</em>.
-        </h2>
-        <p style={{ fontFamily:"'Source Serif 4',serif", fontSize:18, color: D.tx2, fontWeight:300, marginBottom:48, maxWidth:560 }}>
-          Long enough for working families. Structured enough for rhythm. Loose enough for childhood.
-        </p>
-        {[
-          { time:"8:30 — 9:00am",   title:"Morning play",                desc:"Free arrival, breakfast, settling in." },
-          { time:"9:00 — 11:00am",  title:"Personalized academics",      desc:"Two hours: small groups, AI-adaptive practice, brain breaks every 15 minutes." },
-          { time:"11:00 — 12:30pm", title:"Outdoor play + lunch",        desc:"Movement before food. Built on what we know about attention." },
-          { time:"12:30 — 3:30pm",  title:"Real projects + life skills", desc:"Three hours of hands-on work. The thing kids remember decades later." },
-          { time:"3:30 — 4:30pm",   title:"Outdoor play",                desc:"End the day moving. Sports, forest, free play." },
-        ].map((s,i)=>(
-          <div key={i} style={{
-            display:"grid", gridTemplateColumns:"160px 1fr", gap:32,
-            padding:"28px 0", borderBottom:i<4?`1px solid ${D.line}`:"none",
-          }}>
-            <div style={{ fontFamily:"'IBM Plex Mono','Geist Mono',monospace", fontSize:13, color: D.tx3, letterSpacing:".04em", paddingTop:4 }}>{s.time}</div>
-            <div>
-              <h3 style={{ fontFamily:"'Instrument Sans',sans-serif", fontSize:21, fontWeight:600, color: D.tx, marginBottom:6, letterSpacing:"-.01em" }}>{s.title}</h3>
-              <p style={{ fontFamily:"'Source Serif 4',serif", fontSize:16.5, color: D.tx2, fontWeight:300, maxWidth:560 }}>{s.desc}</p>
-            </div>
-          </div>
-        ))}
-      </section>
-
-      {/* ─── 03 · RESEARCH ─────────────────────────────────────── */}
-      <section className="reveal-on-scroll" style={{ maxWidth:1100, margin:"0 auto", padding:"100px 32px", borderTop:`1px solid ${D.line}` }}>
-        <SectionLabel num="03">The research</SectionLabel>
-        <h2 style={{
-          fontFamily:"'Instrument Sans',sans-serif", fontSize:"clamp(32px,4vw,48px)",
-          fontWeight:600, lineHeight:1.08, letterSpacing:"-.022em",
-          color: D.tx, marginBottom:14, maxWidth:840,
-        }}>
-          AI tutoring delivers <em style={{ fontFamily:"'Source Serif 4',serif", fontStyle:"italic", fontWeight:300, color: D.violet }}>2× learning gains</em> over classroom instruction.
-        </h2>
-        <p style={{ fontFamily:"'Source Serif 4',serif", fontSize:18, color: D.tx2, fontWeight:300, marginBottom:64, maxWidth:600 }}>
-          We're not betting on AI replacing school. We're betting on AI doing what it does best, so humans can do what humans do best.
-        </p>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))", gap:32 }}>
-          {[
-            { n:"2×",     u:"learning gains",     d:"AI tutoring vs. best-practice classroom instruction.", src:"Kestin et al., Scientific Reports 2025" },
-            { n:"10–18",  u:"min attention span", d:"A kindergartner's true focus window. Our blocks match it.", src:"Waterford.org, 2024" },
-            { n:"3+",     u:"hours outdoor",      d:"Daily outdoor play correlates with better attention and school readiness.", src:"Koepp et al. 2022 · ScienceDirect 2024" },
-          ].map((s,i)=>(
-            <div key={i} style={{ padding:"32px 28px", background: D.bg2, borderRadius:16, border:`1px solid ${D.line}` }}>
-              <div style={{
-                fontFamily:"'Instrument Sans',sans-serif", fontSize:64, fontWeight:700,
-                color: D.violet, letterSpacing:"-.03em", lineHeight:1, marginBottom:4,
-              }}>{s.n}</div>
-              <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:11, color: D.tx3, letterSpacing:".08em", textTransform:"uppercase", marginBottom:18 }}>{s.u}</div>
-              <p style={{ fontFamily:"'Source Serif 4',serif", fontSize:15.5, lineHeight:1.55, color: D.tx2, fontWeight:300, marginBottom:14 }}>{s.d}</p>
-              <p style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:10.5, color: D.tx4, letterSpacing:".04em" }}>{s.src}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ─── 04 · FOUNDING CAMPUSES ────────────────────────────── */}
-      <section id="campuses" className="reveal-on-scroll" style={{ maxWidth:1100, margin:"0 auto", padding:"100px 32px", borderTop:`1px solid ${D.line}` }}>
-        <SectionLabel num="04">Founding campuses · 2026</SectionLabel>
-        <h2 style={{
-          fontFamily:"'Instrument Sans',sans-serif", fontSize:"clamp(32px,4vw,48px)",
-          fontWeight:600, lineHeight:1.08, letterSpacing:"-.022em",
-          color: D.tx, marginBottom:14,
-        }}>
-          Where neoschool is <em style={{ fontFamily:"'Source Serif 4',serif", fontStyle:"italic", fontWeight:300, color: D.coral }}>opening first</em>.
-        </h2>
-        <p style={{ fontFamily:"'Source Serif 4',serif", fontSize:18, color: D.tx2, fontWeight:300, marginBottom:48, maxWidth:560 }}>
-          The first cohort. Each campus runs the same model — built for how kids actually learn.
-        </p>
-
-        {/* Missoula featured card */}
-        <a href="/missoula.html" style={{ textDecoration:"none", color:"inherit", display:"block", marginBottom:18 }}>
-          <div style={{
-            display:"grid", gridTemplateColumns:"1.1fr 1fr", gap:0, overflow:"hidden",
-            borderRadius:20, background: D.bg2, border:`1px solid ${D.line}`,
-            transition:"all .25s", cursor:"pointer",
-          }}
-            onMouseEnter={e=>{e.currentTarget.style.borderColor=D.violet;e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 24px 60px -20px rgba(107,92,231,.3)";}}
-            onMouseLeave={e=>{e.currentTarget.style.borderColor=D.line;e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="none";}}>
-            <div style={{ minHeight:340, backgroundImage:"url('/missoula/kids-flowers.jpg')", backgroundSize:"cover", backgroundPosition:"center 75%" }}/>
-            <div style={{ padding:"42px 44px", display:"flex", flexDirection:"column", justifyContent:"center" }}>
-              <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:18 }}>
-                <span style={{ width:8, height:8, borderRadius:"50%", background: D.violet, animation:"pu 2s infinite" }}/>
-                <span style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:11, color: D.violet, letterSpacing:".14em", textTransform:"uppercase", fontWeight:500 }}>Now enrolling · Founding families</span>
-              </div>
-              <h3 style={{ fontFamily:"'Instrument Sans',sans-serif", fontSize:36, fontWeight:600, color: D.tx, letterSpacing:"-.022em", lineHeight:1.05, marginBottom:10 }}>
-                Missoula, <em style={{ fontFamily:"'Source Serif 4',serif", fontStyle:"italic", fontWeight:300, color: D.coral }}>Montana</em>
-              </h3>
-              <p style={{ fontFamily:"'Source Serif 4',serif", fontSize:16, color: D.tx2, fontWeight:300, lineHeight:1.55, marginBottom:18 }}>
-                Kindergarten + 1st Grade · 10–12 students per class · Opening September 2026.
-              </p>
-              <p style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:11, color: D.tx3, letterSpacing:".06em", marginBottom:22 }}>Stewarded by a second-generation Missoulian family</p>
-              <span style={{
-                background: D.violet, color:"#fff", padding:"13px 24px", borderRadius:14,
-                fontFamily:"'Instrument Sans',sans-serif", fontSize:14.5, fontWeight:600,
-                width:"fit-content", letterSpacing:"-.005em",
-              }}>Apply for 2026–27 →</span>
-            </div>
-          </div>
-        </a>
-
-        <p style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:11, color: D.tx3, letterSpacing:".14em", textTransform:"uppercase", margin:"28px 0 14px", textAlign:"center" }}>Coming next</p>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))", gap:12 }}>
-          {[
-            { name:"Berkeley",  status:"Waitlist open", date:"Jan 2027" },
-            { name:"Palo Alto", status:"Waitlist open", date:"Jan 2027" },
-            { name:"SF",        status:"Waitlist open", date:"Sept 2027" },
-          ].map((c,i)=>(
-            <div key={i} onClick={()=>onStart("parent")} style={{
-              padding:"24px", background: D.bg2, borderRadius:14, border:`1px solid ${D.line}`,
-              cursor:"pointer", transition:"all .2s",
-            }}
-              onMouseEnter={e=>{e.currentTarget.style.borderColor=D.line2;}}
-              onMouseLeave={e=>{e.currentTarget.style.borderColor=D.line;}}>
-              <p style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:10, color: D.tx3, letterSpacing:".1em", textTransform:"uppercase", marginBottom:8 }}>{c.status}</p>
-              <h4 style={{ fontFamily:"'Instrument Sans',sans-serif", fontSize:20, fontWeight:600, color: D.tx, letterSpacing:"-.01em", marginBottom:4 }}>{c.name}</h4>
-              <p style={{ fontFamily:"'Source Serif 4',serif", fontSize:13, color: D.tx3, fontWeight:300 }}>{c.date}</p>
-            </div>
-          ))}
-          <div onClick={()=>setShowInterestForm(true)} style={{
-            padding:"24px", background:"transparent", borderRadius:14, border:`1px dashed ${D.line2}`,
-            cursor:"pointer", transition:"all .2s", display:"flex", flexDirection:"column", justifyContent:"center",
-          }}
-            onMouseEnter={e=>{e.currentTarget.style.borderColor=D.violet;}}
-            onMouseLeave={e=>{e.currentTarget.style.borderColor=D.line2;}}>
-            <p style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:10, color: D.violet, letterSpacing:".1em", textTransform:"uppercase", marginBottom:8 }}>+ Your city?</p>
-            <h4 style={{ fontFamily:"'Instrument Sans',sans-serif", fontSize:16, fontWeight:500, color: D.tx2, letterSpacing:"-.005em" }}>Launch a campus in your community</h4>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── 05 · FOR FAMILIES, GUIDES, DIRECTORS ──────────────── */}
-      <section className="reveal-on-scroll" style={{ maxWidth:1100, margin:"0 auto", padding:"100px 32px", borderTop:`1px solid ${D.line}` }}>
-        <SectionLabel num="05">Three ways to join</SectionLabel>
-        <h2 style={{
-          fontFamily:"'Instrument Sans',sans-serif", fontSize:"clamp(32px,4vw,48px)",
-          fontWeight:600, lineHeight:1.08, letterSpacing:"-.022em",
-          color: D.tx, marginBottom:48,
-        }}>
-          The platform <em style={{ fontFamily:"'Source Serif 4',serif", fontStyle:"italic", fontWeight:300, color: D.violet }}>is for everyone</em>.
-        </h2>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))", gap:18 }}>
-          {[
-            { id:"parent",   label:"For families",       desc:"Find a campus, or use the platform at home. AI tutors, 75+ labs, real growth tracking.", cta:"Sign in as a parent →" },
-            { id:"guide",    label:"For guides",         desc:"Facilitate, don't lecture. The platform handles data, comms, and adaptation.", cta:"Sign in as a guide →" },
-            { id:"director", label:"Launch a campus",    desc:"Open a neoschool in your community. Curriculum, tools, comms, enrollment — all in one box.", cta:"Apply to launch →" },
-          ].map(t=>(
-            <button key={t.id} onClick={()=>onStart(t.id)} style={{
-              padding:"32px 28px", background: D.bg2, borderRadius:16,
-              border:`1px solid ${D.line}`, cursor:"pointer", textAlign:"left",
-              color:"inherit", transition:"all .25s", fontFamily:"inherit",
-              display:"flex", flexDirection:"column", gap:14,
-            }}
-              onMouseEnter={e=>{e.currentTarget.style.borderColor=D.violet;e.currentTarget.style.transform="translateY(-2px)";}}
-              onMouseLeave={e=>{e.currentTarget.style.borderColor=D.line;e.currentTarget.style.transform="translateY(0)";}}>
-              <p style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:11, color: D.violet, letterSpacing:".12em", textTransform:"uppercase", fontWeight:500 }}>{t.label}</p>
-              <p style={{ fontFamily:"'Source Serif 4',serif", fontSize:16, color: D.tx2, fontWeight:300, lineHeight:1.55, flex:1 }}>{t.desc}</p>
-              <p style={{ fontFamily:"'Instrument Sans',sans-serif", fontSize:14, color: D.tx, fontWeight:500, letterSpacing:"-.005em" }}>{t.cta}</p>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* ─── FOUNDER QUOTE ─────────────────────────────────────── */}
-      <section className="reveal-on-scroll" style={{ maxWidth:880, margin:"0 auto", padding:"100px 32px", borderTop:`1px solid ${D.line}`, textAlign:"center" }}>
-        <p style={{
-          fontFamily:"'Source Serif 4',Georgia,serif", fontStyle:"italic", fontWeight:300,
-          fontSize:"clamp(22px,2.6vw,30px)", lineHeight:1.4, color: D.tx,
-          letterSpacing:"-.015em", marginBottom:28,
-        }}>
-          "When parents and educators come together to design a school around how kids actually learn —
-          curious, hands-on, outside, alongside trusted adults — you get a generation that's
-          confident, kind, and ready for whatever comes next."
-        </p>
-        <p style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:11, color: D.violet, letterSpacing:".12em", textTransform:"uppercase" }}>
-          Esther Wojcicki · Advisor to neoschool
-        </p>
-      </section>
-
-      {/* ─── CTA ───────────────────────────────────────────────── */}
-      <section className="reveal-on-scroll" style={{ maxWidth:980, margin:"0 auto", padding:"120px 32px", borderTop:`1px solid ${D.line}`, textAlign:"center" }}>
-        <SectionLabel num="06">Become a founding family</SectionLabel>
-        <h2 style={{
-          fontFamily:"'Instrument Sans',sans-serif", fontSize:"clamp(40px,5.5vw,68px)",
-          fontWeight:600, lineHeight:1.05, letterSpacing:"-.025em",
-          color: D.tx, marginBottom:24, maxWidth:760, margin:"0 auto 24px",
-        }}>
-          Apply for the <em style={{ fontFamily:"'Source Serif 4',serif", fontStyle:"italic", fontWeight:300, color: D.violet }}>2026–27</em> cohort.
-        </h2>
-        <p style={{ fontFamily:"'Source Serif 4',serif", fontSize:19, color: D.tx2, fontWeight:300, marginBottom:40, maxWidth:560, margin:"0 auto 40px" }}>
-          Kindergarten + 1st Grade in Missoula. Limited spots. We'll respond within 24 hours.
-        </p>
-        <a href="/missoula.html" style={{
-          background: D.violet, color:"#fff", padding:"18px 36px", borderRadius:14,
-          fontFamily:"'Instrument Sans',sans-serif", fontSize:16, fontWeight:600,
-          textDecoration:"none", letterSpacing:"-.005em",
-          display:"inline-flex", alignItems:"center", gap:8, transition:"all .2s",
-        }}
-          onMouseEnter={e=>{e.currentTarget.style.background=D.violetHvr;e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow="0 18px 44px -12px rgba(107,92,231,.5)";}}
-          onMouseLeave={e=>{e.currentTarget.style.background=D.violet;e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="none";}}>
-          Apply to Missoula →
-        </a>
-      </section>
-
-      {/* ─── FOOTER ────────────────────────────────────────────── */}
-      <footer style={{
-        background: D.bg2, padding:"56px 32px", marginTop:40, borderTop:`1px solid ${D.line}`,
+      <div style={{
+        position:"fixed", inset:0, zIndex:40,
+        display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:32,
+        transition:"all 300ms",
+        backgroundColor: menuOpen ? bg : "rgba(250,246,240,0)",
+        opacity: menuOpen ? 1 : 0,
+        pointerEvents: menuOpen ? "auto" : "none",
       }}>
-        <div style={{ maxWidth:1100, margin:"0 auto", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:24 }}>
-          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-            <div style={{ width:22, height:22, background: D.violet, borderRadius:6, position:"relative" }}>
-              <div style={{ position:"absolute", inset:6, background: D.bg2, borderRadius:2 }}/>
-            </div>
-            <span style={{
-              fontFamily:"'Instrument Sans',sans-serif", fontWeight:600, fontSize:14,
-              letterSpacing:".02em", textTransform:"uppercase", color: D.tx,
-            }}>neoschool</span>
-            <span style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:11, color: D.tx3, letterSpacing:".08em", marginLeft:12 }}>Missoula · Sept 2026</span>
+        {[
+          { label:"Our approach", action:() => scrollTo("approach") },
+          { label:"Afternoons",   action:() => scrollTo("afternoons") },
+          { label:"Who we are",   action:() => scrollTo("who-we-are") },
+          { label:"Apply",        action:() => { setMenuOpen(false); window.location.href = "/missoula.html"; } },
+          { label:"Sign in",      action:() => { setMenuOpen(false); onStart("parent"); } },
+        ].map(item => (
+          <button key={item.label} onClick={item.action} className="text-nav" style={{
+            fontSize:20, color: textSecondary,
+            background:"none", border:"none", cursor:"pointer", padding:0,
+          }}>{item.label}</button>
+        ))}
+        <a href="/missoula.html" onClick={() => setMenuOpen(false)} className="btn-iris" style={{ padding:"14px 30px", fontSize:14 }}>
+          Apply for 2026
+        </a>
+      </div>
+
+      <main id="main-content">
+
+        <section style={{
+          position:"relative", height:"100vh", minHeight:600,
+          display:"flex", alignItems:"center", justifyContent:"center", overflow:"hidden",
+        }}>
+          <video autoPlay muted loop playsInline aria-hidden="true" style={{
+            position:"absolute", inset:0, height:"100%", width:"100%", objectFit:"cover",
+          }} src="/hero-video.mp4"/>
+
+          <div style={{
+            position:"absolute", inset:0,
+            background:"linear-gradient(to bottom, rgba(10,10,18,0.15) 0%, rgba(10,10,18,0.25) 30%, rgba(10,10,18,0.50) 65%, rgba(42,38,34,0.95) 100%)",
+          }}/>
+
+          <div style={{
+            position:"relative", zIndex:10,
+            display:"flex", flexDirection:"column", alignItems:"center",
+            padding:"0 24px", textAlign:"center", maxWidth:920,
+          }}>
+            <p className="font-heading" style={{
+              ...heroFade(300), fontSize:11, fontWeight:600, textTransform:"uppercase",
+              letterSpacing:"0.25em", color:"#fff", textShadow:"0 2px 8px rgba(0,0,0,0.9)",
+            }}>
+              Missoula, Montana · Kindergarten + 1st Grade · September 2026
+            </p>
+
+            <h1 className="font-body text-hero" style={{
+              ...heroFade(600), marginTop:24, fontWeight:400, color:"#fff",
+              textShadow:"0 2px 12px rgba(0,0,0,0.5)", textWrap:"balance",
+            }}>
+              The school built for the post-AI world.
+            </h1>
+
+            <p className="font-heading" style={{
+              ...heroFade(900), marginTop:24, maxWidth:520, fontSize:18,
+              color:"rgba(255,255,255,.9)", textShadow:"0 2px 8px rgba(0,0,0,0.9)", lineHeight:1.5,
+            }}>
+              AI-powered academics in two hours. Real projects, real coaches, and real childhood
+              the rest of it. Opening September 2026.
+            </p>
+
+            <a href="/missoula.html" className="btn-iris" style={{
+              ...heroFade(1200), marginTop:40, padding:"14px 32px", fontSize:13.5,
+            }}>
+              Apply for Missoula → 2026
+            </a>
+
+            <button onClick={() => onStart("parent")} className="font-heading" style={{
+              ...heroFade(1400), marginTop:16, fontSize:14,
+              color:"rgba(255,255,255,.5)", textShadow:"0 2px 8px rgba(0,0,0,0.9)",
+              background:"none", border:"none", cursor:"pointer", transition:"color 350ms",
+            }}
+              onMouseEnter={e => e.currentTarget.style.color = "rgba(255,255,255,.75)"}
+              onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,.5)"}>
+              or sign in to the platform →
+            </button>
           </div>
-          <div style={{ fontFamily:"'Source Serif 4',serif", fontSize:14, color: D.tx3, fontWeight:300 }}>
-            <a href="mailto:jennie@chiefmamaofficer.com" style={{ color: D.violet, textDecoration:"none" }}>jennie@chiefmamaofficer.com</a>
-            &nbsp;·&nbsp;
-            <a href="/missoula.html" style={{ color: D.tx2, textDecoration:"none" }}>Missoula campus</a>
+
+          <div style={{
+            ...heroFade(2000),
+            position:"absolute", bottom:32, left:"50%", transform:"translateX(-50%)",
+          }}>
+            <div style={{
+              height:48, width:1, background:"rgba(255,255,255,.4)",
+              animation:"scrollPulse 2.5s ease-in-out infinite",
+            }}/>
+          </div>
+        </section>
+
+        <SectionReveal>
+          {(isVisible) => {
+            const r = (d) => ({
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? "translateY(0)" : "translateY(16px)",
+              filter: isVisible ? "blur(0px)" : "blur(4px)",
+              transition: `opacity 400ms cubic-bezier(0.22,1,0.36,1) ${d}ms, transform 400ms cubic-bezier(0.22,1,0.36,1) ${d}ms, filter 400ms cubic-bezier(0.22,1,0.36,1) ${d}ms`,
+            });
+            return (
+              <section id="approach" style={{ position:"relative", background: bg, padding:"140px 0" }}>
+                <div style={{ position:"relative", margin:"0 auto", maxWidth:620, padding:"0 24px" }}>
+                  <span className="section-number">01</span>
+                  <h2 className="font-body text-section-heading" style={{ ...r(0), fontWeight:400, color: textPrimary, textWrap:"balance", position:"relative" }}>
+                    Two hours of academics. Then the real learning starts.
+                  </h2>
+                  {[
+                    "Your child doesn't need six hours in a classroom. They need focused, personalized instruction that meets them exactly where they are. AI tutoring — already validated with over 100,000 students — delivers that in two hours each morning. Real mastery, not seat time.",
+                    "The rest of the day belongs to the things AI will never replace. Professional coaches — engineers, biologists, artists — work alongside your child on real projects. They model curiosity, guide hands-on work, and ask harder questions when the easy answers come too quickly.",
+                    "No homework. No busywork. Your child comes home at 3:30 having built something — not having memorized something. Your evening belongs to your family.",
+                  ].map((p, i) => (
+                    <p key={i} className="prose-neo" style={{ ...r(200 + i * 120), marginTop: i === 0 ? 40 : 28 }}>{p}</p>
+                  ))}
+                </div>
+              </section>
+            );
+          }}
+        </SectionReveal>
+
+        <SectionReveal>
+          {(isVisible) => {
+            const r = (d) => ({
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? "translateY(0)" : "translateY(16px)",
+              filter: isVisible ? "blur(0px)" : "blur(4px)",
+              transition: `opacity 400ms cubic-bezier(0.22,1,0.36,1) ${d}ms, transform 400ms cubic-bezier(0.22,1,0.36,1) ${d}ms, filter 400ms cubic-bezier(0.22,1,0.36,1) ${d}ms`,
+            });
+            const projects = [
+              { title:"Build a weather station.",                tag:"Engineering · Ages 7-11",     body:"Design, wire, and program a real weather station that collects data from the schoolyard. Read the data. Spot the patterns. Present your findings to the class like a scientist — because you are one." },
+              { title:"Run a real business.",                    tag:"Entrepreneurship · Ages 8-11", body:"Start with $50. Source materials, design a product, set a price, and sell it at a community market. The goal isn't a grade — it's profit. And the lessons come from what didn't sell." },
+              { title:"Write, direct, and perform a show.",      tag:"Public Speaking · Ages 6-10",  body:"Seven weeks of improv, sketch comedy, and stagecraft. Then your child writes, directs, and performs their own show in front of a live audience. Not a recital. A production." },
+              { title:"Order your own meal at a restaurant.",    tag:"Independence · Ages 5-7",      body:"Walk in. Request a table. Make eye contact with the server. Order. Say thank you. For a five-year-old, this is a real achievement — and the beginning of a lifetime of confidence." },
+              { title:"Climb a 40-foot wall.",                   tag:"Grit · Ages 5-8",              body:"Train at a climbing gym for weeks, building physical skills and mental resilience. The test isn't a worksheet. It's reaching the top — on your own." },
+            ];
+            return (
+              <section id="afternoons" style={{ position:"relative", background: bgSecondary, padding:"140px 0" }}>
+                <div style={{ position:"relative", margin:"0 auto", maxWidth:800, padding:"0 24px" }}>
+                  <span className="section-number">02</span>
+                  <h2 className="font-body text-section-heading" style={{ ...r(0), fontWeight:400, color: textPrimary, position:"relative" }}>
+                    What afternoons look like.
+                  </h2>
+                  <p className="font-body" style={{ ...r(120), marginTop:20, maxWidth:560, fontSize:18, fontStyle:"italic", color: textSecondary, lineHeight:1.55 }}>
+                    After two hours of AI-powered academics, your child spends the rest of the day on projects that matter. Here's a taste.
+                  </p>
+                  <div style={{ marginTop:64, display:"flex", flexDirection:"column" }}>
+                    {projects.map((project, i) => (
+                      <div key={i} style={{ ...r(300 + i * 200), padding:"48px 0", borderTop: i === 0 ? "none" : `1px solid ${borderSubtle}` }}>
+                        <h3 className="font-body" style={{ fontSize:20, fontWeight:400, color: textPrimary, letterSpacing:"-.005em", lineHeight:1.3 }}>{project.title}</h3>
+                        <p className="font-heading" style={{ marginTop:6, fontSize:12, fontWeight:500, textTransform:"uppercase", letterSpacing:".1em", color: coral }}>{project.tag}</p>
+                        <p className="font-body" style={{ marginTop:16, maxWidth:620, fontSize:16, lineHeight:1.65, color: textSecondary }}>{project.body}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            );
+          }}
+        </SectionReveal>
+
+        <SectionReveal>
+          {(isVisible) => {
+            const r = (d) => ({
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? "translateY(0)" : "translateY(16px)",
+              filter: isVisible ? "blur(0px)" : "blur(4px)",
+              transition: `opacity 400ms cubic-bezier(0.22,1,0.36,1) ${d}ms, transform 400ms cubic-bezier(0.22,1,0.36,1) ${d}ms, filter 400ms cubic-bezier(0.22,1,0.36,1) ${d}ms`,
+            });
+            const team = [
+              { name:"Jennie Yang",      bio:"Missoula mom. Founder. Building neoschool's first campus. Second-generation Missoulian family.", photo:"/missoula/family.jpg" },
+              { name:"Esther Wojcicki",  bio:"Educator, author of How to Raise Successful People. Co-built the school we've all been dreaming of.", photo:"/team-esther.jpeg" },
+              { name:"Robert Speed",     bio:"Father of two. 20 years leading education at Blackboard, PowerSchool, and Faria Education.", photo:"/team-robert.jpeg" },
+            ];
+            return (
+              <section id="dinner" style={{ position:"relative", background: bgDark, padding:"140px 0" }}>
+                <div style={{ position:"absolute", inset:0, pointerEvents:"none", background:"radial-gradient(ellipse 600px 400px at 50% 55%, rgba(107,92,231,0.08) 0%, transparent 70%)" }}/>
+                <div style={{ position:"relative", zIndex:10, margin:"0 auto", maxWidth:600, padding:"0 24px", textAlign:"center" }}>
+                  <p className="text-overline" style={{ ...r(0), color: coral }}>
+                    Founding Family Conversation
+                  </p>
+                  <h2 className="font-body" style={{ ...r(120), marginTop:24, fontWeight:400, color: textOnDark, fontSize:"clamp(1.75rem, 4vw, 2.75rem)", lineHeight:1.18, textWrap:"balance" }}>
+                    Come meet us. Bring your questions.
+                  </h2>
+                  <p className="font-body" style={{ ...r(240), margin:"20px auto 0", maxWidth:480, fontSize:18, lineHeight:1.65, color:"rgba(237,236,232,0.75)" }}>
+                    Reach out to schedule a call with Jennie. No pitch — just parents talking to parents about what school could be.
+                  </p>
+                  <p className="font-heading" style={{ ...r(300), marginTop:24, fontSize:14, fontWeight:500, color: textOnDark }}>
+                    jennie@chiefmamaofficer.com
+                  </p>
+                  <div style={r(360)}>
+                    <a href="/missoula.html" className="btn-iris" style={{ marginTop:40, padding:"14px 32px", width:"100%", maxWidth:400, textAlign:"center" }}>
+                      Apply for Missoula
+                    </a>
+                  </div>
+                  <button onClick={() => onStart("director")} className="font-heading" style={{
+                    ...r(420), marginTop:24, fontSize:14, color:"rgba(237,236,232,0.4)",
+                    background:"none", border:"none", cursor:"pointer", transition:"color 350ms",
+                  }}
+                    onMouseEnter={e => e.currentTarget.style.color = "rgba(237,236,232,0.7)"}
+                    onMouseLeave={e => e.currentTarget.style.color = "rgba(237,236,232,0.4)"}>
+                    or launch a campus in your community →
+                  </button>
+                  <div id="who-we-are" style={{ ...r(500), marginTop:80, paddingTop:48, borderTop:"1px solid rgba(255,255,255,.08)" }}>
+                    <p className="text-overline" style={{ color:"rgba(237,236,232,0.4)" }}>Who you'll meet</p>
+                    <div style={{ marginTop:32, display:"flex", flexDirection:"column", gap:24 }}>
+                      {team.map((person, i) => (
+                        <div key={i} style={{ display:"flex", flexDirection:"column", alignItems:"center", textAlign:"center" }}>
+                          <img src={person.photo} alt={person.name} style={{ marginBottom:12, height:80, width:80, borderRadius:"50%", objectFit:"cover", objectPosition:"top" }}/>
+                          <p className="font-heading" style={{ fontSize:18, fontWeight:600, color: textOnDark }}>{person.name}</p>
+                          <p className="font-body" style={{ marginTop:4, fontSize:15, color:"rgba(237,236,232,0.6)", maxWidth:400, lineHeight:1.55 }}>{person.bio}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="font-body" style={{ marginTop:32, fontSize:14, fontStyle:"italic", color:"rgba(237,236,232,0.35)" }}>
+                      Our AI tutoring platform was built by MIT engineers and tested with over 100,000 students.
+                    </p>
+                  </div>
+                </div>
+              </section>
+            );
+          }}
+        </SectionReveal>
+
+        <SectionReveal>
+          {(isVisible) => {
+            const r = (d) => ({
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? "translateY(0)" : "translateY(16px)",
+              filter: isVisible ? "blur(0px)" : "blur(4px)",
+              transition: `opacity 400ms cubic-bezier(0.22,1,0.36,1) ${d}ms, transform 400ms cubic-bezier(0.22,1,0.36,1) ${d}ms, filter 400ms cubic-bezier(0.22,1,0.36,1) ${d}ms`,
+            });
+            return (
+              <section style={{ background: bg, padding:"140px 0" }}>
+                <div style={{ position:"relative", margin:"0 auto", maxWidth:1080, padding:"0 24px" }}>
+                  <span className="section-number">03</span>
+                  <h2 className="font-body text-section-heading" style={{ ...r(0), fontWeight:400, color: textPrimary, position:"relative", textAlign:"center", maxWidth:720, margin:"0 auto" }}>
+                    The platform is built for everyone in a school.
+                  </h2>
+                  <p className="font-body" style={{ ...r(120), margin:"20px auto 0", maxWidth:560, fontSize:18, fontStyle:"italic", color: textSecondary, lineHeight:1.55, textAlign:"center" }}>
+                    Parents, guides, directors. Sign in to use neoschool from anywhere.
+                  </p>
+                  <div style={{ marginTop:64, display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(280px, 1fr))", gap:18 }}>
+                    {[
+                      { id:"parent",   label:"For families",    desc:"Find a campus, or use the platform at home. AI tutors, 75+ labs, real growth tracking.",       cta:"Sign in →" },
+                      { id:"guide",    label:"For guides",      desc:"Facilitate, don't lecture. The platform handles data, comms, and adaptation.",                cta:"Sign in →" },
+                      { id:"director", label:"Launch a campus", desc:"Open a neoschool in your community. Curriculum, tools, comms, enrollment — all in one box.", cta:"Apply →" },
+                    ].map((t, i) => (
+                      <button key={t.id} onClick={() => onStart(t.id)} style={{
+                        ...r(240 + i * 100),
+                        padding:"36px 32px", background:"#fff", borderRadius:16,
+                        border:`1px solid ${borderSubtle}`, cursor:"pointer", textAlign:"left",
+                        color:"inherit", transition:"all 350ms", fontFamily:"inherit",
+                        display:"flex", flexDirection:"column", gap:14,
+                      }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = iris; e.currentTarget.style.boxShadow = "0 4px 24px rgba(42,38,34,.10)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = borderSubtle; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}>
+                        <p className="text-overline" style={{ color: iris, marginBottom:0 }}>{t.label}</p>
+                        <p className="font-body" style={{ fontSize:16, color: textSecondary, lineHeight:1.55, flex:1 }}>{t.desc}</p>
+                        <p className="font-heading" style={{ fontSize:14, color: textPrimary, fontWeight:500, letterSpacing:"-.005em" }}>{t.cta}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            );
+          }}
+        </SectionReveal>
+
+      </main>
+
+      <footer style={{ background: bg, borderTop:`1px solid ${borderSubtle}`, padding:"40px 24px" }}>
+        <div style={{ margin:"0 auto", maxWidth:1080, display:"flex", flexDirection:"column", alignItems:"center", gap:24 }}>
+          <img src="/neoschool-logo.png" alt="neoschool" style={{ height:80 }}/>
+          <span className="font-heading" style={{ fontSize:12, color: textMuted }}>Missoula, Montana</span>
+          <div style={{ display:"flex", gap:24, flexWrap:"wrap", justifyContent:"center" }}>
+            {[
+              { label:"jennie@chiefmamaofficer.com", href:"mailto:jennie@chiefmamaofficer.com" },
+              { label:"Missoula campus",            href:"/missoula.html" },
+              { label:"Instagram",                  href:"https://www.instagram.com/neoschool" },
+            ].map(link => (
+              <a key={link.label} href={link.href}
+                {...(link.href.startsWith("http") ? { target:"_blank", rel:"noopener noreferrer" } : {})}
+                className="font-heading" style={{ fontSize:12, color: textMuted, textDecoration:"none", transition:"color 350ms" }}
+                onMouseEnter={e => e.currentTarget.style.color = textPrimary}
+                onMouseLeave={e => e.currentTarget.style.color = textMuted}>
+                {link.label}
+              </a>
+            ))}
           </div>
         </div>
+        <p className="font-heading" style={{ marginTop:32, fontSize:11, textAlign:"center", color: textMuted, opacity:.5 }}>
+          © 2026 neoschool · Built for the post-AI world.
+        </p>
       </footer>
+
+      <style>{`
+        @media (min-width: 1024px) {
+          .nav-desktop { display: flex !important; }
+          .nav-mobile-btn { display: none !important; }
+        }
+      `}</style>
 
       {showInterestForm && <CampusInterestForm onClose={() => setShowInterestForm(false)} />}
     </div>
   );
+}
+
+function SectionReveal({ children }) {
+  const ref = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) { setIsVisible(true); observer.unobserve(el); }
+      },
+      { threshold: 0.15 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  return <div ref={ref}>{children(isVisible)}</div>;
 }
 
 // ── CAMPUS INTEREST FORM ─────────────────────────────────────────────────────

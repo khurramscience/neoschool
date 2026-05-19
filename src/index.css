@@ -74,6 +74,31 @@ body::after{
 @keyframes pu{0%,100%{opacity:1}50%{opacity:.3}}
 @keyframes pi{0%{transform:scale(.85);opacity:0}70%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
 @keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes scrollPulse{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+
+/* ── Lovable V2 utility classes (warm parent variant) ── */
+.font-heading{font-family:'Instrument Sans',system-ui,sans-serif}
+.font-body{font-family:'Source Serif 4',Georgia,serif}
+
+.text-hero{font-size:clamp(2.25rem,5.5vw,4.5rem);line-height:1.08;letter-spacing:-.02em}
+.text-section-heading{font-size:clamp(1.625rem,3.5vw,2.625rem);line-height:1.18;letter-spacing:-.01em}
+.text-overline{font-family:'Instrument Sans',system-ui,sans-serif;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:hsl(18 52% 62%)}
+.text-nav{font-family:'Instrument Sans',system-ui,sans-serif;font-size:13px;font-weight:500;text-transform:uppercase;letter-spacing:.1em}
+
+.section-number{font-family:'Instrument Sans',system-ui,sans-serif;font-size:clamp(5rem,10vw,7.5rem);font-weight:700;opacity:.05;position:absolute;top:0;left:0;line-height:1;pointer-events:none;user-select:none;color:hsl(30 7% 66%)}
+
+.prose-neo{font-family:'Source Serif 4',Georgia,serif;font-size:18px;line-height:1.7;max-width:620px;color:hsl(28 8% 44%)}
+
+.btn-iris{
+  font-family:'Instrument Sans',system-ui,sans-serif;
+  font-size:13px;text-transform:uppercase;letter-spacing:.08em;
+  background:hsl(248 74% 62%);color:#fff;border-radius:12px;
+  transition:box-shadow 350ms ease-in-out,transform 150ms ease-out;
+  border:none;cursor:pointer;font-weight:500;text-decoration:none;
+  display:inline-block;
+}
+.btn-iris:hover{box-shadow:0 0 24px rgba(107,92,231,.3);color:#fff}
+.btn-iris:active{transform:scale(.97)}
 
 /* ── Frontier landing animations ── */
 @keyframes hero-fade-up{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
