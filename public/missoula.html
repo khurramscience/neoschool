@@ -294,6 +294,103 @@
   .form-status.success{background:rgba(74,124,106,.2);color:#a8e0c4;border:1px solid rgba(74,124,106,.4);display:block}
   .form-status.error{background:rgba(168,61,61,.2);color:#f0a4a4;border:1px solid rgba(168,61,61,.4);display:block}
 
+  /* ─── ROBUST APPLICATION FORM: sections, optional, fieldsets, checkboxes ─── */
+  .form-section{margin-bottom:32px;padding-bottom:28px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .form-section:last-of-type{border-bottom:none}
+  .form-section-eyebrow{
+    font-family:'Geist Mono',monospace;font-size:10.5px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--or3);font-weight:600;
+    margin-bottom:18px;padding-bottom:8px;
+    border-bottom:1px solid rgba(232,133,63,.2);
+    display:inline-block;
+  }
+  label .optional{
+    font-family:'Newsreader',serif;font-size:11px;font-style:italic;
+    color:rgba(255,255,255,.4);letter-spacing:0;text-transform:none;
+    font-weight:300;margin-left:6px;
+  }
+  fieldset{border:none;padding:0;margin:0}
+  /* date input — match dark theme */
+  input[type="date"]{
+    color-scheme:dark;
+    font-family:'Newsreader',serif;
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator{
+    filter:invert(.7);cursor:pointer;
+  }
+  /* Radio pills (Yes/No for IEP/504) */
+  .radio-pill{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:9px 18px;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.14);
+    border-radius:99px;cursor:pointer;
+    font-family:'Newsreader',serif;font-size:14.5px;
+    color:rgba(255,255,255,.85);
+    transition:all .15s;
+    text-transform:none;letter-spacing:0;
+  }
+  .radio-pill:hover{border-color:var(--or3);background:rgba(255,255,255,.09)}
+  .radio-pill input{
+    appearance:none;-webkit-appearance:none;
+    width:16px;height:16px;margin:0;padding:0;
+    border:1.5px solid rgba(255,255,255,.5);
+    border-radius:50%;background:transparent;cursor:pointer;
+    flex-shrink:0;display:grid;place-content:center;
+    transition:all .15s;
+  }
+  .radio-pill input:checked{
+    border-color:var(--or3);background:var(--or3);
+    box-shadow:inset 0 0 0 3px var(--nv);
+  }
+  .radio-pill:has(input:checked){
+    border-color:var(--or3);background:rgba(232,133,63,.1);
+    color:#fff;
+  }
+  /* Acknowledgment checkboxes — required-feel, visually distinct */
+  .ack-section{
+    background:rgba(0,0,0,.18);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:14px;
+    padding:24px 22px !important;
+  }
+  .ack-checkbox{
+    display:flex;align-items:flex-start;gap:14px;
+    padding:16px 18px;margin-bottom:14px;
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:10px;
+    text-transform:none;letter-spacing:0;
+    font-family:'Newsreader',serif;font-weight:300;
+    font-size:13.5px;line-height:1.6;
+    color:rgba(255,255,255,.82);
+    cursor:pointer;transition:all .15s;
+  }
+  .ack-checkbox:hover{border-color:rgba(232,133,63,.3);background:rgba(255,255,255,.06)}
+  .ack-checkbox:has(input:checked){
+    border-color:var(--or3);background:rgba(232,133,63,.07);
+  }
+  .ack-checkbox input[type="checkbox"]{
+    appearance:none;-webkit-appearance:none;
+    width:18px;height:18px;flex-shrink:0;margin-top:1px;
+    border:1.5px solid rgba(255,255,255,.4);
+    border-radius:4px;background:transparent;cursor:pointer;
+    transition:all .15s;position:relative;padding:0;
+  }
+  .ack-checkbox input[type="checkbox"]:checked{
+    background:var(--or3);border-color:var(--or3);
+  }
+  .ack-checkbox input[type="checkbox"]:checked::after{
+    content:"";position:absolute;left:5px;top:1px;
+    width:5px;height:10px;
+    border:solid #fff;border-width:0 2px 2px 0;
+    transform:rotate(45deg);
+  }
+  .ack-checkbox input[type="checkbox"]:focus{
+    outline:none;box-shadow:0 0 0 3px rgba(232,133,63,.18);
+  }
+  .ack-checkbox span strong{color:#fff;font-weight:500}
+
   /* Footer */
   footer{background:var(--nv);color:#fff;padding:36px 0;margin-top:30px}
 
@@ -796,54 +893,176 @@
       <p class="apply-sub">Kindergarten + 1st Grade · Limited spots available. We'll respond within 24 hours.</p>
 
       <form id="applyForm" onsubmit="submitApplication(event)">
-        <div class="form-grid">
-          <div>
-            <label for="parentName">Parent name *</label>
-            <input id="parentName" name="parentName" type="text" required placeholder="Your full name">
+
+        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+        <!-- SECTION 1 — PARENT CONTACT -->
+        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+        <div class="form-section">
+          <p class="form-section-eyebrow">01 · Parent</p>
+
+          <div class="form-grid">
+            <div>
+              <label for="parentFirst">Parent's first name *</label>
+              <input id="parentFirst" name="parentFirst" type="text" required placeholder="First">
+            </div>
+            <div>
+              <label for="parentLast">Parent's last name *</label>
+              <input id="parentLast" name="parentLast" type="text" required placeholder="Last">
+            </div>
           </div>
-          <div>
-            <label for="email">Email *</label>
-            <input id="email" name="email" type="email" required placeholder="you@example.com">
+
+          <div class="form-grid">
+            <div>
+              <label for="email">Email *</label>
+              <input id="email" name="email" type="email" required placeholder="you@example.com">
+            </div>
+            <div>
+              <label for="phone">Phone number *</label>
+              <input id="phone" name="phone" type="tel" required placeholder="(406) 555-0100">
+            </div>
           </div>
         </div>
 
-        <div class="form-grid">
-          <div>
-            <label for="phone">Phone</label>
-            <input id="phone" name="phone" type="tel" placeholder="(406) 555-0100">
+        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+        <!-- SECTION 2 — CHILD DETAILS -->
+        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+        <div class="form-section">
+          <p class="form-section-eyebrow">02 · Child</p>
+
+          <div class="form-grid">
+            <div>
+              <label for="childFirst">Child's first name *</label>
+              <input id="childFirst" name="childFirst" type="text" required placeholder="First">
+            </div>
+            <div>
+              <label for="childLast">Child's last name *</label>
+              <input id="childLast" name="childLast" type="text" required placeholder="Last">
+            </div>
           </div>
-          <div>
-            <label for="childName">Child's name *</label>
-            <input id="childName" name="childName" type="text" required placeholder="Child's first name">
+
+          <div class="form-grid">
+            <div>
+              <label for="preferredName">Preferred name <span class="optional">(optional)</span></label>
+              <input id="preferredName" name="preferredName" type="text" placeholder="What they're called at home">
+            </div>
+            <div>
+              <label for="gender">Child's gender *</label>
+              <select id="gender" name="gender" required>
+                <option value="">Select</option>
+                <option value="girl">Girl</option>
+                <option value="boy">Boy</option>
+                <option value="nonbinary">Non-binary</option>
+                <option value="prefer-not">Prefer not to say</option>
+                <option value="other">Other / specify in notes</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div>
+              <label for="dob">Child's date of birth *</label>
+              <input id="dob" name="dob" type="date" required>
+            </div>
+            <div>
+              <label for="grade">Child's current grade level *</label>
+              <select id="grade" name="grade" required>
+                <option value="">Select</option>
+                <option value="Pre-K / Daycare">Pre-K / Daycare</option>
+                <option value="Kindergarten">Kindergarten</option>
+                <option value="1st Grade">1st Grade</option>
+                <option value="2nd Grade">2nd Grade</option>
+                <option value="3rd Grade">3rd Grade</option>
+                <option value="4th Grade">4th Grade</option>
+                <option value="5th Grade">5th Grade</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div>
+              <label for="currentSchool">Child's current school *</label>
+              <input id="currentSchool" name="currentSchool" type="text" required placeholder="School name or 'Homeschool'">
+            </div>
+            <div>
+              <label for="enrollmentDate">Desired enrollment date *</label>
+              <select id="enrollmentDate" name="enrollmentDate" required>
+                <option value="">Select</option>
+                <option value="Sept 2026 (start of year)">Sept 2026 (start of year)</option>
+                <option value="Jan 2027 (mid-year)">Jan 2027 (mid-year)</option>
+                <option value="Sept 2027 or later">Sept 2027 or later</option>
+                <option value="As soon as possible">As soon as possible</option>
+              </select>
+            </div>
           </div>
         </div>
 
-        <div class="form-grid">
-          <div>
-            <label for="grade">Grade for 2026–27 *</label>
-            <select id="grade" name="grade" required>
-              <option value="">Select grade</option>
-              <option value="Kindergarten">Kindergarten</option>
-              <option value="1st Grade">1st Grade</option>
-              <option value="Other">Other (please specify in notes)</option>
-            </select>
+        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+        <!-- SECTION 3 — FIT & MOTIVATION -->
+        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+        <div class="form-section">
+          <p class="form-section-eyebrow">03 · Fit</p>
+
+          <div style="margin-bottom:18px">
+            <label for="referredBy">Who referred you to neoschool? <span class="optional">(optional)</span></label>
+            <input id="referredBy" name="referredBy" type="text" placeholder="Name, social media, search, etc.">
           </div>
-          <div>
-            <label for="situation">Current situation</label>
-            <select id="situation" name="situation">
-              <option value="">Select if applicable</option>
-              <option value="public">Public school</option>
-              <option value="private">Private school</option>
-              <option value="homeschool">Homeschooling</option>
-              <option value="preschool">Preschool / PreK / Daycare</option>
-              <option value="other">Other</option>
-            </select>
+
+          <div style="margin-bottom:18px">
+            <label for="motivation">What drew you to apply for neoschool? *</label>
+            <textarea id="motivation" name="motivation" required placeholder="What about our approach resonates with you? What are you hoping for?"></textarea>
+          </div>
+
+          <div style="margin-bottom:18px">
+            <label for="notes">Is there anything else you'd like us to know about your child or your family? <span class="optional">(optional)</span></label>
+            <textarea id="notes" name="notes" placeholder="Interests, strengths, what makes them unique, family context..."></textarea>
           </div>
         </div>
 
-        <div style="margin-bottom:18px">
-          <label for="notes">What drew you to neoschool? (optional)</label>
-          <textarea id="notes" name="notes" placeholder="Tell us a bit about your child and what you're hoping for in their education..."></textarea>
+        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+        <!-- SECTION 4 — LEARNING NEEDS -->
+        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+        <div class="form-section">
+          <p class="form-section-eyebrow">04 · Learning support</p>
+
+          <fieldset style="border:1px solid var(--p2);border-radius:10px;padding:16px 18px 14px;margin-bottom:18px">
+            <legend style="font-family:'Newsreader',serif;font-size:14.5px;color:var(--nv);padding:0 8px;line-height:1.45">
+              Does your child currently have an IEP, 504 Plan, or other learning or behavior support plan? *
+            </legend>
+            <p style="font-size:12.5px;color:var(--mu);margin:8px 0 12px;line-height:1.5">
+              If yes, you'll be asked to upload documentation during enrollment.
+            </p>
+            <div style="display:flex;gap:18px">
+              <label class="radio-pill"><input type="radio" name="iep504" value="yes" required> Yes</label>
+              <label class="radio-pill"><input type="radio" name="iep504" value="no" required> No</label>
+            </div>
+          </fieldset>
+
+          <div style="margin-bottom:18px">
+            <label for="accommodations">Are there any accommodations or adjustments that help your child learn and thrive? <span class="optional">(optional)</span></label>
+            <textarea id="accommodations" name="accommodations" placeholder="Examples: extra breaks, quiet space for focus, visual schedules, etc."></textarea>
+          </div>
+        </div>
+
+        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+        <!-- SECTION 5 — ACKNOWLEDGMENTS -->
+        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+        <div class="form-section ack-section">
+          <p class="form-section-eyebrow">05 · Acknowledgments</p>
+
+          <label class="ack-checkbox">
+            <input type="checkbox" name="ackFit" required>
+            <span>
+              I understand that neoschool is designed for students who thrive with a high degree of independence and are functioning within a typical range of ability. I agree to disclose any known learning or behavioral needs during the admissions process and to provide supporting documentation upon enrollment. I recognize that neoschool is not structured to provide intensive behavioral, therapeutic, or one-to-one academic support, and that if significant challenges emerge after enrollment, our family will meet with the neoschool team to honestly evaluate whether this environment is the right fit for my child. *
+            </span>
+          </label>
+
+          <label class="ack-checkbox">
+            <input type="checkbox" name="ackTuition" required>
+            <span>
+              I understand neoschool's annual tuition rate and payment schedule. I acknowledge that while financial aid is not currently offered, neoschool rewards community-building: <strong>Founding Families can earn tuition credits by referring other families to our flagship campus.</strong> *
+            </span>
+          </label>
         </div>
 
         <button type="submit" class="submit-btn" id="submitBtn">Apply for 2026–2027 →</button>
@@ -909,15 +1128,47 @@
     const form = document.getElementById("applyForm");
 
     // Snapshot data immediately
+    const parentFirst = form.parentFirst.value.trim();
+    const parentLast = form.parentLast.value.trim();
+    const childFirst = form.childFirst.value.trim();
+    const childLast = form.childLast.value.trim();
+    const preferredName = form.preferredName.value.trim();
+    const iepRadio = form.querySelector('input[name="iep504"]:checked');
+
     const data = {
-      parent_name: form.parentName.value.trim(),
+      // Parent
+      parent_first_name: parentFirst,
+      parent_last_name: parentLast,
+      parent_name: `${parentFirst} ${parentLast}`.trim(), // backward compat
       email: form.email.value.trim(),
-      phone: form.phone.value.trim() || null,
-      child_name: form.childName.value.trim(),
+      phone: form.phone.value.trim(),
+
+      // Child
+      child_first_name: childFirst,
+      child_last_name: childLast,
+      child_name: `${childFirst} ${childLast}`.trim(), // backward compat
+      preferred_name: preferredName || null,
+      gender: form.gender.value,
+      date_of_birth: form.dob.value,
       grade: form.grade.value,
-      campus: "Missoula",
-      situation: form.situation.value || null,
+      current_school: form.currentSchool.value.trim(),
+      enrollment_date: form.enrollmentDate.value,
+
+      // Fit & motivation
+      referred_by: form.referredBy.value.trim() || null,
+      motivation: form.motivation.value.trim(),
       notes: form.notes.value.trim() || null,
+
+      // Learning support
+      has_iep_504: iepRadio ? iepRadio.value : null,
+      accommodations: form.accommodations.value.trim() || null,
+
+      // Acknowledgments
+      ack_fit: form.ackFit.checked,
+      ack_tuition: form.ackTuition.checked,
+
+      // Meta
+      campus: "Missoula",
       source: "missoula-page",
       submitted_at: new Date().toISOString(),
     };
@@ -930,8 +1181,7 @@
     } catch {}
 
     // === STEP 2: Show success state IMMEDIATELY (optimistic UI) ===
-    const firstName = data.parent_name.split(" ")[0] || "there";
-    document.getElementById("successName").textContent = firstName;
+    document.getElementById("successName").textContent = parentFirst || "there";
     document.getElementById("successEmail").textContent = data.email;
     document.getElementById("formState").style.display = "none";
     document.getElementById("successState").style.display = "block";
