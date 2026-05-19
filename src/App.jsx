@@ -1096,6 +1096,343 @@ function TutorMessage({ content, isUser }) {
   );
 }
 
+// ── JOURNEY VIEW — Knowledge Graph visualization ─────────────────────────────
+function JourneyView({ studentId, allLabs, onOpenLab }) {
+  const [tick, setTick] = useState(0);
+  const graph = getStudentGraph(studentId);
+  const recs = kgRecs(studentId, allLabs, 4);
+  const skills = getSkillsSummary(studentId, allLabs);
+  const path = getStudentPath(studentId);
+  const graphData = getGraphData(studentId, allLabs);
+
+  const visitedNodes = graphData.nodes.filter(n => n.visited);
+  const masteredCount = visitedNodes.filter(n => n.mastery >= 0.6).length;
+  const inProgressCount = visitedNodes.filter(n => n.mastery > 0 && n.mastery < 0.6).length;
+
+  const topicColors = {
+    "Physics": "#6B5CE7",
+    "Multiplication": "#C25420",
+    "Division": "#D9622B",
+    "Fractions": "#E89A4F",
+    "Negative Numbers": "#4A7C6A",
+    "Properties": "#2D6EA8",
+  };
+  const colorFor = (topic) => topicColors[topic] || "#A89BE8";
+
+  return (
+    <div style={{ paddingBottom:32 }}>
+      {/* Stats header */}
+      <div style={{
+        display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(140px, 1fr))",
+        gap:10, marginBottom:18,
+      }}>
+        {[
+          { label:"Labs explored", value: visitedNodes.length, color:"#6B5CE7" },
+          { label:"Mastered (60%+)", value: masteredCount, color:"#2D8B5F" },
+          { label:"In progress", value: inProgressCount, color:"#C25420" },
+          { label:"Skills earned", value: skills.length, color:"#4A7C6A" },
+        ].map(s => (
+          <div key={s.label} style={{
+            background:"#fff", borderRadius:10, padding:"14px 16px",
+            border:"1px solid var(--p2)",
+          }}>
+            <div style={{
+              fontSize:11, color:"var(--mu)", fontFamily:"'IBM Plex Mono',monospace",
+              letterSpacing:".06em", textTransform:"uppercase", marginBottom:4,
+            }}>{s.label}</div>
+            <div style={{
+              fontSize:28, fontWeight:700, color:s.color,
+              fontFamily:"'Instrument Sans',sans-serif", lineHeight:1,
+              letterSpacing:"-.01em",
+            }}>{s.value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Recommended next */}
+      {recs.length > 0 && (
+        <div style={{ marginBottom:22 }}>
+          <p style={{
+            fontFamily:"'IBM Plex Mono',monospace", fontSize:11, fontWeight:600,
+            color:"var(--mu)", letterSpacing:".08em", textTransform:"uppercase",
+            marginBottom:10,
+          }}>Recommended next · powered by your knowledge graph</p>
+          <div style={{
+            display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(220px, 1fr))",
+            gap:10,
+          }}>
+            {recs.slice(0, 4).map((rec, i) => (
+              <button key={rec.id} onClick={() => onOpenLab(rec)} style={{
+                background:"#fff", border:`1px solid ${i === 0 ? "#6B5CE7" : "var(--p2)"}`,
+                borderRadius:10, padding:"14px 16px", cursor:"pointer",
+                textAlign:"left", fontFamily:"inherit", color:"inherit",
+                transition:"all 200ms", position:"relative",
+              }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = "#6B5CE7"; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 20px -8px rgba(107,92,231,.25)"; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = i === 0 ? "#6B5CE7" : "var(--p2)"; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
+                {i === 0 && (
+                  <span style={{
+                    position:"absolute", top:-7, right:14,
+                    background:"#6B5CE7", color:"#fff",
+                    fontSize:9, fontFamily:"'IBM Plex Mono',monospace",
+                    padding:"3px 7px", borderRadius:4, letterSpacing:".05em",
+                    textTransform:"uppercase", fontWeight:600,
+                  }}>Next</span>
+                )}
+                <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
+                  <span style={{ fontSize:22 }}>{rec.emoji}</span>
+                  <span style={{
+                    fontFamily:"'Instrument Sans',sans-serif", fontWeight:600,
+                    fontSize:14, color:"var(--tx)", letterSpacing:"-.005em",
+                  }}>{rec.title}</span>
+                </div>
+                <p style={{
+                  fontSize:11.5, color:"var(--mu)", fontStyle:"italic",
+                  fontFamily:"'Source Serif 4',serif", lineHeight:1.4,
+                }}>{rec.reason} · {rec.time}m</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Path so far */}
+      {path.length > 0 && (
+        <div style={{ marginBottom:22 }}>
+          <p style={{
+            fontFamily:"'IBM Plex Mono',monospace", fontSize:11, fontWeight:600,
+            color:"var(--mu)", letterSpacing:".08em", textTransform:"uppercase",
+            marginBottom:10,
+          }}>Your journey · last {Math.min(path.length, 8)} stops</p>
+          <div style={{
+            display:"flex", gap:6, flexWrap:"wrap", alignItems:"center",
+            padding:"14px", background:"#fff", borderRadius:10,
+            border:"1px solid var(--p2)",
+          }}>
+            {path.slice(-8).map((labId, i, arr) => {
+              const lab = allLabs.find(l => l.id === labId);
+              if (!lab) return null;
+              const node = graph.labs[labId];
+              const mastery = node?.mastery || 0;
+              return (
+                <div key={i} style={{ display:"flex", alignItems:"center", gap:6 }}>
+                  <div title={`${lab.title} · ${Math.round(mastery * 100)}% mastery`} style={{
+                    padding:"6px 10px", borderRadius:18,
+                    background: mastery >= 0.6 ? "#2D8B5F" : mastery > 0 ? "#C25420" : "var(--p)",
+                    color: mastery > 0 ? "#fff" : "var(--mu)",
+                    fontSize:12, fontWeight:500,
+                    fontFamily:"'Instrument Sans',sans-serif",
+                    display:"flex", alignItems:"center", gap:4,
+                    cursor:"pointer",
+                  }} onClick={() => onOpenLab(lab)}>
+                    <span style={{ fontSize:14 }}>{lab.emoji}</span>
+                    <span>{lab.title}</span>
+                  </div>
+                  {i < arr.length - 1 && (
+                    <span style={{ color:"var(--mu)", fontSize:14 }}>→</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Force-directed graph SVG */}
+      <div style={{ marginBottom:22 }}>
+        <p style={{
+          fontFamily:"'IBM Plex Mono',monospace", fontSize:11, fontWeight:600,
+          color:"var(--mu)", letterSpacing:".08em", textTransform:"uppercase",
+          marginBottom:10,
+        }}>Knowledge graph · by topic</p>
+        <KnowledgeGraphSVG
+          graphData={graphData}
+          allLabs={allLabs}
+          colorFor={colorFor}
+          onOpenLab={onOpenLab}
+        />
+      </div>
+
+      {/* Skills earned */}
+      {skills.length > 0 && (
+        <div>
+          <p style={{
+            fontFamily:"'IBM Plex Mono',monospace", fontSize:11, fontWeight:600,
+            color:"var(--mu)", letterSpacing:".08em", textTransform:"uppercase",
+            marginBottom:10,
+          }}>Skills earned</p>
+          <div style={{
+            display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(180px, 1fr))",
+            gap:8,
+          }}>
+            {skills.slice(0, 12).map(s => (
+              <div key={s.skill} style={{
+                background:"#fff", border:"1px solid var(--p2)",
+                borderRadius:8, padding:"10px 12px",
+              }}>
+                <div style={{
+                  display:"flex", justifyContent:"space-between", alignItems:"center",
+                  marginBottom:5,
+                }}>
+                  <span style={{
+                    fontFamily:"'Source Serif 4',serif", fontSize:13, color:"var(--tx)",
+                  }}>{s.skill}</span>
+                  <span style={{
+                    fontFamily:"'IBM Plex Mono',monospace", fontSize:10,
+                    color: s.level >= 0.6 ? "#2D8B5F" : "var(--mu)",
+                  }}>{Math.round(s.level * 100)}%</span>
+                </div>
+                <div style={{ height:4, background:"var(--p)", borderRadius:99, overflow:"hidden" }}>
+                  <div style={{
+                    width: `${Math.round(s.level * 100)}%`,
+                    height:"100%", background:colorFor(s.topic),
+                    transition:"width 400ms",
+                  }}/>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {visitedNodes.length === 0 && (
+        <div style={{
+          textAlign:"center", padding:"40px 20px",
+          background:"#fff", borderRadius:10, border:"1px dashed var(--p2)",
+        }}>
+          <p style={{ fontSize:32, marginBottom:12 }}>🗺</p>
+          <h3 style={{ fontSize:18, marginBottom:6, color:"var(--nv)" }}>Your journey starts now</h3>
+          <p style={{ fontSize:13, color:"var(--mu)", marginBottom:18, maxWidth:380, margin:"0 auto 18px" }}>
+            Try any lab and we'll build your personalized knowledge graph — connecting what you've learned to what to try next.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── KNOWLEDGE GRAPH SVG — simple radial visualization ─────────────────────────
+function KnowledgeGraphSVG({ graphData, allLabs, colorFor, onOpenLab }) {
+  const containerRef = useRef(null);
+  const [size, setSize] = useState({ w: 600, h: 380 });
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const ro = new ResizeObserver(entries => {
+      const r = entries[0].contentRect;
+      setSize({ w: r.width, h: Math.min(440, Math.max(280, r.width * 0.65)) });
+    });
+    ro.observe(containerRef.current);
+    return () => ro.disconnect();
+  }, []);
+
+  // Group labs by topic, layout topics around the circle
+  const topics = [...new Set(graphData.nodes.map(n => n.topic))];
+  const cx = size.w / 2, cy = size.h / 2;
+  const radius = Math.min(size.w, size.h) * 0.38;
+
+  // Position nodes: topic angle + radius offset (visited vs unvisited)
+  const positions = {};
+  topics.forEach((topic, ti) => {
+    const angle = (ti / topics.length) * Math.PI * 2 - Math.PI / 2;
+    const topicNodes = graphData.nodes.filter(n => n.topic === topic);
+    topicNodes.forEach((node, ni) => {
+      const r2 = radius - 18 + (ni % 3) * 30;
+      const aOff = (ni - topicNodes.length / 2 + 0.5) * 0.18;
+      const a = angle + aOff;
+      positions[node.id] = {
+        x: cx + r2 * Math.cos(a),
+        y: cy + r2 * Math.sin(a),
+        ...node,
+      };
+    });
+  });
+
+  return (
+    <div ref={containerRef} style={{
+      background:"#fff", borderRadius:12, border:"1px solid var(--p2)",
+      padding:"14px", overflow:"hidden",
+    }}>
+      <svg width={size.w} height={size.h} style={{ display:"block" }}>
+        {/* Edges */}
+        {graphData.edges.map((e, i) => {
+          const fromP = positions[e.from];
+          const toP = positions[e.to];
+          if (!fromP || !toP) return null;
+          return (
+            <line
+              key={i}
+              x1={fromP.x} y1={fromP.y} x2={toP.x} y2={toP.y}
+              stroke={e.type === "prereq" ? "#A89BE8" : "#d4cfc8"}
+              strokeWidth={e.type === "prereq" ? 1.5 : 1}
+              strokeDasharray={e.type === "discovered" ? "3 4" : ""}
+              opacity={0.5}
+            />
+          );
+        })}
+
+        {/* Topic ring labels */}
+        {topics.map((topic, ti) => {
+          const angle = (ti / topics.length) * Math.PI * 2 - Math.PI / 2;
+          const lx = cx + (radius + 30) * Math.cos(angle);
+          const ly = cy + (radius + 30) * Math.sin(angle);
+          return (
+            <text
+              key={topic}
+              x={lx} y={ly}
+              textAnchor="middle" dominantBaseline="middle"
+              fontFamily="'IBM Plex Mono',monospace"
+              fontSize={9} fontWeight={600}
+              fill={colorFor(topic)}
+              letterSpacing={1}
+            >{topic.toUpperCase()}</text>
+          );
+        })}
+
+        {/* Nodes */}
+        {Object.values(positions).map(node => {
+          const mastery = node.mastery || 0;
+          const isVisited = node.visited;
+          const r = isVisited ? 16 : 11;
+          const fill = isVisited
+            ? (mastery >= 0.6 ? "#2D8B5F" : mastery > 0 ? colorFor(node.topic) : "#fff")
+            : "#fff";
+          const opacity = isVisited ? 1 : 0.45;
+          const stroke = isVisited ? "#2A2622" : colorFor(node.topic);
+          return (
+            <g
+              key={node.id}
+              onClick={() => onOpenLab(allLabs.find(l => l.id === node.id))}
+              style={{ cursor:"pointer" }}
+            >
+              <circle
+                cx={node.x} cy={node.y} r={r}
+                fill={fill}
+                stroke={stroke}
+                strokeWidth={isVisited ? 1.5 : 1}
+                opacity={opacity}
+              />
+              <text
+                x={node.x} y={node.y + 1}
+                textAnchor="middle" dominantBaseline="middle"
+                fontSize={isVisited ? 14 : 11}
+              >{node.emoji}</text>
+              <title>{node.label} · {isVisited ? `${Math.round(mastery * 100)}% mastery` : "not yet started"}</title>
+            </g>
+          );
+        })}
+      </svg>
+      <div style={{
+        display:"flex", gap:14, justifyContent:"center", marginTop:6,
+        fontFamily:"'IBM Plex Mono',monospace", fontSize:10, color:"var(--mu)",
+      }}>
+        <span><span style={{ display:"inline-block", width:8, height:8, borderRadius:"50%", background:"#2D8B5F", marginRight:5 }}/>mastered</span>
+        <span><span style={{ display:"inline-block", width:8, height:8, borderRadius:"50%", background:"#6B5CE7", marginRight:5 }}/>in progress</span>
+        <span><span style={{ display:"inline-block", width:8, height:8, borderRadius:"50%", background:"#fff", border:"1px solid #A89BE8", marginRight:5 }}/>not yet</span>
+      </div>
+    </div>
+  );
+}
+
 // ── CAMPUS INTEREST FORM ─────────────────────────────────────────────────────
 // For people who want to launch a neoschool campus in their community
 function CampusInterestForm({ onClose }) {
@@ -2484,11 +2821,14 @@ function StudentPortal({ user }) {
       </div>
       {activeTool && <SimViewer tool={activeTool} onClose={() => setActiveTool(null)} />}
       <div style={{ display:"flex", background:"var(--p)", padding:"4px", margin:"10px 11px 0", borderRadius:11, flexShrink:0 }}>
-        {[{id:"labs",l:"🎮 Activities"},{id:"tools",l:"🛠 Tools & Sims"},{id:"tutors",l:"🤖 Tutors"},{id:"memory",l:"🧠 Memory"}].map(t => (
+        {[{id:"labs",l:"🎮 Activities"},{id:"journey",l:"🗺 Journey"},{id:"tools",l:"🛠 Tools"},{id:"tutors",l:"🤖 Tutors"},{id:"memory",l:"🧠 Memory"}].map(t => (
           <div key={t.id} onClick={() => setActiveTab(t.id)} style={{ flex:1, textAlign:"center", padding:"7px", borderRadius:8, cursor:"pointer", fontWeight:600, fontSize:11, background:activeTab===t.id?"#fff":"transparent", color:activeTab===t.id?"var(--nv)":"var(--mu)", transition:"all .2s" }}>{t.l}</div>
         ))}
       </div>
       <div style={{ flex:1, overflowY:"auto", padding:"11px" }}>
+        {activeTab === "journey" && (
+          <JourneyView studentId={user?.id || "demo"} allLabs={LABS} onOpenLab={(lab) => { window.location.hash = `lab/${lab.id}`; }}/>
+        )}
         {activeTab === "tools" && (
           <ContentProviders onOpenTool={setActiveTool}/>
         )}

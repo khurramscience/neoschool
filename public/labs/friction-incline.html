@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Friction & Inclined Plane — neoschool</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,sans-serif;background:linear-gradient(180deg,#faf6f0 0%,#f0e8d8 60%,#d4a574 100%);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+  header{background:rgba(255,255,255,.92);backdrop-filter:blur(8px);padding:14px 20px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+  h1{font-size:18px;font-weight:600;color:#2A2622}
+  .stat{display:flex;flex-direction:column;font-family:'IBM Plex Mono',monospace}
+  .stat label{font-size:10px;color:#6B5CE7;text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+  .stat value{font-size:16px;color:#2A2622;font-weight:700}
+  .controls{background:rgba(255,255,255,.85);padding:14px 20px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;border-bottom:1px solid rgba(0,0,0,.06)}
+  .control{display:flex;flex-direction:column;gap:4px;min-width:130px}
+  .control label{font-size:11px;color:#564E48;font-weight:600;display:flex;justify-content:space-between}
+  .control label span{color:#6B5CE7;font-family:'IBM Plex Mono',monospace}
+  input[type=range]{width:100%;accent-color:#6B5CE7}
+  button{background:#6B5CE7;color:#fff;border:none;padding:10px 22px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;transition:all .2s}
+  button:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(107,92,231,.3)}
+  button.secondary{background:transparent;color:#6B5CE7;border:1px solid #6B5CE7}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  #canvas{flex:1;display:block;cursor:default}
+  .formula{position:absolute;bottom:20px;right:20px;background:rgba(255,255,255,.95);padding:14px 18px;border-radius:10px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;line-height:1.7;border:1px solid rgba(0,0,0,.08);max-width:280px}
+  .formula b{color:#6B5CE7}
+  .formula .verdict{margin-top:8px;padding-top:8px;border-top:1px solid rgba(0,0,0,.1);font-weight:600}
+  .formula .moves{color:#2D8B5F}
+  .formula .static{color:#C25420}
+</style>
+</head>
+<body>
+<header>
+  <h1>📐 Friction & Inclined Plane</h1>
+  <div class="stat"><label>Angle θ</label><value id="ang-stat">30°</value></div>
+  <div class="stat"><label>F_gravity</label><value id="fg-stat">0 N</value></div>
+  <div class="stat"><label>F_friction max</label><value id="ff-stat">0 N</value></div>
+  <div class="stat"><label>Status</label><value id="status">—</value></div>
+</header>
+
+<div class="controls">
+  <div class="control">
+    <label>Angle θ <span id="ang-v">30°</span></label>
+    <input id="ang" type="range" min="0" max="60" value="30"/>
+  </div>
+  <div class="control">
+    <label>Mass m <span id="mass-v">2.0 kg</span></label>
+    <input id="mass" type="range" min="5" max="100" value="20"/>
+  </div>
+  <div class="control">
+    <label>μ_static <span id="ms-v">0.40</span></label>
+    <input id="ms" type="range" min="0" max="100" value="40"/>
+  </div>
+  <div class="control">
+    <label>μ_kinetic <span id="mk-v">0.25</span></label>
+    <input id="mk" type="range" min="0" max="80" value="25"/>
+  </div>
+  <button id="release">Release ↓</button>
+  <button id="reset" class="secondary">Reset</button>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<div class="formula" id="formula">
+  Loading…
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const $ = id => document.getElementById(id);
+const g = 9.8;
+
+let W=0, H=0;
+function resize() {
+  W = canvas.width = canvas.clientWidth = window.innerWidth;
+  H = canvas.height = canvas.clientHeight = window.innerHeight - 160;
+}
+window.addEventListener('resize', resize);
+resize();
+
+let pos = 0; // distance from top of ramp (0..1)
+let vel = 0;
+let running = false;
+let timeOnRamp = 0;
+let maxVel = 0;
+
+function getParams() {
+  return {
+    theta: parseInt($('ang').value) * Math.PI / 180,
+    thetaDeg: parseInt($('ang').value),
+    m: parseInt($('mass').value) / 10,
+    mus: parseInt($('ms').value) / 100,
+    muk: parseInt($('mk').value) / 100,
+  };
+}
+
+function physics(p) {
+  const Fg_parallel = p.m * g * Math.sin(p.theta);     // downslope
+  const Fnorm       = p.m * g * Math.cos(p.theta);     // perpendicular
+  const Ffr_static_max = p.mus * Fnorm;                // max static friction
+  const Ffr_kinetic    = p.muk * Fnorm;                // kinetic friction (always when moving)
+
+  const moving = Math.abs(vel) > 0.001 || running;
+  const willMove = Fg_parallel > Ffr_static_max;
+
+  let accel = 0;
+  if (moving) {
+    // kinetic friction opposes motion (motion is downslope, so friction is up)
+    accel = (Fg_parallel - Ffr_kinetic) / p.m;
+    if (vel <= 0 && Fg_parallel <= Ffr_static_max) {
+      vel = 0; accel = 0;
+    }
+  } else if (running && willMove) {
+    accel = (Fg_parallel - Ffr_kinetic) / p.m;
+  }
+  return { Fg_parallel, Fnorm, Ffr_static_max, Ffr_kinetic, accel, willMove };
+}
+
+function postState() {
+  const p = getParams();
+  const phys = physics(p);
+  window.parent.postMessage({
+    type: 'sim-state',
+    sim: 'friction-incline',
+    state: {
+      angleDeg: p.thetaDeg,
+      mass: p.m,
+      mu_static: p.mus,
+      mu_kinetic: p.muk,
+      Fg_parallel: phys.Fg_parallel,
+      Fnormal: phys.Fnorm,
+      Ffr_static_max: phys.Ffr_static_max,
+      Ffr_kinetic: phys.Ffr_kinetic,
+      moving: running && vel !== 0,
+      willMove: phys.willMove,
+      velocity: vel,
+      pos,
+      timeOnRamp,
+    }
+  }, '*');
+}
+
+function updateUI() {
+  const p = getParams();
+  const phys = physics(p);
+  $('ang-v').textContent = p.thetaDeg + '°';
+  $('mass-v').textContent = p.m.toFixed(1) + ' kg';
+  $('ms-v').textContent = p.mus.toFixed(2);
+  $('mk-v').textContent = p.muk.toFixed(2);
+  $('ang-stat').textContent = p.thetaDeg + '°';
+  $('fg-stat').textContent = phys.Fg_parallel.toFixed(1) + ' N';
+  $('ff-stat').textContent = phys.Ffr_static_max.toFixed(1) + ' N';
+  $('status').textContent = phys.willMove ? (running ? 'SLIDING' : 'WILL SLIDE') : 'STATIC';
+
+  // Formula card
+  $('formula').innerHTML = `
+    <b>F_g∥</b> = m·g·sin(θ) = ${phys.Fg_parallel.toFixed(2)} N<br>
+    <b>F_N</b>  = m·g·cos(θ) = ${phys.Fnorm.toFixed(2)} N<br>
+    <b>F_fs<sup>max</sup></b> = μ<sub>s</sub>·F_N = ${phys.Ffr_static_max.toFixed(2)} N<br>
+    <b>F_fk</b> = μ<sub>k</sub>·F_N = ${phys.Ffr_kinetic.toFixed(2)} N
+    <div class="verdict ${phys.willMove ? 'moves' : 'static'}">
+      ${phys.willMove
+        ? '→ F_g∥ exceeds F_fs<sup>max</sup>: SLIDES!'
+        : '→ F_fs<sup>max</sup> holds the block.'}
+    </div>
+  `;
+}
+
+let last = 0;
+function frame(t) {
+  const dt = Math.min(0.033, (t - last) / 1000);
+  last = t;
+  if (running) {
+    const p = getParams();
+    const phys = physics(p);
+    if (phys.willMove || Math.abs(vel) > 0.001) {
+      vel += phys.accel * dt;
+      pos += vel * dt * 0.04; // visual scaling
+      if (Math.abs(vel) > maxVel) maxVel = Math.abs(vel);
+      timeOnRamp += dt;
+      if (pos >= 1) { pos = 1; vel = 0; running = false; postState(); }
+    } else {
+      vel = 0;
+    }
+    postState();
+  }
+  draw();
+  requestAnimationFrame(frame);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  const p = getParams();
+  const theta = p.theta;
+
+  // Inclined plane geometry — fits in middle of canvas
+  const margin = 80;
+  const groundY = H - 60;
+  const rampLen = Math.min(W - margin * 2, H - 140) * 0.9;
+  const baseX = margin;
+  const baseY = groundY;
+  const topX = baseX + rampLen * Math.cos(theta);
+  const topY = baseY - rampLen * Math.sin(theta);
+
+  // Ground
+  ctx.fillStyle = '#8B6F47';
+  ctx.fillRect(0, groundY, W, H - groundY);
+  ctx.fillStyle = '#A8825D';
+  ctx.fillRect(0, groundY, W, 4);
+
+  // Ramp triangle
+  ctx.fillStyle = '#d8c4a0';
+  ctx.beginPath();
+  ctx.moveTo(baseX, baseY);
+  ctx.lineTo(topX, topY);
+  ctx.lineTo(topX, baseY);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = '#2A2622';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Angle marker
+  ctx.strokeStyle = '#6B5CE7';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(baseX, baseY, 36, -theta, 0);
+  ctx.stroke();
+  ctx.fillStyle = '#6B5CE7';
+  ctx.font = '14px IBM Plex Mono, monospace';
+  ctx.fillText(`θ=${p.thetaDeg}°`, baseX + 42, baseY - 10);
+
+  // Block position on ramp (top to bottom)
+  const blockSize = 32;
+  const startBuf = blockSize / rampLen + 0.02;
+  const t = startBuf + pos * (1 - startBuf * 2);
+  const bx = topX + (baseX - topX) * t;
+  const by = topY + (baseY - topY) * t;
+
+  // Block — rotated to match ramp
+  ctx.save();
+  ctx.translate(bx, by);
+  ctx.rotate(-theta);
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,.2)';
+  ctx.fillRect(-blockSize/2 + 3, -blockSize - 1, blockSize, blockSize);
+  // Body
+  const grad = ctx.createLinearGradient(0, -blockSize, 0, 0);
+  grad.addColorStop(0, '#6B5CE7');
+  grad.addColorStop(1, '#4d3eb8');
+  ctx.fillStyle = grad;
+  ctx.fillRect(-blockSize/2, -blockSize, blockSize, blockSize);
+  ctx.strokeStyle = '#2A2622';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(-blockSize/2, -blockSize, blockSize, blockSize);
+  // Highlight
+  ctx.fillStyle = 'rgba(255,255,255,.2)';
+  ctx.fillRect(-blockSize/2 + 3, -blockSize + 3, blockSize - 12, 4);
+  // Mass label
+  ctx.rotate(theta); // unrotate for text
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 10px system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillText('m', 0, -blockSize/2 - 8);
+  ctx.restore();
+
+  // Force arrows on block
+  const phys = physics(p);
+  const arrowScale = 0.4;
+  // Gravity (straight down)
+  drawArrow(ctx, bx, by - blockSize, bx, by - blockSize + p.m * g * arrowScale, '#dd5555', 'F_g');
+  // F_parallel (downslope) — purple
+  const px = bx + Math.cos(theta) * phys.Fg_parallel * arrowScale;
+  const py = by + Math.sin(theta) * phys.Fg_parallel * arrowScale;
+  if (phys.Fg_parallel > 0.5) drawArrow(ctx, bx, by, px, py, '#6B5CE7', 'F_g‖');
+  // Friction (upslope) — green
+  const Ffr = phys.willMove ? phys.Ffr_kinetic : Math.min(phys.Fg_parallel, phys.Ffr_static_max);
+  if (Ffr > 0.5) {
+    const fx = bx - Math.cos(theta) * Ffr * arrowScale;
+    const fy = by - Math.sin(theta) * Ffr * arrowScale;
+    drawArrow(ctx, bx, by, fx, fy, '#2D8B5F', 'F_fr');
+  }
+
+  // Velocity indicator
+  if (Math.abs(vel) > 0.1 && running) {
+    const speedTxt = `v = ${Math.abs(vel).toFixed(1)} m/s`;
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 13px IBM Plex Mono, monospace';
+    ctx.strokeStyle = '#2A2622';
+    ctx.lineWidth = 4;
+    ctx.textAlign = 'center';
+    ctx.strokeText(speedTxt, bx, by - 60);
+    ctx.fillText(speedTxt, bx, by - 60);
+  }
+
+  ctx.textAlign = 'left';
+}
+
+function drawArrow(ctx, x1, y1, x2, y2, color, label) {
+  const dx = x2 - x1, dy = y2 - y1;
+  const len = Math.hypot(dx, dy);
+  if (len < 2) return;
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.stroke();
+  // Arrowhead
+  const ang = Math.atan2(dy, dx);
+  const hSize = 7;
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - hSize * Math.cos(ang - 0.4), y2 - hSize * Math.sin(ang - 0.4));
+  ctx.lineTo(x2 - hSize * Math.cos(ang + 0.4), y2 - hSize * Math.sin(ang + 0.4));
+  ctx.closePath();
+  ctx.fill();
+  // Label
+  ctx.font = 'bold 11px IBM Plex Mono, monospace';
+  ctx.fillText(label, x2 + 4 * Math.cos(ang), y2 + 4 * Math.sin(ang));
+}
+
+['ang','mass','ms','mk'].forEach(id => {
+  $(id).addEventListener('input', () => { updateUI(); postState(); });
+});
+$('release').addEventListener('click', () => { running = true; pos = 0; vel = 0; timeOnRamp = 0; maxVel = 0; postState(); });
+$('reset').addEventListener('click', () => { running = false; pos = 0; vel = 0; timeOnRamp = 0; maxVel = 0; updateUI(); });
+
+updateUI();
+postState();
+requestAnimationFrame(frame);
+
+window.parent.postMessage({ type: 'sim-loaded', sim: 'friction-incline' }, '*');
+</script>
+</body>
+</html>

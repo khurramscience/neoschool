@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Wave Interference — neoschool</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,sans-serif;background:#08101e;color:#fff;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+  header{background:rgba(255,255,255,.06);backdrop-filter:blur(8px);padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+  h1{font-size:18px;font-weight:600}
+  .stat{display:flex;flex-direction:column;font-family:'IBM Plex Mono',monospace}
+  .stat label{font-size:10px;color:#a89be8;text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+  .stat value{font-size:16px;font-weight:700}
+  .controls{background:rgba(255,255,255,.04);padding:14px 20px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.06)}
+  .control{display:flex;flex-direction:column;gap:4px;min-width:140px}
+  .control label{font-size:11px;color:rgba(255,255,255,.7);font-weight:600;display:flex;justify-content:space-between}
+  .control label span{color:#a89be8;font-family:'IBM Plex Mono',monospace}
+  input[type=range]{width:100%;accent-color:#6B5CE7}
+  button{background:#6B5CE7;color:#fff;border:none;padding:10px 22px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;transition:all .2s}
+  button:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(107,92,231,.4)}
+  button.secondary{background:transparent;color:#a89be8;border:1px solid #a89be8}
+  #canvas{flex:1;display:block;cursor:crosshair}
+  .toggle{display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,.8);cursor:pointer;user-select:none}
+  .toggle input{accent-color:#6B5CE7;width:16px;height:16px}
+  .legend{position:absolute;bottom:20px;left:20px;background:rgba(20,30,60,.9);padding:12px 16px;border-radius:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.7;border:1px solid rgba(107,92,231,.3)}
+  .legend .row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+  .legend .dot{width:10px;height:10px;border-radius:2px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🌊 Wave Interference</h1>
+  <div class="stat"><label>Frequency</label><value id="fhz">1.0 Hz</value></div>
+  <div class="stat"><label>Wavelength λ</label><value id="lam">100 px</value></div>
+  <div class="stat"><label>Source dist</label><value id="dist">0 px</value></div>
+  <div class="stat"><label>Pattern</label><value id="pat">—</value></div>
+</header>
+
+<div class="controls">
+  <div class="control">
+    <label>Frequency <span id="f-v">1.0 Hz</span></label>
+    <input id="f" type="range" min="3" max="40" value="10"/>
+  </div>
+  <div class="control">
+    <label>Source separation <span id="sep-v">160 px</span></label>
+    <input id="sep" type="range" min="40" max="400" value="160"/>
+  </div>
+  <div class="control">
+    <label>Amplitude <span id="amp-v">1.0</span></label>
+    <input id="amp" type="range" min="2" max="20" value="10"/>
+  </div>
+  <label class="toggle">
+    <input type="checkbox" id="onlyA"> Source A only
+  </label>
+  <label class="toggle">
+    <input type="checkbox" id="onlyB"> Source B only
+  </label>
+  <label class="toggle">
+    <input type="checkbox" id="nodes"> Show nodes
+  </label>
+  <button id="reset" class="secondary">Reset</button>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<div class="legend">
+  <div class="row"><div class="dot" style="background:#ff6347"></div>+ amplitude (peak)</div>
+  <div class="row"><div class="dot" style="background:#1a1f3a"></div>− amplitude (trough)</div>
+  <div class="row"><div class="dot" style="background:#fff"></div>nodes (destructive)</div>
+  <div style="opacity:.7;margin-top:6px">Click on water to add a probe</div>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const $ = id => document.getElementById(id);
+
+let W=0, H=0;
+function resize() {
+  W = canvas.width = canvas.clientWidth = window.innerWidth;
+  H = canvas.height = canvas.clientHeight = window.innerHeight - 160;
+}
+window.addEventListener('resize', resize);
+resize();
+
+let t = 0;
+let probes = [];
+
+function getParams() {
+  const speed = 60; // px/s
+  const f = parseInt($('f').value) / 10; // Hz
+  const lambda = speed / f; // wavelength in px
+  return {
+    f, lambda, speed,
+    sep: parseInt($('sep').value),
+    amp: parseInt($('amp').value) / 10,
+    onlyA: $('onlyA').checked,
+    onlyB: $('onlyB').checked,
+    showNodes: $('nodes').checked,
+  };
+}
+
+function sourceA() { const p = getParams(); return { x: W/2 - p.sep/2, y: H/2 }; }
+function sourceB() { const p = getParams(); return { x: W/2 + p.sep/2, y: H/2 }; }
+
+function amplitudeAt(x, y, time) {
+  const p = getParams();
+  const k = 2 * Math.PI / p.lambda;
+  const omega = 2 * Math.PI * p.f;
+  let a = 0;
+  if (!p.onlyB) {
+    const sA = sourceA();
+    const r1 = Math.hypot(x - sA.x, y - sA.y);
+    a += p.amp * Math.cos(k * r1 - omega * time) / (1 + r1 * 0.005);
+  }
+  if (!p.onlyA) {
+    const sB = sourceB();
+    const r2 = Math.hypot(x - sB.x, y - sB.y);
+    a += p.amp * Math.cos(k * r2 - omega * time) / (1 + r2 * 0.005);
+  }
+  return a;
+}
+
+function postState() {
+  const p = getParams();
+  window.parent.postMessage({
+    type: 'sim-state',
+    sim: 'wave-interference',
+    state: {
+      frequency: p.f,
+      wavelength: p.lambda,
+      separation: p.sep,
+      amplitude: p.amp,
+      bothActive: !p.onlyA && !p.onlyB,
+      onlyA: p.onlyA,
+      onlyB: p.onlyB,
+      probeCount: probes.length,
+      probeReadings: probes.map(pp => ({
+        x: pp.x, y: pp.y,
+        distA: Math.hypot(pp.x - sourceA().x, pp.y - sourceA().y),
+        distB: Math.hypot(pp.x - sourceB().x, pp.y - sourceB().y),
+        pathDiff: Math.abs(Math.hypot(pp.x - sourceA().x, pp.y - sourceA().y) - Math.hypot(pp.x - sourceB().x, pp.y - sourceB().y)),
+      })),
+    }
+  }, '*');
+}
+
+function updateUI() {
+  const p = getParams();
+  $('f-v').textContent = p.f.toFixed(1) + ' Hz';
+  $('fhz').textContent = p.f.toFixed(1) + ' Hz';
+  $('lam').textContent = p.lambda.toFixed(0) + ' px';
+  $('sep-v').textContent = p.sep + ' px';
+  $('amp-v').textContent = p.amp.toFixed(1);
+  $('dist').textContent = p.sep + ' px';
+  const ratio = p.sep / p.lambda;
+  $('pat').textContent = ratio > 0.5 ? 'STRONG' : 'WEAK';
+}
+
+let imgData;
+function draw() {
+  const p = getParams();
+  if (!imgData || imgData.width !== W || imgData.height !== H) {
+    imgData = ctx.createImageData(W, H);
+  }
+  const data = imgData.data;
+  const step = 3; // sample every 3rd pixel for performance
+  for (let y = 0; y < H; y += step) {
+    for (let x = 0; x < W; x += step) {
+      const a = amplitudeAt(x, y, t);
+      // Map amplitude to color: red for +, dark blue for -
+      const norm = Math.max(-1, Math.min(1, a));
+      let r, g, b;
+      if (norm > 0) {
+        r = 255 * norm + (1 - norm) * 26;
+        g = 99 * norm + (1 - norm) * 41;
+        b = 71 * norm + (1 - norm) * 80;
+      } else {
+        const an = -norm;
+        r = 26 * (1 - an) + an * 14;
+        g = 41 * (1 - an) + an * 25;
+        b = 80 * (1 - an) + an * 60;
+      }
+      // Highlight nodes (near zero)
+      if (p.showNodes && Math.abs(a) < 0.05) { r = g = b = 240; }
+      // Fill step block
+      for (let dy = 0; dy < step && y + dy < H; dy++) {
+        for (let dx = 0; dx < step && x + dx < W; dx++) {
+          const idx = ((y + dy) * W + (x + dx)) * 4;
+          data[idx] = r; data[idx+1] = g; data[idx+2] = b; data[idx+3] = 255;
+        }
+      }
+    }
+  }
+  ctx.putImageData(imgData, 0, 0);
+
+  // Sources
+  if (!p.onlyB) {
+    const sA = sourceA();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(sA.x, sA.y, 10, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = '#a89be8';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.fillStyle = '#1a1f3a';
+    ctx.font = 'bold 11px IBM Plex Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('A', sA.x, sA.y + 4);
+  }
+  if (!p.onlyA) {
+    const sB = sourceB();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(sB.x, sB.y, 10, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = '#a89be8';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.fillStyle = '#1a1f3a';
+    ctx.font = 'bold 11px IBM Plex Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('B', sB.x, sB.y + 4);
+  }
+
+  // Probes
+  probes.forEach((pp, i) => {
+    const a = amplitudeAt(pp.x, pp.y, t);
+    ctx.fillStyle = '#6B5CE7';
+    ctx.beginPath();
+    ctx.arc(pp.x, pp.y, 6, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    // Reading label
+    const d1 = Math.hypot(pp.x - sourceA().x, pp.y - sourceA().y);
+    const d2 = Math.hypot(pp.x - sourceB().x, pp.y - sourceB().y);
+    const pathDiff = Math.abs(d1 - d2);
+    const ratio = pathDiff / p.lambda;
+    const nearInt = Math.abs(ratio - Math.round(ratio)) < 0.1;
+    const nearHalf = Math.abs(ratio - (Math.round(ratio - 0.5) + 0.5)) < 0.1;
+    let label = `Δd=${pathDiff.toFixed(0)}px (${ratio.toFixed(2)}λ)`;
+    if (nearInt) label += ' · CONSTRUCTIVE';
+    else if (nearHalf) label += ' · DESTRUCTIVE';
+    ctx.fillStyle = '#fff';
+    ctx.font = '11px IBM Plex Mono, monospace';
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 3;
+    ctx.textAlign = 'left';
+    ctx.strokeText(label, pp.x + 12, pp.y - 8);
+    ctx.fillText(label, pp.x + 12, pp.y - 8);
+  });
+}
+
+let lastT = 0;
+function frame(now) {
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  t += dt;
+  draw();
+  requestAnimationFrame(frame);
+}
+
+['f','sep','amp'].forEach(id => {
+  $(id).addEventListener('input', () => { updateUI(); postState(); });
+});
+['onlyA','onlyB','nodes'].forEach(id => {
+  $(id).addEventListener('change', () => { updateUI(); postState(); });
+});
+$('reset').addEventListener('click', () => { probes = []; postState(); });
+
+canvas.addEventListener('click', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  probes.push({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+  if (probes.length > 3) probes.shift();
+  postState();
+});
+
+updateUI();
+postState();
+requestAnimationFrame(frame);
+
+window.parent.postMessage({ type: 'sim-loaded', sim: 'wave-interference' }, '*');
+</script>
+</body>
+</html>
