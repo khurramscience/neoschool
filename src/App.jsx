@@ -151,7 +151,7 @@ function Marketing({ onStart }) {
           height:72, display:"flex", alignItems:"center", justifyContent:"space-between",
         }}>
           <a href="/" aria-label="neoschool home" style={{ display:"flex", alignItems:"center" }}>
-            <img src="/neoschool-logo.png" alt="neoschool" style={{
+            <img src="/neoschool-logo.png" alt="neoschool" className="nav-logo" style={{
               height:80, transition:"filter 300ms",
               filter: scrolled ? "none" : "brightness(0) invert(1)",
             }}/>
@@ -295,6 +295,78 @@ function Marketing({ onStart }) {
           </div>
         </section>
 
+        {/* ─── ROLE-BASED CTAs — restored from previous design ─── */}
+        <SectionReveal>
+          {(isVisible) => {
+            const r = (d) => ({
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? "translateY(0)" : "translateY(16px)",
+              filter: isVisible ? "blur(0px)" : "blur(4px)",
+              transition: `opacity 500ms cubic-bezier(0.22,1,0.36,1) ${d}ms, transform 500ms cubic-bezier(0.22,1,0.36,1) ${d}ms, filter 500ms cubic-bezier(0.22,1,0.36,1) ${d}ms`,
+            });
+            const roles = [
+              { id:"parent",   label:"For parents",       sub:"Find a campus or use the platform at home.",      color:"#C25420", colorHover:"#D9622B" },
+              { id:"guide",    label:"For Guides",        sub:"Facilitate, don't lecture. Tools that handle the rest.", color:"#4A7C6A", colorHover:"#5D9082" },
+              { id:"director", label:"Launch a school",   sub:"Open a neoschool in your community.",             color:"#2D6EA8", colorHover:"#4084C2" },
+            ];
+            return (
+              <section style={{ background: bg, padding:"100px 0 80px" }}>
+                <div style={{ margin:"0 auto", maxWidth:1080, padding:"0 24px", textAlign:"center" }}>
+                  <p className="text-overline" style={{ ...r(0), color: coral, marginBottom:14 }}>
+                    Any parent · Any teacher · Launch a school
+                  </p>
+                  <h2 className="font-body" style={{
+                    ...r(80), fontWeight:400, color: textPrimary,
+                    fontSize:"clamp(1.5rem, 3vw, 2.25rem)", lineHeight:1.2, letterSpacing:"-.01em",
+                    marginBottom:48, maxWidth:680, margin:"0 auto 48px",
+                  }}>
+                    The operating system for microschools.
+                  </h2>
+                  <div style={{
+                    display:"grid",
+                    gridTemplateColumns:"repeat(auto-fit, minmax(260px, 1fr))",
+                    gap:18, maxWidth:900, margin:"0 auto",
+                  }}>
+                    {roles.map((role, i) => (
+                      <button key={role.id} onClick={() => onStart(role.id)} style={{
+                        ...r(180 + i * 100),
+                        background: "#fff",
+                        border: `1px solid ${borderSubtle}`,
+                        borderRadius: 16,
+                        padding: "32px 24px",
+                        cursor: "pointer",
+                        fontFamily: "inherit",
+                        display:"flex", flexDirection:"column", alignItems:"center", gap:14,
+                        transition: "all 300ms cubic-bezier(.2,.8,.2,1)",
+                      }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = role.color; e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = `0 16px 36px -12px ${role.color}33`; }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = borderSubtle; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
+                        {/* Big circular color-coded button */}
+                        <div style={{
+                          width: 88, height: 88, borderRadius: "50%",
+                          background: role.color,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          color: "#fff", fontFamily: "'Instrument Sans',sans-serif",
+                          fontSize: 13, fontWeight: 600, letterSpacing: "-.005em",
+                          textAlign: "center", lineHeight: 1.15,
+                          boxShadow: `0 8px 24px -6px ${role.color}66`,
+                          padding: "0 8px",
+                        }}>
+                          {role.label}<br/>→
+                        </div>
+                        <p className="font-body" style={{
+                          fontSize: 15, color: textSecondary, lineHeight: 1.5,
+                          maxWidth: 220, textAlign: "center",
+                        }}>{role.sub}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            );
+          }}
+        </SectionReveal>
+
         <SectionReveal>
           {(isVisible) => {
             const r = (d) => ({
@@ -426,51 +498,6 @@ function Marketing({ onStart }) {
           }}
         </SectionReveal>
 
-        <SectionReveal>
-          {(isVisible) => {
-            const r = (d) => ({
-              opacity: isVisible ? 1 : 0,
-              transform: isVisible ? "translateY(0)" : "translateY(16px)",
-              filter: isVisible ? "blur(0px)" : "blur(4px)",
-              transition: `opacity 400ms cubic-bezier(0.22,1,0.36,1) ${d}ms, transform 400ms cubic-bezier(0.22,1,0.36,1) ${d}ms, filter 400ms cubic-bezier(0.22,1,0.36,1) ${d}ms`,
-            });
-            return (
-              <section style={{ background: bg, padding:"140px 0" }}>
-                <div style={{ position:"relative", margin:"0 auto", maxWidth:1080, padding:"0 24px" }}>
-                  <span className="section-number">03</span>
-                  <h2 className="font-body text-section-heading" style={{ ...r(0), fontWeight:400, color: textPrimary, position:"relative", textAlign:"center", maxWidth:720, margin:"0 auto" }}>
-                    The platform is built for everyone in a school.
-                  </h2>
-                  <p className="font-body" style={{ ...r(120), margin:"20px auto 0", maxWidth:560, fontSize:18, fontStyle:"italic", color: textSecondary, lineHeight:1.55, textAlign:"center" }}>
-                    Parents, guides, directors. Sign in to use neoschool from anywhere.
-                  </p>
-                  <div style={{ marginTop:64, display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(280px, 1fr))", gap:18 }}>
-                    {[
-                      { id:"parent",   label:"For families",    desc:"Find a campus, or use the platform at home. AI tutors, 75+ labs, real growth tracking.",       cta:"Sign in →" },
-                      { id:"guide",    label:"For guides",      desc:"Facilitate, don't lecture. The platform handles data, comms, and adaptation.",                cta:"Sign in →" },
-                      { id:"director", label:"Launch a campus", desc:"Open a neoschool in your community. Curriculum, tools, comms, enrollment — all in one box.", cta:"Apply →" },
-                    ].map((t, i) => (
-                      <button key={t.id} onClick={() => onStart(t.id)} style={{
-                        ...r(240 + i * 100),
-                        padding:"36px 32px", background:"#fff", borderRadius:16,
-                        border:`1px solid ${borderSubtle}`, cursor:"pointer", textAlign:"left",
-                        color:"inherit", transition:"all 350ms", fontFamily:"inherit",
-                        display:"flex", flexDirection:"column", gap:14,
-                      }}
-                        onMouseEnter={e => { e.currentTarget.style.borderColor = iris; e.currentTarget.style.boxShadow = "0 4px 24px rgba(42,38,34,.10)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-                        onMouseLeave={e => { e.currentTarget.style.borderColor = borderSubtle; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}>
-                        <p className="text-overline" style={{ color: iris, marginBottom:0 }}>{t.label}</p>
-                        <p className="font-body" style={{ fontSize:16, color: textSecondary, lineHeight:1.55, flex:1 }}>{t.desc}</p>
-                        <p className="font-heading" style={{ fontSize:14, color: textPrimary, fontWeight:500, letterSpacing:"-.005em" }}>{t.cta}</p>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </section>
-            );
-          }}
-        </SectionReveal>
-
       </main>
 
       <footer style={{ background: bg, borderTop:`1px solid ${borderSubtle}`, padding:"40px 24px" }}>
@@ -502,6 +529,12 @@ function Marketing({ onStart }) {
         @media (min-width: 1024px) {
           .nav-desktop { display: flex !important; }
           .nav-mobile-btn { display: none !important; }
+        }
+        @media (max-width: 1023px) {
+          .nav-logo { height: 50px !important; }
+        }
+        @media (max-width: 480px) {
+          .nav-logo { height: 40px !important; }
         }
       `}</style>
 
