@@ -241,6 +241,14 @@
   .day-step .time .dur + .when::before{content:'·';margin-right:7px;color:var(--p2)}
   @media (max-width:720px){.day{grid-template-columns:repeat(2,1fr);gap:14px}}
 
+  /* Skill / activity chips (used in Life Skills + Outdoor cards) */
+  .skill-chips{
+    display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:10px;
+    font-family:'Geist Mono',monospace;font-size:10.5px;
+    color:var(--mu);letter-spacing:.04em;text-transform:uppercase;
+  }
+  .skill-chips div{line-height:1.45}
+
   /* Experience cards */
   .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
   @media (max-width:680px){.grid-2{grid-template-columns:1fr}}
@@ -624,12 +632,28 @@
     <div class="card">
       <div class="ico">🍳</div>
       <h3>Life Skills Workshops</h3>
-      <p>Real-world skills that build confident, capable, independent kids. Workshops rotate throughout the year with community experts and local Missoula partners.</p>
+      <p style="margin-bottom:14px">Real-world skills that build confident, capable, independent kids. Workshops rotate throughout the year with community experts and local Missoula partners.</p>
+      <div class="skill-chips">
+        <div>🍳 Cooking</div>
+        <div>💰 Financial literacy</div>
+        <div>💼 Entrepreneurship</div>
+        <div>🎤 Public speaking</div>
+        <div>🧘 Emotion regulation</div>
+        <div>🦌 Survival skills</div>
+      </div>
     </div>
     <div class="card">
       <div class="ico">🌳</div>
       <h3>Outdoor Play + Sports</h3>
-      <p>Unstructured time outside and sports every day. Dedicated forest days. Movement and free play improve attention.</p>
+      <p style="margin-bottom:14px">Unstructured time outside and sports every day. Dedicated forest days. Movement and free play improve attention.</p>
+      <div class="skill-chips">
+        <div>🚵 Mountain biking</div>
+        <div>🏊 Swimming</div>
+        <div>🥾 Hiking</div>
+        <div>⚽ Soccer</div>
+        <div>⛷️ Skiing</div>
+        <div>🤸 Gymnastics</div>
+      </div>
     </div>
   </div>
 </section>
