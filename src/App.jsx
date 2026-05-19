@@ -6074,6 +6074,34 @@ export default function App() {
   const [parentData, setParentData] = useState(null);
 
   useEffect(() => {
+    // ── Quick-test URL parameter: ?demo=labs ──────────────────────────────────
+    // Drops you straight into a demo Student account on the Activities tab.
+    // Handy for testing the AI tutor + simulations without sign-up friction.
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("demo") === "labs" || params.get("demo") === "student") {
+      const demoStudent = {
+        name: "Ava Chen", email: "ava-demo@neoschool.me",
+        role: "student", id: "ava-demo@neoschool.me",
+      };
+      localStorage.setItem("neo_current", JSON.stringify(demoStudent));
+      setUser(demoStudent); setRole("student"); setScreen("app");
+      // Strip the param so refreshes don't re-trigger
+      window.history.replaceState({}, "", window.location.pathname);
+      startSyncLoop(30000);
+      return;
+    }
+    if (params.get("demo") === "parent") {
+      const demoParent = {
+        name: "Sarah Chen", email: "sarah-demo@neoschool.me",
+        role: "parent", id: "sarah-demo@neoschool.me",
+      };
+      localStorage.setItem("neo_current", JSON.stringify(demoParent));
+      setUser(demoParent); setRole("parent"); setScreen("app");
+      window.history.replaceState({}, "", window.location.pathname);
+      startSyncLoop(30000);
+      return;
+    }
+
     const saved = localStorage.getItem("neo_current");
     if (saved) { const u = JSON.parse(saved); setUser(u); setRole(u.role); setScreen("app"); }
     // Restore parent data + screen position
