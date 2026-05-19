@@ -302,6 +302,54 @@
   .form-status.success{background:rgba(74,124,106,.2);color:#a8e0c4;border:1px solid rgba(74,124,106,.4);display:block}
   .form-status.error{background:rgba(168,61,61,.2);color:#f0a4a4;border:1px solid rgba(168,61,61,.4);display:block}
 
+  /* ─── Apply section callout: FREE + WHAT'S INCLUDED ──────────────────────── */
+  .apply-callout{
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:14px;
+    padding:22px 24px;
+    margin-bottom:28px;
+  }
+  .apply-callout-row{display:flex;gap:14px;align-items:center;margin-bottom:0}
+  .apply-callout-badge{
+    background:var(--or3);color:#fff;
+    font-family:'Geist Mono',monospace;font-size:11.5px;font-weight:600;
+    letter-spacing:.12em;
+    padding:7px 12px;border-radius:8px;
+    flex-shrink:0;
+  }
+  .apply-callout-h{
+    font-family:'Fraunces',serif;
+    font-size:18px;font-weight:500;color:#fff;
+    line-height:1.25;margin-bottom:2px;letter-spacing:-.005em;
+  }
+  .apply-callout-p{
+    font-family:'Newsreader',serif;font-weight:300;
+    font-size:14px;color:rgba(255,255,255,.7);
+    line-height:1.55;
+  }
+  .apply-callout-eyebrow{
+    font-family:'Geist Mono',monospace;font-size:10.5px;
+    font-weight:600;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--or3);
+    margin-bottom:6px;
+  }
+  .apply-callout-divider{
+    height:1px;background:rgba(255,255,255,.1);
+    margin:18px 0;
+  }
+  .includes-grid{
+    display:grid;grid-template-columns:repeat(2,1fr);
+    gap:8px 14px;margin-top:8px;
+    font-family:'Geist Mono',monospace;font-size:10.5px;
+    color:rgba(255,255,255,.8);
+    letter-spacing:.04em;text-transform:uppercase;
+  }
+  @media(max-width:540px){
+    .includes-grid{grid-template-columns:1fr}
+    .apply-callout-row{flex-direction:column;align-items:flex-start;gap:8px}
+  }
+
   /* ─── ROBUST APPLICATION FORM: sections, optional, fieldsets, checkboxes ─── */
   .form-section{margin-bottom:32px;padding-bottom:28px;border-bottom:1px solid rgba(255,255,255,.08)}
   .form-section:last-of-type{border-bottom:none}
@@ -931,6 +979,30 @@
       <h2>Apply for <em>2026–2027</em></h2>
       <p class="apply-sub">Kindergarten + 1st Grade · Limited spots available. We'll respond within 24 hours.</p>
 
+      <!-- Free application + what's included callout -->
+      <div class="apply-callout">
+        <div class="apply-callout-row">
+          <div class="apply-callout-badge">FREE</div>
+          <div>
+            <p class="apply-callout-h">The application is completely free.</p>
+            <p class="apply-callout-p">No fees to apply. No commitment until you accept admission.</p>
+          </div>
+        </div>
+        <div class="apply-callout-divider"></div>
+        <div>
+          <p class="apply-callout-eyebrow">Tuition includes everything</p>
+          <p class="apply-callout-p" style="margin-bottom:10px">No surprise fees. No extras to buy.</p>
+          <div class="includes-grid">
+            <div>🤖 AI tutor</div>
+            <div>🎨 All activities</div>
+            <div>📚 Books &amp; materials</div>
+            <div>🍎 Snacks</div>
+            <div>🌳 Enrichment workshops</div>
+            <div>🚌 Field trips</div>
+          </div>
+        </div>
+      </div>
+
       <form id="applyForm" onsubmit="submitApplication(event)">
 
         <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
@@ -1033,6 +1105,19 @@
                 <option value="As soon as possible">As soon as possible</option>
               </select>
             </div>
+          </div>
+
+          <div style="margin-bottom:18px">
+            <label for="enrollmentType">How would you like to enroll? *</label>
+            <select id="enrollmentType" name="enrollmentType" required>
+              <option value="">Select</option>
+              <option value="full-time">Full-time (Mon–Fri, all day)</option>
+              <option value="part-time">Part-time (specific days each week)</option>
+              <option value="drop-in-homeschool">Drop-in for homeschoolers (flexible schedule)</option>
+            </select>
+            <p style="font-size:11.5px;color:rgba(255,255,255,.5);margin-top:6px;line-height:1.5;font-style:italic;font-family:'Newsreader',serif;font-weight:300">
+              Homeschooling families can pick specific days or drop-in for activities, projects, and AI tutor sessions.
+            </p>
           </div>
         </div>
 
@@ -1192,6 +1277,7 @@
       grade: form.grade.value,
       current_school: form.currentSchool.value.trim(),
       enrollment_date: form.enrollmentDate.value,
+      enrollment_type: form.enrollmentType.value,
 
       // Fit & motivation
       referred_by: form.referredBy.value.trim() || null,
