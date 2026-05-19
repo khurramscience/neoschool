@@ -468,7 +468,9 @@ function Marketing({ onStart }) {
                     {campuses.map((c, i) => {
                       const isClickable = !!c.href;
                       const Cmp = isClickable ? "a" : "button";
-                      const props = isClickable ? { href: c.href } : { onClick: () => onStart("parent") };
+                      const props = isClickable
+                        ? { href: c.href }
+                        : { onClick: () => { window.location.href = `mailto:jennie@chiefmamaofficer.com?subject=${encodeURIComponent(`Join ${c.name} waitlist`)}&body=${encodeURIComponent(`Hi Jennie,\n\nI'd like to join the waitlist for the ${c.name}, ${c.state} campus opening ${c.date}.\n\nMy name:\nChild's age / grade:\nEmail:\nPhone:\n\nThank you!`)}`; } };
                       return (
                         <Cmp key={c.name} {...props} style={{
                           ...r(180 + i * 80),
@@ -495,14 +497,33 @@ function Marketing({ onStart }) {
                           <p className="font-body" style={{ fontSize:14.5, color:textSecondary, lineHeight:1.55 }}>
                             {c.grades} · Opening {c.date}
                           </p>
-                          <span className="text-nav" style={{ color:c.statusColor, fontSize:12, marginTop:6 }}>
+
+                          {/* Explicit button pill — not just hover text */}
+                          <span style={{
+                            marginTop: 12,
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 6,
+                            background: c.statusColor,
+                            color: "#fff",
+                            padding: "10px 18px",
+                            borderRadius: 10,
+                            fontFamily: "'Instrument Sans',sans-serif",
+                            fontSize: 12.5,
+                            fontWeight: 600,
+                            letterSpacing: ".06em",
+                            textTransform: "uppercase",
+                            width: "fit-content",
+                            transition: "all 200ms",
+                          }}>
                             {c.cta}
                           </span>
                         </Cmp>
                       );
                     })}
 
-                    {/* Launch your own — dashed border, special card */}
+                    {/* Launch your own — dashed card with explicit button */}
                     <button onClick={() => onStart("director")} style={{
                       ...r(180 + 3 * 80),
                       background:"transparent", border:`1px dashed ${borderSubtle}`, borderRadius:12,
@@ -512,15 +533,33 @@ function Marketing({ onStart }) {
                     }}
                       onMouseEnter={e => { e.currentTarget.style.borderColor = iris; e.currentTarget.style.background="rgba(107,92,231,.03)"; }}
                       onMouseLeave={e => { e.currentTarget.style.borderColor = borderSubtle; e.currentTarget.style.background="transparent"; }}>
-                      <span className="text-nav" style={{ fontSize:10.5, color: iris }}>+ Your city?</span>
+                      <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                        <span style={{ width:6, height:6, borderRadius:"50%", background: iris }}/>
+                        <span className="text-nav" style={{ fontSize:10.5, color: iris }}>+ Your city?</span>
+                      </div>
                       <h3 className="font-heading" style={{
-                        fontSize:20, fontWeight:600, color:textPrimary,
-                        letterSpacing:"-.01em", lineHeight:1.2, marginTop:4,
+                        fontSize:24, fontWeight:600, color:textPrimary,
+                        letterSpacing:"-.01em", lineHeight:1.1, marginTop:4,
                       }}>Launch a campus.</h3>
                       <p className="font-body" style={{ fontSize:14.5, color:textSecondary, lineHeight:1.55 }}>
                         Open a neoschool in your community. We provide the operating system.
                       </p>
-                      <span className="text-nav" style={{ color:iris, fontSize:12, marginTop:6 }}>
+                      <span style={{
+                        marginTop: 12,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 6,
+                        background: iris,
+                        color: "#fff",
+                        padding: "10px 18px",
+                        borderRadius: 10,
+                        fontFamily: "'Instrument Sans',sans-serif",
+                        fontSize: 12.5,
+                        fontWeight: 600,
+                        letterSpacing: ".06em",
+                        textTransform: "uppercase",
+                        width: "fit-content",
+                      }}>
                         Apply to launch →
                       </span>
                     </button>
@@ -541,18 +580,44 @@ function Marketing({ onStart }) {
             });
             return (
               <section id="approach" style={{ position:"relative", background: bg, padding:"140px 0" }}>
-                <div style={{ position:"relative", margin:"0 auto", maxWidth:620, padding:"0 24px" }}>
+                <div style={{ position:"relative", margin:"0 auto", maxWidth:1180, padding:"0 24px" }}>
                   <span className="section-number">01</span>
-                  <h2 className="font-body text-section-heading" style={{ ...r(0), fontWeight:400, color: textPrimary, textWrap:"balance", position:"relative" }}>
-                    Two hours of academics. Then the real learning starts.
-                  </h2>
-                  {[
-                    "Your child doesn't need six hours in a classroom. They need focused, personalized instruction that meets them exactly where they are. AI tutoring — already validated with over 100,000 students — delivers that in two hours each morning. Real mastery, not seat time.",
-                    "The rest of the day belongs to the things AI will never replace. Professional coaches — engineers, biologists, artists — work alongside your child on real projects. They model curiosity, guide hands-on work, and ask harder questions when the easy answers come too quickly.",
-                    "No homework. No busywork. Your child comes home at 3:30 having built something — not having memorized something. Your evening belongs to your family.",
-                  ].map((p, i) => (
-                    <p key={i} className="prose-neo" style={{ ...r(200 + i * 120), marginTop: i === 0 ? 40 : 28 }}>{p}</p>
-                  ))}
+
+                  <div className="approach-grid" style={{
+                    display:"grid", gridTemplateColumns:"1.1fr 1fr", gap:80, alignItems:"start",
+                  }}>
+                    <div style={{ maxWidth:620 }}>
+                      <h2 className="font-body text-section-heading" style={{
+                        ...r(0), fontWeight:400, color: textPrimary, textWrap:"balance", position:"relative",
+                      }}>
+                        Two hours of academics. Then the real learning starts.
+                      </h2>
+                      {[
+                        "Your child doesn't need six hours in a classroom. They need focused, personalized instruction that meets them exactly where they are. AI tutoring — already validated with over 100,000 students — delivers that in two hours each morning. Real mastery, not seat time.",
+                        "The rest of the day belongs to the things AI will never replace. Professional coaches — engineers, biologists, artists — work alongside your child on real projects. They model curiosity, guide hands-on work, and ask harder questions when the easy answers come too quickly.",
+                        "No homework. No busywork. Your child comes home at 3:30 having built something — not having memorized something. Your evening belongs to your family.",
+                      ].map((p, i) => (
+                        <p key={i} className="prose-neo" style={{ ...r(200 + i * 120), marginTop: i === 0 ? 40 : 28 }}>{p}</p>
+                      ))}
+                    </div>
+
+                    {/* Real photo — Missoula kids in wildflowers */}
+                    <div style={{ ...r(160), position:"sticky", top:120 }}>
+                      <div style={{
+                        width:"100%", aspectRatio:"3/4",
+                        backgroundImage:"url('/missoula/kids-flowers.jpg')",
+                        backgroundSize:"cover", backgroundPosition:"center 70%",
+                        borderRadius:16,
+                        boxShadow:"0 12px 40px -8px rgba(42,38,34,.18)",
+                      }}/>
+                      <p className="font-heading" style={{
+                        fontSize:11, color: textMuted, marginTop:14,
+                        fontStyle:"italic", textAlign:"center", letterSpacing:".02em",
+                      }}>
+                        Founding families exploring the campus — Missoula, Montana
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </section>
             );
@@ -597,6 +662,47 @@ function Marketing({ onStart }) {
               </section>
             );
           }}
+        </SectionReveal>
+
+        {/* ─── PHOTO BAND — Montana family/community ─── */}
+        <SectionReveal>
+          {(isVisible) => (
+            <section style={{
+              height:"clamp(320px, 50vh, 540px)",
+              backgroundImage:"url('/missoula/family.jpg')",
+              backgroundSize:"cover",
+              backgroundPosition:"center 30%",
+              backgroundAttachment:"fixed",
+              position:"relative",
+              opacity: isVisible ? 1 : 0,
+              transition: "opacity 800ms cubic-bezier(0.22,1,0.36,1)",
+            }}>
+              <div style={{
+                position:"absolute", inset:0,
+                background:"linear-gradient(to bottom, rgba(20,20,18,0) 0%, rgba(20,20,18,0.15) 50%, rgba(20,20,18,0.55) 100%)",
+              }}/>
+              <div style={{
+                position:"absolute", bottom:32, left:0, right:0,
+                textAlign:"center", padding:"0 24px",
+              }}>
+                <p className="font-body" style={{
+                  fontSize:"clamp(20px,2.4vw,28px)", fontStyle:"italic",
+                  color:"rgba(255,255,255,.95)", textShadow:"0 2px 12px rgba(0,0,0,.6)",
+                  fontWeight:300, lineHeight:1.4, maxWidth:760, margin:"0 auto",
+                  letterSpacing:"-.01em",
+                }}>
+                  "We're building the school we wished existed when our own kids started."
+                </p>
+                <p className="font-heading" style={{
+                  marginTop:14, fontSize:12, fontWeight:500,
+                  textTransform:"uppercase", letterSpacing:".14em",
+                  color:"rgba(255,255,255,.7)", textShadow:"0 2px 8px rgba(0,0,0,.9)",
+                }}>
+                  Founding families · Missoula 2026
+                </p>
+              </div>
+            </section>
+          )}
         </SectionReveal>
 
         <SectionReveal>
@@ -843,6 +949,8 @@ function Marketing({ onStart }) {
         }
         @media (max-width: 1023px) {
           .nav-logo { height: 50px !important; }
+          .approach-grid { grid-template-columns: 1fr !important; gap: 48px !important; }
+          .approach-grid > div:last-child { position: static !important; max-width: 480px; margin: 0 auto; }
         }
         @media (max-width: 480px) {
           .nav-logo { height: 40px !important; }
