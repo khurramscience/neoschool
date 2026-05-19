@@ -221,7 +221,7 @@
   .pill{padding:8px 18px;background:var(--or);color:#fff;border-radius:99px;font-family:'Fraunces',serif;font-size:14px;font-weight:500;letter-spacing:-.005em}
 
   /* Section */
-  section{padding-top:88px;padding-bottom:88px}
+  section{padding-top:56px;padding-bottom:56px}
   section h2{font-family:'Fraunces',serif;font-size:34px;font-weight:400;letter-spacing:-.015em;line-height:1.1;margin-bottom:10px;color:var(--nv)}
   section h2 em{font-style:italic;color:var(--or);font-weight:300}
   .section-eyebrow{font-family:'Geist Mono',monospace;font-size:11px;color:var(--or);letter-spacing:.12em;text-transform:uppercase;border-bottom:1.5px solid var(--or);display:inline-block;padding-bottom:4px;margin-bottom:34px}
@@ -237,7 +237,7 @@
   .day-step:nth-child(5) .accent{background:var(--am);width:50%;margin-left:auto;margin-right:auto}
   .day-step .emoji{font-size:32px;margin-bottom:6px;display:block}
   .day-step .name{font-family:'Fraunces',serif;font-weight:500;font-size:14.5px;margin-bottom:4px;line-height:1.2}
-  .day-step .time{font-family:'Geist Mono',monospace;font-size:10.5px;color:var(--mu);letter-spacing:.04em;display:flex;align-items:center;gap:7px;justify-content:flex-end}
+  .day-step .time{font-family:'Geist Mono',monospace;font-size:10.5px;color:var(--mu);letter-spacing:.04em;display:flex;align-items:center;gap:7px;justify-content:center;flex-wrap:wrap}
   .day-step .time .dur + .when::before{content:'·';margin-right:7px;color:var(--p2)}
   @media (max-width:720px){.day{grid-template-columns:repeat(2,1fr);gap:14px}}
 
@@ -310,6 +310,31 @@
     font-weight:300;margin-left:6px;
   }
   fieldset{border:none;padding:0;margin:0}
+  /* IEP/504 question block — must be readable on dark form bg */
+  .iep-block{
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.03);
+    border-radius:12px;
+    padding:18px 20px 16px;
+    margin-bottom:18px;
+  }
+  .iep-question{
+    font-family:'Newsreader',serif;
+    font-size:15.5px;font-weight:400;
+    color:#fff;
+    line-height:1.45;
+    margin-bottom:6px;
+    text-transform:none;letter-spacing:0;
+  }
+  .iep-helper{
+    font-family:'Newsreader',serif;
+    font-size:13px;font-style:italic;
+    color:rgba(255,255,255,.5);
+    line-height:1.5;
+    margin-bottom:14px;
+    text-transform:none;letter-spacing:0;
+    font-weight:300;
+  }
   /* date input — match dark theme */
   input[type="date"]{
     color-scheme:dark;
@@ -473,8 +498,8 @@
     h1{font-size:34px !important;line-height:1.05;letter-spacing:-.018em}
     .hero-sub{font-size:15.5px;margin-bottom:18px}
     .pill{padding:6px 12px;font-size:12.5px}
-    /* Reduced from 72px — was too much per user feedback */
-    section{padding-top:56px !important;padding-bottom:56px !important}
+    /* Reduced — Jennie's feedback: padding still felt excessive */
+    section{padding-top:44px !important;padding-bottom:44px !important}
     section h2{font-size:24px}
 
     /* Mobile day-timeline: emoji left · name middle · time right (stacked) */
@@ -599,17 +624,7 @@
     <div class="card">
       <div class="ico">🍳</div>
       <h3>Life Skills Workshops</h3>
-      <p style="margin-bottom:14px">Real-world skills that build confident, capable, independent kids. Workshops rotate throughout the year with community experts and local Missoula partners.</p>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:10px;font-family:'Geist Mono',monospace;font-size:10.5px;color:var(--mu);letter-spacing:.04em;text-transform:uppercase">
-        <div>🍳 Cooking</div>
-        <div>🌱 Gardening</div>
-        <div>💰 Financial literacy</div>
-        <div>💬 Communication</div>
-        <div>🦌 Survival skills</div>
-        <div>💼 Entrepreneurship</div>
-        <div>🧘 Emotion regulation</div>
-        <div>🎤 Public speaking</div>
-      </div>
+      <p>Real-world skills that build confident, capable, independent kids. Workshops rotate throughout the year with community experts and local Missoula partners.</p>
     </div>
     <div class="card">
       <div class="ico">🌳</div>
@@ -727,7 +742,7 @@
       </div>
       <div class="detail-item">
         <div class="label">🔒 Deposit</div>
-        <div class="value">Once admission is offered, a <em>$500 refundable deposit</em> secures your child's spot. Deducted from the first month's tuition payment.</div>
+        <div class="value">Once admission is offered, a <em>$500 refundable deposit</em> secures your child's spot, due <em>by July 1, 2026</em>. Deducted from the first month's tuition payment.</div>
       </div>
       <div class="detail-item">
         <div class="label">📆 Monthly Payments</div>
@@ -1025,18 +1040,18 @@
         <div class="form-section">
           <p class="form-section-eyebrow">04 · Learning support</p>
 
-          <fieldset style="border:1px solid var(--p2);border-radius:10px;padding:16px 18px 14px;margin-bottom:18px">
-            <legend style="font-family:'Newsreader',serif;font-size:14.5px;color:var(--nv);padding:0 8px;line-height:1.45">
-              Does your child currently have an IEP, 504 Plan, or other learning or behavior support plan? *
-            </legend>
-            <p style="font-size:12.5px;color:var(--mu);margin:8px 0 12px;line-height:1.5">
+          <div class="iep-block">
+            <p class="iep-question">
+              Does your child currently have an IEP, 504 Plan, or other learning or behavior support plan? <span style="color:var(--or3)">*</span>
+            </p>
+            <p class="iep-helper">
               If yes, you'll be asked to upload documentation during enrollment.
             </p>
-            <div style="display:flex;gap:18px">
+            <div style="display:flex;gap:14px;flex-wrap:wrap">
               <label class="radio-pill"><input type="radio" name="iep504" value="yes" required> Yes</label>
               <label class="radio-pill"><input type="radio" name="iep504" value="no" required> No</label>
             </div>
-          </fieldset>
+          </div>
 
           <div style="margin-bottom:18px">
             <label for="accommodations">Are there any accommodations or adjustments that help your child learn and thrive? <span class="optional">(optional)</span></label>
