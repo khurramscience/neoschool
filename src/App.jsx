@@ -295,7 +295,7 @@ function Marketing({ onStart }) {
           </div>
         </section>
 
-        {/* ─── ROLE-BASED CTAs — restored from previous design ─── */}
+        {/* ─── PLATFORM ACCESS — minimal, consistent ─── */}
         <SectionReveal>
           {(isVisible) => {
             const r = (d) => ({
@@ -305,9 +305,9 @@ function Marketing({ onStart }) {
               transition: `opacity 500ms cubic-bezier(0.22,1,0.36,1) ${d}ms, transform 500ms cubic-bezier(0.22,1,0.36,1) ${d}ms, filter 500ms cubic-bezier(0.22,1,0.36,1) ${d}ms`,
             });
             const roles = [
-              { id:"parent",   label:"For parents",       sub:"Find a campus or use the platform at home.",      color:"#C25420", colorHover:"#D9622B" },
-              { id:"guide",    label:"For Guides",        sub:"Facilitate, don't lecture. Tools that handle the rest.", color:"#4A7C6A", colorHover:"#5D9082" },
-              { id:"director", label:"Launch a school",   sub:"Open a neoschool in your community.",             color:"#2D6EA8", colorHover:"#4084C2" },
+              { id:"parent",   label:"For parents",   sub:"Find a campus, or use the platform at home." },
+              { id:"guide",    label:"For Guides",    sub:"Facilitate, don't lecture. Tools handle the rest." },
+              { id:"director", label:"Launch a school", sub:"Open a neoschool in your community." },
             ];
             return (
               <section style={{ background: bg, padding:"100px 0 80px" }}>
@@ -318,48 +318,213 @@ function Marketing({ onStart }) {
                   <h2 className="font-body" style={{
                     ...r(80), fontWeight:400, color: textPrimary,
                     fontSize:"clamp(1.5rem, 3vw, 2.25rem)", lineHeight:1.2, letterSpacing:"-.01em",
-                    marginBottom:48, maxWidth:680, margin:"0 auto 48px",
+                    margin:"0 auto 56px", maxWidth:680,
                   }}>
                     The operating system for microschools.
                   </h2>
                   <div style={{
                     display:"grid",
                     gridTemplateColumns:"repeat(auto-fit, minmax(260px, 1fr))",
-                    gap:18, maxWidth:900, margin:"0 auto",
+                    gap:14, maxWidth:980, margin:"0 auto",
                   }}>
                     {roles.map((role, i) => (
                       <button key={role.id} onClick={() => onStart(role.id)} style={{
-                        ...r(180 + i * 100),
+                        ...r(180 + i * 80),
                         background: "#fff",
                         border: `1px solid ${borderSubtle}`,
-                        borderRadius: 16,
-                        padding: "32px 24px",
+                        borderRadius: 12,
+                        padding: "32px 28px",
                         cursor: "pointer",
                         fontFamily: "inherit",
-                        display:"flex", flexDirection:"column", alignItems:"center", gap:14,
+                        display:"flex", flexDirection:"column", alignItems:"flex-start", gap:10,
+                        textAlign:"left",
                         transition: "all 300ms cubic-bezier(.2,.8,.2,1)",
                       }}
-                        onMouseEnter={e => { e.currentTarget.style.borderColor = role.color; e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = `0 16px 36px -12px ${role.color}33`; }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = iris; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 12px 28px -10px rgba(42,38,34,.15)"; }}
                         onMouseLeave={e => { e.currentTarget.style.borderColor = borderSubtle; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
-                        {/* Big circular color-coded button */}
-                        <div style={{
-                          width: 88, height: 88, borderRadius: "50%",
-                          background: role.color,
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          color: "#fff", fontFamily: "'Instrument Sans',sans-serif",
-                          fontSize: 13, fontWeight: 600, letterSpacing: "-.005em",
-                          textAlign: "center", lineHeight: 1.15,
-                          boxShadow: `0 8px 24px -6px ${role.color}66`,
-                          padding: "0 8px",
-                        }}>
-                          {role.label}<br/>→
-                        </div>
+                        <p className="font-heading" style={{
+                          fontSize: 17, fontWeight: 600, color: textPrimary,
+                          letterSpacing: "-.005em",
+                        }}>{role.label}</p>
                         <p className="font-body" style={{
                           fontSize: 15, color: textSecondary, lineHeight: 1.5,
-                          maxWidth: 220, textAlign: "center",
+                          flex: 1,
                         }}>{role.sub}</p>
+                        <span className="text-nav" style={{ color: iris, marginTop: 4, fontSize: 12 }}>
+                          Sign in →
+                        </span>
                       </button>
                     ))}
+                  </div>
+                </div>
+              </section>
+            );
+          }}
+        </SectionReveal>
+
+        {/* ─── PARTNERSHIP — Esther Wojcicki TRICK framework ─── */}
+        <SectionReveal>
+          {(isVisible) => {
+            const r = (d) => ({
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? "translateY(0)" : "translateY(16px)",
+              filter: isVisible ? "blur(0px)" : "blur(4px)",
+              transition: `opacity 500ms cubic-bezier(0.22,1,0.36,1) ${d}ms, transform 500ms cubic-bezier(0.22,1,0.36,1) ${d}ms, filter 500ms cubic-bezier(0.22,1,0.36,1) ${d}ms`,
+            });
+            const trick = [
+              { letter:"T", word:"Trust",         desc:"In the child, in the educator, in the process." },
+              { letter:"R", word:"Respect",       desc:"For who children are now, not just who they'll become." },
+              { letter:"I", word:"Independence",  desc:"Letting kids do hard things on their own." },
+              { letter:"C", word:"Collaboration", desc:"With parents, with peers, with the community." },
+              { letter:"K", word:"Kindness",      desc:"As a competency, as a practice, as a default." },
+            ];
+            return (
+              <section style={{ background: bgSecondary, padding:"120px 0" }}>
+                <div style={{ position:"relative", margin:"0 auto", maxWidth:880, padding:"0 24px" }}>
+                  <span className="section-number">04</span>
+
+                  <p className="text-overline" style={{ ...r(0), color: iris, marginBottom:16 }}>
+                    In collaboration with Esther Wojcicki
+                  </p>
+                  <h2 className="font-body text-section-heading" style={{
+                    ...r(80), fontWeight:400, color: textPrimary,
+                    position:"relative", textWrap:"balance", marginBottom:16,
+                  }}>
+                    Built on the <em style={{ fontStyle:"italic", color: coral, fontWeight:300 }}>TRICK</em> framework.
+                  </h2>
+                  <p className="font-body" style={{
+                    ...r(160), maxWidth:620, fontSize:18,
+                    fontStyle:"italic", color: textSecondary, lineHeight:1.6,
+                    marginBottom: 48,
+                  }}>
+                    Esther Wojcicki — educator, mother of three (Susan, Anne, Janet), and author of <em style={{ fontStyle:"italic" }}>How to Raise Successful People</em> — co-built neoschool around her decades-tested parenting framework.
+                  </p>
+
+                  <div style={{
+                    display:"grid",
+                    gridTemplateColumns:"repeat(auto-fit, minmax(160px, 1fr))",
+                    gap:14, marginBottom: 28,
+                  }}>
+                    {trick.map((t, i) => (
+                      <div key={t.letter} style={{
+                        ...r(240 + i * 80),
+                        background: "#fff", borderRadius: 12, padding: "24px 20px",
+                        border: `1px solid ${borderSubtle}`, transition: "all 250ms",
+                      }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = iris; e.currentTarget.style.transform = "translateY(-2px)"; }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = borderSubtle; e.currentTarget.style.transform = "translateY(0)"; }}>
+                        <p className="font-heading" style={{
+                          fontSize: 32, fontWeight: 700, color: iris, lineHeight: 1,
+                          marginBottom: 6, letterSpacing: "-.02em",
+                        }}>{t.letter}</p>
+                        <p className="font-heading" style={{
+                          fontSize: 14, fontWeight: 600, color: textPrimary,
+                          marginBottom: 6, letterSpacing: "-.005em",
+                        }}>{t.word}</p>
+                        <p className="font-body" style={{
+                          fontSize: 13.5, lineHeight: 1.45, color: textSecondary,
+                        }}>{t.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            );
+          }}
+        </SectionReveal>
+
+        {/* ─── CAMPUSES — Missoula + Berkeley + Bay Area + Launch yours ─── */}
+        <SectionReveal>
+          {(isVisible) => {
+            const r = (d) => ({
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? "translateY(0)" : "translateY(16px)",
+              filter: isVisible ? "blur(0px)" : "blur(4px)",
+              transition: `opacity 500ms cubic-bezier(0.22,1,0.36,1) ${d}ms, transform 500ms cubic-bezier(0.22,1,0.36,1) ${d}ms, filter 500ms cubic-bezier(0.22,1,0.36,1) ${d}ms`,
+            });
+            const campuses = [
+              { name:"Missoula",     state:"Montana",     status:"NOW ENROLLING", date:"September 2026", grades:"K + 1st", href:"/missoula.html", cta:"Apply →",     statusColor: iris },
+              { name:"Berkeley",     state:"California",  status:"WAITLIST",      date:"January 2027",   grades:"Ages 5-11", href:null,                cta:"Join waitlist →", statusColor: coral },
+              { name:"Palo Alto",    state:"California",  status:"WAITLIST",      date:"September 2027", grades:"K + 1st", href:null,                cta:"Join waitlist →", statusColor: coral },
+            ];
+            return (
+              <section id="campuses" style={{ background: bg, padding:"120px 0" }}>
+                <div style={{ position:"relative", margin:"0 auto", maxWidth:1080, padding:"0 24px" }}>
+                  <span className="section-number">05</span>
+                  <p className="text-overline" style={{ ...r(0), color: coral, marginBottom:14, textAlign:"center" }}>
+                    Founding campuses
+                  </p>
+                  <h2 className="font-body text-section-heading" style={{
+                    ...r(80), fontWeight:400, color: textPrimary,
+                    position:"relative", textAlign:"center", marginBottom:48,
+                  }}>
+                    Find a neoschool near you.
+                  </h2>
+
+                  <div style={{
+                    display:"grid",
+                    gridTemplateColumns:"repeat(auto-fit, minmax(280px, 1fr))",
+                    gap:14, marginBottom:14,
+                  }}>
+                    {campuses.map((c, i) => {
+                      const isClickable = !!c.href;
+                      const Cmp = isClickable ? "a" : "button";
+                      const props = isClickable ? { href: c.href } : { onClick: () => onStart("parent") };
+                      return (
+                        <Cmp key={c.name} {...props} style={{
+                          ...r(180 + i * 80),
+                          background:"#fff", border:`1px solid ${borderSubtle}`, borderRadius:12,
+                          padding:"28px 26px", cursor:"pointer", textDecoration:"none",
+                          color:"inherit", fontFamily:"inherit", textAlign:"left",
+                          display:"flex", flexDirection:"column", gap:10,
+                          transition:"all 300ms cubic-bezier(.2,.8,.2,1)",
+                        }}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor = c.statusColor; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 12px 28px -10px rgba(42,38,34,.15)"; }}
+                          onMouseLeave={e => { e.currentTarget.style.borderColor = borderSubtle; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
+                          <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                            <span style={{ width:6, height:6, borderRadius:"50%", background: c.statusColor }}/>
+                            <span className="text-nav" style={{ fontSize:10.5, color: c.statusColor }}>
+                              {c.status}
+                            </span>
+                          </div>
+                          <h3 className="font-heading" style={{
+                            fontSize:24, fontWeight:600, color:textPrimary,
+                            letterSpacing:"-.01em", lineHeight:1.1, marginTop:4,
+                          }}>
+                            {c.name}, <span style={{ fontWeight:400, color:textSecondary }}>{c.state}</span>
+                          </h3>
+                          <p className="font-body" style={{ fontSize:14.5, color:textSecondary, lineHeight:1.55 }}>
+                            {c.grades} · Opening {c.date}
+                          </p>
+                          <span className="text-nav" style={{ color:c.statusColor, fontSize:12, marginTop:6 }}>
+                            {c.cta}
+                          </span>
+                        </Cmp>
+                      );
+                    })}
+
+                    {/* Launch your own — dashed border, special card */}
+                    <button onClick={() => onStart("director")} style={{
+                      ...r(180 + 3 * 80),
+                      background:"transparent", border:`1px dashed ${borderSubtle}`, borderRadius:12,
+                      padding:"28px 26px", cursor:"pointer", fontFamily:"inherit", textAlign:"left",
+                      display:"flex", flexDirection:"column", gap:10,
+                      transition:"all 300ms cubic-bezier(.2,.8,.2,1)",
+                    }}
+                      onMouseEnter={e => { e.currentTarget.style.borderColor = iris; e.currentTarget.style.background="rgba(107,92,231,.03)"; }}
+                      onMouseLeave={e => { e.currentTarget.style.borderColor = borderSubtle; e.currentTarget.style.background="transparent"; }}>
+                      <span className="text-nav" style={{ fontSize:10.5, color: iris }}>+ Your city?</span>
+                      <h3 className="font-heading" style={{
+                        fontSize:20, fontWeight:600, color:textPrimary,
+                        letterSpacing:"-.01em", lineHeight:1.2, marginTop:4,
+                      }}>Launch a campus.</h3>
+                      <p className="font-body" style={{ fontSize:14.5, color:textSecondary, lineHeight:1.55 }}>
+                        Open a neoschool in your community. We provide the operating system.
+                      </p>
+                      <span className="text-nav" style={{ color:iris, fontSize:12, marginTop:6 }}>
+                        Apply to launch →
+                      </span>
+                    </button>
                   </div>
                 </div>
               </section>
