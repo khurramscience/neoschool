@@ -8,6 +8,8 @@ import { getTutorConfig, saveTutorConfig } from "./tutorConfig.js";
 import { getStudentGraph, recordLabVisit, recordLabEvent, getRecommendations as kgRecs, getSkillsSummary, getStudentPath, getGraphData } from "./knowledgeGraph.js";
 import { generateMCQ, shouldSpawnMCQ, recordMCQResult, getMCQStats } from "./mcqGenerator.js";
 import { startSyncLoop, flushSync, getSyncStatus } from "./supabaseSync.js";
+import { getUserKey, setUserKey, clearUserKey, hasUserKey, getDemoUsesLeft, getDemoBudget, shouldShowDemoWarning, canMakeRequest } from "./userApiKey.js";
+import { BYOKRequiredError } from "./api.js";
 
 // ── SHARED ────────────────────────────────────────────────────────────────────
 const Logo = ({ l, sz = 16 }) => (
@@ -1126,6 +1128,169 @@ function TutorMessage({ content, isUser }) {
       whiteSpace: "pre-wrap",
       wordBreak: "break-word",
     }}>{content}</div>
+  );
+}
+
+// ── BYOK MODAL — friendly prompt to add user's own Anthropic key ─────────────
+// Shown when demo interactions are exhausted, or by clicking "Add my key" in the tutor.
+function BYOKModal({ open, onClose, reason }) {
+  const [keyInput, setKeyInput] = useState("");
+  const [error, setError] = useState("");
+  const [saved, setSaved] = useState(false);
+
+  if (!open) return null;
+
+  const save = () => {
+    setError("");
+    const cleaned = keyInput.trim();
+    if (!cleaned) { setError("Paste your key first."); return; }
+    if (!cleaned.startsWith("sk-ant-")) {
+      setError("Anthropic keys start with sk-ant-... Make sure you copied the full key.");
+      return;
+    }
+    if (cleaned.length < 40) {
+      setError("That key looks too short — paste the full key from console.anthropic.com.");
+      return;
+    }
+    const ok = setUserKey(cleaned);
+    if (!ok) { setError("Couldn't save the key. Try again."); return; }
+    setSaved(true);
+    setTimeout(() => onClose(true), 1100);
+  };
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 9999,
+      background: "rgba(20,18,15,.65)", backdropFilter: "blur(8px)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: 16,
+    }} onClick={() => onClose(false)}>
+      <div onClick={e => e.stopPropagation()} style={{
+        background: "#fff", borderRadius: 20, maxWidth: 540, width: "100%",
+        padding: "32px 32px 28px",
+        boxShadow: "0 24px 60px -8px rgba(20,18,15,.4)",
+        fontFamily: "'Source Serif 4', Georgia, serif",
+        maxHeight: "92vh", overflowY: "auto",
+      }}>
+        <p className="text-overline" style={{ color: "hsl(248 74% 62%)", marginBottom: 14 }}>
+          {reason === "warning" ? "Heads up" : reason === "invalid_key" ? "Key issue" : "Keep learning"}
+        </p>
+        <h2 style={{
+          fontFamily: "'Source Serif 4', serif",
+          fontSize: 26, fontWeight: 400, color: "var(--nv)",
+          letterSpacing: "-.01em", lineHeight: 1.2, marginBottom: 8,
+        }}>
+          {saved ? "✨ All set." : "Bring your own AI tutor key"}
+        </h2>
+
+        {saved ? (
+          <p style={{ fontSize: 16, color: "var(--mu)", lineHeight: 1.55 }}>
+            Your key is saved on this device only. Ms. Ada is ready when you are.
+          </p>
+        ) : (
+          <>
+            <p style={{
+              fontSize: 15, color: "var(--mu)", lineHeight: 1.6, marginBottom: 18,
+            }}>
+              {reason === "invalid_key" ? (
+                <>Your key didn't work. Double-check it at console.anthropic.com or paste a new one below.</>
+              ) : (
+                <>
+                  You've explored neoschool's AI tutor — now let's give you full access.
+                  Anthropic (makers of Claude) lets anyone get an API key in 2 minutes.
+                  <strong style={{ color: "var(--nv)" }}> The first $5 is free</strong>, then
+                  a tutor response costs about <strong>$0.003</strong> — that's hundreds of conversations.
+                  Your key stays on your device only.
+                </>
+              )}
+            </p>
+
+            <div style={{
+              background: "var(--cr)", borderRadius: 12, padding: "16px 18px",
+              marginBottom: 18, fontSize: 13.5, lineHeight: 1.65,
+            }}>
+              <p style={{
+                fontFamily: "'IBM Plex Mono',monospace", fontSize: 10, fontWeight: 600,
+                color: "hsl(248 74% 62%)", letterSpacing: ".08em",
+                textTransform: "uppercase", marginBottom: 10,
+              }}>How to get your key (2 min)</p>
+              <ol style={{ paddingLeft: 18, color: "var(--tx)", margin: 0 }}>
+                <li style={{ marginBottom: 6 }}>
+                  Go to{" "}
+                  <a href="https://console.anthropic.com/" target="_blank" rel="noopener noreferrer"
+                     style={{ color: "hsl(248 74% 62%)", fontWeight: 500 }}>
+                    console.anthropic.com
+                  </a>{" "}
+                  → sign up (Google login works)
+                </li>
+                <li style={{ marginBottom: 6 }}>Add a billing method (first $5 free)</li>
+                <li style={{ marginBottom: 6 }}>Top-right → <strong>API Keys</strong> → <strong>Create Key</strong></li>
+                <li>Copy the <code style={{
+                  fontFamily: "'IBM Plex Mono',monospace", fontSize: 12,
+                  background: "#fff", padding: "1px 6px", borderRadius: 4,
+                }}>sk-ant-...</code> key and paste below</li>
+              </ol>
+            </div>
+
+            <label style={{
+              display: "block",
+              fontFamily: "'IBM Plex Mono',monospace", fontSize: 11, fontWeight: 600,
+              color: "var(--mu)", letterSpacing: ".06em",
+              textTransform: "uppercase", marginBottom: 6,
+            }}>Paste your key</label>
+            <input
+              type="password"
+              value={keyInput}
+              onChange={(e) => { setKeyInput(e.target.value); setError(""); }}
+              onKeyDown={(e) => e.key === "Enter" && save()}
+              placeholder="sk-ant-api03-..."
+              autoComplete="off"
+              style={{
+                width: "100%", padding: "12px 14px", borderRadius: 10,
+                border: `1.5px solid ${error ? "#C25420" : "var(--p2)"}`,
+                fontFamily: "'IBM Plex Mono',monospace", fontSize: 13,
+                outline: "none", transition: "border-color 200ms",
+              }}
+              onFocus={(e) => e.target.style.borderColor = "hsl(248 74% 62%)"}
+              onBlur={(e) => e.target.style.borderColor = error ? "#C25420" : "var(--p2)"}
+            />
+            {error && (
+              <p style={{ fontSize: 12.5, color: "#C25420", marginTop: 6 }}>
+                {error}
+              </p>
+            )}
+            <p style={{
+              fontSize: 11.5, color: "var(--mu)", marginTop: 8, lineHeight: 1.5,
+              fontStyle: "italic",
+            }}>
+              🔒 Your key is stored in this browser only — never sent to neoschool servers.
+            </p>
+
+            <div style={{ display: "flex", gap: 10, marginTop: 22, alignItems: "center" }}>
+              <button onClick={save} style={{
+                background: "hsl(248 74% 62%)", color: "#fff",
+                border: "none", padding: "12px 26px", borderRadius: 10,
+                fontFamily: "'Instrument Sans',sans-serif",
+                fontSize: 13, fontWeight: 600, letterSpacing: ".04em",
+                textTransform: "uppercase", cursor: "pointer",
+                transition: "all 200ms",
+              }}
+                onMouseEnter={e => e.currentTarget.style.boxShadow = "0 8px 24px rgba(107,92,231,.35)"}
+                onMouseLeave={e => e.currentTarget.style.boxShadow = "none"}>
+                Save & continue →
+              </button>
+              <button onClick={() => onClose(false)} style={{
+                background: "transparent", color: "var(--mu)",
+                border: "none", padding: "12px 14px", cursor: "pointer",
+                fontSize: 13, fontFamily: "'Source Serif 4',serif",
+              }}>
+                Maybe later
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -2586,6 +2751,19 @@ function LabPlayer({ lab, userId, onBack }) {
   const [simState, setSimState] = useState(null); // postMessage bridge: knows current sim state
   const [lastMCQAt, setLastMCQAt] = useState(0);
   const [ttsEnabled, setTtsEnabled] = useState(() => localStorage.getItem("neo_tts_enabled") === "1");
+  const [byokOpen, setByokOpen] = useState(false);
+  const [byokReason, setByokReason] = useState("");
+  // Track demo state — re-renders when key/uses change
+  const [tutorKeyState, setTutorKeyState] = useState({
+    hasKey: hasUserKey(),
+    usesLeft: getDemoUsesLeft(),
+    budget: getDemoBudget(),
+  });
+  const refreshKeyState = () => setTutorKeyState({
+    hasKey: hasUserKey(),
+    usesLeft: getDemoUsesLeft(),
+    budget: getDemoBudget(),
+  });
   const chatRef = useRef();
   const tutorCfg = getTutorConfig(lab.id, lab);
   const mem = getMemory(userId || "demo");
@@ -2733,9 +2911,24 @@ function LabPlayer({ lab, userId, onBack }) {
           }
         } catch (e) { /* MCQ failed silently — chat continues */ }
       }
-    } catch {
-      setMsgs(p => [...p, { role:"assistant", content:"What have you noticed so far in this lab?" }]);
+    } catch (err) {
+      // BYOK required → show modal instead of failing silently
+      if (err && (err.code === "byok_required" || err.name === "BYOKRequiredError")) {
+        setByokReason(err.details?.kind === "invalid_key" ? "invalid_key" : "exhausted");
+        setByokOpen(true);
+        // Soft message in chat
+        setMsgs(p => [...p, {
+          role: "assistant",
+          content: tutorKeyState.hasKey
+            ? "Your Anthropic key seems invalid or out of credits. Click below to update it."
+            : "You've used your free demo interactions! Add your own Anthropic key (free to start) to keep learning. Click below to set it up.",
+          id: Date.now(),
+        }]);
+      } else {
+        setMsgs(p => [...p, { role:"assistant", content:"What have you noticed so far in this lab?" }]);
+      }
     }
+    refreshKeyState();
     setTyping(false);
     setTimeout(() => chatRef.current?.scrollTo({ top:99999, behavior:"smooth" }), 80);
   };
@@ -2819,11 +3012,33 @@ function LabPlayer({ lab, userId, onBack }) {
                   letterSpacing:".04em", marginTop:2,
                 }}>{tutorCfg.persona}</div>
               </div>
-              <span style={{
-                fontSize:10, color:"hsl(248 74% 62%)", fontWeight:600,
-                fontFamily:"'IBM Plex Mono',monospace",
-                letterSpacing:".06em", textTransform:"uppercase",
-              }}>1 cr/msg</span>
+              <button
+                onClick={() => { setByokReason(""); setByokOpen(true); }}
+                style={{
+                  fontSize:10, fontWeight:600, padding:"4px 9px",
+                  borderRadius:8, cursor:"pointer",
+                  fontFamily:"'IBM Plex Mono',monospace",
+                  letterSpacing:".06em", textTransform:"uppercase",
+                  border: "1px solid",
+                  borderColor: tutorKeyState.hasKey
+                    ? "rgba(45,139,95,.3)"
+                    : tutorKeyState.usesLeft <= 3 ? "rgba(194,84,32,.4)" : "rgba(107,92,231,.3)",
+                  background: tutorKeyState.hasKey
+                    ? "rgba(45,139,95,.08)"
+                    : tutorKeyState.usesLeft <= 3 ? "rgba(194,84,32,.08)" : "rgba(107,92,231,.06)",
+                  color: tutorKeyState.hasKey
+                    ? "#1f5e40"
+                    : tutorKeyState.usesLeft <= 3 ? "#C25420" : "hsl(248 74% 62%)",
+                  transition: "all 150ms",
+                }}
+                title={tutorKeyState.hasKey ? "Using your Anthropic key (click to manage)" : `${tutorKeyState.usesLeft} free demo uses left — click to add your own key`}
+              >
+                {tutorKeyState.hasKey
+                  ? "✦ Your key"
+                  : tutorKeyState.usesLeft > 0
+                    ? `${tutorKeyState.usesLeft}/${tutorKeyState.budget} demo`
+                    : "Add key"}
+              </button>
               <button onClick={() => {
                 const next = !ttsEnabled;
                 setTtsEnabled(next);
@@ -3014,11 +3229,17 @@ function LabPlayer({ lab, userId, onBack }) {
           </div>
         )}
       </div>
+      <BYOKModal
+        open={byokOpen}
+        reason={byokReason}
+        onClose={(savedNew) => {
+          setByokOpen(false);
+          if (savedNew) { refreshKeyState(); }
+        }}
+      />
     </div>
   );
 }
-
-// ── STUDENT PORTAL ────────────────────────────────────────────────────────────
 function StudentPortal({ user }) {
   const [activeTab, setActiveTab]   = useState("labs");
   const [activeLab, setActiveLab]   = useState(null);

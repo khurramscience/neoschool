@@ -1,39 +1,86 @@
 // ── NEOSCHOOL API LAYER ───────────────────────────────────────────────────────
 const MODEL = "claude-sonnet-4-20250514";
 
+import { getUserKey, incrementDemoUse, canMakeRequest } from "./userApiKey.js";
+
 // If a Supabase URL is configured, route all Anthropic calls through our
 // Edge Function (anthropic-proxy) so the API key stays server-side.
 // Otherwise, fall back to direct browser calls using a per-user localStorage key.
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const PROXY_URL = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1/anthropic-proxy` : null;
 
-// Get user-provided API key (only used in fallback mode)
-function getApiKey() {
-  return localStorage.getItem("neo_api_key") || "";
+// Custom error class so the UI can detect "need API key" vs other failures
+export class BYOKRequiredError extends Error {
+  constructor(message, details = {}) {
+    super(message);
+    this.name = "BYOKRequiredError";
+    this.code = "byok_required";
+    this.details = details;
+  }
 }
 
 export async function claude(system, messages, maxT = 200) {
-  // Prefer the Edge Function proxy (production path)
+  // 1. Gate: if no user key AND no demo uses left, throw a typed error so UI shows BYOK modal
+  const gate = canMakeRequest();
+  if (!gate.ok) {
+    throw new BYOKRequiredError(
+      "You've used all your free demo interactions. Add your own Anthropic API key to keep learning — it's free to start at console.anthropic.com.",
+      { reason: gate.reason }
+    );
+  }
+
+  // 2. Prefer the Edge Function proxy (production path)
   if (PROXY_URL) {
+    const headers = { "Content-Type": "application/json" };
+    const userKey = getUserKey();
+    if (userKey) headers["X-User-Anthropic-Key"] = userKey;
+
     const r = await fetch(PROXY_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({ model: MODEL, max_tokens: maxT, system, messages }),
     });
+
+    if (r.status === 402) {
+      // Edge function says "BYOK required" (no platform key configured)
+      throw new BYOKRequiredError(
+        "Free demo unavailable — please add your own Anthropic API key to chat with Ms. Ada.",
+        { status: 402 }
+      );
+    }
+
     if (!r.ok) {
       const errText = await r.text().catch(() => "");
+      // Surface invalid-user-key clearly
+      if (r.status === 401 && errText.includes("invalid_user_key")) {
+        throw new BYOKRequiredError(
+          "Your Anthropic API key seems invalid or out of credits. Check it at console.anthropic.com.",
+          { status: 401, kind: "invalid_key" }
+        );
+      }
       throw new Error(`Anthropic proxy error ${r.status}: ${errText}`);
     }
+
     const data = await r.json();
+    // Count demo uses (BYOK users don't get counted)
+    if (!userKey) incrementDemoUse();
     return data.content?.[0]?.text || "";
   }
 
-  // Fallback: direct browser call with user's localStorage key
-  const apiKey = getApiKey();
-  const headers = { "Content-Type": "application/json" };
-  if (apiKey) headers["x-api-key"] = apiKey;
-  headers["anthropic-version"] = "2023-06-01";
-  headers["anthropic-dangerous-direct-browser-access"] = "true";
+  // 3. Fallback: direct browser call with user's localStorage key
+  const apiKey = getUserKey() || localStorage.getItem("neo_api_key") || "";
+  if (!apiKey) {
+    throw new BYOKRequiredError(
+      "Please add your Anthropic API key to chat with Ms. Ada — free to start at console.anthropic.com.",
+      { reason: "no_key_no_proxy" }
+    );
+  }
+  const headers = {
+    "Content-Type": "application/json",
+    "x-api-key": apiKey,
+    "anthropic-version": "2023-06-01",
+    "anthropic-dangerous-direct-browser-access": "true",
+  };
 
   const body = { model: MODEL, max_tokens: maxT, messages };
   if (system) body.system = system;
