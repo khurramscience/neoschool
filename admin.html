@@ -102,6 +102,22 @@
     <button class="pill" data-filter="reviewing" onclick="setFilter(this,'reviewing')">Reviewing</button>
     <button class="pill" data-filter="accepted" onclick="setFilter(this,'accepted')">Accepted</button>
     <button class="pill" data-filter="waitlisted" onclick="setFilter(this,'waitlisted')">Waitlisted</button>
+    <button class="pill" data-filter="rejected" onclick="setFilter(this,'rejected')">Rejected</button>
+  </div>
+
+  <div class="controls" style="margin-top:8px;align-items:center">
+    <label style="font-family:'Geist Mono',monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#7a7367;font-weight:600">Sort:</label>
+    <select id="sortBy" onchange="render()" style="padding:8px 14px;border-radius:99px;border:1px solid #e8dfd0;background:#fff;font-family:'Newsreader',serif;font-size:13.5px;color:#1a1612;cursor:pointer">
+      <option value="newest">Newest first</option>
+      <option value="oldest">Oldest first (FIFO · for waitlist)</option>
+      <option value="priority">Priority first (sibling · referral)</option>
+      <option value="referrals">Referrals first</option>
+    </select>
+    <label style="font-family:'Geist Mono',monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#7a7367;font-weight:600;margin-left:8px">View:</label>
+    <button class="pill" id="iepBtn" onclick="toggleFlag('iep')">⚠ IEP/504 only</button>
+    <button class="pill" id="enrollFTBtn" onclick="toggleFlag('ft')">FT</button>
+    <button class="pill" id="enrollPTBtn" onclick="toggleFlag('pt')">PT</button>
+    <button class="pill" id="enrollDIBtn" onclick="toggleFlag('di')">Drop-in</button>
   </div>
 
   <div class="status-bar">
@@ -252,6 +268,34 @@
 
   const STAGES = ["new", "reviewing", "accepted", "waitlisted", "rejected"];
   let expandedId = null;
+  let activeFlags = new Set();
+
+  // ── Priority flags (stored client-side per device) ────────────────────────
+  // 'sibling' = sibling of currently enrolled family → bump to top
+  // 'referral-credit' = referrer was a founding family (must credit them)
+  const FLAGS_KEY = "neo_priority_flags";
+  function readFlags() { try { return JSON.parse(localStorage.getItem(FLAGS_KEY) || "{}"); } catch { return {}; } }
+  function writeFlags(f) { localStorage.setItem(FLAGS_KEY, JSON.stringify(f)); }
+  function getPriority(appId) { return readFlags()[appId] || null; }
+  function setPriority(appId, value) {
+    const f = readFlags();
+    if (value) f[appId] = value;
+    else delete f[appId];
+    writeFlags(f);
+    render();
+  }
+
+  function toggleFlag(flag) {
+    if (activeFlags.has(flag)) activeFlags.delete(flag);
+    else activeFlags.add(flag);
+    // Toggle visual state
+    const btnMap = { iep: "iepBtn", ft: "enrollFTBtn", pt: "enrollPTBtn", di: "enrollDIBtn" };
+    Object.entries(btnMap).forEach(([k, id]) => {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle("on", activeFlags.has(k));
+    });
+    render();
+  }
 
   function toggleExpand(id) {
     expandedId = expandedId === id ? null : id;
@@ -294,12 +338,50 @@
 
   function render() {
     const search = document.getElementById("searchBox").value.toLowerCase();
-    const filtered = allApps.filter(a => {
+    const sortBy = (document.getElementById("sortBy")||{value:"newest"}).value;
+
+    // Helpers to pull fields whether they live at top level or inside form_data
+    const F = (a, k) => a[k] ?? (a.form_data && a.form_data[k]);
+    const getEnroll = a => F(a, "enrollment_type") || "";
+    const getIEP = a => F(a, "has_iep_504") || "";
+    const getReferrer = a => F(a, "referred_by") || "";
+    const getMotivation = a => F(a, "motivation") || a.notes || "";
+    const getNotes = a => F(a, "notes") || (a.form_data ? null : a.notes) || "";
+    const getParentFirst = a => F(a, "parent_first_name") || (a.parent_name || "").split(" ")[0] || "";
+
+    let filtered = allApps.filter(a => {
       if (currentFilter !== "All" && a.status !== currentFilter) return false;
+
+      // Flag filters
+      if (activeFlags.has("iep") && getIEP(a) !== "yes") return false;
+      if (activeFlags.has("ft") && getEnroll(a) !== "full-time") return false;
+      if (activeFlags.has("pt") && getEnroll(a) !== "part-time") return false;
+      if (activeFlags.has("di") && getEnroll(a) !== "drop-in-homeschool") return false;
+
       if (!search) return true;
-      const blob = `${a.parent_name} ${a.email} ${a.child_name} ${a.notes}`.toLowerCase();
+      const blob = `${a.parent_name} ${a.email} ${a.child_name} ${getMotivation(a)} ${getNotes(a)} ${getReferrer(a)}`.toLowerCase();
       return blob.includes(search);
     });
+
+    // Sort
+    const ts = a => new Date(a.submitted_at).getTime() || 0;
+    if (sortBy === "newest") filtered.sort((a,b) => ts(b) - ts(a));
+    else if (sortBy === "oldest") filtered.sort((a,b) => ts(a) - ts(b));
+    else if (sortBy === "priority") {
+      filtered.sort((a, b) => {
+        const pa = getPriority(a.id) === "sibling" ? 2 : getPriority(a.id) === "referral-credit" ? 1 : 0;
+        const pb = getPriority(b.id) === "sibling" ? 2 : getPriority(b.id) === "referral-credit" ? 1 : 0;
+        if (pb !== pa) return pb - pa;
+        return ts(a) - ts(b); // among same priority, FIFO
+      });
+    } else if (sortBy === "referrals") {
+      filtered.sort((a, b) => {
+        const ra = getReferrer(a) ? 1 : 0;
+        const rb = getReferrer(b) ? 1 : 0;
+        if (rb !== ra) return rb - ra;
+        return ts(b) - ts(a);
+      });
+    }
 
     // Update stats
     document.getElementById("totalCount").textContent = allApps.length;
@@ -308,7 +390,7 @@
     const today = new Date().toDateString();
     document.getElementById("todayCount").textContent = allApps.filter(a => a.submitted_at && new Date(a.submitted_at).toDateString() === today).length;
 
-    // Update document title with last-24h count for visible browser-tab notification
+    // Tab title notification
     const last24h = allApps.filter(a => a.submitted_at && (Date.now() - new Date(a.submitted_at).getTime()) < 86400000).length;
     document.title = last24h > 0 ? `(${last24h}) neoschool · Admin` : "neoschool · Admin · Applications";
 
@@ -321,7 +403,7 @@
     }
 
     let html = `<table><thead><tr>
-      <th>Family</th><th>Child</th><th>Grade</th><th>Campus</th>
+      <th>Family</th><th>Child</th><th>Grade</th><th>Type</th><th>Campus</th>
       <th>Stage</th><th>When</th><th style="width:24px"></th>
     </tr></thead><tbody>`;
 
@@ -335,13 +417,44 @@
       const isNew = hours < 24;
       const isExpanded = expandedId == a.id;
 
-      html += `<tr style="cursor:pointer${isNew ? ';background:rgba(217,98,43,.04)' : ''}" onclick="toggleExpand('${a.id}')">
+      const enroll = getEnroll(a);
+      const iep = getIEP(a);
+      const referrer = getReferrer(a);
+      const priority = getPriority(a.id);
+      const preferredName = F(a, "preferred_name");
+      const dob = F(a, "date_of_birth");
+      const gender = F(a, "gender");
+      const currentSchool = F(a, "current_school");
+      const enrollDate = F(a, "enrollment_date");
+      const accommodations = F(a, "accommodations");
+      const motivation = F(a, "motivation");
+      const ackFit = F(a, "ack_fit");
+      const ackTuition = F(a, "ack_tuition");
+
+      const enrollBadge = enroll === "full-time" ? `<span style="background:#e8f0e9;color:#1f5e40;padding:2px 7px;border-radius:4px;font-size:10.5px;font-family:'Geist Mono',monospace;letter-spacing:.04em;font-weight:600">FT</span>` :
+                          enroll === "part-time" ? `<span style="background:#fff4e6;color:#c25420;padding:2px 7px;border-radius:4px;font-size:10.5px;font-family:'Geist Mono',monospace;letter-spacing:.04em;font-weight:600">PT</span>` :
+                          enroll === "drop-in-homeschool" ? `<span style="background:#ede8f5;color:#6b5ce7;padding:2px 7px;border-radius:4px;font-size:10.5px;font-family:'Geist Mono',monospace;letter-spacing:.04em;font-weight:600">DROP-IN</span>` :
+                          `<span style="color:#7a7367;font-size:11px">—</span>`;
+
+      const iepBadge = iep === "yes" ? `<span title="Has IEP/504" style="background:#fff4e6;color:#c25420;padding:1px 6px;border-radius:4px;font-size:9.5px;font-family:'Geist Mono',monospace;letter-spacing:.04em;font-weight:600;margin-left:6px">⚠ IEP</span>` : "";
+
+      const prioBadge = priority === "sibling" ? `<span title="Sibling of existing family" style="background:#1f5e40;color:#fff;padding:2px 7px;border-radius:4px;font-size:9.5px;font-family:'Geist Mono',monospace;letter-spacing:.04em;font-weight:600;margin-left:6px">SIBLING</span>` :
+                        priority === "referral-credit" ? `<span title="Founding family referred" style="background:#c25420;color:#fff;padding:2px 7px;border-radius:4px;font-size:9.5px;font-family:'Geist Mono',monospace;letter-spacing:.04em;font-weight:600;margin-left:6px">REF</span>` : "";
+
+      const refBadge = referrer ? `<span title="Referred by ${escape(referrer)}" style="color:#6b5ce7;font-size:11px;margin-left:6px">★ ${escape(referrer)}</span>` : "";
+
+      const rowBg = priority === "sibling" ? "rgba(31,94,64,.05)" :
+                    priority === "referral-credit" ? "rgba(194,84,32,.04)" :
+                    isNew ? "rgba(217,98,43,.04)" : "transparent";
+
+      html += `<tr style="cursor:pointer;background:${rowBg}" onclick="toggleExpand('${a.id}')">
         <td>
-          <div class="name">${escape(a.parent_name)} ${isNew ? '<span class="new-badge">NEW</span>' : ''}</div>
-          <div class="email">${escape(a.email)}</div>
+          <div class="name">${escape(a.parent_name)}${isNew ? ' <span class="new-badge">NEW</span>' : ""}${iepBadge}${prioBadge}</div>
+          <div class="email">${escape(a.email)}${refBadge}</div>
         </td>
-        <td>${escape(a.child_name)}</td>
+        <td>${escape(a.child_name)}${preferredName ? ` <span style="color:#7a7367;font-size:11px">(${escape(preferredName)})</span>` : ""}</td>
         <td>${escape(a.grade)}</td>
+        <td>${enrollBadge}</td>
         <td>${escape(a.campus)}</td>
         <td><span class="stage stage-${a.status || "new"}">${escape(a.status || "new")}</span></td>
         <td class="when">${whenStr}</td>
@@ -349,24 +462,46 @@
       </tr>`;
 
       if (isExpanded) {
-        html += `<tr class="expanded-row"><td colspan="7" style="background:#faf4ed;padding:18px 24px">
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px 30px;margin-bottom:14px">
+        const detailField = (label, val) => val ? `<div><div class="field-label">${label}</div><div>${escape(val)}</div></div>` : "";
+        html += `<tr class="expanded-row"><td colspan="8" style="background:#faf4ed;padding:20px 24px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px 30px;margin-bottom:18px">
             ${a.email && a.email !== "—" ? `<div><div class="field-label">Email</div><div><a href="mailto:${escape(a.email)}" style="color:#c25420">${escape(a.email)}</a></div></div>` : ""}
             ${a.phone ? `<div><div class="field-label">Phone</div><div><a href="tel:${escape(a.phone)}" style="color:#c25420">${escape(a.phone)}</a></div></div>` : ""}
-            ${a.situation ? `<div><div class="field-label">Current situation</div><div style="text-transform:capitalize">${escape(a.situation)}</div></div>` : ""}
-            ${a.form_source ? `<div><div class="field-label">Source</div><div>${escape(a.form_source)}</div></div>` : ""}
-            <div><div class="field-label">Storage</div><div>${a.source}</div></div>
+            ${detailField("Gender", gender)}
+            ${detailField("Date of birth", dob)}
+            ${detailField("Current school", currentSchool)}
+            ${detailField("Desired enrollment", enrollDate)}
+            ${detailField("Enrollment type", enroll)}
+            ${detailField("Referred by", referrer)}
+            ${iep ? `<div><div class="field-label">IEP / 504</div><div>${iep === "yes" ? '<span style="color:#c25420;font-weight:600">⚠ Yes — needs review</span>' : "No"}</div></div>` : ""}
+            <div><div class="field-label">Acknowledgments</div><div style="font-size:13px">Fit: ${ackFit ? "✓" : "—"} · Tuition: ${ackTuition ? "✓" : "—"}</div></div>
             <div><div class="field-label">Submitted</div><div>${d.toLocaleString()}</div></div>
           </div>
-          ${a.notes ? `<div style="margin-bottom:14px"><div class="field-label">What drew them to neoschool</div><div style="font-family:'Newsreader',serif;font-size:14px;line-height:1.6;color:#1a1612;font-style:italic;border-left:2px solid #c25420;padding-left:14px">"${escape(a.notes)}"</div></div>` : ""}
+
+          ${motivation ? `<div style="margin-bottom:14px"><div class="field-label">What drew them to neoschool</div><div style="font-family:'Newsreader',serif;font-size:14px;line-height:1.6;color:#1a1612;font-style:italic;border-left:2px solid #c25420;padding-left:14px;white-space:pre-wrap">"${escape(motivation)}"</div></div>` : ""}
+
+          ${getNotes(a) ? `<div style="margin-bottom:14px"><div class="field-label">About child / family</div><div style="font-family:'Newsreader',serif;font-size:14px;line-height:1.6;color:#1a1612;border-left:2px solid #e8a574;padding-left:14px;white-space:pre-wrap">${escape(getNotes(a))}</div></div>` : ""}
+
+          ${accommodations ? `<div style="margin-bottom:14px"><div class="field-label">Accommodations</div><div style="font-family:'Newsreader',serif;font-size:14px;line-height:1.6;color:#1a1612;border-left:2px solid #c25420;padding-left:14px;white-space:pre-wrap">${escape(accommodations)}</div></div>` : ""}
+
+          <div style="margin-bottom:14px">
+            <div class="field-label">Priority flag</div>
+            <div class="stage-changer">
+              <button class="pill ${!priority ? 'on' : ''}" onclick="setPriority('${a.id}', null); event.stopPropagation()">Standard</button>
+              <button class="pill ${priority === 'sibling' ? 'on' : ''}" onclick="setPriority('${a.id}', 'sibling'); event.stopPropagation()">Sibling of existing family</button>
+              <button class="pill ${priority === 'referral-credit' ? 'on' : ''}" onclick="setPriority('${a.id}', 'referral-credit'); event.stopPropagation()">Founding-family referral · credit</button>
+            </div>
+          </div>
+
           <div>
             <div class="field-label">Change stage</div>
             <div class="stage-changer">
               ${STAGES.map(s => `<button class="pill ${a.status === s ? 'on' : ''}" onclick="changeStatus('${a.id}', '${s}', '${a.source}', event)">${s}</button>`).join("")}
             </div>
           </div>
-          <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
-            ${a.email && a.email !== "—" ? `<a href="mailto:${escape(a.email)}?subject=Welcome%20to%20neoschool%20Missoula&body=Hi%20${escape((a.parent_name || '').split(' ')[0])}%2C%0A%0AThanks%20so%20much%20for%20applying%20to%20neoschool%20Missoula.%20I%27d%20love%20to%20learn%20more%20about%20%20${escape(a.child_name)}.%20What%27s%20a%20good%20time%20to%20chat%20this%20week%3F%0A%0AWarmly%2C%0AJennie" class="btn">✉ Reply via email</a>` : ""}
+
+          <div style="margin-top:18px;display:flex;gap:8px;flex-wrap:wrap">
+            ${a.email && a.email !== "—" ? `<a href="mailto:${escape(a.email)}?subject=Welcome%20to%20neoschool%20Missoula&body=Hi%20${escape(getParentFirst(a))}%2C%0A%0AThanks%20so%20much%20for%20applying%20to%20neoschool%20Missoula.%20I%27d%20love%20to%20learn%20more%20about%20%20${escape(a.child_name)}.%20What%27s%20a%20good%20time%20to%20chat%20this%20week%3F%0A%0AWarmly%2C%0AJennie" class="btn">✉ Reply via email</a>` : ""}
             ${a.phone ? `<a href="tel:${escape(a.phone)}" class="btn btn-secondary">☏ Call ${escape(a.phone)}</a>` : ""}
           </div>
         </td></tr>`;
@@ -377,11 +512,29 @@
   }
 
   function exportCSV() {
-    const rows = [["Submitted","Parent","Email","Phone","Child","Grade","Campus","Situation","Notes","Status","Source"]];
+    const F = (a, k) => a[k] ?? (a.form_data && a.form_data[k]) ?? "";
+    const flags = JSON.parse(localStorage.getItem("neo_priority_flags") || "{}");
+    const rows = [[
+      "Submitted","Parent First","Parent Last","Email","Phone",
+      "Child First","Child Last","Preferred Name","Gender","Date of Birth",
+      "Current Grade","Current School","Desired Enrollment","Enrollment Type",
+      "Referred By","What drew them","Notes","Has IEP/504","Accommodations",
+      "Ack Fit","Ack Tuition","Campus","Status","Priority Flag","Source"
+    ]];
     for (const a of allApps) {
       rows.push([
-        a.submitted_at, a.parent_name, a.email, a.phone, a.child_name, a.grade,
-        a.campus, a.situation, a.notes, a.status, a.form_source || a.source
+        a.submitted_at,
+        F(a,"parent_first_name") || (a.parent_name||"").split(" ")[0],
+        F(a,"parent_last_name") || (a.parent_name||"").split(" ").slice(1).join(" "),
+        a.email, a.phone,
+        F(a,"child_first_name") || (a.child_name||"").split(" ")[0],
+        F(a,"child_last_name") || (a.child_name||"").split(" ").slice(1).join(" "),
+        F(a,"preferred_name"), F(a,"gender"), F(a,"date_of_birth"),
+        a.grade, F(a,"current_school"), F(a,"enrollment_date"), F(a,"enrollment_type"),
+        F(a,"referred_by"), F(a,"motivation") || a.notes, F(a,"notes"),
+        F(a,"has_iep_504"), F(a,"accommodations"),
+        F(a,"ack_fit") ? "yes" : "", F(a,"ack_tuition") ? "yes" : "",
+        a.campus, a.status, flags[a.id] || "", a.form_source || a.source
       ]);
     }
     const csv = rows.map(r => r.map(c => `"${String(c || "").replace(/"/g, '""')}"`).join(",")).join("\n");
