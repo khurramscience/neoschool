@@ -74,6 +74,68 @@ body::after{
 @keyframes pu{0%,100%{opacity:1}50%{opacity:.3}}
 @keyframes pi{0%{transform:scale(.85);opacity:0}70%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
 @keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ── Frontier landing animations ── */
+@keyframes hero-fade-up{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+@keyframes hero-fade-in{from{opacity:0}to{opacity:1}}
+@keyframes glow-pulse{0%,100%{box-shadow:0 0 0 0 rgba(107,92,231,.4)}50%{box-shadow:0 0 0 12px rgba(107,92,231,0)}}
+@keyframes gradient-shift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+@keyframes scroll-arrow{0%{transform:translateY(0);opacity:.6}50%{opacity:1}100%{transform:translateY(10px);opacity:.6}}
+
+/* Hero staggered reveal — each child fades up in sequence */
+.hero-stagger > *{opacity:0;animation:hero-fade-up .9s cubic-bezier(.16,.84,.44,1) forwards}
+.hero-stagger > *:nth-child(1){animation-delay:.08s}
+.hero-stagger > *:nth-child(2){animation-delay:.22s}
+.hero-stagger > *:nth-child(3){animation-delay:.36s}
+.hero-stagger > *:nth-child(4){animation-delay:.5s}
+
+/* Scroll reveal for sections */
+.reveal-on-scroll{opacity:0;transform:translateY(28px);transition:opacity .85s cubic-bezier(.16,.84,.44,1),transform .85s cubic-bezier(.16,.84,.44,1)}
+.reveal-on-scroll.visible{opacity:1;transform:translateY(0)}
+
+/* Stagger inside revealed sections */
+.reveal-stagger > *{opacity:0;transform:translateY(20px);transition:opacity .7s cubic-bezier(.16,.84,.44,1),transform .7s cubic-bezier(.16,.84,.44,1)}
+.reveal-stagger.visible > *{opacity:1;transform:translateY(0)}
+.reveal-stagger.visible > *:nth-child(1){transition-delay:.05s}
+.reveal-stagger.visible > *:nth-child(2){transition-delay:.15s}
+.reveal-stagger.visible > *:nth-child(3){transition-delay:.25s}
+.reveal-stagger.visible > *:nth-child(4){transition-delay:.35s}
+.reveal-stagger.visible > *:nth-child(5){transition-delay:.45s}
+
+/* Hero gradient mesh background */
+.hero-mesh{
+  position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(800px 600px at 15% 10%, rgba(107,92,231,.18) 0%, transparent 50%),
+    radial-gradient(600px 500px at 85% 30%, rgba(212,133,106,.08) 0%, transparent 50%),
+    radial-gradient(700px 500px at 50% 80%, rgba(107,92,231,.06) 0%, transparent 60%);
+  z-index:0;
+}
+
+/* Subtle grain texture for dark variant */
+.dark-grain{
+  position:absolute;inset:0;pointer-events:none;
+  background:url("data:image/svg+xml;utf8,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity:.35;mix-blend-mode:overlay;
+}
+
+/* Stat counter — pulse on viewport entry */
+.stat-pulse{transition:transform .4s cubic-bezier(.16,.84,.44,1)}
+.stat-pulse:hover{transform:translateY(-2px)}
+
+/* Button magnetic-hover glow */
+.btn-violet-glow{position:relative;overflow:hidden}
+.btn-violet-glow::before{
+  content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 0%,rgba(255,255,255,.15) 50%,transparent 100%);
+  transform:translateX(-100%);transition:transform .6s cubic-bezier(.16,.84,.44,1);
+}
+.btn-violet-glow:hover::before{transform:translateX(100%)}
+
+/* Scroll-down arrow indicator */
+.scroll-down{animation:scroll-arrow 1.8s ease-in-out infinite}
+
+/* Smooth scroll site-wide */
+html{scroll-behavior:smooth}
 .fu{animation:fu .65s cubic-bezier(.22,.68,0,1.1) both}
 .fi{animation:fi .4s ease both}
 .pi{animation:pi .45s cubic-bezier(.22,.68,0,1.2) both}

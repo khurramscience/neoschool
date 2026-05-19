@@ -89,6 +89,23 @@ function PaymentModal({ userId, onClose }) {
 function Marketing({ onStart }) {
   const [showInterestForm, setShowInterestForm] = useState(false);
 
+  // ── Scroll-triggered reveal animations ──
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+            observer.unobserve(entry.target);
+          }
+        }
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -80px 0px" }
+    );
+    document.querySelectorAll(".reveal-on-scroll, .reveal-stagger").forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   // ── Dark frontier variant — design DNA from Lovable + research doc ──
   const D = {
     bg:        "#0a0a12",           // primary dark
@@ -171,60 +188,74 @@ function Marketing({ onStart }) {
       </nav>
 
       {/* ─── HERO — manifesto ──────────────────────────────────── */}
-      <section style={{ maxWidth:1100, margin:"0 auto", padding:"140px 32px 120px" }}>
-        <SectionLabel num="">neoschool · Post-AI education</SectionLabel>
-        <h1 style={{
-          fontFamily:"'Instrument Sans','Inter',sans-serif",
-          fontSize:"clamp(48px, 7vw, 84px)", fontWeight:600,
-          lineHeight:1.02, letterSpacing:"-.028em",
-          color: D.tx, marginBottom:40, maxWidth:920,
+      <section style={{ position:"relative", overflow:"hidden" }}>
+        <div className="hero-mesh"/>
+        <div className="dark-grain"/>
+        <div className="hero-stagger" style={{ position:"relative", maxWidth:1100, margin:"0 auto", padding:"140px 32px 120px", zIndex:1 }}>
+          <SectionLabel num="">neoschool · Post-AI education</SectionLabel>
+          <h1 style={{
+            fontFamily:"'Instrument Sans','Inter',sans-serif",
+            fontSize:"clamp(48px, 7vw, 84px)", fontWeight:600,
+            lineHeight:1.02, letterSpacing:"-.028em",
+            color: D.tx, marginBottom:40, maxWidth:920,
+          }}>
+            The school built for the <em style={{
+              fontFamily:"'Source Serif 4',Georgia,serif", fontStyle:"italic", fontWeight:300, color: D.violet,
+            }}>post-AI</em> world.
+          </h1>
+          <p style={{
+            fontFamily:"'Source Serif 4',Georgia,serif",
+            fontSize:21, lineHeight:1.5, color: D.tx2, fontWeight:300,
+            maxWidth:640, marginBottom:48,
+          }}>
+            AI-powered academics in two hours. Real projects, real coaches, real childhood.
+            A microschool model designed for how kids actually learn — opening September 2026.
+          </p>
+          <div style={{ display:"flex", gap:14, flexWrap:"wrap", alignItems:"center" }}>
+            <a href="/missoula.html" className="btn-violet-glow" style={{
+              background: D.violet, color:"#fff", padding:"16px 30px", borderRadius:14,
+              fontFamily:"'Instrument Sans',sans-serif", fontSize:15.5, fontWeight:600,
+              textDecoration:"none", transition:"all .2s", letterSpacing:"-.005em",
+              display:"inline-flex", alignItems:"center", gap:8,
+            }}
+              onMouseEnter={e=>{e.currentTarget.style.background=D.violetHvr;e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow="0 16px 38px -10px rgba(107,92,231,.5)";}}
+              onMouseLeave={e=>{e.currentTarget.style.background=D.violet;e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="none";}}>
+              Apply for 2026 →
+            </a>
+            <button onClick={()=>onStart("director")} style={{
+              background:"transparent", color: D.tx, padding:"15px 28px", borderRadius:14,
+              fontFamily:"'Instrument Sans',sans-serif", fontSize:15.5, fontWeight:500,
+              border:`1px solid ${D.line2}`, cursor:"pointer", transition:"all .2s",
+            }}
+              onMouseEnter={e=>{e.currentTarget.style.borderColor=D.tx;e.currentTarget.style.background="rgba(255,255,255,.03)";}}
+              onMouseLeave={e=>{e.currentTarget.style.borderColor=D.line2;e.currentTarget.style.background="transparent";}}>
+              Launch a campus
+            </button>
+            <button onClick={()=>onStart("parent")} style={{
+              background:"transparent", color: D.tx2, padding:"15px 20px",
+              fontFamily:"'Instrument Sans',sans-serif", fontSize:15, fontWeight:500,
+              border:"none", cursor:"pointer", transition:"color .15s",
+            }}
+              onMouseEnter={e=>{e.currentTarget.style.color=D.tx;}}
+              onMouseLeave={e=>{e.currentTarget.style.color=D.tx2;}}>
+              Sign in →
+            </button>
+          </div>
+        </div>
+        {/* Scroll indicator at bottom of hero */}
+        <div className="scroll-down" style={{
+          position:"absolute", bottom:30, left:"50%", transform:"translateX(-50%)",
+          fontFamily:"'IBM Plex Mono',monospace", fontSize:10, color: D.tx3,
+          letterSpacing:".14em", textTransform:"uppercase", textAlign:"center",
+          zIndex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:8,
         }}>
-          The school built for the <em style={{
-            fontFamily:"'Source Serif 4',Georgia,serif", fontStyle:"italic", fontWeight:300, color: D.violet,
-          }}>post-AI</em> world.
-        </h1>
-        <p style={{
-          fontFamily:"'Source Serif 4',Georgia,serif",
-          fontSize:21, lineHeight:1.5, color: D.tx2, fontWeight:300,
-          maxWidth:640, marginBottom:48,
-        }}>
-          AI-powered academics in two hours. Real projects, real coaches, real childhood.
-          A microschool model designed for how kids actually learn — opening September 2026.
-        </p>
-        <div style={{ display:"flex", gap:14, flexWrap:"wrap", alignItems:"center" }}>
-          <a href="/missoula.html" style={{
-            background: D.violet, color:"#fff", padding:"16px 30px", borderRadius:14,
-            fontFamily:"'Instrument Sans',sans-serif", fontSize:15.5, fontWeight:600,
-            textDecoration:"none", transition:"all .2s", letterSpacing:"-.005em",
-            display:"inline-flex", alignItems:"center", gap:8,
-          }}
-            onMouseEnter={e=>{e.currentTarget.style.background=D.violetHvr;e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow="0 16px 38px -10px rgba(107,92,231,.5)";}}
-            onMouseLeave={e=>{e.currentTarget.style.background=D.violet;e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="none";}}>
-            Apply for 2026 →
-          </a>
-          <button onClick={()=>onStart("director")} style={{
-            background:"transparent", color: D.tx, padding:"15px 28px", borderRadius:14,
-            fontFamily:"'Instrument Sans',sans-serif", fontSize:15.5, fontWeight:500,
-            border:`1px solid ${D.line2}`, cursor:"pointer", transition:"all .2s",
-          }}
-            onMouseEnter={e=>{e.currentTarget.style.borderColor=D.tx;}}
-            onMouseLeave={e=>{e.currentTarget.style.borderColor=D.line2;}}>
-            Launch a campus
-          </button>
-          <button onClick={()=>onStart("parent")} style={{
-            background:"transparent", color: D.tx2, padding:"15px 20px",
-            fontFamily:"'Instrument Sans',sans-serif", fontSize:15, fontWeight:500,
-            border:"none", cursor:"pointer", transition:"color .15s",
-          }}
-            onMouseEnter={e=>{e.currentTarget.style.color=D.tx;}}
-            onMouseLeave={e=>{e.currentTarget.style.color=D.tx2;}}>
-            Sign in →
-          </button>
+          <span>Scroll</span>
+          <span style={{ fontSize:14 }}>↓</span>
         </div>
       </section>
 
       {/* ─── 01 · THE THESIS ───────────────────────────────────── */}
-      <section id="philosophy" style={{ maxWidth:980, margin:"0 auto", padding:"100px 32px", borderTop:`1px solid ${D.line}` }}>
+      <section id="philosophy" className="reveal-on-scroll" style={{ maxWidth:980, margin:"0 auto", padding:"100px 32px", borderTop:`1px solid ${D.line}` }}>
         <SectionLabel num="01">The thesis</SectionLabel>
         <p style={{
           fontFamily:"'Source Serif 4',Georgia,serif", fontSize:"clamp(26px,3vw,38px)",
@@ -238,7 +269,7 @@ function Marketing({ onStart }) {
       </section>
 
       {/* ─── 02 · A DAY ────────────────────────────────────────── */}
-      <section style={{ maxWidth:980, margin:"0 auto", padding:"100px 32px", borderTop:`1px solid ${D.line}` }}>
+      <section className="reveal-on-scroll" style={{ maxWidth:980, margin:"0 auto", padding:"100px 32px", borderTop:`1px solid ${D.line}` }}>
         <SectionLabel num="02">A typical day</SectionLabel>
         <h2 style={{
           fontFamily:"'Instrument Sans',sans-serif", fontSize:"clamp(32px,4vw,48px)",
@@ -271,7 +302,7 @@ function Marketing({ onStart }) {
       </section>
 
       {/* ─── 03 · RESEARCH ─────────────────────────────────────── */}
-      <section style={{ maxWidth:1100, margin:"0 auto", padding:"100px 32px", borderTop:`1px solid ${D.line}` }}>
+      <section className="reveal-on-scroll" style={{ maxWidth:1100, margin:"0 auto", padding:"100px 32px", borderTop:`1px solid ${D.line}` }}>
         <SectionLabel num="03">The research</SectionLabel>
         <h2 style={{
           fontFamily:"'Instrument Sans',sans-serif", fontSize:"clamp(32px,4vw,48px)",
@@ -303,7 +334,7 @@ function Marketing({ onStart }) {
       </section>
 
       {/* ─── 04 · FOUNDING CAMPUSES ────────────────────────────── */}
-      <section id="campuses" style={{ maxWidth:1100, margin:"0 auto", padding:"100px 32px", borderTop:`1px solid ${D.line}` }}>
+      <section id="campuses" className="reveal-on-scroll" style={{ maxWidth:1100, margin:"0 auto", padding:"100px 32px", borderTop:`1px solid ${D.line}` }}>
         <SectionLabel num="04">Founding campuses · 2026</SectionLabel>
         <h2 style={{
           fontFamily:"'Instrument Sans',sans-serif", fontSize:"clamp(32px,4vw,48px)",
@@ -378,7 +409,7 @@ function Marketing({ onStart }) {
       </section>
 
       {/* ─── 05 · FOR FAMILIES, GUIDES, DIRECTORS ──────────────── */}
-      <section style={{ maxWidth:1100, margin:"0 auto", padding:"100px 32px", borderTop:`1px solid ${D.line}` }}>
+      <section className="reveal-on-scroll" style={{ maxWidth:1100, margin:"0 auto", padding:"100px 32px", borderTop:`1px solid ${D.line}` }}>
         <SectionLabel num="05">Three ways to join</SectionLabel>
         <h2 style={{
           fontFamily:"'Instrument Sans',sans-serif", fontSize:"clamp(32px,4vw,48px)",
@@ -410,7 +441,7 @@ function Marketing({ onStart }) {
       </section>
 
       {/* ─── FOUNDER QUOTE ─────────────────────────────────────── */}
-      <section style={{ maxWidth:880, margin:"0 auto", padding:"100px 32px", borderTop:`1px solid ${D.line}`, textAlign:"center" }}>
+      <section className="reveal-on-scroll" style={{ maxWidth:880, margin:"0 auto", padding:"100px 32px", borderTop:`1px solid ${D.line}`, textAlign:"center" }}>
         <p style={{
           fontFamily:"'Source Serif 4',Georgia,serif", fontStyle:"italic", fontWeight:300,
           fontSize:"clamp(22px,2.6vw,30px)", lineHeight:1.4, color: D.tx,
@@ -426,7 +457,7 @@ function Marketing({ onStart }) {
       </section>
 
       {/* ─── CTA ───────────────────────────────────────────────── */}
-      <section style={{ maxWidth:980, margin:"0 auto", padding:"120px 32px", borderTop:`1px solid ${D.line}`, textAlign:"center" }}>
+      <section className="reveal-on-scroll" style={{ maxWidth:980, margin:"0 auto", padding:"120px 32px", borderTop:`1px solid ${D.line}`, textAlign:"center" }}>
         <SectionLabel num="06">Become a founding family</SectionLabel>
         <h2 style={{
           fontFamily:"'Instrument Sans',sans-serif", fontSize:"clamp(40px,5.5vw,68px)",
