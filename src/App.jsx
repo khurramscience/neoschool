@@ -839,7 +839,7 @@ function Marketing({ onStart }) {
               <p className="font-body" style={{
                 fontSize:14, color: textSecondary, lineHeight:1.55, maxWidth:260,
               }}>
-                The operating system for microschools. Built by parents, for parents.
+                The operating system for microschools. Built by parents, for parents. The school built for the post-AI world.
               </p>
             </div>
 
@@ -853,14 +853,21 @@ function Marketing({ onStart }) {
                 }}
                   onMouseEnter={e=>e.currentTarget.style.color=iris}
                   onMouseLeave={e=>e.currentTarget.style.color=textPrimary}>
-                  Missoula, Montana
+                  Missoula, MT · Sept 2026
                 </a>
                 <span className="font-heading" style={{ fontSize:13.5, color: textMuted }}>
-                  Berkeley, CA (waitlist)
+                  Berkeley, CA · Waitlist
                 </span>
                 <span className="font-heading" style={{ fontSize:13.5, color: textMuted }}>
-                  Palo Alto, CA (waitlist)
+                  Palo Alto, CA · Waitlist
                 </span>
+                <button onClick={()=>onStart("director")} className="font-heading" style={{
+                  fontSize:13.5, color: iris, background:"none", border:"none",
+                  cursor:"pointer", padding:0, textAlign:"left", fontWeight:500,
+                  marginTop:4,
+                }}>
+                  + Launch your own →
+                </button>
               </div>
             </div>
 
@@ -890,7 +897,15 @@ function Marketing({ onStart }) {
                 }}
                   onMouseEnter={e=>e.currentTarget.style.color=iris}
                   onMouseLeave={e=>e.currentTarget.style.color=textPrimary}>
-                  Launch a campus
+                  For directors
+                </button>
+                <button onClick={()=>onStart("student")} className="font-heading" style={{
+                  fontSize:13.5, color: textPrimary, background:"none", border:"none",
+                  cursor:"pointer", padding:0, textAlign:"left", fontWeight:500,
+                }}
+                  onMouseEnter={e=>e.currentTarget.style.color=iris}
+                  onMouseLeave={e=>e.currentTarget.style.color=textPrimary}>
+                  For students
                 </button>
               </div>
             </div>
@@ -899,13 +914,13 @@ function Marketing({ onStart }) {
             <div>
               <p className="text-overline" style={{ color: iris, marginBottom:14 }}>Contact</p>
               <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
-                <a href="mailto:jennie@chiefmamaofficer.com" className="font-heading" style={{
+                <a href="mailto:hello@neoschool.me" className="font-heading" style={{
                   fontSize:13.5, color: textPrimary, textDecoration:"none", fontWeight:500,
-                  transition:"color 250ms", wordBreak:"break-word",
+                  transition:"color 250ms",
                 }}
                   onMouseEnter={e=>e.currentTarget.style.color=iris}
                   onMouseLeave={e=>e.currentTarget.style.color=textPrimary}>
-                  jennie@chiefmamaofficer.com
+                  hello@neoschool.me
                 </a>
                 <a href="https://www.instagram.com/neoschool" target="_blank" rel="noopener noreferrer" className="font-heading" style={{
                   fontSize:13.5, color: textPrimary, textDecoration:"none", fontWeight:500,
@@ -1927,7 +1942,7 @@ function LabPlayer({ lab, userId, onBack }) {
   const [showPay, setShowPay] = useState(false);
   const [sessionStart] = useState(Date.now());
   const chatRef = useRef();
-  const tutorCfg = getTutorConfig(lab.id);
+  const tutorCfg = getTutorConfig(lab.id, lab);
   const mem = getMemory(userId || "demo");
 
   // Grade mismatch detection
@@ -2039,37 +2054,186 @@ function LabPlayer({ lab, userId, onBack }) {
           )}
         </div>
         {showTutor && (
-          <div style={{ width:280, display:"flex", flexDirection:"column", borderLeft:"1px solid var(--p2)", background:"var(--cr)" }}>
-            <div style={{ padding:"10px 12px", borderBottom:"1px solid var(--p2)", display:"flex", alignItems:"center", gap:8, flexShrink:0, background:"var(--p)" }}>
-              <div style={{ width:28, height:28, borderRadius:"50%", background:"var(--or)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:14 }}>{tutorCfg.avatar}</div>
-              <div style={{ flex:1 }}><div style={{ fontWeight:600, fontSize:12.5 }}>{tutorCfg.name}</div><div style={{ fontSize:10, color:"var(--mu)" }}>{tutorCfg.persona}</div></div>
-              <span style={{ fontSize:10, color:"var(--sg)", fontWeight:600 }}>1 cr/msg</span>
+          <div className="tutor-panel" style={{
+            width: "min(420px, 40vw)",
+            minWidth: 320,
+            display:"flex", flexDirection:"column",
+            borderLeft:"1px solid var(--p2)", background:"#fff",
+          }}>
+            <div style={{
+              padding:"16px 18px",
+              borderBottom:"1px solid var(--p2)",
+              display:"flex", alignItems:"center", gap:12, flexShrink:0,
+              background:"var(--cr)",
+            }}>
+              <div style={{
+                width:36, height:36, borderRadius:"50%",
+                background:"hsl(248 74% 62%)",
+                display:"flex", alignItems:"center", justifyContent:"center",
+                fontSize:16, color:"#fff", flexShrink:0,
+              }}>{tutorCfg.avatar}</div>
+              <div style={{ flex:1, minWidth:0 }}>
+                <div style={{
+                  fontFamily:"'Instrument Sans',sans-serif",
+                  fontWeight:600, fontSize:14, color:"var(--tx)",
+                  letterSpacing:"-.005em",
+                }}>AI STEM Tutor · {tutorCfg.name}</div>
+                <div style={{
+                  fontSize:11, color:"var(--mu)",
+                  fontFamily:"'IBM Plex Mono',monospace",
+                  letterSpacing:".04em", marginTop:2,
+                }}>{tutorCfg.persona}</div>
+              </div>
+              <span style={{
+                fontSize:10, color:"hsl(248 74% 62%)", fontWeight:600,
+                fontFamily:"'IBM Plex Mono',monospace",
+                letterSpacing:".06em", textTransform:"uppercase",
+              }}>1 cr/msg</span>
             </div>
             {msgs.length <= 1 && (
-              <div style={{ padding:"9px 11px", flexShrink:0 }}>
-                <p style={{ fontSize:10, color:"var(--mu)", marginBottom:5 }}>Ask me:</p>
-                {(tutorCfg.starterPrompts||[]).map((s,i) => <div key={i} onClick={()=>setInp(s)} style={{ fontSize:11, background:"var(--p)", borderRadius:7, padding:"5px 8px", cursor:"pointer", color:"var(--mu)", marginBottom:3 }}>{s}</div>)}
+              <div style={{ padding:"14px 18px", flexShrink:0, borderBottom:"1px solid var(--p2)" }}>
+                <p style={{
+                  fontSize:11, color:"var(--mu)", marginBottom:8,
+                  fontFamily:"'IBM Plex Mono',monospace",
+                  letterSpacing:".08em", textTransform:"uppercase", fontWeight:500,
+                }}>Try asking:</p>
+                <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+                  {(tutorCfg.starterPrompts||[]).map((s,i) => (
+                    <button key={i} onClick={()=>setInp(s)} style={{
+                      fontSize:13, background:"var(--cr)", borderRadius:8,
+                      padding:"8px 12px", cursor:"pointer", color:"var(--tx2)",
+                      border:"1px solid var(--p2)", textAlign:"left",
+                      fontFamily:"'Source Serif 4',serif",
+                      transition:"all 150ms",
+                    }}
+                      onMouseEnter={e=>{e.currentTarget.style.borderColor="hsl(248 74% 62%)";e.currentTarget.style.background="#fff";}}
+                      onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--p2)";e.currentTarget.style.background="var(--cr)";}}>
+                      {s}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
-            <div ref={chatRef} style={{ flex:1, overflowY:"auto", padding:"10px", display:"flex", flexDirection:"column", gap:7 }}>
+            <div ref={chatRef} style={{
+              flex:1, overflowY:"auto", padding:"16px 18px",
+              display:"flex", flexDirection:"column", gap:14,
+            }}>
               {msgs.map((m,i) => (
-                <div key={i} style={{ display:"flex", flexDirection:"column", alignItems:m.role==="user"?"flex-end":"flex-start" }}>
-                  {m.role==="assistant" && <div style={{ fontSize:10, color:"var(--mu)", marginBottom:2 }}>{tutorCfg.name}</div>}
-                  <div className={m.role==="user"?"cb-u":"cb-a"} style={{ fontSize:12, whiteSpace:"pre-wrap" }}>{m.content}</div>
+                <div key={i} style={{
+                  display:"flex", flexDirection:"column",
+                  alignItems: m.role==="user" ? "flex-end" : "flex-start",
+                }}>
+                  <div style={{
+                    fontSize: 14.5, lineHeight: 1.55,
+                    fontFamily: "'Source Serif 4',serif",
+                    background: m.role === "user" ? "hsl(50 10% 9%)" : "var(--cr)",
+                    color: m.role === "user" ? "#fff" : "var(--tx)",
+                    padding:"10px 14px",
+                    borderRadius: m.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+                    maxWidth: "92%",
+                    whiteSpace:"pre-wrap",
+                    wordBreak:"break-word",
+                  }}>{m.content}</div>
                   {m.role==="assistant" && m.id && (
-                    <div style={{ display:"flex", gap:4, marginTop:3 }}>
-                      <button onClick={()=>rateMsg(m.id,"good")} style={{ background:ratings[m.id]==="good"?"#dff2ea":"var(--p)", border:"none", borderRadius:5, padding:"2px 6px", fontSize:11, cursor:"pointer" }}>👍</button>
-                      <button onClick={()=>rateMsg(m.id,"bad")} style={{ background:ratings[m.id]==="bad"?"#fde8e8":"var(--p)", border:"none", borderRadius:5, padding:"2px 6px", fontSize:11, cursor:"pointer" }}>👎</button>
+                    <div style={{ display:"flex", gap:6, marginTop:6, marginLeft:4 }}>
+                      <button onClick={()=>rateMsg(m.id,"good")} style={{
+                        background: ratings[m.id]==="good"?"#dff2ea":"transparent",
+                        border:"1px solid var(--p2)", borderRadius:6,
+                        padding:"3px 8px", fontSize:12, cursor:"pointer",
+                        transition:"all 150ms",
+                      }}>👍</button>
+                      <button onClick={()=>rateMsg(m.id,"bad")} style={{
+                        background: ratings[m.id]==="bad"?"#fde8e8":"transparent",
+                        border:"1px solid var(--p2)", borderRadius:6,
+                        padding:"3px 8px", fontSize:12, cursor:"pointer",
+                        transition:"all 150ms",
+                      }}>👎</button>
                     </div>
                   )}
                 </div>
               ))}
-              {typing && <div className="cb-a" style={{ display:"flex", gap:4 }}>{[0,1,2].map(i=><div key={i} style={{ width:6,height:6,borderRadius:"50%",background:"var(--p2)",animation:`pu 1.2s ${i*.2}s infinite`}}/>)}</div>}
+              {typing && (
+                <div style={{
+                  background:"var(--cr)", padding:"10px 14px",
+                  borderRadius:"16px 16px 16px 4px",
+                  alignSelf:"flex-start", display:"flex", gap:5,
+                }}>
+                  {[0,1,2].map(i=>(
+                    <div key={i} style={{
+                      width:7, height:7, borderRadius:"50%",
+                      background:"var(--mu)",
+                      animation:`pu 1.2s ${i*.2}s infinite`,
+                    }}/>
+                  ))}
+                </div>
+              )}
             </div>
-            <div style={{ padding:"9px 11px", borderTop:"1px solid var(--p2)", flexShrink:0 }}>
-              <div style={{ display:"flex", gap:5 }}>
-                <input className="inp" style={{ flex:1, fontSize:12 }} placeholder="Ask anything…" value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()}/>
-                <button className="btn bn xs" onClick={send} disabled={!inp.trim()||typing}>{typing?<Spn/>:"→"}</button>
+            <div style={{
+              padding:"12px 14px", borderTop:"1px solid var(--p2)", flexShrink:0,
+              background:"var(--cr)",
+            }}>
+              <div style={{
+                display:"flex", gap:8, alignItems:"flex-end",
+                background:"#fff", borderRadius:14,
+                border:"1px solid var(--p2)",
+                padding:"6px 6px 6px 14px",
+              }}>
+                <input
+                  className="tutor-input"
+                  style={{
+                    flex:1, fontSize:14, border:"none", outline:"none",
+                    background:"transparent",
+                    fontFamily:"'Source Serif 4',serif",
+                    color:"var(--tx)",
+                    padding:"8px 0",
+                  }}
+                  placeholder="Ask me anything about STEM…"
+                  value={inp}
+                  onChange={e=>setInp(e.target.value)}
+                  onKeyDown={e=>e.key==="Enter"&&send()}
+                />
+                <button onClick={()=>{
+                  if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
+                    alert("Voice input isn't supported in this browser. Try Chrome.");
+                    return;
+                  }
+                  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+                  const rec = new SR();
+                  rec.continuous = false;
+                  rec.interimResults = false;
+                  rec.lang = "en-US";
+                  rec.onresult = (e)=>{ setInp(e.results[0][0].transcript); };
+                  rec.start();
+                }} style={{
+                  background:"transparent", border:"none", cursor:"pointer",
+                  padding:"6px 8px", borderRadius:8,
+                  display:"flex", alignItems:"center", justifyContent:"center",
+                  color:"var(--mu)", transition:"all 150ms",
+                }} title="Voice input"
+                  onMouseEnter={e=>e.currentTarget.style.color="hsl(248 74% 62%)"}
+                  onMouseLeave={e=>e.currentTarget.style.color="var(--mu)"}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                    <line x1="12" y1="19" x2="12" y2="23"/>
+                    <line x1="8" y1="23" x2="16" y2="23"/>
+                  </svg>
+                </button>
+                <button onClick={send} disabled={!inp.trim()||typing} style={{
+                  background:"hsl(248 74% 62%)", color:"#fff",
+                  border:"none", borderRadius:10, cursor:"pointer",
+                  width:34, height:34,
+                  display:"flex", alignItems:"center", justifyContent:"center",
+                  opacity: (!inp.trim()||typing) ? .4 : 1,
+                  transition:"all 150ms",
+                }}>
+                  {typing ? <Spn/> : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="19" x2="12" y2="5"/>
+                      <polyline points="5 12 12 5 19 12"/>
+                    </svg>
+                  )}
+                </button>
               </div>
             </div>
           </div>

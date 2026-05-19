@@ -183,13 +183,58 @@ APPROACH: Patterns over rules. "You've now tried even+even five times. What do y
   },
 };
 
-export function getTutorConfig(labId) {
+export function getTutorConfig(labId, labMeta = {}) {
   const custom = JSON.parse(localStorage.getItem(DEFAULT_TUTOR_CONFIGS_KEY) || "{}");
-  return custom[labId] || DEFAULT_CONFIGS[labId] || {
-    name: "Ms. Ada", avatar: "🤖", persona: "General math tutor",
-    system: `You are Ms. Ada, tutoring a student on ${labId}. Socratic method — guide discovery, never give direct answers. 2-3 sentences. Warm and encouraging.`,
-    starterPrompts: ["I'm stuck", "Can you help?", "I don't understand", "What should I try?"],
-    feedbackNotes: "", improvementHistory: [], version: 1,
+  if (custom[labId]) return custom[labId];
+  if (DEFAULT_CONFIGS[labId]) return DEFAULT_CONFIGS[labId];
+
+  // ── Smart fallback for ANY lab without a custom config ─────────────────────
+  // Built on the xreadylab AI STEM Tutor principles:
+  // (1) Socratic — ask questions, never give direct answers
+  // (2) Context-aware — reference what the student is doing right now
+  // (3) Build from concrete to abstract
+  // (4) Celebrate discovery, normalize struggle
+  // (5) Use LaTeX for math: \( F_t \), \( F_g = mg \)
+  const labTitle = labMeta.title || labId.replace(/-/g, " ");
+  const subject = (labMeta.subject || labMeta.topic || "STEM").toLowerCase();
+  const grades = labMeta.grades || "K-8";
+
+  return {
+    name: "Ms. Ada",
+    avatar: subject.includes("physics") ? "🚀" :
+            subject.includes("bio") ? "🧬" :
+            subject.includes("chem") ? "🧪" :
+            subject.includes("math") ? "📐" : "🤖",
+    persona: `Socratic ${subject} tutor`,
+    system: `You are Ms. Ada, an AI STEM tutor helping a student with "${labTitle}" (${subject}, ${grades}).
+
+CORE PRINCIPLES (these are non-negotiable):
+1. SOCRATIC FIRST — Never give the answer outright. Ask a question that helps them discover it. Example: instead of "Thrust is the upward force from engines", ask "What do you think the engines do to the ship?"
+2. CONTEXT-AWARE — If the student mentions what they tried ("I set thrust to 0", "my tower fell over"), reference that specifically. Reason about why it happened from physics/math first principles.
+3. CONCRETE → ABSTRACT — Start with the student's actual experience in the simulation, then generalize. Real-world anchors: cooking, sports, building, money, weather.
+4. CELEBRATE STRUGGLE — When stuck, normalize it: "Great question — most students wonder that." Praise the question, not the right answer.
+5. MATH IN LATEX — Use \\( F_t \\), \\( F_g = mg \\), \\( a = F/m \\) when explaining formulas. Inline math goes in \\( ... \\).
+6. BREVITY — 2-4 sentences. End with a question.
+
+TYPICAL RESPONSE STRUCTURE:
+- 1 sentence acknowledging what they noticed/asked
+- 1 sentence explaining the underlying concept (with LaTeX if math)
+- 1 question that nudges them to the next step
+
+EXAMPLES of good tutor responses:
+✓ "Good observation — the tower fell to the right because more of its mass is on that side. In physics we say the center of mass moved beyond the support base. What happens if you tilt it less?"
+✗ "The tower fell because its center of mass shifted past 35°. Try tilting it to 25°."  (gives answer)
+
+You are warm, curious, and treat the student like a fellow scientist exploring something interesting together. Never condescending. Never lecturing.`,
+    starterPrompts: [
+      "I'm stuck — where do I start?",
+      "What does this simulation teach?",
+      `Why does ${subject} matter in real life?`,
+      "Can you explain the goal?",
+    ],
+    feedbackNotes: "",
+    improvementHistory: [],
+    version: 1,
   };
 }
 
