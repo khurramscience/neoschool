@@ -116,7 +116,6 @@
     <label style="font-family:'Geist Mono',monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#7a7367;font-weight:600;margin-left:8px">View:</label>
     <button class="pill" id="iepBtn" onclick="toggleFlag('iep')">⚠ IEP/504 only</button>
     <button class="pill" id="enrollFTBtn" onclick="toggleFlag('ft')">FT</button>
-    <button class="pill" id="enrollPTBtn" onclick="toggleFlag('pt')">PT</button>
     <button class="pill" id="enrollDIBtn" onclick="toggleFlag('di')">Drop-in</button>
   </div>
 
@@ -289,7 +288,7 @@
     if (activeFlags.has(flag)) activeFlags.delete(flag);
     else activeFlags.add(flag);
     // Toggle visual state
-    const btnMap = { iep: "iepBtn", ft: "enrollFTBtn", pt: "enrollPTBtn", di: "enrollDIBtn" };
+    const btnMap = { iep: "iepBtn", ft: "enrollFTBtn", di: "enrollDIBtn" };
     Object.entries(btnMap).forEach(([k, id]) => {
       const el = document.getElementById(id);
       if (el) el.classList.toggle("on", activeFlags.has(k));
@@ -355,7 +354,6 @@
       // Flag filters
       if (activeFlags.has("iep") && getIEP(a) !== "yes") return false;
       if (activeFlags.has("ft") && getEnroll(a) !== "full-time") return false;
-      if (activeFlags.has("pt") && getEnroll(a) !== "part-time") return false;
       if (activeFlags.has("di") && getEnroll(a) !== "drop-in-homeschool") return false;
 
       if (!search) return true;
@@ -432,7 +430,6 @@
       const ackTuition = F(a, "ack_tuition");
 
       const enrollBadge = enroll === "full-time" ? `<span style="background:#e8f0e9;color:#1f5e40;padding:2px 7px;border-radius:4px;font-size:10.5px;font-family:'Geist Mono',monospace;letter-spacing:.04em;font-weight:600">FT</span>` :
-                          enroll === "part-time" ? `<span style="background:#fff4e6;color:#c25420;padding:2px 7px;border-radius:4px;font-size:10.5px;font-family:'Geist Mono',monospace;letter-spacing:.04em;font-weight:600">PT</span>` :
                           enroll === "drop-in-homeschool" ? `<span style="background:#ede8f5;color:#6b5ce7;padding:2px 7px;border-radius:4px;font-size:10.5px;font-family:'Geist Mono',monospace;letter-spacing:.04em;font-weight:600">DROP-IN</span>` :
                           `<span style="color:#7a7367;font-size:11px">—</span>`;
 
