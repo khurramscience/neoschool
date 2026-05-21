@@ -483,6 +483,65 @@
   /* Footer */
   footer{background:var(--nv);color:#fff;padding:36px 0;margin-top:30px}
 
+  /* ─── Stay-in-the-loop email capture ─────────────────────────────────────── */
+  #stayInLoop{padding-top:0;padding-bottom:48px}
+  .loop-card{
+    background:linear-gradient(135deg,#fff6ef 0%,#fdeee2 100%);
+    border:1px solid var(--p2);
+    border-radius:20px;
+    padding:40px 44px;
+    max-width:680px;margin:0 auto;
+  }
+  .loop-eyebrow{
+    font-family:'Geist Mono',monospace;font-size:11px;
+    letter-spacing:.12em;text-transform:uppercase;
+    color:var(--or3);margin-bottom:8px;font-weight:600;
+  }
+  .loop-h{
+    font-family:'Fraunces',serif;font-size:30px;font-weight:500;
+    color:var(--nv);letter-spacing:-.015em;line-height:1.1;margin-bottom:8px;
+  }
+  .loop-sub{
+    font-family:'Newsreader',serif;font-size:16px;font-weight:300;
+    color:var(--mu);line-height:1.55;margin-bottom:24px;max-width:520px;
+  }
+  .loop-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+  .loop-card label{
+    display:block;font-family:'Geist Mono',monospace;font-size:10.5px;
+    letter-spacing:.06em;text-transform:uppercase;color:var(--nv);
+    margin-bottom:6px;font-weight:500;
+  }
+  .loop-optional{
+    font-family:'Newsreader',serif;font-size:11px;font-style:italic;
+    color:var(--mu);letter-spacing:0;text-transform:none;font-weight:300;margin-left:4px;
+  }
+  .loop-card input,.loop-card select{
+    width:100%;padding:12px 14px;border-radius:10px;
+    border:1px solid var(--p2);background:#fff;
+    font-family:'Newsreader',serif;font-size:15px;color:var(--nv);
+    transition:border-color .15s;
+  }
+  .loop-card input:focus,.loop-card select:focus{
+    outline:none;border-color:var(--or3);
+  }
+  .loop-btn{
+    background:var(--or);color:#fff;border:none;
+    padding:15px 30px;border-radius:99px;cursor:pointer;
+    font-family:'Fraunces',serif;font-size:16px;font-weight:500;
+    letter-spacing:-.005em;width:100%;transition:all .2s;margin-top:8px;
+  }
+  .loop-btn:hover{background:var(--or2);transform:translateY(-1px);box-shadow:0 8px 20px -6px rgba(217,98,43,.4)}
+  .loop-privacy{
+    font-family:'Newsreader',serif;font-size:12px;color:var(--mu);
+    text-align:center;margin-top:14px;font-weight:300;line-height:1.5;
+  }
+  .loop-privacy a{color:var(--or)}
+  @media(max-width:540px){
+    .loop-card{padding:28px 22px}
+    .loop-grid{grid-template-columns:1fr}
+    .loop-h{font-size:25px}
+  }
+
   /* Top bar Apply CTA */
   .topbar-apply{background:var(--or);color:#fff;padding:7px 16px;border-radius:99px;font-family:'Fraunces',serif;font-size:13px;font-weight:500;text-decoration:none;letter-spacing:-.005em;transition:all .2s;display:inline-block}
   .topbar-apply:hover{background:var(--or2);transform:translateY(-1px);box-shadow:0 4px 14px rgba(217,98,43,.4)}
@@ -1081,8 +1140,8 @@
               <label for="gender">Child's gender *</label>
               <select id="gender" name="gender" required>
                 <option value="">Select</option>
-                <option value="girl">Girl</option>
-                <option value="boy">Boy</option>
+                <option value="female">Female</option>
+                <option value="male">Male</option>
                 <option value="nonbinary">Non-binary</option>
                 <option value="prefer-not">Prefer not to say</option>
                 <option value="other">Other / specify in notes</option>
@@ -1212,6 +1271,62 @@
   </div>
 </section>
 
+<!-- Stay in the loop — email capture for not-ready-to-apply families -->
+<section class="container" id="stayInLoop">
+  <div class="loop-card">
+    <div id="loopFormState">
+      <p class="loop-eyebrow">Not ready to apply yet?</p>
+      <h2 class="loop-h">Stay in the loop</h2>
+      <p class="loop-sub">We'll share campus updates, open-house dates, and enrollment news. No spam, unsubscribe anytime.</p>
+
+      <form id="loopForm" onsubmit="submitInterest(event)">
+        <div class="loop-grid">
+          <div>
+            <label for="loopFirst">First name *</label>
+            <input id="loopFirst" name="loopFirst" type="text" required placeholder="First">
+          </div>
+          <div>
+            <label for="loopLast">Last name *</label>
+            <input id="loopLast" name="loopLast" type="text" required placeholder="Last">
+          </div>
+        </div>
+        <div style="margin-bottom:14px">
+          <label for="loopEmail">Email *</label>
+          <input id="loopEmail" name="loopEmail" type="email" required placeholder="you@example.com">
+        </div>
+        <div class="loop-grid">
+          <div>
+            <label for="loopKidName">Child's first name <span class="loop-optional">(optional)</span></label>
+            <input id="loopKidName" name="loopKidName" type="text" placeholder="First">
+          </div>
+          <div>
+            <label for="loopKidAge">Child's age <span class="loop-optional">(optional)</span></label>
+            <select id="loopKidAge" name="loopKidAge">
+              <option value="">Select</option>
+              <option value="under-3">Under 3</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9+">9 or older</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="loop-btn" id="loopBtn">Keep me posted →</button>
+        <p class="loop-privacy">By joining, you agree to our <a href="/privacy-policy.html">Privacy Policy</a>. We never sell your information.</p>
+      </form>
+    </div>
+
+    <div id="loopSuccessState" style="display:none;text-align:center;padding:20px 10px">
+      <div style="font-size:34px;margin-bottom:10px">🌲</div>
+      <h2 class="loop-h" style="margin-bottom:8px">You're on the list!</h2>
+      <p class="loop-sub" style="margin-bottom:0">Thanks <span id="loopSuccessName">friend</span> — we'll be in touch with neoschool Missoula updates. Keep an eye on your inbox.</p>
+    </div>
+  </div>
+</section>
+
 <!-- Footer -->
 <footer>
   <div class="container">
@@ -1220,6 +1335,10 @@
       <a href="mailto:jennie@chiefmamaofficer.com">jennie@chiefmamaofficer.com</a>
       &nbsp;·&nbsp;
       <a href="/">Platform</a>
+      &nbsp;·&nbsp;
+      <a href="/privacy-policy.html">Privacy</a>
+      &nbsp;·&nbsp;
+      <a href="/terms-of-use.html">Terms</a>
     </div>
   </div>
 </footer>
@@ -1263,6 +1382,53 @@
   // Supabase client setup
   const SUPABASE_URL = "https://dwpxsaamaehtmhsuuprg.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_eM_rkri5KfdnheOZyCNN3w_hqmN7M4k";
+
+  // ── Stay-in-the-loop interest capture ──────────────────────────────────────
+  window.submitInterest = async function(e) {
+    e.preventDefault();
+    const form = document.getElementById("loopForm");
+    const first = form.loopFirst.value.trim();
+
+    const data = {
+      // Marks this as an interest signup, not a full application
+      type: "interest",
+      source: "missoula-stay-in-loop",
+      parent_first_name: first,
+      parent_last_name: form.loopLast.value.trim(),
+      parent_name: `${first} ${form.loopLast.value.trim()}`.trim(),
+      email: form.loopEmail.value.trim(),
+      child_first_name: form.loopKidName.value.trim() || null,
+      child_name: form.loopKidName.value.trim() || null,
+      child_age: form.loopKidAge.value || null,
+      campus: "Missoula",
+      submitted_at: new Date().toISOString(),
+    };
+
+    // 1. Save locally immediately (sync, can't fail)
+    try {
+      const local = JSON.parse(localStorage.getItem("neo_waitlist_interest") || "[]");
+      local.push({ id: Date.now(), ...data });
+      localStorage.setItem("neo_waitlist_interest", JSON.stringify(local));
+    } catch {}
+
+    // 2. Optimistic success UI
+    document.getElementById("loopSuccessName").textContent = first || "friend";
+    document.getElementById("loopFormState").style.display = "none";
+    document.getElementById("loopSuccessState").style.display = "block";
+
+    // 3. Fire to Edge Function in background (reuses submit-application w/ type flag)
+    try {
+      fetch(`${SUPABASE_URL}/functions/v1/submit-application`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify(data),
+      }).catch(() => {});
+    } catch {}
+  };
 
   window.submitApplication = async function(e) {
     e.preventDefault();
