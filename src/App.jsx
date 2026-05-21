@@ -2354,6 +2354,135 @@ function ActivityTimeline({ studentId, childName }) {
   );
 }
 
+function ParentMessages({ user, childName }) {
+  const email = (user?.email || user?.id || "").toLowerCase();
+  const parentName = user?.name || "Parent";
+  const MSG_KEY = "neo_messages_parent"; // parent-side local mirror
+  const SUPABASE_URL = "https://dwpxsaamaehtmhsuuprg.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_eM_rkri5KfdnheOZyCNN3w_hqmN7M4k";
+
+  const [messages, setMessages] = React.useState([]);
+  const [draft, setDraft] = React.useState("");
+  const [sending, setSending] = React.useState(false);
+  const bodyRef = React.useRef(null);
+
+  const readLocal = () => {
+    try { return JSON.parse(localStorage.getItem(MSG_KEY) || "{}")[email] || []; }
+    catch { return []; }
+  };
+  const writeLocal = (msgs) => {
+    let all = {};
+    try { all = JSON.parse(localStorage.getItem(MSG_KEY) || "{}"); } catch {}
+    all[email] = msgs;
+    localStorage.setItem(MSG_KEY, JSON.stringify(all));
+  };
+
+  // Load: merge local mirror + server thread (when DB is up)
+  React.useEffect(() => {
+    if (!email) return;
+    setMessages(readLocal());
+    (async () => {
+      try {
+        const r = await fetch(`${SUPABASE_URL}/functions/v1/parent-messages`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` },
+          body: JSON.stringify({ action: "list", thread_email: email }),
+        });
+        if (r.ok) {
+          const { messages: server } = await r.json();
+          if (Array.isArray(server) && server.length) {
+            const local = readLocal();
+            const merged = [...server];
+            for (const l of local) {
+              if (!merged.some(m => m.body === l.body && Math.abs(new Date(m.created_at) - new Date(l.created_at)) < 60000)) merged.push(l);
+            }
+            merged.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+            setMessages(merged);
+            writeLocal(merged);
+          }
+        }
+      } catch { /* DB down — local mirror only */ }
+    })();
+  }, [email]);
+
+  React.useEffect(() => {
+    if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
+  }, [messages]);
+
+  const send = async () => {
+    const body = draft.trim();
+    if (!body || sending) return;
+    setSending(true);
+    const msg = { sender: "parent", sender_name: parentName, body, created_at: new Date().toISOString() };
+    const next = [...messages, msg];
+    setMessages(next); writeLocal(next); setDraft("");
+
+    try {
+      await fetch(`${SUPABASE_URL}/functions/v1/parent-messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify({ action: "send", thread_email: email, sender: "parent", sender_name: parentName, to_name: parentName, body, campus: "Missoula" }),
+      });
+    } catch { /* best effort; message already shown locally */ }
+    setSending(false);
+  };
+
+  if (!email) {
+    return <div className="card" style={{ textAlign:"center", padding:"40px 20px" }}>
+      <p style={{ fontFamily:"'Newsreader',serif", fontStyle:"italic", color:"var(--mu)" }}>Sign in with your email to message the school.</p>
+    </div>;
+  }
+
+  return (
+    <div className="card" style={{ padding:0, overflow:"hidden", display:"flex", flexDirection:"column", height:540 }}>
+      <div style={{ padding:"16px 20px", borderBottom:"1px solid var(--p2)", background:"var(--p)" }}>
+        <p className="eyebrow" style={{ marginBottom:4 }}>Messages</p>
+        <p style={{ fontFamily:"'Fraunces',serif", fontSize:18, fontWeight:500, color:"var(--nv)" }}>neoschool Missoula</p>
+        <p className="mu" style={{ fontSize:12.5, fontFamily:"'Newsreader',serif" }}>Questions about {childName}? Message the team directly.</p>
+      </div>
+
+      <div ref={bodyRef} style={{ flex:1, overflowY:"auto", padding:20, display:"flex", flexDirection:"column", gap:12, background:"var(--cr)" }}>
+        {messages.length === 0 ? (
+          <div style={{ margin:"auto", textAlign:"center", maxWidth:300, color:"var(--mu)", fontFamily:"'Newsreader',serif", fontStyle:"italic", lineHeight:1.6 }}>
+            No messages yet. Say hello, ask a question about enrollment, schedules, or {childName}'s day — Jennie will get your message by email and reply here.
+          </div>
+        ) : messages.map((m, i) => (
+          <div key={i} style={{
+            maxWidth:"78%", padding:"11px 15px", borderRadius:14, fontSize:14.5, lineHeight:1.5,
+            fontFamily:"'Newsreader',serif", whiteSpace:"pre-wrap",
+            alignSelf: m.sender === "parent" ? "flex-end" : "flex-start",
+            background: m.sender === "parent" ? "var(--or)" : "#fff",
+            color: m.sender === "parent" ? "#fff" : "var(--tx)",
+            border: m.sender === "parent" ? "none" : "1px solid var(--p2)",
+            borderBottomRightRadius: m.sender === "parent" ? 4 : 14,
+            borderBottomLeftRadius: m.sender === "parent" ? 14 : 4,
+          }}>
+            {m.body}
+            <div style={{ fontFamily:"'Geist Mono',monospace", fontSize:9.5, letterSpacing:".04em", textTransform:"uppercase", opacity:.6, marginTop:5 }}>
+              {m.sender === "parent" ? "You" : (m.sender_name || "Jennie")} · {new Date(m.created_at).toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ padding:"14px 16px", borderTop:"1px solid var(--p2)", background:"#fff", display:"flex", gap:10, alignItems:"flex-end" }}>
+        <textarea
+          value={draft}
+          onChange={e => setDraft(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) send(); }}
+          placeholder="Write a message…"
+          style={{ flex:1, border:"1px solid var(--p2)", borderRadius:12, padding:"11px 14px", fontFamily:"'Newsreader',serif", fontSize:14.5, resize:"vertical", minHeight:46, maxHeight:140, color:"var(--tx)" }}
+        />
+        <button onClick={send} disabled={sending || !draft.trim()} style={{
+          background:"var(--or)", color:"#fff", border:"none", borderRadius:99, padding:"11px 22px",
+          fontFamily:"'Fraunces',serif", fontWeight:500, fontSize:14, cursor: draft.trim() ? "pointer" : "default",
+          opacity: draft.trim() ? 1 : .5, whiteSpace:"nowrap",
+        }}>{sending ? "…" : "Send →"}</button>
+      </div>
+    </div>
+  );
+}
+
 function ParentDashboard({ user, data }) {
   const [pulseScore, setPulseScore]  = useState(null);
   const [pulseWin, setPulseWin]      = useState("");
@@ -2434,13 +2563,16 @@ function ParentDashboard({ user, data }) {
 
         {/* Tabs — refined editorial pill bar */}
         <div style={{ display:"flex", background:"var(--p)", padding:"4px", marginBottom:18, borderRadius:99, border:"1px solid var(--p2)" }}>
-          {[{id:"home",l:"Home"},{id:"activity",l:"Activity"},{id:"coaching",l:"Coaching"},{id:"future",l:"Future"}].map(t => (
+          {[{id:"home",l:"Home"},{id:"activity",l:"Activity"},{id:"messages",l:"Messages"},{id:"coaching",l:"Coaching"},{id:"future",l:"Future"}].map(t => (
             <div key={t.id} onClick={() => setTab(t.id)} style={{ flex:1, textAlign:"center", padding:"8px 4px", borderRadius:99, cursor:"pointer", fontFamily:"'Fraunces',serif", fontSize:12.5, fontWeight:500, background:tab===t.id?"#fff":"transparent", color:tab===t.id?"var(--nv)":"var(--mu)", transition:"all .2s", letterSpacing:"-.005em", boxShadow: tab===t.id ? "var(--shadow-sm)" : "none" }}>{t.l}</div>
           ))}
         </div>
 
         {/* ── ACTIVITY TAB ── all saved sessions across labs */}
         {tab === "activity" && <ActivityTimeline studentId={user?.id || "demo"} childName={childName} />}
+
+        {/* ── MESSAGES TAB ── two-way comms with the school */}
+        {tab === "messages" && <ParentMessages user={user} childName={childName} />}
 
         {/* ── HOME TAB ── */}
         {tab === "home" && <>
