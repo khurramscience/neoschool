@@ -60,6 +60,42 @@
   .stage-changer .pill.on{background:#c25420;border-color:#c25420;color:#fff}
   .expanded-row td{padding:0}
   @media(max-width:680px){table{font-size:12px}td,th{padding:8px}}
+
+  /* ── View switcher tabs ── */
+  .view-tabs{display:flex;gap:6px;margin-bottom:22px;border-bottom:1px solid #e8dfd0;padding-bottom:0}
+  .view-tab{background:transparent;border:none;border-bottom:2px solid transparent;padding:10px 16px;font-family:'Fraunces',serif;font-size:15px;font-weight:500;color:#7a7367;cursor:pointer;transition:all .15s;margin-bottom:-1px}
+  .view-tab:hover{color:#c25420}
+  .view-tab.on{color:#1a1f3a;border-bottom-color:#c25420}
+  .tab-count{display:inline-block;background:#f1ebe0;color:#7a7367;font-family:'Geist Mono',monospace;font-size:10px;font-weight:600;padding:1px 7px;border-radius:99px;margin-left:4px;vertical-align:middle}
+  .view-tab.on .tab-count{background:#c25420;color:#fff}
+
+  /* ── Parent Comms layout ── */
+  .comms-layout{display:grid;grid-template-columns:300px 1fr;gap:0;border:1px solid #e8dfd0;border-radius:14px;overflow:hidden;background:#fff;min-height:540px}
+  .comms-list{border-right:1px solid #e8dfd0;overflow-y:auto;max-height:640px}
+  .comms-item{padding:14px 16px;border-bottom:1px solid #f1ebe0;cursor:pointer;transition:background .12s}
+  .comms-item:hover{background:#faf4ed}
+  .comms-item.active{background:#fdf0e6;border-left:3px solid #c25420;padding-left:13px}
+  .comms-item .ci-name{font-family:'Fraunces',serif;font-size:15px;font-weight:500;color:#1a1612;margin-bottom:2px;display:flex;align-items:center;justify-content:space-between}
+  .comms-item .ci-email{font-size:12px;color:#7a7367;font-family:'Geist Mono',monospace;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .comms-item .ci-preview{font-size:13px;color:#7a7367;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'Newsreader',serif}
+  .ci-unread{background:#c25420;color:#fff;font-family:'Geist Mono',monospace;font-size:9px;font-weight:600;padding:1px 6px;border-radius:99px}
+  .comms-thread{display:flex;flex-direction:column;max-height:640px}
+  .comms-empty{margin:auto;color:#7a7367;font-family:'Newsreader',serif;font-style:italic;text-align:center;padding:40px;max-width:340px;line-height:1.6}
+  .ct-header{padding:16px 20px;border-bottom:1px solid #e8dfd0;background:#faf4ed}
+  .ct-header .cth-name{font-family:'Fraunces',serif;font-size:18px;font-weight:500;color:#1a1612}
+  .ct-header .cth-email{font-size:12.5px;color:#7a7367;font-family:'Geist Mono',monospace}
+  .ct-body{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;background:#fdfaf4}
+  .msg{max-width:74%;padding:11px 15px;border-radius:14px;font-size:14.5px;line-height:1.5;font-family:'Newsreader',serif;white-space:pre-wrap;word-wrap:break-word}
+  .msg .msg-meta{font-family:'Geist Mono',monospace;font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;opacity:.6;margin-top:5px}
+  .msg.school{background:#c25420;color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+  .msg.parent{background:#fff;color:#1a1612;border:1px solid #e8dfd0;align-self:flex-start;border-bottom-left-radius:4px}
+  .ct-compose{padding:14px 16px;border-top:1px solid #e8dfd0;background:#fff;display:flex;gap:10px;align-items:flex-end}
+  .ct-compose textarea{flex:1;border:1px solid #e8dfd0;border-radius:12px;padding:11px 14px;font-family:'Newsreader',serif;font-size:14.5px;resize:vertical;min-height:46px;max-height:160px;color:#1a1612}
+  .ct-compose textarea:focus{outline:none;border-color:#c25420}
+  .ct-send{background:#c25420;color:#fff;border:none;border-radius:99px;padding:11px 22px;font-family:'Fraunces',serif;font-weight:500;font-size:14px;cursor:pointer;white-space:nowrap}
+  .ct-send:hover{background:#a8481c}
+  .ct-note{font-size:11px;color:#7a7367;font-family:'Newsreader',serif;font-style:italic;padding:0 16px 12px;background:#fff}
+  @media(max-width:680px){.comms-layout{grid-template-columns:1fr}.comms-list{max-height:200px}}
 </style>
 </head>
 <body>
@@ -88,6 +124,15 @@
   <div id="systemStatus" style="display:none;background:#fff;border:1px solid #e8dfd0;border-radius:12px;padding:14px 18px;margin-bottom:18px;font-size:13px;line-height:1.6">
   </div>
 
+  <!-- View switcher -->
+  <div class="view-tabs">
+    <button class="view-tab on" id="tab-apps" onclick="switchView('apps')">📋 Applications <span class="tab-count" id="tabCountApps"></span></button>
+    <button class="view-tab" id="tab-interest" onclick="switchView('interest')">✉️ Interest list <span class="tab-count" id="tabCountInterest"></span></button>
+    <button class="view-tab" id="tab-messages" onclick="switchView('messages')">💬 Messages <span class="tab-count" id="tabCountMessages"></span></button>
+  </div>
+
+  <!-- ═══ APPLICATIONS PANEL ═══ -->
+  <div id="panel-apps">
   <div class="stats">
     <div class="stat"><div class="stat-num" id="totalCount">—</div><div class="stat-label">Total applications</div></div>
     <div class="stat"><div class="stat-num" id="newCount">—</div><div class="stat-label">New · need review</div></div>
@@ -125,7 +170,33 @@
   </div>
 
   <div id="tableContainer"></div>
-</div>
+  </div>
+
+  <!-- ═══ INTEREST LIST PANEL ═══ -->
+  <div id="panel-interest" style="display:none">
+    <div class="stats">
+      <div class="stat"><div class="stat-num" id="interestTotal">—</div><div class="stat-label">Total signups</div></div>
+      <div class="stat"><div class="stat-num" id="interestToday">—</div><div class="stat-label">Today</div></div>
+      <div class="stat"><div class="stat-num" id="interestWeek">—</div><div class="stat-label">This week</div></div>
+    </div>
+    <div class="controls">
+      <input id="interestSearch" type="text" placeholder="Search interest signups…" oninput="renderInterest()">
+      <button class="btn btn-secondary" onclick="exportInterestCSV()">↓ Export CSV</button>
+    </div>
+    <div class="status-bar"><span id="interestCount">—</span></div>
+    <div id="interestContainer"></div>
+  </div>
+
+  <!-- ═══ MESSAGES (PARENT COMMS) PANEL ═══ -->
+  <div id="panel-messages" style="display:none">
+    <div class="comms-layout">
+      <div class="comms-list" id="commsList"></div>
+      <div class="comms-thread" id="commsThread">
+        <div class="comms-empty">Select a family on the left to view your conversation, or start a new one.</div>
+      </div>
+    </div>
+  </div>
+  </div>
 
 <script>
   const SUPABASE_URL = "https://dwpxsaamaehtmhsuuprg.supabase.co";
@@ -133,6 +204,8 @@
   const ADMIN_PW = "neoschool2026"; // Simple password — change anytime in code
 
   let allApps = [];
+  let allInterest = [];
+  let currentView = "apps";
   let currentFilter = "All";
 
   // Password gate
@@ -168,6 +241,7 @@
   async function refresh() {
     document.getElementById("resultsCount").textContent = "Loading…";
     const apps = [];
+    const interest = [];
 
     // Test Supabase + Edge Function health
     let dbHealthy = false, edgeFnHealthy = false;
@@ -203,9 +277,24 @@
         const rows = await r.json();
         for (const row of rows) {
           const fd = row.form_data || {};
+          // Route stay-in-loop interest signups to their own list
+          if (fd.type === "interest" || fd.source === "missoula-stay-in-loop") {
+            interest.push({
+              id: row.id, source: "supabase",
+              parent_first_name: fd.parent_first_name || "",
+              parent_last_name: fd.parent_last_name || "",
+              email: fd.email || "—",
+              child_first_name: fd.child_first_name || fd.child_name || "",
+              child_age: fd.child_age || "",
+              campus: row.campus || fd.campus || "Missoula",
+              submitted_at: row.submitted_at || fd.submitted_at,
+            });
+            continue;
+          }
           apps.push({
             id: row.id,
             source: "supabase",
+            form_data:   fd,
             parent_name: fd.parent_name || fd.parentName || "—",
             email:       fd.email || "—",
             phone:       fd.phone || "",
@@ -231,6 +320,7 @@
         apps.push({
           id: l.id,
           source: "localStorage",
+          form_data:   l,
           parent_name: l.parent_name || l.parentName || "—",
           email:       l.email || "—",
           phone:       l.phone || "",
@@ -246,12 +336,57 @@
       }
     } catch (e) { console.warn("localStorage parse failed:", e); }
 
+    // 2b. Interest signups from localStorage
+    try {
+      const localInt = JSON.parse(localStorage.getItem("neo_waitlist_interest") || "[]");
+      for (const l of localInt) {
+        if (interest.some(i => i.email === l.email && Math.abs(new Date(i.submitted_at) - new Date(l.submitted_at)) < 60000)) continue;
+        interest.push({
+          id: l.id, source: "localStorage",
+          parent_first_name: l.parent_first_name || "",
+          parent_last_name: l.parent_last_name || "",
+          email: l.email || "—",
+          child_first_name: l.child_first_name || l.child_name || "",
+          child_age: l.child_age || "",
+          campus: l.campus || "Missoula",
+          submitted_at: l.submitted_at,
+        });
+      }
+    } catch (e) { console.warn("interest parse failed:", e); }
+
     // Sort by submitted_at desc
     apps.sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at));
+    interest.sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at));
     allApps = apps;
+    allInterest = interest;
 
     document.getElementById("lastSync").textContent = `Last sync: ${new Date().toLocaleTimeString()}`;
     render();
+    renderInterest();
+    renderComms();
+    updateTabCounts();
+  }
+
+  function updateTabCounts() {
+    document.getElementById("tabCountApps").textContent = allApps.length || "";
+    document.getElementById("tabCountInterest").textContent = allInterest.length || "";
+    const threads = getThreads();
+    const unread = threads.filter(t => t.unread).length;
+    document.getElementById("tabCountMessages").textContent = unread || "";
+  }
+
+  function switchView(v) {
+    currentView = v;
+    document.getElementById("panel-apps").style.display     = v === "apps" ? "block" : "none";
+    document.getElementById("panel-interest").style.display = v === "interest" ? "block" : "none";
+    document.getElementById("panel-messages").style.display = v === "messages" ? "block" : "none";
+    document.getElementById("tab-apps").classList.toggle("on", v === "apps");
+    document.getElementById("tab-interest").classList.toggle("on", v === "interest");
+    document.getElementById("tab-messages").classList.toggle("on", v === "messages");
+    const titles = { apps: "Admin · Applications", interest: "Admin · Interest list", messages: "Admin · Messages" };
+    document.querySelector(".eyebrow").textContent = titles[v];
+    if (v === "messages") renderComms();
+    if (v === "interest") renderInterest();
   }
 
   function setFilter(el, f) {
@@ -543,6 +678,206 @@
     a.click();
     URL.revokeObjectURL(url);
   }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // INTEREST LIST
+  // ═══════════════════════════════════════════════════════════════════════════
+  function renderInterest() {
+    const search = (document.getElementById("interestSearch")?.value || "").toLowerCase();
+    let list = allInterest.slice();
+    if (search) list = list.filter(i =>
+      `${i.parent_first_name} ${i.parent_last_name} ${i.email} ${i.child_first_name}`.toLowerCase().includes(search));
+
+    // stats
+    document.getElementById("interestTotal").textContent = allInterest.length;
+    const today = new Date().toDateString();
+    document.getElementById("interestToday").textContent = allInterest.filter(i => i.submitted_at && new Date(i.submitted_at).toDateString() === today).length;
+    document.getElementById("interestWeek").textContent = allInterest.filter(i => i.submitted_at && (Date.now() - new Date(i.submitted_at).getTime()) < 7*86400000).length;
+    document.getElementById("interestCount").textContent = `${list.length} signup${list.length===1?"":"s"}`;
+
+    const c = document.getElementById("interestContainer");
+    if (list.length === 0) {
+      c.innerHTML = `<div style="text-align:center;padding:50px 20px;color:#7a7367;font-family:'Newsreader',serif;font-style:italic">No interest signups yet. They'll appear here when families use the "Stay in the loop" form on the Missoula page.</div>`;
+      return;
+    }
+    let html = `<table><thead><tr><th>Name</th><th>Email</th><th>Child</th><th>Age</th><th>When</th><th></th></tr></thead><tbody>`;
+    for (const i of list) {
+      const d = new Date(i.submitted_at);
+      const hours = (Date.now() - d.getTime()) / 3600000;
+      const whenStr = hours < 1 ? `${Math.floor(hours*60)}m ago` : hours < 24 ? `${Math.floor(hours)}h ago` : `${Math.floor(hours/24)}d ago`;
+      const name = `${i.parent_first_name} ${i.parent_last_name}`.trim() || "—";
+      html += `<tr>
+        <td><div class="name">${escape(name)}</div></td>
+        <td><a href="mailto:${escape(i.email)}" style="color:#c25420">${escape(i.email)}</a></td>
+        <td>${escape(i.child_first_name) || "—"}</td>
+        <td>${escape(i.child_age) || "—"}</td>
+        <td class="when">${whenStr}</td>
+        <td><button class="pill" onclick="startThreadFromEmail('${escape(i.email)}','${escape(name)}')">💬 Message</button></td>
+      </tr>`;
+    }
+    html += `</tbody></table>`;
+    c.innerHTML = html;
+  }
+
+  function exportInterestCSV() {
+    const rows = [["Submitted","First Name","Last Name","Email","Child First Name","Child Age","Campus"]];
+    for (const i of allInterest) {
+      rows.push([i.submitted_at, i.parent_first_name, i.parent_last_name, i.email, i.child_first_name, i.child_age, i.campus]);
+    }
+    const csv = rows.map(r => r.map(c => `"${String(c||"").replace(/"/g,'""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `neoschool-interest-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click(); URL.revokeObjectURL(url);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // PARENT COMMS (two-way messaging)
+  // Threads keyed by parent email. Messages stored in localStorage; sending
+  // emails the parent via the parent-messages Edge Function (falls back to a
+  // mailto: compose if the function isn't reachable). When SQL recovers, the
+  // function also threads messages across devices via the messages table.
+  // ═══════════════════════════════════════════════════════════════════════════
+  const MSG_KEY = "neo_messages";        // { "email": [ {sender,sender_name,body,created_at,read} ] }
+  let activeThread = null;
+
+  function readMsgs() { try { return JSON.parse(localStorage.getItem(MSG_KEY) || "{}"); } catch { return {}; } }
+  function writeMsgs(m) { localStorage.setItem(MSG_KEY, JSON.stringify(m)); }
+
+  // Build the list of conversations: any family we've messaged + everyone who applied/interested
+  function getThreads() {
+    const store = readMsgs();
+    const seen = {};
+    const threads = [];
+
+    // From stored message threads
+    for (const [email, msgs] of Object.entries(store)) {
+      const last = msgs[msgs.length - 1];
+      seen[email] = true;
+      threads.push({
+        email,
+        name: (msgs.find(m => m.to_name)?.to_name) || (msgs[0]?.to_name) || email,
+        preview: last ? (last.sender === "school" ? "You: " : "") + last.body : "",
+        ts: last ? new Date(last.created_at).getTime() : 0,
+        unread: msgs.some(m => m.sender === "parent" && !m.read),
+        hasMsgs: true,
+      });
+    }
+    // Add applicants + interest who we haven't messaged yet (so Jennie can start a thread)
+    const contacts = [
+      ...allApps.map(a => ({ email: a.email, name: a.parent_name })),
+      ...allInterest.map(i => ({ email: i.email, name: `${i.parent_first_name} ${i.parent_last_name}`.trim() })),
+    ];
+    for (const c of contacts) {
+      if (!c.email || c.email === "—" || seen[c.email]) continue;
+      seen[c.email] = true;
+      threads.push({ email: c.email, name: c.name || c.email, preview: "", ts: 0, unread: false, hasMsgs: false });
+    }
+    // Sort: has-messages first (by recency), then contacts alphabetically
+    threads.sort((a, b) => (b.ts - a.ts) || a.name.localeCompare(b.name));
+    return threads;
+  }
+
+  function renderComms() {
+    const threads = getThreads();
+    const listEl = document.getElementById("commsList");
+    if (threads.length === 0) {
+      listEl.innerHTML = `<div style="padding:30px 20px;color:#7a7367;font-family:'Newsreader',serif;font-style:italic;text-align:center">No families yet. Applications and interest signups will appear here to message.</div>`;
+    } else {
+      listEl.innerHTML = threads.map(t => `
+        <div class="comms-item ${activeThread === t.email ? 'active' : ''}" onclick="openThread('${escape(t.email)}','${escape(t.name)}')">
+          <div class="ci-name">${escape(t.name)} ${t.unread ? '<span class="ci-unread">NEW</span>' : ''}</div>
+          <div class="ci-email">${escape(t.email)}</div>
+          ${t.preview ? `<div class="ci-preview">${escape(t.preview)}</div>` : '<div class="ci-preview" style="opacity:.5">No messages yet</div>'}
+        </div>`).join("");
+    }
+    updateTabCounts();
+    if (activeThread) openThread(activeThread, threads.find(t => t.email === activeThread)?.name || activeThread, true);
+  }
+
+  function startThreadFromEmail(email, name) {
+    switchView("messages");
+    openThread(email, name);
+  }
+
+  window.openThread = function(email, name, keepScroll) {
+    activeThread = email;
+    const store = readMsgs();
+    const msgs = store[email] || [];
+    // Mark parent messages as read
+    let changed = false;
+    msgs.forEach(m => { if (m.sender === "parent" && !m.read) { m.read = true; changed = true; } });
+    if (changed) { store[email] = msgs; writeMsgs(store); }
+
+    // Highlight active item
+    document.querySelectorAll(".comms-item").forEach(el => el.classList.remove("active"));
+
+    const threadEl = document.getElementById("commsThread");
+    const bubbles = msgs.length
+      ? msgs.map(m => `<div class="msg ${m.sender}">${escape(m.body)}<div class="msg-meta">${m.sender === "school" ? "You" : escape(name)} · ${new Date(m.created_at).toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})}</div></div>`).join("")
+      : `<div class="comms-empty" style="margin:auto">No messages yet. Send the first one below — it'll be emailed to <strong>${escape(name)}</strong>.</div>`;
+
+    threadEl.innerHTML = `
+      <div class="ct-header">
+        <div class="cth-name">${escape(name)}</div>
+        <div class="cth-email"><a href="mailto:${escape(email)}" style="color:#7a7367">${escape(email)}</a></div>
+      </div>
+      <div class="ct-body" id="ctBody">${bubbles}</div>
+      <div class="ct-compose">
+        <textarea id="msgInput" placeholder="Write a message to ${escape(name)}…" onkeydown="if(event.key==='Enter'&&(event.metaKey||event.ctrlKey)){sendMessage()}"></textarea>
+        <button class="ct-send" onclick="sendMessage()">Send →</button>
+      </div>
+      <div class="ct-note">Sends an email to the family now. They can reply by email, or in-app once they're on the platform. ⌘/Ctrl+Enter to send.</div>`;
+
+    if (!keepScroll) {
+      const body = document.getElementById("ctBody");
+      if (body) body.scrollTop = body.scrollHeight;
+    }
+    // re-highlight
+    renderActiveHighlight();
+  };
+
+  function renderActiveHighlight() {
+    document.querySelectorAll(".comms-item").forEach(el => {
+      const onclick = el.getAttribute("onclick") || "";
+      el.classList.toggle("active", onclick.includes(`'${activeThread}'`));
+    });
+  }
+
+  window.sendMessage = async function() {
+    const input = document.getElementById("msgInput");
+    if (!input) return;
+    const body = input.value.trim();
+    if (!body || !activeThread) return;
+
+    const threads = getThreads();
+    const name = threads.find(t => t.email === activeThread)?.name || activeThread;
+    const msg = { sender: "school", sender_name: "Jennie Yang", to_name: name, body, created_at: new Date().toISOString(), read: true };
+
+    // 1. Store locally immediately
+    const store = readMsgs();
+    if (!store[activeThread]) store[activeThread] = [];
+    store[activeThread].push(msg);
+    writeMsgs(store);
+    input.value = "";
+    openThread(activeThread, name);
+
+    // 2. Send via Edge Function (emails the parent). Fall back to mailto if unreachable.
+    let sent = false;
+    try {
+      const r = await fetch(`${SUPABASE_URL}/functions/v1/parent-messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify({ action: "send", thread_email: activeThread, sender: "school", sender_name: "Jennie Yang", to_name: name, body, campus: "Missoula" }),
+      });
+      sent = r.ok;
+    } catch {}
+    if (!sent) {
+      // Fallback: open mail client pre-filled
+      window.location.href = `mailto:${activeThread}?subject=${encodeURIComponent("Message from neoschool Missoula")}&body=${encodeURIComponent(body)}`;
+    }
+  };
 </script>
 
 </body>
