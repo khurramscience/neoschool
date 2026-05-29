@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Pattern Play 🌈</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+  html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#ccfbf1 0%,#a7f3d0 100%);color:#1a1612;-webkit-font-smoothing:antialiased}
+  .wrap{display:flex;flex-direction:column;height:100%;padding:18px 16px;max-width:760px;margin:0 auto}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .title{font-size:22px;font-weight:700;color:#0d9488}
+  .stars{display:flex;gap:4px;font-size:24px}
+  .star{filter:grayscale(1);opacity:.35;transition:all .35s}
+  .star.lit{filter:none;opacity:1;transform:scale(1.2) rotate(-8deg)}
+  .question{font-size:clamp(20px,5vw,28px);font-weight:700;text-align:center;color:#1a1f3a;margin:6px 0 16px}
+  .pattern-row{flex:1;background:#fff;border-radius:24px;border:3px solid #5eead4;padding:18px;display:flex;align-items:center;justify-content:center;gap:clamp(6px,2vw,14px);flex-wrap:wrap;box-shadow:0 4px 0 #5eead4;min-height:140px}
+  .item{font-size:clamp(40px,11vw,64px);line-height:1;animation:popIn 0.4s ease-out backwards}
+  @keyframes popIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+  .blank{width:clamp(50px,13vw,80px);height:clamp(50px,13vw,80px);border:3px dashed #5eead4;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:clamp(28px,8vw,42px);font-weight:700;color:#0d9488;background:#f0fdfa;animation:pulseBlank 1.4s ease-in-out infinite}
+  @keyframes pulseBlank{50%{background:#ccfbf1;transform:scale(1.05)}}
+  .blank.filled{background:#bbf7d0;border-style:solid;border-color:#16a34a;animation:none}
+  .choices{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px}
+  .choice{aspect-ratio:1;background:#fff;border:none;border-radius:18px;font-family:'Quicksand',sans-serif;font-size:clamp(36px,9vw,52px);font-weight:700;color:#1a1f3a;cursor:pointer;box-shadow:0 4px 0 #0d9488;transition:all .15s;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
+  .choice:active{transform:translateY(2px);box-shadow:0 2px 0 #0d9488}
+  .choice.wrong{background:#fecaca;animation:shake 0.4s}
+  .choice.right{background:#bbf7d0}
+  @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  .celebration{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(36px,9vw,54px);font-weight:700;color:#0d9488;pointer-events:none;opacity:0;transition:opacity .25s;background:rgba(255,255,255,.85);text-align:center}
+  .celebration.show{opacity:1}
+  .confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+  .help{font-size:13px;color:#7a7367;text-align:center;margin-top:8px;font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="title">🌈 Pattern Play</div>
+    <div class="stars" id="stars">
+      <span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span>
+    </div>
+  </div>
+  <div class="question">What comes next in the pattern?</div>
+  <div class="pattern-row" id="pattern"></div>
+  <div class="choices" id="choices"></div>
+  <div class="help">Look at the pattern. Tap the picture that comes next!</div>
+</div>
+<div class="celebration" id="celebration"></div>
+
+<script>
+  // Pools of visually distinct items
+  const ITEM_POOLS = [
+    ["🔴","🔵","🟢","🟡","🟣","🟠"],
+    ["⭐","💖","🌸","🍀","🌙","☀️"],
+    ["🐶","🐱","🐰","🐸","🐥","🦊"],
+    ["🍎","🍌","🍇","🍓","🥕","🍊"],
+    ["🚗","🚕","🚌","🚒","🚜","🛵"],
+  ];
+  const PATTERNS = ["AB", "ABB", "AAB", "ABC"];
+
+  const patternEl = document.getElementById("pattern");
+  const choicesEl = document.getElementById("choices");
+  const starsEl   = document.getElementById("stars");
+  const celebration = document.getElementById("celebration");
+  let stars = 0, target = null, round = 0;
+
+  let audioCtx = null;
+  function tone(f,d=0.15,t="sine",v=0.18){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(audioCtx.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+d);o.stop(audioCtx.currentTime+d)}catch{}}
+  const sounds = {
+    right: () => { [523, 659, 784].forEach((f,i) => setTimeout(() => tone(f, 0.18, "triangle", 0.22), i*100)); },
+    wrong: () => tone(220, 0.25, "sawtooth", 0.1),
+    win:   () => { [523, 659, 784, 1047].forEach((f,i) => setTimeout(() => tone(f, 0.22, "triangle", 0.25), i*120)); },
+  };
+
+  function nextRound() {
+    round++;
+    const pool = ITEM_POOLS[Math.floor(Math.random() * ITEM_POOLS.length)];
+    const shuffled = [...pool].sort(() => Math.random() - 0.5);
+    const A = shuffled[0], B = shuffled[1], C = shuffled[2];
+    const patType = PATTERNS[Math.floor(Math.random() * PATTERNS.length)];
+
+    // Build pattern (show 2 reps + start of next) and decide what comes next
+    let sequence, next;
+    if (patType === "AB") {
+      // AB AB AB ?  → A
+      sequence = [A, B, A, B, A, B];
+      next = A;
+    } else if (patType === "ABB") {
+      // A BB A BB A ?  → B
+      sequence = [A, B, B, A, B, B, A];
+      next = B;
+    } else if (patType === "AAB") {
+      // AA B AA B AA ?  → B
+      sequence = [A, A, B, A, A, B, A, A];
+      next = B;
+    } else { // ABC
+      sequence = [A, B, C, A, B, C, A];
+      next = B;
+    }
+
+    patternEl.innerHTML =
+      sequence.map((s, i) => `<div class="item" style="animation-delay:${i*0.08}s">${s}</div>`).join("") +
+      `<div class="blank" id="blank">?</div>`;
+
+    // 4 distinct choices including the right one
+    const allItems = [A, B, C, ...pool.filter(p => p !== A && p !== B && p !== C)];
+    const opts = new Set([next]);
+    let idx = 0;
+    while (opts.size < 4 && idx < allItems.length) { opts.add(allItems[idx++]); }
+    const choiceArr = [...opts].sort(() => Math.random() - 0.5);
+    choicesEl.innerHTML = choiceArr.map(c => `<button class="choice" onclick="pick('${c}', this)">${c}</button>`).join("");
+    target = next;
+  }
+
+  window.pick = function(item, btn) {
+    [...document.querySelectorAll(".choice")].forEach(b => b.disabled = true);
+    if (item === target) {
+      btn.classList.add("right");
+      const blank = document.getElementById("blank");
+      if (blank) { blank.classList.add("filled"); blank.textContent = item; }
+      sounds.right();
+      stars++; lightStar(stars);
+      postProgress(true);
+      if (stars >= 5) setTimeout(win, 700);
+      else setTimeout(nextRound, 1100);
+    } else {
+      btn.classList.add("wrong");
+      sounds.wrong();
+      postProgress(false);
+      setTimeout(() => {
+        btn.classList.remove("wrong");
+        [...document.querySelectorAll(".choice")].forEach(b => b.disabled = false);
+      }, 500);
+    }
+  };
+
+  function lightStar(n) {
+    const stars = starsEl.querySelectorAll(".star");
+    if (stars[n-1]) stars[n-1].classList.add("lit");
+  }
+  function confettiBurst() {
+    const colors = ["#fb7185","#fbbf24","#34d399","#60a5fa","#a78bfa","#f472b6"];
+    for (let i = 0; i < 60; i++) {
+      const c = document.createElement("div"); c.className = "confetti";
+      c.style.left = Math.random() * 100 + "vw";
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.animationDelay = (Math.random() * 0.8) + "s";
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 2600);
+    }
+  }
+  function win() {
+    sounds.win(); confettiBurst();
+    celebration.textContent = "🎉 Pattern pro! 🎉";
+    celebration.classList.add("show");
+    postProgress(true, true);
+    setTimeout(() => {
+      celebration.classList.remove("show");
+      stars = 0;
+      starsEl.querySelectorAll(".star").forEach(s => s.classList.remove("lit"));
+      nextRound();
+    }, 2800);
+  }
+  function postProgress(correct, complete=false) {
+    try { parent.postMessage({ type: "labProgress", lab: "pattern-play", round, correct, target, stars, complete }, "*"); } catch {}
+  }
+  nextRound();
+</script>
+</body>
+</html>

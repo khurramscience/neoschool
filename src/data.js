@@ -86,6 +86,13 @@ export const LABS = [
   {id:"xr-number-systems",title:"Number Systems (European & Indian)",emoji:"🌍",grades:"Gr 3-7",topic:"Math",subject:"Math",desc:"Compare historical number systems.",skills:["number systems","history of math"],difficulty:"medium",time:15,url:"https://xreadylab.com/public_html/wp-content/uploads/webgames/math/Number Systems European and Indian/index.html",embed:true,caPoints:[]},
   {id:"xr-equality-explorer",title:"Equality Explorer (Two Variables)",emoji:"⚖️",grades:"Gr 6-9",topic:"Math",subject:"Math",desc:"Balance equations with two unknowns — algebra prep.",skills:["algebra","equations"],difficulty:"hard",time:15,url:"https://xreadylab.com/public_html/wp-content/uploads/webgames/math/equality explorer. two variables/index.html",embed:true,caPoints:[]},
 // Total new: 21 labs
+
+  // ── KINDERGARTEN GAMES (Pre-K & K) ── built-in, mobile-first, with sound + tutor bridge ──
+  {id:"k-count-critters",title:"Count the Critters",emoji:"🐰",grades:"Pre-K – K",topic:"Counting",subject:"Math",desc:"Count cute animals and tap the right number. Builds 1–10 number sense.",skills:["counting","number recognition","1-10"],difficulty:"easy",time:8,url:"./labs/count-critters.html",caPoints:["K.CC.A.1","K.CC.B.4"]},
+  {id:"k-apple-math",title:"Apple Math",emoji:"🍎",grades:"Pre-K – 1",topic:"Addition",subject:"Math",desc:"Add apples in two baskets together — visual addition within 10.",skills:["addition","sums within 10","visual math"],difficulty:"easy",time:8,url:"./labs/apple-math.html",caPoints:["K.OA.A.1","K.OA.A.2"]},
+  {id:"k-shape-sort",title:"Shape Sort",emoji:"🔺",grades:"Pre-K – K",topic:"Geometry",subject:"Math",desc:"Drag shapes to their matching homes. Circles, squares, triangles, hearts, stars.",skills:["shapes","geometry","sorting","fine motor"],difficulty:"easy",time:6,url:"./labs/shape-sort.html",caPoints:["K.G.A.2","K.G.A.3"]},
+  {id:"k-letter-match",title:"Letter Match",emoji:"🔤",grades:"Pre-K – K",topic:"Phonics",subject:"Reading",desc:"Hear a word and pick the letter that makes its first sound.",skills:["phonics","letter sounds","alphabet"],difficulty:"easy",time:8,url:"./labs/letter-match.html",caPoints:["RF.K.1.D","RF.K.2.D","RF.K.3.A"]},
+  {id:"k-pattern-play",title:"Pattern Play",emoji:"🌈",grades:"Pre-K – 1",topic:"Patterns",subject:"Math",desc:"Look at a colorful pattern and pick what comes next. AB, AAB, ABB patterns.",skills:["patterns","logic","sequencing"],difficulty:"easy",time:6,url:"./labs/pattern-play.html",caPoints:["K.MD.B.3"]},
 ];
 
 

@@ -3404,7 +3404,7 @@ function StudentPortal({ user }) {
   const chatRef = useRef();
   const mem = getMemory(user.id);
   const recs = buildRecommendations(mem, LABS);
-  const topics = ["All", ...new Set(LABS.map(l => l.topic))];
+  const topics = ["All", "⭐ Kindergarten", ...new Set(LABS.map(l => l.topic))];
   const student = DEMO_STUDENTS.find(s => s.name === user?.name) || DEMO_STUDENTS[0];
 
   const openTutor = (t) => {
@@ -3588,7 +3588,7 @@ function StudentPortal({ user }) {
                     {topics.map(t => <div key={t} className={`pill${filter===t?" on":""}`} style={{ fontSize:11 }} onClick={()=>setFilter(t)}>{t}</div>)}
                   </div>
                   <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
-                    {LABS.filter(l => filter==="All" || l.topic===filter).map((l,i) => {
+                    {LABS.filter(l => filter==="All" || (filter==="⭐ Kindergarten" ? /Pre-K|^K\b|– K|- K/i.test(l.grades) : l.topic===filter)).map((l,i) => {
                       const p2 = mem.labStats[l.id]?.masteryPct || student.labProgress[l.id] || 0;
                       const labRange = parseLabGrades(l.grades);
                       const above    = stuNum < labRange.min;

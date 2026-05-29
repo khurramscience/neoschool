@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Shape Sort 🔺</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-drag:none}
+  html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#fce7f3 0%,#fbcfe8 100%);color:#1a1612;-webkit-font-smoothing:antialiased;touch-action:none}
+  .wrap{display:flex;flex-direction:column;height:100%;padding:18px 16px;max-width:760px;margin:0 auto}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .title{font-size:22px;font-weight:700;color:#9333ea}
+  .progress{font-size:14px;color:#7a7367;font-weight:600}
+  .question{font-size:clamp(18px,4vw,22px);font-weight:700;text-align:center;color:#1a1f3a;margin-bottom:14px}
+  .targets{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:12px;margin-bottom:14px}
+  .target{aspect-ratio:1;background:#fff;border:3px dashed #d8b4fe;border-radius:18px;display:flex;align-items:center;justify-content:center;position:relative;transition:all .2s}
+  .target.matched{border-color:#86efac;border-style:solid;background:#dcfce7;animation:matchPop .35s}
+  .target.over{border-color:#9333ea;background:#fae8ff;transform:scale(1.04)}
+  @keyframes matchPop{50%{transform:scale(1.15)}}
+  .target svg{width:60%;height:60%;opacity:.35}
+  .target.matched svg{opacity:1}
+  .target-label{position:absolute;bottom:-22px;left:0;right:0;text-align:center;font-size:12px;font-weight:600;color:#7a7367;text-transform:uppercase;letter-spacing:.04em}
+  .pool{flex:1;background:#fff;border-radius:22px;border:3px solid #d8b4fe;box-shadow:0 4px 0 #d8b4fe;padding:18px;display:flex;flex-wrap:wrap;gap:14px;align-content:center;justify-content:center;min-height:160px;margin-bottom:24px}
+  .shape{width:clamp(60px,15vw,90px);height:clamp(60px,15vw,90px);cursor:grab;touch-action:none;transition:transform .15s;display:flex;align-items:center;justify-content:center}
+  .shape.dragging{cursor:grabbing;z-index:10;transform:scale(1.15);opacity:.85;transition:none}
+  .shape svg{width:100%;height:100%;filter:drop-shadow(0 4px 0 rgba(0,0,0,.15))}
+  .celebration{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(36px,9vw,54px);font-weight:700;color:#9333ea;pointer-events:none;opacity:0;transition:opacity .25s;background:rgba(255,255,255,.85);text-align:center}
+  .celebration.show{opacity:1}
+  .confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+  .help{font-size:13px;color:#7a7367;text-align:center;margin-top:8px;font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="title">🔺 Shape Sort</div>
+    <div class="progress" id="progress">0 / 5</div>
+  </div>
+  <div class="question">Drag each shape to its home!</div>
+  <div class="targets" id="targets"></div>
+  <div class="pool" id="pool"></div>
+  <div class="help">Pick up a shape and drop it in the matching outline.</div>
+</div>
+<div class="celebration" id="celebration"></div>
+
+<script>
+  const SHAPES = [
+    { id:"circle",    label:"Circle",    color:"#fbbf24", svg:`<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="currentColor"/></svg>` },
+    { id:"square",    label:"Square",    color:"#60a5fa", svg:`<svg viewBox="0 0 100 100"><rect x="8" y="8" width="84" height="84" rx="6" fill="currentColor"/></svg>` },
+    { id:"triangle",  label:"Triangle",  color:"#34d399", svg:`<svg viewBox="0 0 100 100"><polygon points="50,8 92,88 8,88" fill="currentColor"/></svg>` },
+    { id:"rectangle", label:"Rectangle", color:"#f87171", svg:`<svg viewBox="0 0 100 100"><rect x="6" y="26" width="88" height="48" rx="5" fill="currentColor"/></svg>` },
+    { id:"star",      label:"Star",      color:"#a78bfa", svg:`<svg viewBox="0 0 100 100"><polygon points="50,8 61,38 93,38 67,57 77,88 50,69 23,88 33,57 7,38 39,38" fill="currentColor"/></svg>` },
+    { id:"heart",     label:"Heart",     color:"#ec4899", svg:`<svg viewBox="0 0 100 100"><path d="M50 84 L14 50 a18 18 0 0 1 36 -14 a18 18 0 0 1 36 14 z" fill="currentColor"/></svg>` },
+  ];
+  const targetsEl = document.getElementById("targets");
+  const poolEl    = document.getElementById("pool");
+  const celebration = document.getElementById("celebration");
+  const progressEl = document.getElementById("progress");
+  let matched = 0, totalShapes = 0;
+
+  let audioCtx = null;
+  function tone(f,d=0.15,t="sine",v=0.18){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(audioCtx.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+d);o.stop(audioCtx.currentTime+d)}catch{}}
+  const sounds = {
+    pick:  () => tone(660, 0.06, "sine"),
+    right: () => { [523, 784].forEach((f,i) => setTimeout(() => tone(f, 0.18, "triangle", 0.22), i*100)); },
+    wrong: () => tone(220, 0.2, "sawtooth", 0.1),
+    win:   () => { [523, 659, 784, 1047].forEach((f,i) => setTimeout(() => tone(f, 0.22, "triangle", 0.25), i*120)); },
+  };
+
+  function newGame() {
+    matched = 0;
+    // Pick 5 random shapes
+    const chosen = [...SHAPES].sort(() => Math.random() - 0.5).slice(0, 5);
+    totalShapes = chosen.length;
+    progressEl.textContent = `0 / ${totalShapes}`;
+
+    targetsEl.innerHTML = chosen.map(s => `
+      <div class="target" data-shape="${s.id}" style="color:${s.color}">
+        ${s.svg}
+        <div class="target-label">${s.label}</div>
+      </div>`).join("");
+
+    const pool = [...chosen].sort(() => Math.random() - 0.5);
+    poolEl.innerHTML = pool.map(s => `
+      <div class="shape" data-shape="${s.id}" style="color:${s.color}" draggable="false">
+        ${s.svg}
+      </div>`).join("");
+
+    bindDrag();
+  }
+
+  function bindDrag() {
+    let dragging = null, offsetX = 0, offsetY = 0, startX = 0, startY = 0;
+    document.querySelectorAll(".shape").forEach(el => {
+      const start = (e) => {
+        if (el.dataset.placed) return;
+        e.preventDefault();
+        const t = (e.touches ? e.touches[0] : e);
+        const rect = el.getBoundingClientRect();
+        offsetX = t.clientX - rect.left;
+        offsetY = t.clientY - rect.top;
+        startX = rect.left; startY = rect.top;
+        // Lift out of flow
+        el.style.position = "fixed";
+        el.style.left = rect.left + "px";
+        el.style.top  = rect.top + "px";
+        el.style.width = rect.width + "px";
+        el.style.height = rect.height + "px";
+        el.classList.add("dragging");
+        dragging = el;
+        sounds.pick();
+      };
+      el.addEventListener("mousedown", start);
+      el.addEventListener("touchstart", start, { passive: false });
+    });
+
+    const move = (e) => {
+      if (!dragging) return;
+      e.preventDefault();
+      const t = (e.touches ? e.touches[0] : e);
+      dragging.style.left = (t.clientX - offsetX) + "px";
+      dragging.style.top  = (t.clientY - offsetY) + "px";
+      // Highlight target hover
+      document.querySelectorAll(".target").forEach(tt => tt.classList.remove("over"));
+      const hit = targetUnderPoint(t.clientX, t.clientY);
+      if (hit) hit.classList.add("over");
+    };
+    const end = (e) => {
+      if (!dragging) return;
+      const t = (e.changedTouches ? e.changedTouches[0] : e);
+      document.querySelectorAll(".target").forEach(tt => tt.classList.remove("over"));
+      const hit = targetUnderPoint(t.clientX, t.clientY);
+      if (hit && hit.dataset.shape === dragging.dataset.shape && !hit.classList.contains("matched")) {
+        // Snap to target
+        const r = hit.getBoundingClientRect();
+        dragging.style.left = (r.left + (r.width - dragging.offsetWidth) / 2) + "px";
+        dragging.style.top  = (r.top + (r.height - dragging.offsetHeight) / 2) + "px";
+        dragging.dataset.placed = "1";
+        dragging.style.pointerEvents = "none";
+        hit.classList.add("matched");
+        matched++;
+        progressEl.textContent = `${matched} / ${totalShapes}`;
+        sounds.right();
+        postProgress(true);
+        if (matched === totalShapes) setTimeout(win, 500);
+      } else {
+        // Snap back
+        sounds.wrong();
+        postProgress(false);
+        dragging.style.left = startX + "px";
+        dragging.style.top  = startY + "px";
+        setTimeout(() => {
+          dragging.style.position = ""; dragging.style.left = ""; dragging.style.top = "";
+          dragging.style.width = ""; dragging.style.height = "";
+          dragging.classList.remove("dragging");
+          dragging = null;
+        }, 250);
+        return;
+      }
+      dragging.classList.remove("dragging");
+      dragging = null;
+    };
+    document.addEventListener("mousemove", move);
+    document.addEventListener("mouseup", end);
+    document.addEventListener("touchmove", move, { passive: false });
+    document.addEventListener("touchend", end);
+  }
+
+  function targetUnderPoint(x, y) {
+    return [...document.querySelectorAll(".target")].find(t => {
+      const r = t.getBoundingClientRect();
+      return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+    });
+  }
+
+  function confettiBurst() {
+    const colors = ["#fb7185","#fbbf24","#34d399","#60a5fa","#a78bfa","#f472b6"];
+    for (let i = 0; i < 60; i++) {
+      const c = document.createElement("div"); c.className = "confetti";
+      c.style.left = Math.random() * 100 + "vw";
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.animationDelay = (Math.random() * 0.8) + "s";
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 2600);
+    }
+  }
+  function win() {
+    sounds.win(); confettiBurst();
+    celebration.textContent = "🎉 Shape master! 🎉";
+    celebration.classList.add("show");
+    postProgress(true, true);
+    setTimeout(() => { celebration.classList.remove("show"); newGame(); }, 2800);
+  }
+  function postProgress(correct, complete=false) {
+    try { parent.postMessage({ type: "labProgress", lab: "shape-sort", matched, total: totalShapes, correct, complete }, "*"); } catch {}
+  }
+
+  newGame();
+</script>
+</body>
+</html>

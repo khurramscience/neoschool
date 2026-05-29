@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Apple Math 🍎</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+  html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#dbeafe 0%,#bfdbfe 100%);color:#1a1612;-webkit-font-smoothing:antialiased}
+  .wrap{display:flex;flex-direction:column;height:100%;padding:18px 16px;max-width:760px;margin:0 auto}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .title{font-size:22px;font-weight:700;color:#15803d}
+  .stars{display:flex;gap:4px;font-size:24px}
+  .star{filter:grayscale(1);opacity:.35;transition:all .35s}
+  .star.lit{filter:none;opacity:1;transform:scale(1.2) rotate(-8deg)}
+  .equation{font-size:clamp(32px,8vw,52px);font-weight:700;text-align:center;color:#15803d;margin:8px 0;display:flex;align-items:center;justify-content:center;gap:14px}
+  .equation .qmark{color:#c25420;background:#fef3c7;padding:0 18px;border-radius:18px;border:3px dashed #f59e0b;animation:pulseBg 1.4s ease-in-out infinite}
+  @keyframes pulseBg{50%{background:#fde68a}}
+  .baskets{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:14px;align-content:center;min-height:0}
+  .basket{background:#fff;border-radius:22px;border:3px solid #86efac;padding:16px;display:flex;flex-direction:column;box-shadow:0 4px 0 #86efac}
+  .basket-num{font-size:22px;font-weight:700;color:#15803d;text-align:center;margin-bottom:6px}
+  .basket-apples{flex:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(36px,1fr));gap:6px;align-content:center;justify-items:center;min-height:120px}
+  .apple{font-size:clamp(28px,7vw,40px);animation:dropIn 0.5s ease-out backwards}
+  @keyframes dropIn{from{transform:translateY(-30px) scale(0.5);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+  .choices{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+  .choice{aspect-ratio:1.1;background:#fff;border:none;border-radius:18px;font-family:'Quicksand',sans-serif;font-size:clamp(28px,7vw,42px);font-weight:700;color:#1a1f3a;cursor:pointer;box-shadow:0 4px 0 #16a34a;transition:all .15s;touch-action:manipulation}
+  .choice:active{transform:translateY(2px);box-shadow:0 2px 0 #16a34a}
+  .choice.wrong{background:#fecaca;animation:shake 0.4s}
+  .choice.right{background:#bbf7d0;color:#15803d}
+  @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  .celebration{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(36px,9vw,54px);font-weight:700;color:#15803d;pointer-events:none;opacity:0;transition:opacity .25s;background:rgba(255,255,255,.85);text-align:center}
+  .celebration.show{opacity:1}
+  .confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+  .help{font-size:13px;color:#7a7367;text-align:center;margin-top:8px;font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="title">🍎 Apple Math</div>
+    <div class="stars" id="stars">
+      <span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span>
+    </div>
+  </div>
+  <div class="equation" id="equation"></div>
+  <div class="baskets">
+    <div class="basket"><div class="basket-num" id="numA">0</div><div class="basket-apples" id="basketA"></div></div>
+    <div class="basket"><div class="basket-num" id="numB">0</div><div class="basket-apples" id="basketB"></div></div>
+  </div>
+  <div class="choices" id="choices"></div>
+  <div class="help">Count the apples in both baskets, then tap the answer!</div>
+</div>
+<div class="celebration" id="celebration"></div>
+
+<script>
+  const eq = document.getElementById("equation");
+  const numA = document.getElementById("numA");
+  const numB = document.getElementById("numB");
+  const basketA = document.getElementById("basketA");
+  const basketB = document.getElementById("basketB");
+  const choicesEl = document.getElementById("choices");
+  const starsEl = document.getElementById("stars");
+  const celebration = document.getElementById("celebration");
+  let stars = 0, a = 0, b = 0, target = 0, round = 0;
+
+  let audioCtx = null;
+  function tone(f, d=0.15, t="sine", v=0.18){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(audioCtx.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+d);o.stop(audioCtx.currentTime+d)}catch{}}
+  const sounds = {
+    drop:  () => tone(440 + Math.random()*100, 0.08, "sine"),
+    right: () => { [523, 659, 784].forEach((f,i) => setTimeout(() => tone(f, 0.18, "triangle", 0.22), i*100)); },
+    wrong: () => tone(220, 0.25, "sawtooth", 0.1),
+    win:   () => { [523, 659, 784, 1047].forEach((f,i) => setTimeout(() => tone(f, 0.22, "triangle", 0.25), i*120)); },
+  };
+
+  function nextRound() {
+    round++;
+    // Pick a + b ≤ 10, each ≥ 1
+    target = Math.floor(Math.random() * 8) + 3; // 3..10
+    a = Math.floor(Math.random() * (target - 1)) + 1; // 1..target-1
+    b = target - a;
+
+    eq.innerHTML = `<span>${a}</span> <span style="color:#1a1f3a">➕</span> <span>${b}</span> <span style="color:#1a1f3a">=</span> <span class="qmark">?</span>`;
+    numA.textContent = a;
+    numB.textContent = b;
+    basketA.innerHTML = "";
+    basketB.innerHTML = "";
+    for (let i = 0; i < a; i++) {
+      const ap = document.createElement("div");
+      ap.className = "apple";
+      ap.textContent = "🍎";
+      ap.style.animationDelay = (i * 0.08) + "s";
+      basketA.appendChild(ap);
+    }
+    for (let i = 0; i < b; i++) {
+      const ap = document.createElement("div");
+      ap.className = "apple";
+      ap.textContent = "🍏";
+      ap.style.animationDelay = (i * 0.08 + 0.3) + "s";
+      basketB.appendChild(ap);
+    }
+    setTimeout(() => sounds.drop(), 200);
+    setTimeout(() => sounds.drop(), 500);
+
+    // 4 choices
+    const opts = new Set([target]);
+    while (opts.size < 4) opts.add(Math.max(1, Math.min(10, target + (Math.random()<0.5?-1:1) * (Math.floor(Math.random()*3)+1))));
+    const shuffled = [...opts].sort(() => Math.random() - 0.5);
+    choicesEl.innerHTML = shuffled.map(n => `<button class="choice" onclick="pick(${n}, this)">${n}</button>`).join("");
+  }
+
+  window.pick = function(n, btn) {
+    [...document.querySelectorAll(".choice")].forEach(b => b.disabled = true);
+    if (n === target) {
+      btn.classList.add("right");
+      sounds.right();
+      stars++;
+      lightStar(stars);
+      postProgress(true);
+      if (stars >= 5) setTimeout(win, 600);
+      else setTimeout(nextRound, 900);
+    } else {
+      btn.classList.add("wrong");
+      sounds.wrong();
+      postProgress(false);
+      setTimeout(() => {
+        btn.classList.remove("wrong");
+        [...document.querySelectorAll(".choice")].forEach(b => b.disabled = false);
+      }, 500);
+    }
+  };
+
+  function lightStar(n) {
+    const stars = starsEl.querySelectorAll(".star");
+    if (stars[n-1]) stars[n-1].classList.add("lit");
+  }
+  function confettiBurst() {
+    const colors = ["#fb7185","#fbbf24","#34d399","#60a5fa","#a78bfa","#f472b6"];
+    for (let i = 0; i < 50; i++) {
+      const c = document.createElement("div"); c.className = "confetti";
+      c.style.left = Math.random() * 100 + "vw";
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.animationDelay = (Math.random() * 0.8) + "s";
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 2600);
+    }
+  }
+  function win() {
+    sounds.win(); confettiBurst();
+    celebration.textContent = "🎉 Apple champion! 🎉";
+    celebration.classList.add("show");
+    postProgress(true, true);
+    setTimeout(() => {
+      celebration.classList.remove("show");
+      stars = 0;
+      starsEl.querySelectorAll(".star").forEach(s => s.classList.remove("lit"));
+      nextRound();
+    }, 2600);
+  }
+  function postProgress(correct, complete = false) {
+    try { parent.postMessage({ type: "labProgress", lab: "apple-math", round, correct, equation: `${a}+${b}=${target}`, stars, complete }, "*"); } catch {}
+  }
+  nextRound();
+</script>
+</body>
+</html>
