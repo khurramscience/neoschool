@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Letter Match 🔤</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+  html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#ede9fe 0%,#ddd6fe 100%);color:#1a1612;-webkit-font-smoothing:antialiased}
+  .wrap{display:flex;flex-direction:column;height:100%;padding:18px 16px;max-width:760px;margin:0 auto}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .title{font-size:22px;font-weight:700;color:#7c3aed}
+  .stars{display:flex;gap:4px;font-size:24px}
+  .star{filter:grayscale(1);opacity:.35;transition:all .35s}
+  .star.lit{filter:none;opacity:1;transform:scale(1.2) rotate(-8deg)}
+  .question{font-size:clamp(20px,5vw,28px);font-weight:700;text-align:center;color:#1a1f3a;margin:6px 0 14px}
+  .stage{flex:1;background:#fff;border-radius:24px;border:3px solid #c4b5fd;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;box-shadow:0 4px 0 #c4b5fd;min-height:200px}
+  .picture{font-size:clamp(80px,22vw,140px);line-height:1}
+  .word{font-size:clamp(32px,8vw,48px);font-weight:700;color:#7c3aed;letter-spacing:.06em;text-transform:uppercase}
+  .word .missing{color:#c4b5fd;background:#f5f3ff;padding:0 8px;border-radius:8px;border:2px dashed #a78bfa}
+  .speaker{background:#7c3aed;color:#fff;border:none;border-radius:99px;padding:8px 18px;font-family:'Quicksand',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 3px 0 #6d28d9}
+  .speaker:active{transform:translateY(2px);box-shadow:0 1px 0 #6d28d9}
+  .choices{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px}
+  .choice{aspect-ratio:1;background:#fff;border:none;border-radius:18px;font-family:'Quicksand',sans-serif;font-size:clamp(32px,8vw,48px);font-weight:700;color:#1a1f3a;cursor:pointer;box-shadow:0 4px 0 #7c3aed;transition:all .15s;touch-action:manipulation}
+  .choice:active{transform:translateY(2px);box-shadow:0 2px 0 #7c3aed}
+  .choice.wrong{background:#fecaca;animation:shake 0.4s}
+  .choice.right{background:#bbf7d0;color:#15803d}
+  @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  .celebration{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(36px,9vw,54px);font-weight:700;color:#7c3aed;pointer-events:none;opacity:0;transition:opacity .25s;background:rgba(255,255,255,.85);text-align:center}
+  .celebration.show{opacity:1}
+  .confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+  .help{font-size:13px;color:#7a7367;text-align:center;margin-top:8px;font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="title">🔤 Letter Match</div>
+    <div class="stars" id="stars">
+      <span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span>
+    </div>
+  </div>
+  <div class="question">What letter starts this word?</div>
+  <div class="stage">
+    <div class="picture" id="picture"></div>
+    <div class="word" id="word"></div>
+    <button class="speaker" onclick="speak()">🔊 Say it</button>
+  </div>
+  <div class="choices" id="choices"></div>
+  <div class="help">Listen, then tap the letter that makes the first sound.</div>
+</div>
+<div class="celebration" id="celebration"></div>
+
+<script>
+  // Picture-word pairs with single-letter onsets (no consonant blends)
+  const WORDS = [
+    { word:"cat",      emoji:"🐱" }, { word:"dog",      emoji:"🐶" },
+    { word:"sun",      emoji:"☀️" }, { word:"hat",      emoji:"🎩" },
+    { word:"bus",      emoji:"🚌" }, { word:"fish",     emoji:"🐟" },
+    { word:"ball",     emoji:"⚽" }, { word:"moon",     emoji:"🌙" },
+    { word:"pig",      emoji:"🐷" }, { word:"leaf",     emoji:"🍃" },
+    { word:"rabbit",   emoji:"🐰" }, { word:"tree",     emoji:"🌳" },
+    { word:"nest",     emoji:"🪺" }, { word:"jet",      emoji:"✈️" },
+    { word:"key",      emoji:"🔑" }, { word:"van",      emoji:"🚐" },
+    { word:"web",      emoji:"🕸️" }, { word:"yarn",     emoji:"🧶" },
+    { word:"zebra",    emoji:"🦓" }, { word:"apple",    emoji:"🍎" },
+    { word:"egg",      emoji:"🥚" }, { word:"ice",      emoji:"🧊" },
+    { word:"owl",      emoji:"🦉" }, { word:"umbrella", emoji:"☂️" },
+  ];
+  const pictureEl = document.getElementById("picture");
+  const wordEl    = document.getElementById("word");
+  const choicesEl = document.getElementById("choices");
+  const starsEl   = document.getElementById("stars");
+  const celebration = document.getElementById("celebration");
+  let stars = 0, current = null, round = 0;
+
+  let audioCtx = null;
+  function tone(f,d=0.15,t="sine",v=0.18){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(audioCtx.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+d);o.stop(audioCtx.currentTime+d)}catch{}}
+  const sounds = {
+    right: () => { [523, 659, 784].forEach((f,i) => setTimeout(() => tone(f, 0.18, "triangle", 0.22), i*100)); },
+    wrong: () => tone(220, 0.25, "sawtooth", 0.1),
+    win:   () => { [523, 659, 784, 1047].forEach((f,i) => setTimeout(() => tone(f, 0.22, "triangle", 0.25), i*120)); },
+  };
+
+  window.speak = function() {
+    if (!current) return;
+    try {
+      const u = new SpeechSynthesisUtterance(current.word);
+      u.rate = 0.75; u.pitch = 1.1;
+      speechSynthesis.cancel(); speechSynthesis.speak(u);
+    } catch {}
+  };
+
+  function nextRound() {
+    round++;
+    current = WORDS[Math.floor(Math.random() * WORDS.length)];
+    pictureEl.textContent = current.emoji;
+    wordEl.innerHTML = `<span class="missing">?</span>${current.word.slice(1)}`;
+    setTimeout(speak, 300);
+
+    // 4 letter choices, including the correct one
+    const firstLetter = current.word[0].toUpperCase();
+    const allLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+    const opts = new Set([firstLetter]);
+    while (opts.size < 4) opts.add(allLetters[Math.floor(Math.random() * 26)]);
+    const shuffled = [...opts].sort(() => Math.random() - 0.5);
+    choicesEl.innerHTML = shuffled.map(l => `<button class="choice" onclick="pick('${l}', this)">${l}</button>`).join("");
+  }
+
+  window.pick = function(letter, btn) {
+    [...document.querySelectorAll(".choice")].forEach(b => b.disabled = true);
+    if (letter === current.word[0].toUpperCase()) {
+      btn.classList.add("right");
+      wordEl.innerHTML = current.word.toUpperCase();
+      sounds.right();
+      stars++; lightStar(stars);
+      postProgress(true);
+      if (stars >= 5) setTimeout(win, 700);
+      else setTimeout(nextRound, 1100);
+    } else {
+      btn.classList.add("wrong");
+      sounds.wrong();
+      postProgress(false);
+      setTimeout(() => {
+        btn.classList.remove("wrong");
+        [...document.querySelectorAll(".choice")].forEach(b => b.disabled = false);
+      }, 500);
+    }
+  };
+
+  function lightStar(n) {
+    const stars = starsEl.querySelectorAll(".star");
+    if (stars[n-1]) stars[n-1].classList.add("lit");
+  }
+  function confettiBurst() {
+    const colors = ["#fb7185","#fbbf24","#34d399","#60a5fa","#a78bfa","#f472b6"];
+    for (let i = 0; i < 60; i++) {
+      const c = document.createElement("div"); c.className = "confetti";
+      c.style.left = Math.random() * 100 + "vw";
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.animationDelay = (Math.random() * 0.8) + "s";
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 2600);
+    }
+  }
+  function win() {
+    sounds.win(); confettiBurst();
+    celebration.textContent = "🎉 Letter star! 🎉";
+    celebration.classList.add("show");
+    postProgress(true, true);
+    setTimeout(() => {
+      celebration.classList.remove("show");
+      stars = 0;
+      starsEl.querySelectorAll(".star").forEach(s => s.classList.remove("lit"));
+      nextRound();
+    }, 2800);
+  }
+  function postProgress(correct, complete=false) {
+    try { parent.postMessage({ type: "labProgress", lab: "letter-match", round, correct, word: current?.word, stars, complete }, "*"); } catch {}
+  }
+  nextRound();
+</script>
+</body>
+</html>
