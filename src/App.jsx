@@ -397,6 +397,67 @@ function Marketing({ onStart }) {
           }}
         </SectionReveal>
 
+        {/* ─── SECTION 03 — OUR STORY (the manifesto / why we're building this) ─── */}
+        <SectionReveal>
+          {(isVisible) => {
+            const r = (d) => ({
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? "translateY(0)" : "translateY(16px)",
+              filter: isVisible ? "blur(0px)" : "blur(4px)",
+              transition: `opacity 500ms cubic-bezier(0.22,1,0.36,1) ${d}ms, transform 500ms cubic-bezier(0.22,1,0.36,1) ${d}ms, filter 500ms cubic-bezier(0.22,1,0.36,1) ${d}ms`,
+            });
+            return (
+              <section id="story" style={{ background: bg, padding:"120px 0" }}>
+                <div style={{ position:"relative", margin:"0 auto", maxWidth:760, padding:"0 24px" }}>
+                  <span className="section-number">03</span>
+                  <p className="text-overline" style={{ ...r(0), color: coral, marginBottom:16 }}>
+                    Why we're building this
+                  </p>
+                  <h2 className="font-body text-section-heading" style={{
+                    ...r(80), fontWeight:400, color: textPrimary,
+                    textWrap:"balance", marginBottom:32, lineHeight:1.15,
+                  }}>
+                    The school system hasn't changed in <em style={{ fontStyle:"italic", color: coral, fontWeight:300 }}>200 years</em>. The world has.
+                  </h2>
+
+                  <div className="font-body" style={{
+                    ...r(160), fontSize:18, color: textSecondary, lineHeight:1.75,
+                  }}>
+                    <p style={{ marginBottom:18 }}>
+                      Same classroom. Same chalkboard. Same rote memorization. But the kids entering kindergarten this fall likely won't go to a traditional college — AI has already begun making the industrial "degree pipeline" obsolete. So how do we teach them now?
+                    </p>
+                    <p style={{ marginBottom:18 }}>
+                      The traditional model isn't just outdated; it's actively breaking. Teachers are resigning <em>en masse</em>. Trust in the system has been shattered by school violence, bullying, and institutional failure. And the burden has fallen entirely on mothers — forced to act as unpaid "general contractors" for their children's futures. Even parents paying $30,000–$50,000 a year for private school still find themselves hiring tutors and managing weekend logistics just to keep up.
+                    </p>
+                    <p style={{ marginBottom:18 }}>
+                      Homeschooling has nearly doubled since COVID, to almost 6% of US students. But parents don't want to build a school from scratch in their living rooms — they want a system upgrade.
+                    </p>
+                    <p style={{ marginBottom:32, color: textPrimary, fontWeight:500 }}>
+                      After years in education, technology, and public health — and after scouring the market for a school we'd actually send our own children to — we stopped looking and started building.
+                    </p>
+                  </div>
+
+                  <div style={{
+                    ...r(280), background:"#fff", border:`1px solid ${borderSubtle}`,
+                    borderRadius:14, padding:"28px 30px", marginBottom:22,
+                  }}>
+                    <p className="text-overline" style={{ color: iris, marginBottom:10 }}>
+                      The model
+                    </p>
+                    <p className="font-body" style={{ fontSize:17, lineHeight:1.65, color: textPrimary }}>
+                      An AI tutor handles personalized academics in <strong>two focused hours each morning</strong>. The rest of the day belongs to building, creating, solving real problems, and learning from professional coaches — engineers, artists, scientists — not textbooks. <span style={{ color: textSecondary }}>No busywork. No six-hour days of sitting still.</span>
+                    </p>
+                  </div>
+
+                  <p className="font-body" style={{ ...r(360), fontSize:14, color: textSecondary, fontStyle:"italic", lineHeight:1.65 }}>
+                    The two-hour academic block is validated by other microschool operators and by peer-reviewed research (Nature / Scientific Reports, 2025) showing AI tutoring outperforms classroom instruction. Our own AI tutoring platform has been tested with 100,000+ students across 800 schools.
+                  </p>
+                </div>
+              </section>
+            );
+          }}
+        </SectionReveal>
+
         {/* ─── PARTNERSHIP — Esther Wojcicki TRICK framework ─── */}
         <SectionReveal>
           {(isVisible) => {
@@ -419,7 +480,7 @@ function Marketing({ onStart }) {
                   <span className="section-number">04</span>
 
                   <p className="text-overline" style={{ ...r(0), color: iris, marginBottom:16 }}>
-                    In collaboration with Esther Wojcicki
+                    Built together with Esther Wojcicki
                   </p>
                   <h2 className="font-body text-section-heading" style={{
                     ...r(80), fontWeight:400, color: textPrimary,
@@ -428,11 +489,11 @@ function Marketing({ onStart }) {
                     Built on the <em style={{ fontStyle:"italic", color: coral, fontWeight:300 }}>TRICK</em> framework.
                   </h2>
                   <p className="font-body" style={{
-                    ...r(160), maxWidth:620, fontSize:18,
-                    fontStyle:"italic", color: textSecondary, lineHeight:1.6,
+                    ...r(160), maxWidth:640, fontSize:18,
+                    color: textSecondary, lineHeight:1.7,
                     marginBottom: 48,
                   }}>
-                    Esther Wojcicki — educator, mother of three (Susan, Anne, Janet), and author of <em style={{ fontStyle:"italic" }}>How to Raise Successful People</em> — co-built neoschool around her decades-tested parenting framework.
+                    <strong style={{ color: textPrimary, fontWeight:600 }}>Esther Wojcicki</strong> — pioneering educator, founder of <em style={{ fontStyle:"italic" }}>Global Moonshots in Education</em>, and best-selling author of <em style={{ fontStyle:"italic" }}>How to Raise Successful People</em> and <em style={{ fontStyle:"italic" }}>Moonshots in Education</em> — is co-building neoschool around the framework she's spent <strong style={{ color: textPrimary, fontWeight:500 }}>30+ years</strong> refining at Palo Alto High School, where she grew the country's largest journalism program from 20 students to 600+. MacArthur Research Fellow. 2002 California Teacher of the Year.
                   </p>
 
                   <div style={{
@@ -815,8 +876,8 @@ function Marketing({ onStart }) {
               transition: `opacity 400ms cubic-bezier(0.22,1,0.36,1) ${d}ms, transform 400ms cubic-bezier(0.22,1,0.36,1) ${d}ms, filter 400ms cubic-bezier(0.22,1,0.36,1) ${d}ms`,
             });
             const team = [
-              { name:"Jennie Yang",      bio:"Missoula mom. Founder. Building neoschool's first campus. Second-generation Missoulian family.", photo:"/missoula/family.jpg" },
-              { name:"Esther Wojcicki",  bio:"Educator, author of How to Raise Successful People. Co-built the school we've all been dreaming of.", photo:"/team-esther.jpeg" },
+              { name:"Jennie Yang",      bio:"Mother of two. Founder of Chief Mama Officer, a community of 500+ moms navigating work and family. Building neoschool's first campus in Missoula for her bright, introverted 5-year-old son — and for every family looking for something better.", photo:"/missoula/family.jpg" },
+              { name:"Esther Wojcicki",  bio:"Pioneering educator. Founded the Palo Alto High School journalism program — the country's largest, with 600+ students — and Global Moonshots in Education. Best-selling author of How to Raise Successful People and Moonshots in Education. 30+ years rethinking what school can become.", photo:"/team-esther.jpeg" },
               { name:"Robert Speed",     bio:"Father of two. 20 years leading education at Blackboard, PowerSchool, and Faria Education.", photo:"/team-robert.jpeg" },
             ];
             return (
