@@ -3,7 +3,7 @@ import { LABS, TUTORS, TOOLS, CONTENT_PROVIDERS, DEMO_STUDENTS, CA_CITIES, GRADE
 import { resolveTool } from "./toolResolver.js";
 import { claude, genJSON, genCurriculum, genMultiCurriculum, genBriefing, genParentComm } from "./api.js";
 import { getMemory, saveSession, saveTutorFeedback, buildRecommendations, buildCrossContext } from "./memory.js";
-import { getCredits, useCredits, addCredits, PLANS, COSTS } from "./credits.js";
+import { getCredits, useCredits, addCredits, PLANS, COSTS, FREE_DEMO_CREDITS } from "./credits.js";
 import { getTutorConfig, saveTutorConfig } from "./tutorConfig.js";
 import { getStudentGraph, recordLabVisit, recordLabEvent, getRecommendations as kgRecs, getSkillsSummary, getStudentPath, getGraphData } from "./knowledgeGraph.js";
 import { generateMCQ, shouldSpawnMCQ, recordMCQResult, getMCQStats } from "./mcqGenerator.js";
@@ -25,13 +25,21 @@ const PBar = ({ v, c = "var(--nv)", h = 4 }) => <div className="pb" style={{ hei
 
 // ── CREDITS WIDGET + PAYMENT MODAL ───────────────────────────────────────────
 function CreditsWidget({ userId, onBuyMore }) {
+  const unlimited = hasUserKey();
   const bal = getCredits(userId || "demo").balance;
-  const pct = Math.min((bal / 30) * 100, 100);
+  const pct = Math.min((bal / FREE_DEMO_CREDITS) * 100, 100);
+  if (unlimited) {
+    return (
+      <div onClick={onBuyMore} style={{ display:"flex", alignItems:"center", gap:6, background:"rgba(255,255,255,.12)", borderRadius:99, padding:"5px 12px", cursor:"pointer" }}>
+        <span>🔑</span><div style={{ fontSize:12, fontWeight:700, color:"#fff" }}>Unlimited</div>
+      </div>
+    );
+  }
   return (
     <div onClick={onBuyMore} style={{ display:"flex", alignItems:"center", gap:7, background:"rgba(255,255,255,.12)", borderRadius:99, padding:"5px 12px", cursor:"pointer" }}>
-      <span>⚡</span>
+      <span>✨</span>
       <div>
-        <div style={{ fontSize:12, fontWeight:700, color: bal < 5 ? "#ffb347" : "#fff" }}>{bal} cr</div>
+        <div style={{ fontSize:12, fontWeight:700, color: bal < 5 ? "#ffb347" : "#fff" }}>{bal} free</div>
         <div style={{ width:48, height:3, borderRadius:99, background:"rgba(255,255,255,.2)" }}>
           <div style={{ width:`${pct}%`, height:"100%", borderRadius:99, background: bal < 5 ? "#ffb347" : "var(--sg2)" }}/>
         </div>
@@ -43,6 +51,8 @@ function CreditsWidget({ userId, onBuyMore }) {
 function PaymentModal({ userId, onClose }) {
   const [sel, setSel] = useState("family");
   const [loading, setLoading] = useState(false);
+  const [keyInput, setKeyInput] = useState("");
+  const [keySaved, setKeySaved] = useState(false);
   const simulatePurchase = (plan) => {
     setLoading(true);
     setTimeout(() => {
@@ -52,39 +62,57 @@ function PaymentModal({ userId, onClose }) {
       onClose();
     }, 1400);
   };
+  const saveKey = () => {
+    if (setUserKey(keyInput.trim())) { setKeySaved(true); setTimeout(onClose, 900); }
+    else alert("That doesn't look like a valid Anthropic key (starts with sk-ant-).");
+  };
   return (
     <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.55)", zIndex:2000, display:"flex", alignItems:"center", justifyContent:"center", padding:20 }} onClick={onClose}>
-      <div className="card pi" style={{ maxWidth:520, width:"100%", padding:"28px 24px" }} onClick={e => e.stopPropagation()}>
-        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16 }}>
-          <div><h2 className="h2">Get more credits</h2><p className="mu" style={{ fontSize:12 }}>Balance: <strong>{getCredits(userId).balance} credits</strong></p></div>
+      <div className="card pi" style={{ maxWidth:520, width:"100%", padding:"28px 24px", maxHeight:"90vh", overflowY:"auto" }} onClick={e => e.stopPropagation()}>
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:6 }}>
+          <div><h2 className="h2">Keep learning with your tutor</h2><p className="mu" style={{ fontSize:12 }}>{getCredits(userId).balance} free tutor messages left</p></div>
           <button onClick={onClose} style={{ background:"none", border:"none", cursor:"pointer", fontSize:22, color:"var(--mu)" }}>×</button>
         </div>
-        <div style={{ background:"var(--p)", borderRadius:10, padding:"9px 13px", marginBottom:16 }}>
-          <p style={{ fontSize:12, color:"var(--mu)" }}>💡 Costs: Tutor msg=1 · Curriculum=5 · Briefing=3 · Parent update=2</p>
+        <div style={{ background:"#eafaf3", borderRadius:10, padding:"10px 13px", marginBottom:16 }}>
+          <p style={{ fontSize:12, color:"var(--sg)", fontWeight:600 }}>✓ All activities & games stay free forever — no credits needed.</p>
+          <p style={{ fontSize:11.5, color:"var(--mu)", marginTop:3 }}>Credits are only for chatting with the AI tutor (1 per message).</p>
         </div>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:16 }}>
-          {PLANS.map(plan => (
+          {PLANS.filter(p => p.price > 0).map(plan => (
             <div key={plan.id} onClick={() => setSel(plan.id)} style={{ border:`2px solid ${sel===plan.id?plan.color:"var(--p2)"}`, borderRadius:13, padding:"13px", cursor:"pointer", background:sel===plan.id?`${plan.color}14`:"#fff", position:"relative", transition:"all .2s" }}>
               {plan.popular && <div style={{ position:"absolute", top:-9, right:10, background:plan.color, color:"#fff", fontSize:9, fontWeight:700, padding:"2px 7px", borderRadius:99 }}>POPULAR</div>}
               <div style={{ fontFamily:"'Fraunces',serif", fontSize:15, fontWeight:500, marginBottom:2 }}>{plan.name}</div>
-              <div style={{ fontSize:17, fontWeight:700, color:plan.color, marginBottom:2 }}>{plan.price===0?"Free":`$${plan.price}/mo`}</div>
-              <div style={{ fontSize:11, fontWeight:700, marginBottom:2 }}>⚡ {plan.credits} credits</div>
+              <div style={{ fontSize:17, fontWeight:700, color:plan.color, marginBottom:2 }}>{`$${plan.price}/mo`}</div>
+              <div style={{ fontSize:11, fontWeight:700, marginBottom:2 }}>✨ {plan.credits} tutor messages</div>
               <div style={{ fontSize:10, color:"var(--mu)" }}>{plan.desc}</div>
             </div>
           ))}
         </div>
         {(() => {
-          const plan = PLANS.find(p => p.id === sel);
+          const plan = PLANS.find(p => p.id === sel) || PLANS[2];
           return (
             <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
               <button className="btn bn fw" onClick={() => simulatePurchase(plan)} disabled={loading}>
-                {loading ? "Adding credits…" : plan.price===0 ? `✦ Add ${plan.credits} free credits` : `⚡ Demo: ${plan.credits} credits ($${plan.price})`}
+                {loading ? "Adding credits…" : `⚡ Demo: ${plan.credits} credits ($${plan.price})`}
               </button>
-              {plan.price > 0 && <a href={plan.stripe||"#"} target="_blank" rel="noopener noreferrer" className="btn bo fw" style={{ textDecoration:"none" }}>💳 Real Stripe checkout →</a>}
+              <a href={plan.stripe||"#"} target="_blank" rel="noopener noreferrer" className="btn bo fw" style={{ textDecoration:"none" }}>💳 Real Stripe checkout →</a>
             </div>
           );
         })()}
-        <p style={{ textAlign:"center", fontSize:11, color:"var(--mu)", marginTop:10 }}>Powered by Stripe · Schools: enterprise@neoschool.me</p>
+        {/* BYOK alternative — unlimited with your own key */}
+        <div style={{ borderTop:"1px solid var(--p2)", marginTop:18, paddingTop:16 }}>
+          <p style={{ fontSize:12.5, fontWeight:700, marginBottom:4 }}>🔑 Or bring your own key — unlimited, free</p>
+          <p style={{ fontSize:11.5, color:"var(--mu)", marginBottom:9 }}>Have an Anthropic API key? Paste it for unlimited tutoring on your own Claude credits. Stored only on this device.</p>
+          {keySaved ? (
+            <p style={{ fontSize:13, color:"var(--sg)", fontWeight:600 }}>✓ Saved — you now have unlimited tutoring!</p>
+          ) : (
+            <div style={{ display:"flex", gap:8 }}>
+              <input className="inp" style={{ flex:1 }} placeholder="sk-ant-…" value={keyInput} onChange={e=>setKeyInput(e.target.value)} />
+              <button className="btn bg" onClick={saveKey} disabled={!keyInput.trim()}>Save</button>
+            </div>
+          )}
+        </div>
+        <p style={{ textAlign:"center", fontSize:11, color:"var(--mu)", marginTop:14 }}>Powered by Stripe · Schools: enterprise@neoschool.me</p>
       </div>
     </div>
   );
@@ -2931,6 +2959,41 @@ function parseLabGrades(gradesStr) {
   return { min: nums[0], max: nums[nums.length - 1] };
 }
 
+// Grade-first content filtering. Scale: Pre-K = -1, K = 0, Grade N = N.
+const GRADE_BANDS = [
+  { id:"All",  label:"All",   val:null },
+  { id:"prek", label:"Pre-K", val:-1 },
+  { id:"k",    label:"K",     val:0 },
+  { id:"1",    label:"1st",   val:1 },
+  { id:"2",    label:"2nd",   val:2 },
+  { id:"3",    label:"3rd",   val:3 },
+  { id:"4",    label:"4th",   val:4 },
+  { id:"5",    label:"5th",   val:5 },
+  { id:"6",    label:"6th",   val:6 },
+  { id:"7",    label:"7th",   val:7 },
+  { id:"8",    label:"8th",   val:8 },
+  { id:"9",    label:"9th",   val:9 },
+  { id:"10",   label:"10th",  val:10 },
+  { id:"11",   label:"11th",  val:11 },
+  { id:"12",   label:"12th",  val:12 },
+];
+function labBand(gradesStr) {
+  const s = (gradesStr || "").toLowerCase();
+  let min = 99, max = -99;
+  if (s.includes("pre-k") || s.includes("prek")) { min = Math.min(min, -1); max = Math.max(max, -1); }
+  if (/\bk\b|k–|k-|–\s*k|-\s*k|–k/.test(s)) { min = Math.min(min, 0); max = Math.max(max, 0); }
+  const nums = s.match(/\d+/g)?.map(Number) || [];
+  for (const n of nums) { min = Math.min(min, n); max = Math.max(max, n); }
+  if (min === 99) min = -1;
+  if (max === -99) max = 12;
+  return { min, max };
+}
+function labMatchesGrade(lab, bandVal) {
+  if (bandVal === null || bandVal === undefined) return true;
+  const { min, max } = labBand(lab.grades);
+  return bandVal >= min && bandVal <= max;
+}
+
 function LabPlayer({ lab, userId, onBack }) {
   const [showTutor, setShowTutor] = useState(false);
   const [msgs, setMsgs] = useState([]);
@@ -3034,8 +3097,12 @@ function LabPlayer({ lab, userId, onBack }) {
   const send = async () => {
     if (!inp.trim() || typing) return;
     const cr = useCredits(userId || "demo", "tutor_message", COSTS.tutor_message);
-    // useCredits delegates to safeUseCredits — never blocks the user
-    if (cr.autoToppedUp) console.info('Auto-topped credits for demo');
+    if (!cr.success) {
+      // Free demo exhausted — keep playing the activity free, but gate the tutor.
+      setMsgs(p => [...p, { role:"assistant", content:"✨ That's the end of your free tutor demo! You can keep playing this activity for free. To keep chatting with me, upgrade or connect your own key." }]);
+      setShowPay(true);
+      return;
+    }
     const evtCtx = `Session: ${Math.round((Date.now()-sessionStart)/1000)}s. Clicks: ${events.filter(e=>e.t==="click").length}. Score: ${score??"-"}. Recent: ${events.slice(-3).map(e=>e.action||e.t).join(", ")}`;
     const crossCtx = buildCrossContext(mem);
 
@@ -3442,6 +3509,8 @@ function StudentPortal({ user }) {
   const [typing, setTyping]         = useState(false);
   const [showPay, setShowPay]       = useState(false);
   const [filter, setFilter]         = useState("All");
+  const [gradeBand, setGradeBand]   = useState("All");  // grade-first content filter
+  const [subjectF, setSubjectF]     = useState("All");
   const [activeTool, setActiveTool] = useState(null);
   // Show quick assessment on first visit
   const [assessed, setAssessed] = useState(
@@ -3477,8 +3546,12 @@ function StudentPortal({ user }) {
   const send = async () => {
     if (!inp.trim() || typing) return;
     const cr = useCredits(user.id, "tutor_message", COSTS.tutor_message);
-    // useCredits delegates to safeUseCredits — never blocks the user
-    if (cr.autoToppedUp) console.info('Auto-topped credits for demo');
+    if (!cr.success) {
+      // Free demo exhausted — invite upgrade instead of sending.
+      setMsgs(p => [...p, { role:"assistant", content:"✨ That's the end of your free tutor demo! Activities and games stay free forever. To keep chatting with your tutor, you can upgrade or connect your own key." }]);
+      setShowPay(true);
+      return;
+    }
     const crossCtx = buildCrossContext(mem);
     const m = { role:"user", content:inp.trim() };
     const all = [...msgs, m];
@@ -3545,129 +3618,92 @@ function StudentPortal({ user }) {
           <ContentProviders onOpenTool={setActiveTool}/>
         )}
         {activeTab === "labs" && (() => {
-          // Build the guided path: recommended first → started → not yet
           const childGrade = localStorage.getItem("neo_child_grade") || student?.grade || "3rd Grade";
-          const stuNum    = gradeToNum(childGrade);
-          const inProgress = LABS.filter(l => (mem.labStats[l.id]?.masteryPct || student.labProgress[l.id] || 0) > 0 && (mem.labStats[l.id]?.masteryPct || student.labProgress[l.id] || 0) < 100);
-          const recommended = recs.length > 0 ? recs[0].lab : (inProgress[0] || LABS[0]);
-          const nextUp      = LABS.filter(l => l.id !== recommended.id).slice(0, 3);
-          const pct         = mem.labStats[recommended.id]?.masteryPct || student.labProgress[recommended.id] || 0;
-          const rec0Reason  = recs[0]?.reason || "Continue your journey";
+          const bandObj = GRADE_BANDS.find(b => b.id === gradeBand) || GRADE_BANDS[0];
 
-          // Path visualization: completed → current → upcoming
-          const completed   = LABS.filter(l => (mem.labStats[l.id]?.masteryPct || student.labProgress[l.id] || 0) >= 80).slice(0, 2);
-          const upcoming    = LABS.filter(l => !completed.find(c=>c.id===l.id) && l.id !== recommended.id).slice(0, 2);
+          // Apply grade + subject filters
+          const filtered = LABS.filter(l => {
+            const gOk = labMatchesGrade(l, bandObj.val);
+            const sOk = subjectF === "All" || l.subject === subjectF;
+            return gOk && sOk;
+          });
+          const subjects = ["All", ...Array.from(new Set(LABS.map(l => l.subject).filter(Boolean)))];
+
+          // Recommended "up next" — first recommendation that fits the current filter
+          const recLab = (recs.find(r => filtered.includes(r.lab))?.lab) || filtered[0] || LABS[0];
+          const recReason = recs[0]?.reason || "A great place to start";
+          const pct = mem.labStats[recLab?.id]?.masteryPct || student.labProgress?.[recLab?.id] || 0;
 
           return (
             <div>
-              {/* 1. Today's path — simple horizontal trajectory */}
-              <div style={{ marginBottom:18 }}>
-                <p style={{ fontSize:10, fontWeight:700, color:"var(--mu)", textTransform:"uppercase", letterSpacing:".08em", marginBottom:10 }}>Your math journey</p>
-                <div style={{ display:"flex", alignItems:"center", gap:5, overflowX:"auto", paddingBottom:4 }}>
-                  {completed.map((l,i) => (
-                    <div key={l.id} style={{ flex:"0 0 auto", textAlign:"center", opacity:.55 }}>
-                      <div style={{ width:38, height:38, borderRadius:"50%", background:"var(--sg)", color:"#fff", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, margin:"0 auto" }}>{l.emoji}</div>
-                      <p style={{ fontSize:9, color:"var(--sg)", marginTop:3, fontWeight:600 }}>✓ Done</p>
-                    </div>
-                  ))}
-                  {completed.length > 0 && <div style={{ flex:"0 0 auto", height:2, width:18, background:"var(--p2)" }}/>}
-                  <div style={{ flex:"0 0 auto", textAlign:"center" }}>
-                    <div style={{ width:48, height:48, borderRadius:"50%", background:"var(--or)", color:"#fff", display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, margin:"0 auto", boxShadow:"0 4px 14px rgba(217,98,43,.3)", animation:"pu 2s ease-in-out infinite" }}>{recommended.emoji}</div>
-                    <p style={{ fontSize:10, color:"var(--or)", marginTop:3, fontWeight:700 }}>You are here</p>
-                  </div>
-                  <div style={{ flex:"0 0 auto", height:2, width:18, background:"var(--p2)" }}/>
-                  {upcoming.map((l,i) => (
-                    <div key={l.id} style={{ flex:"0 0 auto", textAlign:"center", opacity:.4 }}>
-                      <div style={{ width:38, height:38, borderRadius:"50%", background:"var(--p)", color:"var(--mu)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, margin:"0 auto", border:"1.5px dashed var(--p2)" }}>{l.emoji}</div>
-                      <p style={{ fontSize:9, color:"var(--mu)", marginTop:3 }}>Next</p>
-                    </div>
-                  ))}
-                </div>
+              {/* Grade selector — content-first, all grades */}
+              <p style={{ fontSize:10, fontWeight:700, color:"var(--mu)", textTransform:"uppercase", letterSpacing:".08em", marginBottom:7 }}>Choose a grade</p>
+              <div style={{ display:"flex", gap:6, overflowX:"auto", paddingBottom:6, marginBottom:12, WebkitOverflowScrolling:"touch" }}>
+                {GRADE_BANDS.map(b => (
+                  <div key={b.id} onClick={() => setGradeBand(b.id)} style={{
+                    flex:"0 0 auto", padding:"6px 13px", borderRadius:99, cursor:"pointer",
+                    fontSize:12.5, fontWeight:600, whiteSpace:"nowrap", transition:"all .15s",
+                    background: gradeBand===b.id ? "var(--nv)" : "#fff",
+                    color: gradeBand===b.id ? "#fff" : "var(--mu)",
+                    border: `1px solid ${gradeBand===b.id ? "var(--nv)" : "var(--p2)"}`,
+                  }}>{b.label}</div>
+                ))}
               </div>
 
-              {/* 2. Hero card — single Up Next */}
-              <div className="card fu" style={{ marginBottom:16, padding:"0", overflow:"hidden", border:"none", background:"linear-gradient(135deg,#fff8f0,#fff)", boxShadow:"0 8px 28px rgba(217,98,43,.15)" }}>
-                <div style={{ padding:"18px 18px 14px" }}>
-                  <p style={{ fontSize:10, fontWeight:700, color:"var(--or)", textTransform:"uppercase", letterSpacing:".09em", marginBottom:8 }}>✦ Up next for you</p>
-                  <div style={{ display:"flex", alignItems:"flex-start", gap:14, marginBottom:14 }}>
-                    <div style={{ fontSize:46, lineHeight:1, flexShrink:0 }}>{recommended.emoji}</div>
-                    <div style={{ flex:1 }}>
-                      <h2 style={{ fontFamily:"'Fraunces',serif", fontSize:22, fontWeight:500, lineHeight:1.2, marginBottom:4 }}>{recommended.title}</h2>
-                      <p style={{ fontSize:13, color:"var(--mu)", lineHeight:1.5, marginBottom:4 }}>{rec0Reason}</p>
-                      <p style={{ fontSize:11, color:"var(--mu)" }}>{recommended.time} min · with {getTutorConfig(recommended.id).name}</p>
-                      {pct > 0 && (
-                        <div style={{ marginTop:8 }}>
-                          <div style={{ display:"flex", justifyContent:"space-between", marginBottom:3 }}><span style={{ fontSize:11, color:"var(--mu)" }}>Mastery</span><span style={{ fontSize:11, fontWeight:700, color:"var(--or)" }}>{pct}%</span></div>
-                          <PBar v={pct} c="var(--or)" h={5}/>
-                        </div>
-                      )}
+              {/* Subject chips */}
+              <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginBottom:16 }}>
+                {subjects.map(s => (
+                  <div key={s} onClick={() => setSubjectF(s)} style={{
+                    padding:"5px 12px", borderRadius:99, cursor:"pointer", fontSize:11.5, fontWeight:600,
+                    background: subjectF===s ? "var(--or)" : "var(--p)",
+                    color: subjectF===s ? "#fff" : "var(--mu)", transition:"all .15s",
+                  }}>{s}</div>
+                ))}
+              </div>
+
+              {/* Up next — single clean hero */}
+              {recLab && (
+                <div className="card" style={{ marginBottom:18, padding:"16px 16px 14px", border:"none", background:"linear-gradient(135deg,#fff8f0,#fff)", boxShadow:"0 6px 22px rgba(217,98,43,.12)" }}>
+                  <p style={{ fontSize:10, fontWeight:700, color:"var(--or)", textTransform:"uppercase", letterSpacing:".09em", marginBottom:10 }}>✦ Up next for you</p>
+                  <div style={{ display:"flex", alignItems:"center", gap:13 }}>
+                    <div style={{ fontSize:40, lineHeight:1, flexShrink:0 }}>{recLab.emoji}</div>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <h2 style={{ fontFamily:"'Fraunces',serif", fontSize:19, fontWeight:500, lineHeight:1.2, marginBottom:3 }}>{recLab.title}</h2>
+                      <p style={{ fontSize:12, color:"var(--mu)" }}>{recLab.grades} · {recLab.time} min</p>
+                      {pct > 0 && <div style={{ marginTop:7 }}><PBar v={pct} c="var(--or)" h={5}/></div>}
                     </div>
                   </div>
-                  <button className="btn bo fw" onClick={() => setActiveLab(recommended)} style={{ fontSize:15, padding:"13px" }}>
+                  <button className="btn bo fw" onClick={() => setActiveLab(recLab)} style={{ fontSize:14, padding:"12px", marginTop:14 }}>
                     {pct > 0 ? "Continue →" : "Start activity →"}
                   </button>
                 </div>
-              </div>
-
-              {/* 3. Coming up next — 3 small previews */}
-              <p style={{ fontSize:10, fontWeight:700, color:"var(--mu)", textTransform:"uppercase", letterSpacing:".08em", marginBottom:8 }}>Then you'll explore</p>
-              <div style={{ display:"flex", flexDirection:"column", gap:7, marginBottom:14 }}>
-                {nextUp.map((l, i) => {
-                  const labRange = parseLabGrades(l.grades);
-                  const above    = stuNum < labRange.min;
-                  return (
-                    <div key={l.id} onClick={() => setActiveLab(l)} className="fu" style={{ cursor:"pointer", display:"flex", alignItems:"center", gap:10, padding:"10px 13px", background:"#fff", borderRadius:11, border:"1px solid var(--p2)", animationDelay:`${i*.05}s`, transition:"all .2s" }}
-                      onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--or)"; e.currentTarget.style.transform="translateX(3px)";}}
-                      onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--p2)"; e.currentTarget.style.transform="";}}>
-                      <span style={{ fontSize:20, opacity:.7 }}>{l.emoji}</span>
-                      <div style={{ flex:1 }}>
-                        <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-                          <span style={{ fontSize:13, fontWeight:600 }}>{l.title}</span>
-                          {above && <span style={{ fontSize:9, background:"#fdf3d0", color:"var(--am)", padding:"1px 5px", borderRadius:99, fontWeight:600 }}>🌟</span>}
-                        </div>
-                        <p style={{ fontSize:10, color:"var(--mu)" }}>{l.time} min</p>
-                      </div>
-                      <span style={{ fontSize:14, color:"var(--mu)" }}>→</span>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* 4. Browse all — collapsed by default */}
-              {!browseAll && (
-                <button className="btn bg fw" onClick={() => setBrowseAll(true)} style={{ fontSize:12 }}>
-                  Browse all {LABS.length} activities ↓
-                </button>
               )}
-              {browseAll && (
-                <div className="fu">
-                  <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:9 }}>
-                    <p style={{ fontSize:10, fontWeight:700, color:"var(--mu)", textTransform:"uppercase", letterSpacing:".08em" }}>All activities ({LABS.length})</p>
-                    <button onClick={() => setBrowseAll(false)} style={{ background:"none", border:"none", cursor:"pointer", fontSize:11, color:"var(--mu)" }}>Hide ↑</button>
-                  </div>
-                  <div style={{ display:"flex", gap:5, flexWrap:"wrap", marginBottom:10 }}>
-                    {topics.map(t => <div key={t} className={`pill${filter===t?" on":""}`} style={{ fontSize:11 }} onClick={()=>setFilter(t)}>{t}</div>)}
-                  </div>
-                  <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
-                    {LABS.filter(l => filter==="All" || (filter==="⭐ Kindergarten" ? /Pre-K|^K\b|– K|- K/i.test(l.grades) : l.topic===filter)).map((l,i) => {
-                      const p2 = mem.labStats[l.id]?.masteryPct || student.labProgress[l.id] || 0;
-                      const labRange = parseLabGrades(l.grades);
-                      const above    = stuNum < labRange.min;
-                      return (
-                        <div key={l.id} onClick={() => setActiveLab(l)} style={{ cursor:"pointer", display:"flex", alignItems:"center", gap:9, padding:"9px 12px", background:"#fff", borderRadius:9, border:"1px solid var(--p)", animation:`fu .3s ${i*.02}s both` }}>
-                          <span style={{ fontSize:18 }}>{l.emoji}</span>
-                          <div style={{ flex:1 }}>
-                            <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-                              <span style={{ fontWeight:600, fontSize:12.5 }}>{l.title}</span>
-                              {above && <span style={{ fontSize:9, background:"#fdf3d0", color:"var(--am)", padding:"1px 5px", borderRadius:99, fontWeight:600 }}>🌟</span>}
-                            </div>
-                            <p style={{ fontSize:10, color:"var(--mu)" }}>{l.grades} · {l.time}min</p>
-                          </div>
-                          {p2 > 0 ? <span style={{ fontSize:11, fontWeight:700, color:p2>80?"var(--sg)":"var(--or)" }}>{p2}%</span> : <span style={{ fontSize:14, color:"var(--mu)" }}>→</span>}
+
+              {/* Filtered activities */}
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:9 }}>
+                <p style={{ fontSize:10, fontWeight:700, color:"var(--mu)", textTransform:"uppercase", letterSpacing:".08em" }}>
+                  {bandObj.val===null ? "All activities" : `${bandObj.label} activities`} ({filtered.length})
+                </p>
+              </div>
+              {filtered.length === 0 ? (
+                <p className="mu" style={{ fontSize:13, padding:"20px 0", textAlign:"center" }}>No activities for this filter yet. Try another grade or subject.</p>
+              ) : (
+                <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+                  {filtered.map((l, i) => {
+                    const p2 = mem.labStats[l.id]?.masteryPct || student.labProgress?.[l.id] || 0;
+                    return (
+                      <div key={l.id} onClick={() => setActiveLab(l)} style={{ cursor:"pointer", display:"flex", alignItems:"center", gap:10, padding:"10px 13px", background:"#fff", borderRadius:11, border:"1px solid var(--p2)", animation:`fu .3s ${Math.min(i*.02,.4)}s both`, transition:"all .15s" }}
+                        onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--or)"; e.currentTarget.style.transform="translateX(3px)";}}
+                        onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--p2)"; e.currentTarget.style.transform="";}}>
+                        <span style={{ fontSize:20, flexShrink:0 }}>{l.emoji}</span>
+                        <div style={{ flex:1, minWidth:0 }}>
+                          <div style={{ fontWeight:600, fontSize:13 }}>{l.title}</div>
+                          <p style={{ fontSize:10.5, color:"var(--mu)" }}>{l.grades} · {l.subject} · {l.time}min</p>
                         </div>
-                      );
-                    })}
-                  </div>
+                        {p2 > 0 ? <span style={{ fontSize:11, fontWeight:700, color:p2>80?"var(--sg)":"var(--or)" }}>{p2}%</span> : <span style={{ fontSize:14, color:"var(--mu)" }}>→</span>}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -4247,7 +4283,8 @@ function CurriculumBuilder({ userId, onNeedCredits }) {
   };
 
   const build = async () => {
-    useCredits(userId || "default", "curriculum_gen", COSTS.curriculum_gen);
+    const cr = useCredits(userId || "default", "curriculum_gen", COSTS.curriculum_gen);
+    if (!cr.success) { onNeedCredits?.(); return; }
     setLoading(true); setCurriculum(null); setError(null);
     try {
       const c = await genMultiCurriculum({ ageBand: band, subjects, weeks, style, dailyMin });

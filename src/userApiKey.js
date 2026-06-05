@@ -9,9 +9,11 @@ const DEMO_USES_KEY   = "neo_demo_uses";
 const DEMO_BUDGET_KEY = "neo_demo_budget";
 
 // How many free demo interactions before we ask the user to bring their own key.
-// Adjust as needed — generous enough to genuinely experience the tutor, low
-// enough to encourage signup.
-export const DEMO_BUDGET_DEFAULT = 10;
+// The credits system (credits.js, FREE_DEMO_CREDITS) is now the authoritative
+// demo gate, so we set this high enough that api.js never pre-empts it. The
+// proxy still returns 402 if no platform key is configured, which surfaces the
+// BYOK modal as the genuine "we can't serve this" fallback.
+export const DEMO_BUDGET_DEFAULT = 100000;
 
 /** Get the user's stored key (if any) */
 export function getUserKey() {
