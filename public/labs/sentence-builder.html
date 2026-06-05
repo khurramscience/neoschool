@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Sentence Builder 🪄</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+  html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#ffe4e6 0%,#fda4af 100%);color:#1a1612;-webkit-font-smoothing:antialiased}
+  .wrap{display:flex;flex-direction:column;height:100%;padding:18px 16px;max-width:760px;margin:0 auto}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .title{font-size:22px;font-weight:700;color:#be123c}
+  .stars{display:flex;gap:4px;font-size:24px}
+  .star{filter:grayscale(1);opacity:.35;transition:all .35s}
+  .star.lit{filter:none;opacity:1;transform:scale(1.2) rotate(-8deg)}
+  .question{font-size:clamp(18px,4.5vw,22px);font-weight:700;text-align:center;color:#1a1f3a;margin:6px 0 10px}
+  .picture-card{background:#fff;border-radius:24px;border:3px solid #fda4af;padding:14px;display:flex;align-items:center;justify-content:center;gap:14px;box-shadow:0 4px 0 #fda4af;margin-bottom:12px}
+  .picture{font-size:clamp(46px,11vw,64px);line-height:1}
+  .picture-label{font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#7a7367;font-weight:700}
+  .build-zone{background:#fff;border:3px dashed #fda4af;border-radius:18px;padding:14px 12px;min-height:74px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;align-content:center;justify-content:center;margin-bottom:10px;transition:all .2s}
+  .build-zone.complete{border-style:solid;border-color:#16a34a;background:#dcfce7}
+  .build-zone:empty::before{content:"Tap words below to build a sentence";color:#9f7a8d;font-family:'Newsreader',serif;font-style:italic;font-size:14px}
+  .pool{flex:1;background:#fff;border-radius:18px;border:3px solid #fda4af;padding:14px;display:flex;flex-wrap:wrap;gap:8px;align-content:start;justify-content:center;box-shadow:0 4px 0 #fda4af;min-height:120px}
+  .word-tile{background:#fda4af;color:#fff;border:none;border-radius:12px;padding:10px 14px;font-family:'Quicksand',sans-serif;font-size:clamp(16px,4vw,22px);font-weight:700;cursor:pointer;box-shadow:0 3px 0 #be123c;transition:all .15s;touch-action:manipulation}
+  .word-tile.in-build{background:#be123c;color:#fff;cursor:pointer}
+  .word-tile:active{transform:translateY(2px);box-shadow:0 1px 0 #be123c}
+  .word-tile.used{opacity:.25;pointer-events:none}
+  .controls{display:flex;gap:8px;justify-content:center;margin-top:8px}
+  .ctl{background:#fff;border:none;border-radius:99px;padding:8px 18px;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:600;color:#9f1239;cursor:pointer;box-shadow:0 3px 0 #fda4af}
+  .ctl:active{transform:translateY(1px);box-shadow:0 1px 0 #fda4af}
+  .ctl-check{background:#be123c;color:#fff;box-shadow:0 3px 0 #9f1239}
+  .ctl-check:active{box-shadow:0 1px 0 #9f1239}
+  .ctl-check:disabled{opacity:.5;cursor:default}
+  .celebration{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(36px,9vw,54px);font-weight:700;color:#be123c;pointer-events:none;opacity:0;transition:opacity .25s;background:rgba(255,255,255,.85);text-align:center}
+  .celebration.show{opacity:1}
+  .confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+  .feedback{text-align:center;font-family:'Newsreader',serif;font-size:13px;font-style:italic;color:#9f1239;margin-top:4px;min-height:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="title">🪄 Sentence Builder</div>
+    <div class="stars" id="stars">
+      <span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span>
+    </div>
+  </div>
+  <div class="question" id="question">Build a sentence about the picture!</div>
+  <div class="picture-card">
+    <div class="picture" id="picture"></div>
+    <div>
+      <div class="picture-label">Make a sentence:</div>
+      <div style="font-family:'Newsreader',serif;font-style:italic;color:#9f1239;font-size:14px;margin-top:4px" id="hint">—</div>
+    </div>
+  </div>
+  <div class="build-zone" id="build"></div>
+  <div class="pool" id="pool"></div>
+  <div class="feedback" id="feedback">&nbsp;</div>
+  <div class="controls">
+    <button class="ctl" onclick="undoLast()">↶ Undo</button>
+    <button class="ctl" onclick="clearBuild()">Start over</button>
+    <button class="ctl ctl-check" id="checkBtn" onclick="checkSentence()">Check ✓</button>
+  </div>
+</div>
+<div class="celebration" id="celebration"></div>
+
+<script>
+  // Sentence templates — each has a picture cue, target sentence, and a word pool
+  // (target tokens + a few distractors). Targets START with a capitalized word
+  // and END with a period token, so kids learn both conventions.
+  const TEMPLATES = [
+    {p:"🐱", hint:"the cat...",     target:["The","cat","is","big","."],       distractors:["dog","run","red"]},
+    {p:"🐶", hint:"the dog...",     target:["The","dog","can","run","."],      distractors:["sit","big","blue"]},
+    {p:"☀️", hint:"the sun...",     target:["The","sun","is","yellow","."],    distractors:["moon","blue","big"]},
+    {p:"🌳", hint:"a tree...",      target:["I","see","a","tree","."],         distractors:["dog","run","cat"]},
+    {p:"🐰", hint:"the bunny...",   target:["The","bunny","is","fast","."],    distractors:["slow","red","big"]},
+    {p:"🍎", hint:"the apple...",   target:["The","apple","is","red","."],     distractors:["green","big","sweet"]},
+    {p:"🐝", hint:"the bee...",     target:["I","see","a","bee","."],          distractors:["big","fly","yellow"]},
+    {p:"🐟", hint:"the fish...",    target:["The","fish","can","swim","."],    distractors:["run","jump","big"]},
+    {p:"⭐", hint:"the star...",    target:["The","star","is","bright","."],   distractors:["big","red","moon"]},
+    {p:"🚗", hint:"the car...",     target:["The","car","is","fast","."],      distractors:["slow","big","run"]},
+  ];
+
+  const pictureEl = document.getElementById("picture");
+  const hintEl = document.getElementById("hint");
+  const buildEl = document.getElementById("build");
+  const poolEl = document.getElementById("pool");
+  const feedbackEl = document.getElementById("feedback");
+  const checkBtn = document.getElementById("checkBtn");
+  const starsEl = document.getElementById("stars");
+  const celebration = document.getElementById("celebration");
+  let stars = 0, current = null, built = [], round = 0;
+
+  let audioCtx = null;
+  function tone(f,d=0.15,t="sine",v=0.18){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(audioCtx.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+d);o.stop(audioCtx.currentTime+d)}catch{}}
+  const sounds = {
+    tap:   () => tone(550 + Math.random()*100, 0.05, "sine"),
+    right: () => { [523, 659, 784].forEach((f,i) => setTimeout(() => tone(f, 0.18, "triangle", 0.22), i*100)); },
+    wrong: () => tone(220, 0.25, "sawtooth", 0.1),
+    win:   () => { [523, 659, 784, 1047].forEach((f,i) => setTimeout(() => tone(f, 0.22, "triangle", 0.25), i*120)); },
+  };
+
+  function nextRound() {
+    round++;
+    current = TEMPLATES[Math.floor(Math.random() * TEMPLATES.length)];
+    built = [];
+    pictureEl.textContent = current.p;
+    hintEl.textContent = current.hint;
+    buildEl.classList.remove("complete");
+    feedbackEl.innerHTML = "&nbsp;";
+    checkBtn.disabled = false;
+
+    // Pool = target words + distractors, shuffled
+    const tokens = [...current.target, ...current.distractors];
+    const shuffled = tokens.sort(() => Math.random() - 0.5);
+    poolEl.innerHTML = shuffled.map((t, i) => `<button class="word-tile" data-idx="${i}" data-token="${t}" onclick="addToBuild(${i}, '${t.replace(/'/g, "\\'")}', this)">${t}</button>`).join("");
+    renderBuild();
+  }
+
+  function renderBuild() {
+    buildEl.innerHTML = built.map((b, i) => `<button class="word-tile in-build" onclick="removeFromBuild(${i})">${b.token}</button>`).join("");
+  }
+
+  window.addToBuild = function(idx, token, btn) {
+    sounds.tap();
+    built.push({ idx, token });
+    btn.classList.add("used");
+    renderBuild();
+  };
+
+  window.removeFromBuild = function(i) {
+    sounds.tap();
+    const removed = built.splice(i, 1)[0];
+    const orig = poolEl.querySelector(`[data-idx="${removed.idx}"]`);
+    if (orig) orig.classList.remove("used");
+    renderBuild();
+  };
+
+  window.undoLast = function() {
+    if (built.length === 0) return;
+    sounds.tap();
+    const last = built.pop();
+    const orig = poolEl.querySelector(`[data-idx="${last.idx}"]`);
+    if (orig) orig.classList.remove("used");
+    renderBuild();
+  };
+
+  window.clearBuild = function() {
+    sounds.tap();
+    built = [];
+    poolEl.querySelectorAll(".word-tile").forEach(t => t.classList.remove("used"));
+    renderBuild();
+    feedbackEl.innerHTML = "&nbsp;";
+    buildEl.classList.remove("complete");
+  };
+
+  window.checkSentence = function() {
+    const builtTokens = built.map(b => b.token);
+    const targetTokens = current.target;
+
+    // Exact match?
+    if (builtTokens.length === targetTokens.length && builtTokens.every((t, i) => t === targetTokens[i])) {
+      buildEl.classList.add("complete");
+      feedbackEl.textContent = `✓ "${builtTokens.join(" ").replace(" .", ".")}"`;
+      sounds.right();
+      stars++; lightStar(stars);
+      postProgress(true);
+      try { const u = new SpeechSynthesisUtterance(builtTokens.join(" ").replace(" .", ".")); u.rate = 0.8; u.pitch = 1.1; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch {}
+      checkBtn.disabled = true;
+      if (stars >= 5) setTimeout(win, 1800);
+      else setTimeout(nextRound, 2000);
+      return;
+    }
+
+    // Diagnostic feedback — what's wrong?
+    let msg = "Almost! ";
+    if (builtTokens.length === 0) msg = "Tap words below to build it.";
+    else if (!builtTokens[0]?.match(/^[A-Z]/)) msg = "Sentences start with a CAPITAL letter.";
+    else if (builtTokens[builtTokens.length - 1] !== ".") msg = "Don't forget the period at the end!";
+    else if (builtTokens.length < targetTokens.length) msg = `Need ${targetTokens.length - builtTokens.length} more word${targetTokens.length - builtTokens.length === 1 ? "" : "s"}.`;
+    else if (builtTokens.length > targetTokens.length) msg = `Too many words. Try fewer.`;
+    else msg = "Close! Check the word order.";
+
+    feedbackEl.textContent = msg;
+    sounds.wrong();
+    postProgress(false);
+    buildEl.style.animation = "shake 0.4s";
+    setTimeout(() => buildEl.style.animation = "", 400);
+  };
+
+  function lightStar(n) { const s = starsEl.querySelectorAll(".star"); if (s[n-1]) s[n-1].classList.add("lit"); }
+  function confettiBurst() {
+    const colors = ["#fb7185","#fbbf24","#34d399","#60a5fa","#a78bfa","#f472b6"];
+    for (let i = 0; i < 50; i++) {
+      const c = document.createElement("div"); c.className = "confetti";
+      c.style.left = Math.random() * 100 + "vw";
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.animationDelay = (Math.random() * 0.8) + "s";
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 2600);
+    }
+  }
+  function win() {
+    sounds.win(); confettiBurst();
+    celebration.textContent = "🎉 Sentence master! 🎉";
+    celebration.classList.add("show");
+    postProgress(true, true);
+    setTimeout(() => {
+      celebration.classList.remove("show");
+      stars = 0; starsEl.querySelectorAll(".star").forEach(s => s.classList.remove("lit"));
+      nextRound();
+    }, 2800);
+  }
+  function postProgress(correct, complete=false) {
+    try { parent.postMessage({ type:"labProgress", lab:"sentence-builder", round, correct, target: current?.target.join(" "), stars, complete }, "*"); } catch {}
+  }
+  // Add the shake keyframe used inline
+  const style = document.createElement("style");
+  style.textContent = "@keyframes shake { 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }";
+  document.head.appendChild(style);
+  nextRound();
+</script>
+</body>
+</html>

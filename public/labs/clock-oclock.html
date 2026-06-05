@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Clock O'Clock 🕐</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+  html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#e0e7ff 0%,#a5b4fc 100%);color:#1a1612;-webkit-font-smoothing:antialiased}
+  .wrap{display:flex;flex-direction:column;height:100%;padding:18px 16px;max-width:760px;margin:0 auto}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .title{font-size:22px;font-weight:700;color:#4338ca}
+  .stars{display:flex;gap:4px;font-size:24px}
+  .star{filter:grayscale(1);opacity:.35;transition:all .35s}
+  .star.lit{filter:none;opacity:1;transform:scale(1.2) rotate(-8deg)}
+  .question{font-size:clamp(22px,5.5vw,30px);font-weight:700;text-align:center;color:#1a1f3a;margin:6px 0 14px}
+  .question .time{color:#4338ca;font-size:clamp(28px,7vw,38px)}
+  .clock-wrap{flex:1;display:flex;align-items:center;justify-content:center;min-height:220px}
+  .clock-svg{width:min(74vw,300px);height:min(74vw,300px);max-height:340px;filter:drop-shadow(0 4px 0 rgba(67,56,202,.3))}
+  .choices{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+  .choice{aspect-ratio:1.1;background:#fff;border:none;border-radius:18px;font-family:'Quicksand',sans-serif;font-size:clamp(20px,5vw,28px);font-weight:700;color:#4338ca;cursor:pointer;box-shadow:0 4px 0 #6366f1;transition:all .15s;touch-action:manipulation;display:flex;align-items:center;justify-content:center;line-height:1}
+  .choice:active{transform:translateY(2px);box-shadow:0 2px 0 #6366f1}
+  .choice.wrong{background:#fecaca;animation:shake 0.4s}
+  .choice.right{background:#bbf7d0;color:#15803d}
+  @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  .celebration{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(36px,9vw,54px);font-weight:700;color:#4338ca;pointer-events:none;opacity:0;transition:opacity .25s;background:rgba(255,255,255,.85);text-align:center}
+  .celebration.show{opacity:1}
+  .confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+  .help{font-size:13px;color:#4338ca;text-align:center;margin-top:8px;font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="title">🕐 Clock O'Clock</div>
+    <div class="stars" id="stars">
+      <span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span>
+    </div>
+  </div>
+  <div class="question">What time does the clock show?</div>
+  <div class="clock-wrap">
+    <svg class="clock-svg" id="clock" viewBox="0 0 200 200"></svg>
+  </div>
+  <div class="choices" id="choices"></div>
+  <div class="help">Look at the short hand (the hour) — what number is it pointing to?</div>
+</div>
+<div class="celebration" id="celebration"></div>
+
+<script>
+  const clock = document.getElementById("clock");
+  const choicesEl = document.getElementById("choices");
+  const starsEl = document.getElementById("stars");
+  const celebration = document.getElementById("celebration");
+  let stars = 0, target = 0, round = 0;
+
+  let audioCtx = null;
+  function tone(f,d=0.15,t="sine",v=0.18){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(audioCtx.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+d);o.stop(audioCtx.currentTime+d)}catch{}}
+  const sounds = {
+    tick:  () => tone(800, 0.05, "square", 0.06),
+    right: () => { [523, 659, 784].forEach((f,i) => setTimeout(() => tone(f, 0.18, "triangle", 0.22), i*100)); },
+    wrong: () => tone(220, 0.25, "sawtooth", 0.1),
+    win:   () => { [523, 659, 784, 1047].forEach((f,i) => setTimeout(() => tone(f, 0.22, "triangle", 0.25), i*120)); },
+  };
+
+  function drawClock(hour) {
+    // 12 hour marks, hour hand at given hour, minute hand at 12
+    const cx = 100, cy = 100, r = 88;
+    let svg = `
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="#fff" stroke="#4338ca" stroke-width="4"/>
+      <circle cx="${cx}" cy="${cy}" r="${r-10}" fill="none" stroke="#e0e7ff" stroke-width="1"/>
+    `;
+    // Numbers 1-12
+    for (let n = 1; n <= 12; n++) {
+      const angle = (n / 12) * Math.PI * 2 - Math.PI/2;
+      const tx = cx + Math.cos(angle) * (r - 18);
+      const ty = cy + Math.sin(angle) * (r - 18);
+      svg += `<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="central" font-family="Quicksand,sans-serif" font-size="14" font-weight="700" fill="#1a1f3a">${n}</text>`;
+    }
+    // Tick marks
+    for (let n = 0; n < 12; n++) {
+      const angle = (n / 12) * Math.PI * 2 - Math.PI/2;
+      const x1 = cx + Math.cos(angle) * (r - 4);
+      const y1 = cy + Math.sin(angle) * (r - 4);
+      const x2 = cx + Math.cos(angle) * (r - 8);
+      const y2 = cy + Math.sin(angle) * (r - 8);
+      svg += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#4338ca" stroke-width="2" stroke-linecap="round"/>`;
+    }
+    // Minute hand (at 12, pointing up) — long & thin
+    svg += `<line x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy - 60}" stroke="#1a1f3a" stroke-width="4" stroke-linecap="round"/>`;
+    // Hour hand — short & thick, points to current hour
+    const hourAngle = (hour / 12) * Math.PI * 2 - Math.PI/2;
+    const hx = cx + Math.cos(hourAngle) * 42;
+    const hy = cy + Math.sin(hourAngle) * 42;
+    svg += `<line x1="${cx}" y1="${cy}" x2="${hx}" y2="${hy}" stroke="#c25420" stroke-width="6" stroke-linecap="round"/>`;
+    // Center dot
+    svg += `<circle cx="${cx}" cy="${cy}" r="5" fill="#4338ca"/>`;
+    clock.innerHTML = svg;
+  }
+
+  function nextRound() {
+    round++;
+    target = Math.floor(Math.random() * 12) + 1; // 1-12
+    drawClock(target);
+    sounds.tick();
+
+    // 4 choices including target
+    const opts = new Set([target]);
+    while (opts.size < 4) {
+      const v = Math.floor(Math.random() * 12) + 1;
+      opts.add(v);
+    }
+    const shuffled = [...opts].sort((a, b) => a - b);
+    choicesEl.innerHTML = shuffled.map(n => `<button class="choice" onclick="pick(${n}, this)">${n}:00</button>`).join("");
+  }
+
+  window.pick = function(n, btn) {
+    [...document.querySelectorAll(".choice")].forEach(b => b.disabled = true);
+    if (n === target) {
+      btn.classList.add("right");
+      sounds.right();
+      stars++; lightStar(stars);
+      postProgress(true);
+      if (stars >= 5) setTimeout(win, 700);
+      else setTimeout(nextRound, 1000);
+    } else {
+      btn.classList.add("wrong");
+      sounds.wrong();
+      postProgress(false);
+      setTimeout(() => {
+        btn.classList.remove("wrong");
+        [...document.querySelectorAll(".choice")].forEach(b => b.disabled = false);
+      }, 500);
+    }
+  };
+
+  function lightStar(n) { const s = starsEl.querySelectorAll(".star"); if (s[n-1]) s[n-1].classList.add("lit"); }
+  function confettiBurst() {
+    const colors = ["#fb7185","#fbbf24","#34d399","#60a5fa","#a78bfa","#f472b6"];
+    for (let i = 0; i < 50; i++) {
+      const c = document.createElement("div"); c.className = "confetti";
+      c.style.left = Math.random() * 100 + "vw";
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.animationDelay = (Math.random() * 0.8) + "s";
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 2600);
+    }
+  }
+  function win() {
+    sounds.win(); confettiBurst();
+    celebration.textContent = "🎉 Time keeper! 🎉";
+    celebration.classList.add("show");
+    postProgress(true, true);
+    setTimeout(() => {
+      celebration.classList.remove("show");
+      stars = 0; starsEl.querySelectorAll(".star").forEach(s => s.classList.remove("lit"));
+      nextRound();
+    }, 2800);
+  }
+  function postProgress(correct, complete=false) {
+    try { parent.postMessage({ type:"labProgress", lab:"clock-oclock", round, correct, target, stars, complete }, "*"); } catch {}
+  }
+  nextRound();
+</script>
+</body>
+</html>

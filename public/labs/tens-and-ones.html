@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Tens & Ones 🔟</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+  html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#fee2e2 0%,#fca5a5 100%);color:#1a1612;-webkit-font-smoothing:antialiased}
+  .wrap{display:flex;flex-direction:column;height:100%;padding:18px 16px;max-width:760px;margin:0 auto}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .title{font-size:22px;font-weight:700;color:#b91c1c}
+  .stars{display:flex;gap:4px;font-size:24px}
+  .star{filter:grayscale(1);opacity:.35;transition:all .35s}
+  .star.lit{filter:none;opacity:1;transform:scale(1.2) rotate(-8deg)}
+  .question{font-size:clamp(20px,5vw,26px);font-weight:700;text-align:center;color:#1a1f3a;margin:6px 0 14px}
+  .blocks{flex:1;background:#fff;border-radius:24px;border:3px solid #fca5a5;padding:18px;display:grid;grid-template-columns:1fr 1fr;gap:14px;box-shadow:0 4px 0 #fca5a5;min-height:180px}
+  .col{display:flex;flex-direction:column;align-items:center}
+  .col-label{font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#7a7367;font-weight:700;margin-bottom:6px}
+  .col-count{font-size:clamp(28px,7vw,38px);font-weight:700;color:#b91c1c;margin-bottom:8px}
+  .col-display{flex:1;background:#fef2f2;border-radius:14px;padding:10px;display:flex;flex-wrap:wrap;gap:4px;align-content:center;justify-content:center;min-height:100px;width:100%}
+  /* Ten sticks — vertical bars of 10 dots */
+  .ten{width:14px;height:80px;background:linear-gradient(180deg,#dc2626 0%,#991b1b 100%);border-radius:4px;display:flex;flex-direction:column;justify-content:space-around;align-items:center;padding:2px 0;animation:popIn .4s ease-out backwards;box-shadow:0 2px 0 rgba(0,0,0,.15)}
+  .ten .dot{width:4px;height:4px;border-radius:50%;background:#fef2f2}
+  .one{width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#fde047,#ca8a04);animation:popIn .4s ease-out backwards;box-shadow:0 2px 0 rgba(0,0,0,.15)}
+  @keyframes popIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+  .choices{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+  .choice{aspect-ratio:1.1;background:#fff;border:none;border-radius:18px;font-family:'Quicksand',sans-serif;font-size:clamp(24px,6vw,34px);font-weight:700;color:#b91c1c;cursor:pointer;box-shadow:0 4px 0 #ef4444;transition:all .15s;touch-action:manipulation}
+  .choice:active{transform:translateY(2px);box-shadow:0 2px 0 #ef4444}
+  .choice.wrong{background:#fecaca;animation:shake 0.4s}
+  .choice.right{background:#bbf7d0;color:#15803d}
+  @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  .celebration{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(36px,9vw,54px);font-weight:700;color:#b91c1c;pointer-events:none;opacity:0;transition:opacity .25s;background:rgba(255,255,255,.85);text-align:center}
+  .celebration.show{opacity:1}
+  .confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+  .help{font-size:13px;color:#991b1b;text-align:center;margin-top:8px;font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="title">🔟 Tens & Ones</div>
+    <div class="stars" id="stars">
+      <span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span>
+    </div>
+  </div>
+  <div class="question">How many in all?</div>
+  <div class="blocks">
+    <div class="col">
+      <div class="col-label">Tens</div>
+      <div class="col-count" id="tensCount">0</div>
+      <div class="col-display" id="tensDisplay"></div>
+    </div>
+    <div class="col">
+      <div class="col-label">Ones</div>
+      <div class="col-count" id="onesCount">0</div>
+      <div class="col-display" id="onesDisplay"></div>
+    </div>
+  </div>
+  <div class="choices" id="choices"></div>
+  <div class="help">Each tall stick is 10. Each yellow dot is 1. Count them all!</div>
+</div>
+<div class="celebration" id="celebration"></div>
+
+<script>
+  const tensCount = document.getElementById("tensCount");
+  const onesCount = document.getElementById("onesCount");
+  const tensDisplay = document.getElementById("tensDisplay");
+  const onesDisplay = document.getElementById("onesDisplay");
+  const choicesEl = document.getElementById("choices");
+  const starsEl = document.getElementById("stars");
+  const celebration = document.getElementById("celebration");
+  let stars = 0, tens = 0, ones = 0, target = 0, round = 0;
+
+  let audioCtx = null;
+  function tone(f,d=0.15,t="sine",v=0.18){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(audioCtx.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+d);o.stop(audioCtx.currentTime+d)}catch{}}
+  const sounds = {
+    plonk: () => tone(440 + Math.random()*100, 0.06, "sine"),
+    right: () => { [523, 659, 784].forEach((f,i) => setTimeout(() => tone(f, 0.18, "triangle", 0.22), i*100)); },
+    wrong: () => tone(220, 0.25, "sawtooth", 0.1),
+    win:   () => { [523, 659, 784, 1047].forEach((f,i) => setTimeout(() => tone(f, 0.22, "triangle", 0.25), i*120)); },
+  };
+
+  function tenStick() {
+    return `<div class="ten">${"<div class=\"dot\"></div>".repeat(10)}</div>`;
+  }
+
+  function nextRound() {
+    round++;
+    tens = Math.floor(Math.random() * 5) + 1; // 1-5 tens
+    ones = Math.floor(Math.random() * 10);    // 0-9 ones
+    target = tens * 10 + ones;
+
+    tensCount.textContent = tens;
+    onesCount.textContent = ones;
+    tensDisplay.innerHTML = Array.from({length: tens}, (_, i) => `<div style="animation-delay:${i*0.1}s">${tenStick()}</div>`).join("");
+    onesDisplay.innerHTML = Array.from({length: ones}, (_, i) => `<div class="one" style="animation-delay:${(tens*0.1) + i*0.05}s"></div>`).join("");
+    setTimeout(() => sounds.plonk(), 200);
+
+    // 4 choices including target
+    const opts = new Set([target]);
+    while (opts.size < 4) {
+      // Common confusion: digit-swap (e.g. 23 vs 32), off-by-ten, off-by-one
+      const tricks = [
+        ones * 10 + tens,           // swap
+        target + 10, target - 10,   // off by 10
+        target + 1, target - 1,     // off by 1
+        target + 9, target - 9,
+      ];
+      const v = tricks[Math.floor(Math.random() * tricks.length)];
+      if (v > 0 && v < 100 && v !== target) opts.add(v);
+    }
+    const shuffled = [...opts].sort(() => Math.random() - 0.5);
+    choicesEl.innerHTML = shuffled.map(n => `<button class="choice" onclick="pick(${n}, this)">${n}</button>`).join("");
+  }
+
+  window.pick = function(n, btn) {
+    [...document.querySelectorAll(".choice")].forEach(b => b.disabled = true);
+    if (n === target) {
+      btn.classList.add("right");
+      sounds.right();
+      stars++; lightStar(stars);
+      postProgress(true);
+      if (stars >= 5) setTimeout(win, 700);
+      else setTimeout(nextRound, 1000);
+    } else {
+      btn.classList.add("wrong");
+      sounds.wrong();
+      postProgress(false);
+      setTimeout(() => {
+        btn.classList.remove("wrong");
+        [...document.querySelectorAll(".choice")].forEach(b => b.disabled = false);
+      }, 500);
+    }
+  };
+
+  function lightStar(n) { const s = starsEl.querySelectorAll(".star"); if (s[n-1]) s[n-1].classList.add("lit"); }
+  function confettiBurst() {
+    const colors = ["#fb7185","#fbbf24","#34d399","#60a5fa","#a78bfa","#f472b6"];
+    for (let i = 0; i < 50; i++) {
+      const c = document.createElement("div"); c.className = "confetti";
+      c.style.left = Math.random() * 100 + "vw";
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.animationDelay = (Math.random() * 0.8) + "s";
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 2600);
+    }
+  }
+  function win() {
+    sounds.win(); confettiBurst();
+    celebration.textContent = "🎉 Place-value pro! 🎉";
+    celebration.classList.add("show");
+    postProgress(true, true);
+    setTimeout(() => {
+      celebration.classList.remove("show");
+      stars = 0; starsEl.querySelectorAll(".star").forEach(s => s.classList.remove("lit"));
+      nextRound();
+    }, 2800);
+  }
+  function postProgress(correct, complete=false) {
+    try { parent.postMessage({ type:"labProgress", lab:"tens-and-ones", round, correct, tens, ones, target, stars, complete }, "*"); } catch {}
+  }
+  nextRound();
+</script>
+</body>
+</html>
