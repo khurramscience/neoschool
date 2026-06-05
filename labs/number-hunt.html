@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Number Hunt 🔢</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+  html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#cffafe 0%,#67e8f9 100%);color:#1a1612;-webkit-font-smoothing:antialiased}
+  .wrap{display:flex;flex-direction:column;height:100%;padding:18px 16px;max-width:760px;margin:0 auto}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .title{font-size:22px;font-weight:700;color:#0891b2}
+  .stars{display:flex;gap:4px;font-size:24px}
+  .star{filter:grayscale(1);opacity:.35;transition:all .35s}
+  .star.lit{filter:none;opacity:1;transform:scale(1.2) rotate(-8deg)}
+  .question{font-size:clamp(20px,5vw,28px);font-weight:700;text-align:center;color:#1a1f3a;margin:6px 0 10px}
+  .word-card{flex:0 0 auto;background:#fff;border-radius:24px;border:3px solid #67e8f9;padding:20px;display:flex;flex-direction:column;align-items:center;gap:14px;box-shadow:0 4px 0 #67e8f9;margin-bottom:14px}
+  .word{font-size:clamp(38px,9vw,52px);font-weight:700;color:#0891b2;text-transform:lowercase;letter-spacing:.02em}
+  .speaker{background:#0891b2;color:#fff;border:none;border-radius:99px;padding:10px 22px;font-family:'Quicksand',sans-serif;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 3px 0 #0e7490}
+  .speaker:active{transform:translateY(2px);box-shadow:0 1px 0 #0e7490}
+  .grid{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;align-content:start}
+  .choice{aspect-ratio:1;background:#fff;border:none;border-radius:18px;font-family:'Quicksand',sans-serif;font-size:clamp(28px,7vw,40px);font-weight:700;color:#0e7490;cursor:pointer;box-shadow:0 4px 0 #0891b2;transition:all .15s;touch-action:manipulation;display:flex;align-items:center;justify-content:center}
+  .choice:active{transform:translateY(2px);box-shadow:0 2px 0 #0891b2}
+  .choice.wrong{background:#fecaca;animation:shake 0.4s}
+  .choice.right{background:#bbf7d0;color:#15803d}
+  @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  .celebration{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(36px,9vw,54px);font-weight:700;color:#0891b2;pointer-events:none;opacity:0;transition:opacity .25s;background:rgba(255,255,255,.85);text-align:center}
+  .celebration.show{opacity:1}
+  .confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+  .help{font-size:13px;color:#155e75;text-align:center;margin-top:8px;font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="title">🔢 Number Hunt</div>
+    <div class="stars" id="stars">
+      <span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span>
+    </div>
+  </div>
+  <div class="question">Find this number!</div>
+  <div class="word-card">
+    <div class="word" id="word">—</div>
+    <button class="speaker" onclick="speak()">🔊 Say it</button>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="help">Listen carefully, then tap the right number.</div>
+</div>
+<div class="celebration" id="celebration"></div>
+
+<script>
+  const WORDS = {
+    1:"one", 2:"two", 3:"three", 4:"four", 5:"five",
+    6:"six", 7:"seven", 8:"eight", 9:"nine", 10:"ten",
+    11:"eleven", 12:"twelve", 13:"thirteen", 14:"fourteen", 15:"fifteen",
+    16:"sixteen", 17:"seventeen", 18:"eighteen", 19:"nineteen", 20:"twenty"
+  };
+  const wordEl = document.getElementById("word");
+  const gridEl = document.getElementById("grid");
+  const starsEl = document.getElementById("stars");
+  const celebration = document.getElementById("celebration");
+  let stars = 0, target = 0, round = 0;
+
+  let audioCtx = null;
+  function tone(f,d=0.15,t="sine",v=0.18){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(audioCtx.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+d);o.stop(audioCtx.currentTime+d)}catch{}}
+  const sounds = {
+    right: () => { [523, 659, 784].forEach((f,i) => setTimeout(() => tone(f, 0.18, "triangle", 0.22), i*100)); },
+    wrong: () => tone(220, 0.25, "sawtooth", 0.1),
+    win:   () => { [523, 659, 784, 1047].forEach((f,i) => setTimeout(() => tone(f, 0.22, "triangle", 0.25), i*120)); },
+  };
+
+  window.speak = function() {
+    if (!target) return;
+    try { const u = new SpeechSynthesisUtterance(WORDS[target]); u.rate = 0.75; u.pitch = 1.1; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch {}
+  };
+
+  function nextRound() {
+    round++;
+    // After 2 rounds, focus on harder teen numbers
+    const useTeen = round > 2 && Math.random() < 0.7;
+    target = useTeen ? (Math.floor(Math.random() * 10) + 11) : (Math.floor(Math.random() * 20) + 1);
+    wordEl.textContent = WORDS[target];
+    setTimeout(speak, 300);
+
+    // Grid of 8 nearby numbers including target
+    const opts = new Set([target]);
+    while (opts.size < 8) {
+      const delta = Math.floor(Math.random() * 8) - 4;
+      const v = target + delta;
+      if (v >= 1 && v <= 20) opts.add(v);
+    }
+    const shuffled = [...opts].sort(() => Math.random() - 0.5);
+    gridEl.innerHTML = shuffled.map(n => `<button class="choice" onclick="pick(${n}, this)">${n}</button>`).join("");
+  }
+
+  window.pick = function(n, btn) {
+    [...document.querySelectorAll(".choice")].forEach(b => b.disabled = true);
+    if (n === target) {
+      btn.classList.add("right");
+      sounds.right();
+      stars++; lightStar(stars);
+      postProgress(true);
+      if (stars >= 5) setTimeout(win, 700);
+      else setTimeout(nextRound, 900);
+    } else {
+      btn.classList.add("wrong");
+      sounds.wrong();
+      postProgress(false);
+      setTimeout(() => {
+        btn.classList.remove("wrong");
+        [...document.querySelectorAll(".choice")].forEach(b => b.disabled = false);
+      }, 500);
+    }
+  };
+
+  function lightStar(n) { const s = starsEl.querySelectorAll(".star"); if (s[n-1]) s[n-1].classList.add("lit"); }
+  function confettiBurst() {
+    const colors = ["#fb7185","#fbbf24","#34d399","#60a5fa","#a78bfa","#f472b6"];
+    for (let i = 0; i < 50; i++) {
+      const c = document.createElement("div"); c.className = "confetti";
+      c.style.left = Math.random() * 100 + "vw";
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.animationDelay = (Math.random() * 0.8) + "s";
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 2600);
+    }
+  }
+  function win() {
+    sounds.win(); confettiBurst();
+    celebration.textContent = "🎉 Number hero! 🎉";
+    celebration.classList.add("show");
+    postProgress(true, true);
+    setTimeout(() => {
+      celebration.classList.remove("show");
+      stars = 0; starsEl.querySelectorAll(".star").forEach(s => s.classList.remove("lit"));
+      nextRound();
+    }, 2600);
+  }
+  function postProgress(correct, complete=false) {
+    try { parent.postMessage({ type:"labProgress", lab:"number-hunt", round, correct, target, stars, complete }, "*"); } catch {}
+  }
+  nextRound();
+</script>
+</body>
+</html>
