@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Skip Count 🦘</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+  html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#d1fae5 0%,#6ee7b7 100%);color:#1a1612;-webkit-font-smoothing:antialiased}
+  .wrap{display:flex;flex-direction:column;height:100%;padding:18px 16px;max-width:760px;margin:0 auto}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .title{font-size:22px;font-weight:700;color:#047857}
+  .stars{display:flex;gap:4px;font-size:24px}
+  .star{filter:grayscale(1);opacity:.35;transition:all .35s}
+  .star.lit{filter:none;opacity:1;transform:scale(1.2) rotate(-8deg)}
+  .question{font-size:clamp(18px,4.5vw,24px);font-weight:700;text-align:center;color:#1a1f3a;margin:6px 0 6px}
+  .by-tag{display:inline-block;background:#047857;color:#fff;padding:4px 14px;border-radius:99px;font-family:'Geist Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.04em;margin-bottom:14px}
+  .sequence{flex:1;background:#fff;border-radius:24px;border:3px solid #6ee7b7;padding:18px 12px;display:flex;align-items:center;justify-content:center;gap:clamp(4px,1.5vw,10px);box-shadow:0 4px 0 #6ee7b7;min-height:160px;flex-wrap:wrap}
+  .num-box{min-width:clamp(48px,11vw,68px);height:clamp(48px,11vw,68px);background:#d1fae5;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:clamp(20px,5.5vw,28px);font-weight:700;color:#047857;animation:popIn .4s ease-out backwards}
+  @keyframes popIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+  .arrow{color:#047857;font-size:clamp(16px,4vw,22px);font-weight:700;opacity:.5}
+  .blank{min-width:clamp(48px,11vw,68px);height:clamp(48px,11vw,68px);border:3px dashed #047857;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:clamp(20px,5.5vw,28px);font-weight:700;color:#047857;background:#ecfdf5;animation:pulseBlank 1.4s ease-in-out infinite}
+  @keyframes pulseBlank{50%{background:#d1fae5;transform:scale(1.05)}}
+  .blank.filled{background:#bbf7d0;border-style:solid;border-color:#16a34a;animation:none}
+  .choices{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+  .choice{aspect-ratio:1.1;background:#fff;border:none;border-radius:18px;font-family:'Quicksand',sans-serif;font-size:clamp(24px,6vw,34px);font-weight:700;color:#047857;cursor:pointer;box-shadow:0 4px 0 #10b981;transition:all .15s;touch-action:manipulation}
+  .choice:active{transform:translateY(2px);box-shadow:0 2px 0 #10b981}
+  .choice.wrong{background:#fecaca;animation:shake 0.4s}
+  .choice.right{background:#bbf7d0;color:#15803d}
+  @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  .celebration{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(36px,9vw,54px);font-weight:700;color:#047857;pointer-events:none;opacity:0;transition:opacity .25s;background:rgba(255,255,255,.85);text-align:center}
+  .celebration.show{opacity:1}
+  .confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+  .help{font-size:13px;color:#047857;text-align:center;margin-top:8px;font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="title">🦘 Skip Count</div>
+    <div class="stars" id="stars">
+      <span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span>
+    </div>
+  </div>
+  <div style="text-align:center">
+    <div class="question">What number comes next?</div>
+    <div class="by-tag" id="byTag">SKIP BY 2</div>
+  </div>
+  <div class="sequence" id="sequence"></div>
+  <div class="choices" id="choices"></div>
+  <div class="help">Each jump adds the same amount. What comes after?</div>
+</div>
+<div class="celebration" id="celebration"></div>
+
+<script>
+  const sequenceEl = document.getElementById("sequence");
+  const choicesEl = document.getElementById("choices");
+  const byTag = document.getElementById("byTag");
+  const starsEl = document.getElementById("stars");
+  const celebration = document.getElementById("celebration");
+  let stars = 0, target = 0, step = 2, round = 0;
+
+  let audioCtx = null;
+  function tone(f,d=0.15,t="sine",v=0.18){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(audioCtx.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+d);o.stop(audioCtx.currentTime+d)}catch{}}
+  const sounds = {
+    hop:   () => tone(660 + Math.random()*80, 0.06, "sine"),
+    right: () => { [523, 659, 784].forEach((f,i) => setTimeout(() => tone(f, 0.18, "triangle", 0.22), i*100)); },
+    wrong: () => tone(220, 0.25, "sawtooth", 0.1),
+    win:   () => { [523, 659, 784, 1047].forEach((f,i) => setTimeout(() => tone(f, 0.22, "triangle", 0.25), i*120)); },
+  };
+
+  function nextRound() {
+    round++;
+    // Cycle through: 2s, 5s, 10s, then mix
+    const steps = round < 3 ? [2, 5, 10] : [2, 5, 10, 2, 5, 10];
+    step = steps[(round - 1) % steps.length];
+    byTag.textContent = `SKIP BY ${step}`;
+
+    // Build a 4-number sequence, hide one (usually the last, sometimes middle)
+    const start = step * (Math.floor(Math.random() * 8) + 1);
+    const seq = [start, start + step, start + step*2, start + step*3, start + step*4];
+    target = seq[4];
+    // Show 4 numbers + blank at end
+    let html = "";
+    seq.slice(0, 4).forEach((n, i) => {
+      html += `<div class="num-box" style="animation-delay:${i*0.08}s">${n}</div>`;
+      if (i < 4) html += `<div class="arrow">→</div>`;
+    });
+    html += `<div class="blank" id="blank">?</div>`;
+    sequenceEl.innerHTML = html;
+    setTimeout(() => sounds.hop(), 200);
+    setTimeout(() => sounds.hop(), 400);
+
+    // 4 choices including target
+    const opts = new Set([target]);
+    while (opts.size < 4) {
+      const delta = (Math.random() < 0.5 ? -1 : 1) * (Math.floor(Math.random() * 3) + 1) * step;
+      const v = target + delta;
+      if (v > 0) opts.add(v);
+    }
+    const shuffled = [...opts].sort(() => Math.random() - 0.5);
+    choicesEl.innerHTML = shuffled.map(n => `<button class="choice" onclick="pick(${n}, this)">${n}</button>`).join("");
+  }
+
+  window.pick = function(n, btn) {
+    [...document.querySelectorAll(".choice")].forEach(b => b.disabled = true);
+    if (n === target) {
+      btn.classList.add("right");
+      const blank = document.getElementById("blank");
+      if (blank) { blank.classList.add("filled"); blank.textContent = n; }
+      sounds.right();
+      stars++; lightStar(stars);
+      postProgress(true);
+      if (stars >= 5) setTimeout(win, 800);
+      else setTimeout(nextRound, 1100);
+    } else {
+      btn.classList.add("wrong");
+      sounds.wrong();
+      postProgress(false);
+      setTimeout(() => {
+        btn.classList.remove("wrong");
+        [...document.querySelectorAll(".choice")].forEach(b => b.disabled = false);
+      }, 500);
+    }
+  };
+
+  function lightStar(n) { const s = starsEl.querySelectorAll(".star"); if (s[n-1]) s[n-1].classList.add("lit"); }
+  function confettiBurst() {
+    const colors = ["#fb7185","#fbbf24","#34d399","#60a5fa","#a78bfa","#f472b6"];
+    for (let i = 0; i < 50; i++) {
+      const c = document.createElement("div"); c.className = "confetti";
+      c.style.left = Math.random() * 100 + "vw";
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.animationDelay = (Math.random() * 0.8) + "s";
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 2600);
+    }
+  }
+  function win() {
+    sounds.win(); confettiBurst();
+    celebration.textContent = "🎉 Skip champ! 🎉";
+    celebration.classList.add("show");
+    postProgress(true, true);
+    setTimeout(() => {
+      celebration.classList.remove("show");
+      stars = 0; starsEl.querySelectorAll(".star").forEach(s => s.classList.remove("lit"));
+      nextRound();
+    }, 2800);
+  }
+  function postProgress(correct, complete=false) {
+    try { parent.postMessage({ type:"labProgress", lab:"skip-count", round, correct, step, target, stars, complete }, "*"); } catch {}
+  }
+  nextRound();
+</script>
+</body>
+</html>
