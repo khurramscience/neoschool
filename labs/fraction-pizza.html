@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Fraction Pizza 🍕</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+  html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#ffedd5 0%,#fdba74 100%);color:#1a1612}
+  .wrap{display:flex;flex-direction:column;height:100%;padding:18px 16px;max-width:760px;margin:0 auto}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .title{font-size:22px;font-weight:700;color:#c2410c}
+  .stars{display:flex;gap:4px;font-size:24px}.star{filter:grayscale(1);opacity:.35;transition:all .35s}.star.lit{filter:none;opacity:1;transform:scale(1.2) rotate(-8deg)}
+  .question{font-size:clamp(19px,4.8vw,25px);font-weight:700;text-align:center;color:#1a1f3a;margin:6px 0 12px}
+  .stage{flex:1;background:#fff;border-radius:24px;border:3px solid #fdba74;padding:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 0 #fdba74;min-height:200px}
+  .pie{width:min(60vw,260px);height:min(60vw,260px)}
+  .choices{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+  .choice{background:#fff;border:none;border-radius:18px;padding:18px 10px;font-family:'Quicksand',sans-serif;font-size:clamp(18px,4.5vw,24px);font-weight:700;color:#c2410c;cursor:pointer;box-shadow:0 4px 0 #f97316;transition:all .15s;touch-action:manipulation}
+  .choice:active{transform:translateY(2px);box-shadow:0 2px 0 #f97316}
+  .choice.wrong{background:#fecaca;animation:shake .4s}.choice.right{background:#bbf7d0;color:#15803d}
+  @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  .celebration{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(36px,9vw,54px);font-weight:700;color:#c2410c;pointer-events:none;opacity:0;transition:opacity .25s;background:rgba(255,255,255,.85);text-align:center}.celebration.show{opacity:1}
+  .confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards}@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+  .help{font-size:13px;color:#9a3412;text-align:center;margin-top:8px;font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar"><div class="title">🍕 Fraction Pizza</div>
+    <div class="stars" id="stars"><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span></div></div>
+  <div class="question" id="question">What fraction is orange?</div>
+  <div class="stage"><svg class="pie" id="pie" viewBox="0 0 100 100"></svg></div>
+  <div class="choices" id="choices"></div>
+  <div class="help">A whole cut into equal pieces. Count the shaded slices!</div>
+</div>
+<div class="celebration" id="celebration"></div>
+<script>
+  const pie=document.getElementById("pie"),choicesEl=document.getElementById("choices"),starsEl=document.getElementById("stars"),celebration=document.getElementById("celebration"),questionEl=document.getElementById("question");
+  let stars=0,round=0,answer="";
+  // fraction definitions: parts and the word names K-2 use
+  const FR=[{p:2,sh:1,t:"one half",f:"1/2"},{p:4,sh:1,t:"one quarter",f:"1/4"},{p:4,sh:2,t:"one half",f:"2/4"},{p:3,sh:1,t:"one third",f:"1/3"},{p:4,sh:3,t:"three quarters",f:"3/4"},{p:2,sh:2,t:"one whole",f:"2/2"}];
+  let actx=null;function tone(f,d=.15,t="sine",v=.18){try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+d);o.stop(actx.currentTime+d)}catch{}}
+  const S={right:()=>{[523,659,784].forEach((f,i)=>setTimeout(()=>tone(f,.18,"triangle",.22),i*100))},wrong:()=>tone(220,.25,"sawtooth",.1),win:()=>{[523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.22,"triangle",.25),i*120))}};
+  function drawPie(parts,shaded){
+    const cx=50,cy=50,r=44;let svg="";
+    for(let i=0;i<parts;i++){
+      const a0=(i/parts)*2*Math.PI-Math.PI/2, a1=((i+1)/parts)*2*Math.PI-Math.PI/2;
+      const x0=cx+r*Math.cos(a0),y0=cy+r*Math.sin(a0),x1=cx+r*Math.cos(a1),y1=cy+r*Math.sin(a1);
+      const large=(a1-a0)>Math.PI?1:0;
+      const fill=i<shaded?"#f97316":"#fff7ed";
+      svg+=`<path d="M${cx},${cy} L${x0},${y0} A${r},${r} 0 ${large} 1 ${x1},${y1} Z" fill="${fill}" stroke="#c2410c" stroke-width="2"/>`;
+    }
+    pie.innerHTML=svg;
+  }
+  function nextRound(){round++;const fr=FR[Math.floor(Math.random()*FR.length)];answer=fr.t;drawPie(fr.p,fr.sh);
+    questionEl.textContent="What fraction is orange?";
+    const opts=new Set([fr.t]);const all=["one half","one quarter","one third","three quarters","one whole"];
+    while(opts.size<3){opts.add(all[Math.floor(Math.random()*all.length)]);}
+    choicesEl.innerHTML=[...opts].sort(()=>Math.random()-.5).map(t=>`<button class="choice" onclick="pick('${t}',this)">${t}</button>`).join("");}
+  window.pick=function(t,btn){[...document.querySelectorAll(".choice")].forEach(b=>b.disabled=true);
+    if(t===answer){btn.classList.add("right");S.right();stars++;lightStar(stars);post(true);if(stars>=5)setTimeout(win,700);else setTimeout(nextRound,900);}
+    else{btn.classList.add("wrong");S.wrong();post(false);setTimeout(()=>{btn.classList.remove("wrong");[...document.querySelectorAll(".choice")].forEach(b=>b.disabled=false);},500);}};
+  function lightStar(n){const s=starsEl.querySelectorAll(".star");if(s[n-1])s[n-1].classList.add("lit");}
+  function confettiBurst(){const c=["#fb7185","#fbbf24","#34d399","#60a5fa","#a78bfa","#f472b6"];for(let i=0;i<50;i++){const e=document.createElement("div");e.className="confetti";e.style.left=Math.random()*100+"vw";e.style.background=c[Math.floor(Math.random()*c.length)];e.style.animationDelay=(Math.random()*.8)+"s";document.body.appendChild(e);setTimeout(()=>e.remove(),2600);}}
+  function win(){S.win();confettiBurst();celebration.textContent="🎉 Fraction whiz! 🎉";celebration.classList.add("show");post(true,true);setTimeout(()=>{celebration.classList.remove("show");stars=0;starsEl.querySelectorAll(".star").forEach(s=>s.classList.remove("lit"));nextRound();},2600);}
+  function post(correct,complete=false){try{parent.postMessage({type:"labProgress",lab:"fraction-pizza",round,correct,answer,stars,complete},"*");}catch{}}
+  nextRound();
+</script>
+</body>
+</html>

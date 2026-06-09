@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Ending Sounds 🔚</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+  html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#ede9fe 0%,#c4b5fd 100%);color:#1a1612}
+  .wrap{display:flex;flex-direction:column;height:100%;padding:18px 16px;max-width:760px;margin:0 auto}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .title{font-size:22px;font-weight:700;color:#6d28d9}
+  .stars{display:flex;gap:4px;font-size:24px}.star{filter:grayscale(1);opacity:.35;transition:all .35s}.star.lit{filter:none;opacity:1;transform:scale(1.2) rotate(-8deg)}
+  .question{font-size:clamp(20px,5vw,26px);font-weight:700;text-align:center;color:#1a1f3a;margin:6px 0 12px}
+  .stage{flex:1;background:#fff;border-radius:24px;border:3px solid #c4b5fd;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;box-shadow:0 4px 0 #c4b5fd;min-height:180px}
+  .picture{font-size:clamp(72px,18vw,120px)}
+  .word{font-size:clamp(30px,7vw,42px);font-weight:700;color:#6d28d9;letter-spacing:.05em;text-transform:lowercase}
+  .word .hl{color:#c4b5fd;background:#f5f3ff;padding:0 6px;border-radius:8px}
+  .speaker{background:#6d28d9;color:#fff;border:none;border-radius:99px;padding:8px 18px;font-family:'Quicksand',sans-serif;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 3px 0 #5b21b6}
+  .speaker:active{transform:translateY(2px);box-shadow:0 1px 0 #5b21b6}
+  .choices{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+  .choice{aspect-ratio:1;background:#fff;border:none;border-radius:18px;font-family:'Quicksand',sans-serif;font-size:clamp(30px,8vw,46px);font-weight:700;color:#1a1f3a;cursor:pointer;box-shadow:0 4px 0 #8b5cf6;transition:all .15s;touch-action:manipulation;text-transform:lowercase}
+  .choice:active{transform:translateY(2px);box-shadow:0 2px 0 #8b5cf6}
+  .choice.wrong{background:#fecaca;animation:shake .4s}.choice.right{background:#bbf7d0;color:#15803d}
+  @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  .celebration{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(36px,9vw,54px);font-weight:700;color:#6d28d9;pointer-events:none;opacity:0;transition:opacity .25s;background:rgba(255,255,255,.85);text-align:center}.celebration.show{opacity:1}
+  .confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards}@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+  .help{font-size:13px;color:#5b21b6;text-align:center;margin-top:8px;font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar"><div class="title">🔚 Ending Sounds</div>
+    <div class="stars" id="stars"><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span></div></div>
+  <div class="question" id="question">What sound does it END with?</div>
+  <div class="stage"><div class="picture" id="picture"></div><div class="word" id="word"></div><button class="speaker" onclick="speak()">🔊 Say it</button></div>
+  <div class="choices" id="choices"></div>
+  <div class="help">Listen to the LAST sound, then tap the matching letter.</div>
+</div>
+<div class="celebration" id="celebration"></div>
+<script>
+  // words with clear single-consonant endings + emoji
+  const WORDS=[{w:"cat",e:"🐱"},{w:"dog",e:"🐶"},{w:"sun",e:"☀️"},{w:"bus",e:"🚌"},{w:"cup",e:"☕"},{w:"bed",e:"🛏️"},{w:"map",e:"🗺️"},{w:"web",e:"🕸️"},{w:"jet",e:"✈️"},{w:"pig",e:"🐷"},{w:"fan",e:"🪭"},{w:"box",e:"📦"},{w:"key",e:"🔑"},{w:"leaf",e:"🍃"},{w:"drum",e:"🥁"},{w:"star",e:"⭐"},{w:"bell",e:"🔔"},{w:"fish",e:"🐟"},{w:"frog",e:"🐸"},{w:"moon",e:"🌙"}];
+  const pictureEl=document.getElementById("picture"),wordEl=document.getElementById("word"),choicesEl=document.getElementById("choices"),starsEl=document.getElementById("stars"),celebration=document.getElementById("celebration");
+  let stars=0,round=0,current=null;
+  let actx=null;function tone(f,d=.15,t="sine",v=.18){try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+d);o.stop(actx.currentTime+d)}catch{}}
+  const S={right:()=>{[523,659,784].forEach((f,i)=>setTimeout(()=>tone(f,.18,"triangle",.22),i*100))},wrong:()=>tone(220,.25,"sawtooth",.1),win:()=>{[523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.22,"triangle",.25),i*120))}};
+  window.speak=function(){if(!current)return;try{const u=new SpeechSynthesisUtterance(current.w);u.rate=.7;u.pitch=1.15;speechSynthesis.cancel();speechSynthesis.speak(u);}catch{}};
+  function lastLetter(w){return w[w.length-1];}
+  function nextRound(){round++;current=WORDS[Math.floor(Math.random()*WORDS.length)];pictureEl.textContent=current.e;
+    wordEl.innerHTML=current.w.slice(0,-1)+`<span class="hl">?</span>`;setTimeout(speak,300);
+    const correct=lastLetter(current.w);const opts=new Set([correct]);const alpha="abcdefghijklmnopqrstuvwxyz".split("");
+    while(opts.size<4)opts.add(alpha[Math.floor(Math.random()*26)]);
+    choicesEl.innerHTML=[...opts].sort(()=>Math.random()-.5).map(l=>`<button class="choice" onclick="pick('${l}',this)">${l}</button>`).join("");}
+  window.pick=function(l,btn){[...document.querySelectorAll(".choice")].forEach(b=>b.disabled=true);
+    if(l===lastLetter(current.w)){btn.classList.add("right");wordEl.innerHTML=current.w;S.right();stars++;lightStar(stars);post(true);if(stars>=5)setTimeout(win,700);else setTimeout(nextRound,1100);}
+    else{btn.classList.add("wrong");S.wrong();post(false);setTimeout(()=>{btn.classList.remove("wrong");[...document.querySelectorAll(".choice")].forEach(b=>b.disabled=false);},500);}};
+  function lightStar(n){const s=starsEl.querySelectorAll(".star");if(s[n-1])s[n-1].classList.add("lit");}
+  function confettiBurst(){const c=["#fb7185","#fbbf24","#34d399","#60a5fa","#a78bfa","#f472b6"];for(let i=0;i<50;i++){const e=document.createElement("div");e.className="confetti";e.style.left=Math.random()*100+"vw";e.style.background=c[Math.floor(Math.random()*c.length)];e.style.animationDelay=(Math.random()*.8)+"s";document.body.appendChild(e);setTimeout(()=>e.remove(),2600);}}
+  function win(){S.win();confettiBurst();celebration.textContent="🎉 Sound star! 🎉";celebration.classList.add("show");post(true,true);setTimeout(()=>{celebration.classList.remove("show");stars=0;starsEl.querySelectorAll(".star").forEach(s=>s.classList.remove("lit"));nextRound();},2600);}
+  function post(correct,complete=false){try{parent.postMessage({type:"labProgress",lab:"ending-sounds",round,correct,word:current?.w,stars,complete},"*");}catch{}}
+  nextRound();
+</script>
+</body>
+</html>
