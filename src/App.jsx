@@ -124,6 +124,7 @@ function Marketing({ onStart }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [heroLoaded, setHeroLoaded] = useState(false);
   const [showInterestForm, setShowInterestForm] = useState(false);
+  const [waitlistCampus, setWaitlistCampus] = useState(null);
 
   useEffect(() => {
     const t = setTimeout(() => setHeroLoaded(true), 100);
@@ -358,6 +359,144 @@ function Marketing({ onStart }) {
           </div>
         </section>
 
+        {/* ─── CAMPUSES — Missoula + Berkeley + Bay Area + Launch yours ─── */}
+        <SectionReveal>
+          {(isVisible) => {
+            const r = (d) => ({
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? "translateY(0)" : "translateY(16px)",
+              filter: isVisible ? "blur(0px)" : "blur(4px)",
+              transition: `opacity 500ms cubic-bezier(0.22,1,0.36,1) ${d}ms, transform 500ms cubic-bezier(0.22,1,0.36,1) ${d}ms, filter 500ms cubic-bezier(0.22,1,0.36,1) ${d}ms`,
+            });
+            const campuses = [
+              { name:"Missoula",     state:"Montana",     status:"NOW ENROLLING", date:"September 2026", grades:"K + 1st", href:"/missoula.html", cta:"Apply →",     statusColor: iris },
+              { name:"Berkeley",     state:"California",  status:"WAITLIST",      date:"January 2027",   grades:"Ages 5-11", href:null,                cta:"Join waitlist →", statusColor: coral },
+              { name:"Palo Alto",    state:"California",  status:"WAITLIST",      date:"September 2027", grades:"K + 1st", href:null,                cta:"Join waitlist →", statusColor: coral },
+            ];
+            return (
+              <section id="campuses" style={{ background: bg, padding:"120px 0" }}>
+                <div style={{ position:"relative", margin:"0 auto", maxWidth:1080, padding:"0 24px" }}>
+                  <span className="section-number">01</span>
+                  <p className="text-overline" style={{ ...r(0), color: coral, marginBottom:14, textAlign:"center" }}>
+                    Founding campuses
+                  </p>
+                  <h2 className="font-body text-section-heading" style={{
+                    ...r(80), fontWeight:400, color: textPrimary,
+                    position:"relative", textAlign:"center", marginBottom:48,
+                  }}>
+                    Find a neoschool near you.
+                  </h2>
+
+                  <div style={{
+                    display:"grid",
+                    gridTemplateColumns:"repeat(auto-fit, minmax(280px, 1fr))",
+                    gap:14, marginBottom:14,
+                  }}>
+                    {campuses.map((c, i) => {
+                      const isClickable = !!c.href;
+                      const Cmp = isClickable ? "a" : "button";
+                      const props = isClickable
+                        ? { href: c.href }
+                        : { onClick: () => setWaitlistCampus(c) };
+                      return (
+                        <Cmp key={c.name} {...props} style={{
+                          ...r(180 + i * 80),
+                          background:"#fff", border:`1px solid ${borderSubtle}`, borderRadius:12,
+                          padding:"28px 26px", cursor:"pointer", textDecoration:"none",
+                          color:"inherit", fontFamily:"inherit", textAlign:"left",
+                          display:"flex", flexDirection:"column", gap:10,
+                          transition:"all 300ms cubic-bezier(.2,.8,.2,1)",
+                        }}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor = c.statusColor; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 12px 28px -10px rgba(42,38,34,.15)"; }}
+                          onMouseLeave={e => { e.currentTarget.style.borderColor = borderSubtle; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
+                          <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                            <span style={{ width:6, height:6, borderRadius:"50%", background: c.statusColor }}/>
+                            <span className="text-nav" style={{ fontSize:10.5, color: c.statusColor }}>
+                              {c.status}
+                            </span>
+                          </div>
+                          <h3 className="font-heading" style={{
+                            fontSize:24, fontWeight:600, color:textPrimary,
+                            letterSpacing:"-.01em", lineHeight:1.1, marginTop:4,
+                          }}>
+                            {c.name}, <span style={{ fontWeight:400, color:textSecondary }}>{c.state}</span>
+                          </h3>
+                          <p className="font-body" style={{ fontSize:14.5, color:textSecondary, lineHeight:1.55 }}>
+                            {c.grades} · Opening {c.date}
+                          </p>
+
+                          {/* Explicit button pill — not just hover text */}
+                          <span style={{
+                            marginTop: 12,
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 6,
+                            background: c.statusColor,
+                            color: "#fff",
+                            padding: "10px 18px",
+                            borderRadius: 10,
+                            fontFamily: "'Instrument Sans',sans-serif",
+                            fontSize: 12.5,
+                            fontWeight: 600,
+                            letterSpacing: ".06em",
+                            textTransform: "uppercase",
+                            width: "fit-content",
+                            transition: "all 200ms",
+                          }}>
+                            {c.cta}
+                          </span>
+                        </Cmp>
+                      );
+                    })}
+
+                    {/* Launch your own — dashed card with explicit button */}
+                    <button onClick={() => onStart("director")} style={{
+                      ...r(180 + 3 * 80),
+                      background:"transparent", border:`1px dashed ${borderSubtle}`, borderRadius:12,
+                      padding:"28px 26px", cursor:"pointer", fontFamily:"inherit", textAlign:"left",
+                      display:"flex", flexDirection:"column", gap:10,
+                      transition:"all 300ms cubic-bezier(.2,.8,.2,1)",
+                    }}
+                      onMouseEnter={e => { e.currentTarget.style.borderColor = iris; e.currentTarget.style.background="rgba(107,92,231,.03)"; }}
+                      onMouseLeave={e => { e.currentTarget.style.borderColor = borderSubtle; e.currentTarget.style.background="transparent"; }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                        <span style={{ width:6, height:6, borderRadius:"50%", background: iris }}/>
+                        <span className="text-nav" style={{ fontSize:10.5, color: iris }}>+ Your city?</span>
+                      </div>
+                      <h3 className="font-heading" style={{
+                        fontSize:24, fontWeight:600, color:textPrimary,
+                        letterSpacing:"-.01em", lineHeight:1.1, marginTop:4,
+                      }}>Launch a campus.</h3>
+                      <p className="font-body" style={{ fontSize:14.5, color:textSecondary, lineHeight:1.55 }}>
+                        Open a neoschool in your community. We provide the operating system.
+                      </p>
+                      <span style={{
+                        marginTop: 12,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 6,
+                        background: iris,
+                        color: "#fff",
+                        padding: "10px 18px",
+                        borderRadius: 10,
+                        fontFamily: "'Instrument Sans',sans-serif",
+                        fontSize: 12.5,
+                        fontWeight: 600,
+                        letterSpacing: ".06em",
+                        textTransform: "uppercase",
+                        width: "fit-content",
+                      }}>
+                        Apply to launch →
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </section>
+            );
+          }}
+        </SectionReveal>
+
         {/* ─── PLATFORM ACCESS — minimal, consistent ─── */}
         <SectionReveal>
           {(isVisible) => {
@@ -473,12 +612,12 @@ function Marketing({ onStart }) {
                       The model
                     </p>
                     <p className="font-body" style={{ fontSize:17, lineHeight:1.65, color: textPrimary }}>
-                      An AI tutor handles personalized academics in <strong>two focused hours each morning</strong>. The rest of the day belongs to building, creating, solving real problems, and learning from professional coaches — engineers, artists, scientists — not textbooks. <span style={{ color: textSecondary }}>No busywork. No six-hour days of sitting still.</span>
+                      neoschool is <strong>instructor-led first</strong>. We hire experienced educators and academics who deliver best-in-class classroom instruction — and the AI tutor <em>supplements</em> their teaching, personalizing practice for every child in <strong>two focused hours each morning</strong>. The rest of the day belongs to building, creating, and solving real problems with professional coaches — engineers, artists, scientists. <span style={{ color: textSecondary }}>No busywork. No six-hour days of sitting still.</span>
                     </p>
                   </div>
 
                   <p className="font-body" style={{ ...r(360), fontSize:14, color: textSecondary, fontStyle:"italic", lineHeight:1.65 }}>
-                    The two-hour academic block is validated by other microschool operators and by peer-reviewed research (Nature / Scientific Reports, 2025) showing AI tutoring outperforms classroom instruction. Our own AI tutoring platform has been tested with 100,000+ students across 800 schools.
+                    The focused two-hour academic block is validated by other microschool operators and by peer-reviewed research (Nature / Scientific Reports, 2025) on the power of personalized tutoring. Our own AI tutoring platform — used alongside teachers — has been tested with 100,000+ students across 800 schools.
                   </p>
                 </div>
               </section>
@@ -557,143 +696,6 @@ function Marketing({ onStart }) {
           }}
         </SectionReveal>
 
-        {/* ─── CAMPUSES — Missoula + Berkeley + Bay Area + Launch yours ─── */}
-        <SectionReveal>
-          {(isVisible) => {
-            const r = (d) => ({
-              opacity: isVisible ? 1 : 0,
-              transform: isVisible ? "translateY(0)" : "translateY(16px)",
-              filter: isVisible ? "blur(0px)" : "blur(4px)",
-              transition: `opacity 500ms cubic-bezier(0.22,1,0.36,1) ${d}ms, transform 500ms cubic-bezier(0.22,1,0.36,1) ${d}ms, filter 500ms cubic-bezier(0.22,1,0.36,1) ${d}ms`,
-            });
-            const campuses = [
-              { name:"Missoula",     state:"Montana",     status:"NOW ENROLLING", date:"September 2026", grades:"K + 1st", href:"/missoula.html", cta:"Apply →",     statusColor: iris },
-              { name:"Berkeley",     state:"California",  status:"WAITLIST",      date:"January 2027",   grades:"Ages 5-11", href:null,                cta:"Join waitlist →", statusColor: coral },
-              { name:"Palo Alto",    state:"California",  status:"WAITLIST",      date:"September 2027", grades:"K + 1st", href:null,                cta:"Join waitlist →", statusColor: coral },
-            ];
-            return (
-              <section id="campuses" style={{ background: bg, padding:"120px 0" }}>
-                <div style={{ position:"relative", margin:"0 auto", maxWidth:1080, padding:"0 24px" }}>
-                  <span className="section-number">05</span>
-                  <p className="text-overline" style={{ ...r(0), color: coral, marginBottom:14, textAlign:"center" }}>
-                    Founding campuses
-                  </p>
-                  <h2 className="font-body text-section-heading" style={{
-                    ...r(80), fontWeight:400, color: textPrimary,
-                    position:"relative", textAlign:"center", marginBottom:48,
-                  }}>
-                    Find a neoschool near you.
-                  </h2>
-
-                  <div style={{
-                    display:"grid",
-                    gridTemplateColumns:"repeat(auto-fit, minmax(280px, 1fr))",
-                    gap:14, marginBottom:14,
-                  }}>
-                    {campuses.map((c, i) => {
-                      const isClickable = !!c.href;
-                      const Cmp = isClickable ? "a" : "button";
-                      const props = isClickable
-                        ? { href: c.href }
-                        : { onClick: () => { window.location.href = `mailto:jennie@chiefmamaofficer.com?subject=${encodeURIComponent(`Join ${c.name} waitlist`)}&body=${encodeURIComponent(`Hi Jennie,\n\nI'd like to join the waitlist for the ${c.name}, ${c.state} campus opening ${c.date}.\n\nMy name:\nChild's age / grade:\nEmail:\nPhone:\n\nThank you!`)}`; } };
-                      return (
-                        <Cmp key={c.name} {...props} style={{
-                          ...r(180 + i * 80),
-                          background:"#fff", border:`1px solid ${borderSubtle}`, borderRadius:12,
-                          padding:"28px 26px", cursor:"pointer", textDecoration:"none",
-                          color:"inherit", fontFamily:"inherit", textAlign:"left",
-                          display:"flex", flexDirection:"column", gap:10,
-                          transition:"all 300ms cubic-bezier(.2,.8,.2,1)",
-                        }}
-                          onMouseEnter={e => { e.currentTarget.style.borderColor = c.statusColor; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 12px 28px -10px rgba(42,38,34,.15)"; }}
-                          onMouseLeave={e => { e.currentTarget.style.borderColor = borderSubtle; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
-                          <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                            <span style={{ width:6, height:6, borderRadius:"50%", background: c.statusColor }}/>
-                            <span className="text-nav" style={{ fontSize:10.5, color: c.statusColor }}>
-                              {c.status}
-                            </span>
-                          </div>
-                          <h3 className="font-heading" style={{
-                            fontSize:24, fontWeight:600, color:textPrimary,
-                            letterSpacing:"-.01em", lineHeight:1.1, marginTop:4,
-                          }}>
-                            {c.name}, <span style={{ fontWeight:400, color:textSecondary }}>{c.state}</span>
-                          </h3>
-                          <p className="font-body" style={{ fontSize:14.5, color:textSecondary, lineHeight:1.55 }}>
-                            {c.grades} · Opening {c.date}
-                          </p>
-
-                          {/* Explicit button pill — not just hover text */}
-                          <span style={{
-                            marginTop: 12,
-                            display: "inline-flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: 6,
-                            background: c.statusColor,
-                            color: "#fff",
-                            padding: "10px 18px",
-                            borderRadius: 10,
-                            fontFamily: "'Instrument Sans',sans-serif",
-                            fontSize: 12.5,
-                            fontWeight: 600,
-                            letterSpacing: ".06em",
-                            textTransform: "uppercase",
-                            width: "fit-content",
-                            transition: "all 200ms",
-                          }}>
-                            {c.cta}
-                          </span>
-                        </Cmp>
-                      );
-                    })}
-
-                    {/* Launch your own — dashed card with explicit button */}
-                    <button onClick={() => onStart("director")} style={{
-                      ...r(180 + 3 * 80),
-                      background:"transparent", border:`1px dashed ${borderSubtle}`, borderRadius:12,
-                      padding:"28px 26px", cursor:"pointer", fontFamily:"inherit", textAlign:"left",
-                      display:"flex", flexDirection:"column", gap:10,
-                      transition:"all 300ms cubic-bezier(.2,.8,.2,1)",
-                    }}
-                      onMouseEnter={e => { e.currentTarget.style.borderColor = iris; e.currentTarget.style.background="rgba(107,92,231,.03)"; }}
-                      onMouseLeave={e => { e.currentTarget.style.borderColor = borderSubtle; e.currentTarget.style.background="transparent"; }}>
-                      <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                        <span style={{ width:6, height:6, borderRadius:"50%", background: iris }}/>
-                        <span className="text-nav" style={{ fontSize:10.5, color: iris }}>+ Your city?</span>
-                      </div>
-                      <h3 className="font-heading" style={{
-                        fontSize:24, fontWeight:600, color:textPrimary,
-                        letterSpacing:"-.01em", lineHeight:1.1, marginTop:4,
-                      }}>Launch a campus.</h3>
-                      <p className="font-body" style={{ fontSize:14.5, color:textSecondary, lineHeight:1.55 }}>
-                        Open a neoschool in your community. We provide the operating system.
-                      </p>
-                      <span style={{
-                        marginTop: 12,
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 6,
-                        background: iris,
-                        color: "#fff",
-                        padding: "10px 18px",
-                        borderRadius: 10,
-                        fontFamily: "'Instrument Sans',sans-serif",
-                        fontSize: 12.5,
-                        fontWeight: 600,
-                        letterSpacing: ".06em",
-                        textTransform: "uppercase",
-                        width: "fit-content",
-                      }}>
-                        Apply to launch →
-                      </span>
-                    </button>
-                  </div>
-                </div>
-              </section>
-            );
-          }}
-        </SectionReveal>
 
         <SectionReveal>
           {(isVisible) => {
@@ -720,7 +722,7 @@ function Marketing({ onStart }) {
                       {[
                         "Your child doesn't need six hours in a classroom. They need focused, personalized instruction that meets them exactly where they are. AI tutoring — already validated with over 100,000 students — delivers that in two hours each morning. Real mastery, not seat time.",
                         "The rest of the day belongs to the things AI will never replace. Professional coaches — engineers, biologists, artists — work alongside your child on real projects. They model curiosity, guide hands-on work, and ask harder questions when the easy answers come too quickly.",
-                        "No homework. No busywork. Your child comes home at 3:30 having built something — not having memorized something. Your evening belongs to your family.",
+                        "No homework. No busywork. Your child comes home at 4:30 having built something — not having memorized something. Your evening belongs to your family.",
                       ].map((p, i) => (
                         <p key={i} className="prose-neo" style={{ ...r(200 + i * 120), marginTop: i === 0 ? 40 : 28 }}>{p}</p>
                       ))}
@@ -1112,21 +1114,13 @@ function Marketing({ onStart }) {
                   onMouseLeave={e=>e.currentTarget.style.color=textPrimary}>
                   hello@neoschool.me
                 </a>
-                <a href="https://www.instagram.com/neoschool" target="_blank" rel="noopener noreferrer" className="font-heading" style={{
+                <a href="https://www.instagram.com/neoschool.me" target="_blank" rel="noopener noreferrer" className="font-heading" style={{
                   fontSize:13.5, color: textPrimary, textDecoration:"none", fontWeight:500,
                   transition:"color 250ms",
                 }}
                   onMouseEnter={e=>e.currentTarget.style.color=iris}
                   onMouseLeave={e=>e.currentTarget.style.color=textPrimary}>
                   Instagram
-                </a>
-                <a href="https://www.linkedin.com/company/neoschool" target="_blank" rel="noopener noreferrer" className="font-heading" style={{
-                  fontSize:13.5, color: textPrimary, textDecoration:"none", fontWeight:500,
-                  transition:"color 250ms",
-                }}
-                  onMouseEnter={e=>e.currentTarget.style.color=iris}
-                  onMouseLeave={e=>e.currentTarget.style.color=textPrimary}>
-                  LinkedIn
                 </a>
               </div>
             </div>
@@ -1163,6 +1157,7 @@ function Marketing({ onStart }) {
       `}</style>
 
       {showInterestForm && <CampusInterestForm onClose={() => setShowInterestForm(false)} />}
+      {waitlistCampus && <WaitlistModal campus={waitlistCampus} onClose={() => setWaitlistCampus(null)} />}
     </div>
   );
 }
@@ -1819,6 +1814,86 @@ function KnowledgeGraphSVG({ graphData, allLabs, colorFor, onOpenLab }) {
 
 // ── CAMPUS INTEREST FORM ─────────────────────────────────────────────────────
 // For people who want to launch a neoschool campus in their community
+function WaitlistModal({ campus, onClose }) {
+  const SUPABASE_URL = "https://dwpxsaamaehtmhsuuprg.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_eM_rkri5KfdnheOZyCNN3w_hqmN7M4k";
+  const [form, setForm] = useState({ firstName:"", lastName:"", email:"", childAge:"" });
+  const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const up = (k,v) => setForm(f => ({...f,[k]:v}));
+  const canSubmit = form.firstName && form.email.includes("@");
+
+  const submit = async () => {
+    if (!canSubmit || sending) return;
+    setSending(true);
+    const record = {
+      type: "interest",
+      source: "campus-waitlist",
+      campus: campus.name,
+      parent_first_name: form.firstName,
+      parent_last_name: form.lastName,
+      email: form.email,
+      child_age: form.childAge,
+      submitted_at: new Date().toISOString(),
+      id: `wl_${Date.now()}`,
+    };
+    // 1. Local mirror so the admin Interest list sees it immediately
+    try {
+      const local = JSON.parse(localStorage.getItem("neo_waitlist_interest") || "[]");
+      local.push(record);
+      localStorage.setItem("neo_waitlist_interest", JSON.stringify(local));
+    } catch {}
+    // 2. Best-effort send to the Edge Function (email + DB when available)
+    try {
+      await fetch(`${SUPABASE_URL}/functions/v1/submit-application`, {
+        method: "POST",
+        headers: { "Content-Type":"application/json", "apikey":SUPABASE_ANON_KEY, "Authorization":`Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify({ campus: campus.name, child_name:"", grade:"", form_data: record }),
+      });
+    } catch {}
+    setSending(false);
+    setSubmitted(true);
+  };
+
+  return (
+    <div onClick={onClose} style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.5)", backdropFilter:"blur(4px)", zIndex:200, display:"flex", alignItems:"center", justifyContent:"center", padding:20 }}>
+      <div onClick={e => e.stopPropagation()} style={{ background:"var(--cr)", borderRadius:18, maxWidth:440, width:"100%", maxHeight:"92vh", overflowY:"auto", padding:"26px 26px 22px", position:"relative" }}>
+        {submitted ? (
+          <div style={{ textAlign:"center", padding:"20px 0" }}>
+            <div style={{ fontSize:52, marginBottom:12 }}>🌲</div>
+            <h2 className="h2" style={{ marginBottom:8 }}>You're on the list!</h2>
+            <p className="mu" style={{ fontSize:13, lineHeight:1.65, marginBottom:18 }}>
+              Thanks, {form.firstName}! We'll email you at {form.email} the moment enrollment opens for {campus.name}, {campus.state} ({campus.date}).
+            </p>
+            <button className="btn bo" onClick={onClose}>Close</button>
+          </div>
+        ) : (
+          <>
+            <button onClick={onClose} style={{ position:"absolute", top:18, right:22, background:"none", border:"none", fontSize:22, color:"var(--mu)", cursor:"pointer" }}>×</button>
+            <p style={{ fontSize:11, fontWeight:700, color:"var(--or)", textTransform:"uppercase", letterSpacing:".09em", marginBottom:6 }}>Join the waitlist</p>
+            <h2 className="h2" style={{ marginBottom:6 }}>{campus.name}, {campus.state}</h2>
+            <p className="mu" style={{ fontSize:13, lineHeight:1.6, marginBottom:18 }}>
+              Opening {campus.date} · {campus.grades}. Leave your details and we'll reach out the moment enrollment opens.
+            </p>
+            <div style={{ display:"flex", flexDirection:"column", gap:11 }}>
+              <div style={{ display:"flex", gap:10 }}>
+                <input className="inp" style={{ flex:1 }} placeholder="First name *" value={form.firstName} onChange={e=>up("firstName",e.target.value)} />
+                <input className="inp" style={{ flex:1 }} placeholder="Last name" value={form.lastName} onChange={e=>up("lastName",e.target.value)} />
+              </div>
+              <input className="inp" placeholder="Email *" type="email" value={form.email} onChange={e=>up("email",e.target.value)} />
+              <input className="inp" placeholder="Child's age (optional)" value={form.childAge} onChange={e=>up("childAge",e.target.value)} />
+              <button className="btn bo fw" onClick={submit} disabled={!canSubmit || sending} style={{ opacity:(!canSubmit||sending)?.55:1, marginTop:4 }}>
+                {sending ? "Joining…" : "Join waitlist →"}
+              </button>
+              <p className="mu" style={{ fontSize:11, textAlign:"center" }}>No spam. We'll only email about {campus.name} enrollment.</p>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function CampusInterestForm({ onClose }) {
   const [form, setForm] = useState({
     name:"", email:"", phone:"", city:"", state:"",
@@ -2727,7 +2802,7 @@ function ParentDashboard({ user, data }) {
               <span style={{ fontSize:18 }}>📅</span>
               <div style={{ flex:1 }}>
                 <p style={{ fontSize:13, fontWeight:600 }}>An enriching school day</p>
-                <p style={{ fontSize:11, color:"var(--mu)" }}>4 daily blocks · 8:30 AM – 3:30 PM</p>
+                <p style={{ fontSize:11, color:"var(--mu)" }}>4 daily blocks · 8:30 AM – 4:30 PM</p>
               </div>
               <span style={{ fontSize:14, color:"var(--mu)" }}>{showSchedule ? "↑" : "↓"}</span>
             </button>
@@ -2737,7 +2812,7 @@ function ParentDashboard({ user, data }) {
                   { time:"8:30–9:00 AM",  block:"Outside Free Play",        sub:"Movement, fresh air, social warm-up",                                                                                          i:"🌳", c:"var(--sg)" },
                   { time:"9:00–11:00 AM", block:"Core Academic Block",      sub:"2 hours personalized math, reading, writing, science. AI tutors adapt in real time. Brain breaks between subjects.", i:"🧠", c:"var(--or)" },
                   { time:"11:00–12:30",   block:"Outside Free Play & Lunch", sub:"Recess + meal · social time · decompression",                                                                                  i:"🍎", c:"var(--am)" },
-                  { time:"12:30–3:30 PM", block:"Real Projects & Life Skills",sub:"Hands-on workshops · creative expression · what AI can never replace",                                                       i:"🎨", c:"var(--bl)" },
+                  { time:"12:30–4:30 PM", block:"Real Projects & Life Skills",sub:"Hands-on workshops · creative expression · what AI can never replace",                                                       i:"🎨", c:"var(--bl)" },
                 ].map((r,i) => (
                   <div key={i} style={{ display:"flex", gap:11, padding:"9px 0", borderBottom:i<3?"1px solid var(--p)":"none" }}>
                     <div style={{ width:34, height:34, borderRadius:9, background:`${r.c}22`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:17, flexShrink:0 }}>{r.i}</div>
