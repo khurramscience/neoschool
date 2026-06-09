@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>States of Matter 🧊</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+  html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#cffafe 0%,#67e8f9 100%);color:#1a1612}
+  .wrap{display:flex;flex-direction:column;height:100%;padding:18px 16px;max-width:760px;margin:0 auto}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .title{font-size:22px;font-weight:700;color:#0891b2}
+  .stars{display:flex;gap:4px;font-size:24px}.star{filter:grayscale(1);opacity:.35;transition:all .35s}.star.lit{filter:none;opacity:1;transform:scale(1.2) rotate(-8deg)}
+  .question{font-size:clamp(18px,4.5vw,24px);font-weight:700;text-align:center;color:#1a1f3a;margin:6px 0 12px}
+  .stage{background:#fff;border-radius:24px;border:3px solid #67e8f9;padding:22px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 4px 0 #67e8f9;margin-bottom:16px}
+  .obj{font-size:clamp(64px,17vw,100px)}
+  .oname{font-size:clamp(16px,4vw,20px);font-weight:700;color:#0891b2}
+  .choices{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-content:start}
+  .choice{background:#fff;border:none;border-radius:18px;padding:18px 8px;font-family:'Quicksand',sans-serif;cursor:pointer;box-shadow:0 4px 0 #22d3ee;transition:all .15s;touch-action:manipulation;display:flex;flex-direction:column;align-items:center;gap:6px}
+  .choice .ic{font-size:clamp(28px,7vw,38px)}.choice .lb{font-size:clamp(13px,3.3vw,16px);font-weight:700;color:#0891b2}
+  .choice:active{transform:translateY(2px);box-shadow:0 2px 0 #22d3ee}
+  .choice.wrong{background:#fecaca;animation:shake .4s}.choice.right{background:#bbf7d0}.choice.right .lb{color:#15803d}
+  @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  .celebration{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(36px,9vw,54px);font-weight:700;color:#0891b2;pointer-events:none;opacity:0;transition:opacity .25s;background:rgba(255,255,255,.85);text-align:center}.celebration.show{opacity:1}
+  .confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards}@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+  .help{font-size:13px;color:#155e75;text-align:center;margin-top:8px;font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar"><div class="title">🧊 States of Matter</div>
+    <div class="stars" id="stars"><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span></div></div>
+  <div class="question">Is it a solid, liquid, or gas?</div>
+  <div class="stage"><div class="obj" id="obj"></div><div class="oname" id="oname"></div></div>
+  <div class="choices" id="choices"></div>
+  <div class="help">Solid keeps its shape · Liquid pours & flows · Gas floats in the air</div>
+</div>
+<div class="celebration" id="celebration"></div>
+<script>
+  const STATES={solid:{ic:"🧱",lb:"Solid"},liquid:{ic:"💧",lb:"Liquid"},gas:{ic:"💨",lb:"Gas"}};
+  const ITEMS=[{e:"🧊",n:"Ice cube",s:"solid"},{e:"🪨",n:"Rock",s:"solid"},{e:"📕",n:"Book",s:"solid"},{e:"🍎",n:"Apple",s:"solid"},{e:"🧱",n:"Brick",s:"solid"},{e:"🪵",n:"Wood",s:"solid"},
+    {e:"💧",n:"Water",s:"liquid"},{e:"🥛",n:"Milk",s:"liquid"},{e:"🧃",n:"Juice",s:"liquid"},{e:"☕",n:"Coffee",s:"liquid"},{e:"🍯",n:"Honey",s:"liquid"},{e:"🌊",n:"Ocean",s:"liquid"},
+    {e:"🎈",n:"Air in a balloon",s:"gas"},{e:"💨",n:"Steam",s:"gas"},{e:"☁️",n:"Cloud",s:"gas"},{e:"🫧",n:"Bubbles",s:"gas"}];
+  const objEl=document.getElementById("obj"),onameEl=document.getElementById("oname"),choicesEl=document.getElementById("choices"),starsEl=document.getElementById("stars"),celebration=document.getElementById("celebration");
+  let stars=0,round=0,answer="";
+  let actx=null;function tone(f,d=.15,t="sine",v=.18){try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+d);o.stop(actx.currentTime+d)}catch{}}
+  const S={right:()=>{[523,659,784].forEach((f,i)=>setTimeout(()=>tone(f,.18,"triangle",.22),i*100))},wrong:()=>tone(220,.25,"sawtooth",.1),win:()=>{[523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.22,"triangle",.25),i*120))}};
+  function speak(t){try{const u=new SpeechSynthesisUtterance(t);u.rate=.85;u.pitch=1.05;speechSynthesis.cancel();speechSynthesis.speak(u);}catch{}}
+  function nextRound(){round++;const it=ITEMS[Math.floor(Math.random()*ITEMS.length)];answer=it.s;objEl.textContent=it.e;onameEl.textContent=it.n;setTimeout(()=>speak(it.n),250);
+    choicesEl.innerHTML=["solid","liquid","gas"].map(k=>`<button class="choice" onclick="pick('${k}',this)"><span class="ic">${STATES[k].ic}</span><span class="lb">${STATES[k].lb}</span></button>`).join("");}
+  window.pick=function(k,btn){[...document.querySelectorAll(".choice")].forEach(b=>b.disabled=true);
+    if(k===answer){btn.classList.add("right");S.right();stars++;lightStar(stars);post(true);if(stars>=5)setTimeout(win,700);else setTimeout(nextRound,1000);}
+    else{btn.classList.add("wrong");S.wrong();post(false);setTimeout(()=>{btn.classList.remove("wrong");[...document.querySelectorAll(".choice")].forEach(b=>b.disabled=false);},500);}};
+  function lightStar(n){const s=starsEl.querySelectorAll(".star");if(s[n-1])s[n-1].classList.add("lit");}
+  function confettiBurst(){const c=["#fb7185","#fbbf24","#34d399","#60a5fa","#a78bfa","#f472b6"];for(let i=0;i<50;i++){const e=document.createElement("div");e.className="confetti";e.style.left=Math.random()*100+"vw";e.style.background=c[Math.floor(Math.random()*c.length)];e.style.animationDelay=(Math.random()*.8)+"s";document.body.appendChild(e);setTimeout(()=>e.remove(),2600);}}
+  function win(){S.win();confettiBurst();celebration.textContent="🎉 Matter master! 🎉";celebration.classList.add("show");post(true,true);setTimeout(()=>{celebration.classList.remove("show");stars=0;starsEl.querySelectorAll(".star").forEach(s=>s.classList.remove("lit"));nextRound();},2600);}
+  function post(correct,complete=false){try{parent.postMessage({type:"labProgress",lab:"states-of-matter",round,correct,answer,stars,complete},"*");}catch{}}
+  nextRound();
+</script>
+</body>
+</html>
