@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Story Problems 📖</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+  html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#fae8ff 0%,#e9d5ff 100%);color:#1a1612}
+  .wrap{display:flex;flex-direction:column;height:100%;padding:18px 16px;max-width:760px;margin:0 auto}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .title{font-size:22px;font-weight:700;color:#9333ea}
+  .stars{display:flex;gap:4px;font-size:24px}.star{filter:grayscale(1);opacity:.35;transition:all .35s}.star.lit{filter:none;opacity:1;transform:scale(1.2) rotate(-8deg)}
+  .stage{background:#fff;border-radius:24px;border:3px solid #d8b4fe;padding:22px;display:flex;flex-direction:column;align-items:center;gap:12px;box-shadow:0 4px 0 #d8b4fe;margin-bottom:14px}
+  .emojis{font-size:clamp(30px,7vw,42px);letter-spacing:4px;text-align:center;line-height:1.3}
+  .story{font-size:clamp(16px,4vw,20px);font-weight:600;color:#1a1f3a;text-align:center;line-height:1.5}
+  .speaker{background:#9333ea;color:#fff;border:none;border-radius:99px;padding:8px 18px;font-family:'Quicksand',sans-serif;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 3px 0 #7e22ce}
+  .speaker:active{transform:translateY(2px);box-shadow:0 1px 0 #7e22ce}
+  .choices{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;align-content:start}
+  .choice{aspect-ratio:1.1;background:#fff;border:none;border-radius:18px;font-family:'Quicksand',sans-serif;font-size:clamp(26px,7vw,38px);font-weight:700;color:#9333ea;cursor:pointer;box-shadow:0 4px 0 #a855f7;transition:all .15s;touch-action:manipulation}
+  .choice:active{transform:translateY(2px);box-shadow:0 2px 0 #a855f7}
+  .choice.wrong{background:#fecaca;animation:shake .4s}.choice.right{background:#bbf7d0;color:#15803d}
+  @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  .celebration{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(36px,9vw,54px);font-weight:700;color:#9333ea;pointer-events:none;opacity:0;transition:opacity .25s;background:rgba(255,255,255,.85);text-align:center}.celebration.show{opacity:1}
+  .confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards}@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+  .help{font-size:13px;color:#7e22ce;text-align:center;margin-top:8px;font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar"><div class="title">📖 Story Problems</div>
+    <div class="stars" id="stars"><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span></div></div>
+  <div class="stage"><div class="emojis" id="emojis"></div><div class="story" id="story"></div><button class="speaker" onclick="speak()">🔊 Read it</button></div>
+  <div class="choices" id="choices"></div>
+  <div class="help">Listen to the story, picture it, then pick the answer.</div>
+</div>
+<div class="celebration" id="celebration"></div>
+<script>
+  const THINGS=[{e:"🍎",n:"apples"},{e:"🐶",n:"puppies"},{e:"🎈",n:"balloons"},{e:"🍪",n:"cookies"},{e:"🐠",n:"fish"},{e:"🚗",n:"toy cars"},{e:"🌸",n:"flowers"},{e:"⭐",n:"stickers"},{e:"🍓",n:"strawberries"},{e:"🦆",n:"ducks"}];
+  const NAMES=["Mia","Leo","Ava","Sam","Zoe","Max","Lily","Ben"];
+  const emojisEl=document.getElementById("emojis"),storyEl=document.getElementById("story"),choicesEl=document.getElementById("choices"),starsEl=document.getElementById("stars"),celebration=document.getElementById("celebration");
+  let stars=0,round=0,answer=0,storyText="";
+  let actx=null;function tone(f,d=.15,t="sine",v=.18){try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+d);o.stop(actx.currentTime+d)}catch{}}
+  const S={right:()=>{[523,659,784].forEach((f,i)=>setTimeout(()=>tone(f,.18,"triangle",.22),i*100))},wrong:()=>tone(220,.25,"sawtooth",.1),win:()=>{[523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.22,"triangle",.25),i*120))}};
+  window.speak=function(){try{const u=new SpeechSynthesisUtterance(storyText);u.rate=.82;u.pitch=1.05;speechSynthesis.cancel();speechSynthesis.speak(u);}catch{}};
+  function nextRound(){round++;const th=THINGS[Math.floor(Math.random()*THINGS.length)];const name=NAMES[Math.floor(Math.random()*NAMES.length)];
+    const add=Math.random()<.5;let a,b,emojiStr;
+    if(add){a=Math.floor(Math.random()*5)+1;b=Math.floor(Math.random()*5)+1;answer=a+b;
+      storyText=`${name} has ${a} ${th.n}. ${name} gets ${b} more. How many ${th.n} now?`;
+      emojiStr=th.e.repeat(a)+"  ➕  "+th.e.repeat(b);
+    }else{a=Math.floor(Math.random()*6)+3;b=Math.floor(Math.random()*(a-1))+1;answer=a-b;
+      storyText=`${name} has ${a} ${th.n}. ${b} ${b===1?"goes":"go"} away. How many ${th.n} are left?`;
+      emojiStr=th.e.repeat(a)+"  ➖  "+th.e.repeat(b);}
+    emojisEl.textContent=emojiStr;storyEl.textContent=storyText;setTimeout(speak,350);
+    const opts=new Set([answer]);while(opts.size<4){const v=answer+(Math.floor(Math.random()*5)-2);if(v>=0&&v<=12)opts.add(v);}
+    choicesEl.innerHTML=[...opts].sort((x,y)=>x-y).map(n=>`<button class="choice" onclick="pick(${n},this)">${n}</button>`).join("");}
+  window.pick=function(n,btn){[...document.querySelectorAll(".choice")].forEach(b=>b.disabled=true);
+    if(n===answer){btn.classList.add("right");S.right();stars++;lightStar(stars);post(true);if(stars>=5)setTimeout(win,700);else setTimeout(nextRound,1000);}
+    else{btn.classList.add("wrong");S.wrong();post(false);setTimeout(()=>{btn.classList.remove("wrong");[...document.querySelectorAll(".choice")].forEach(b=>b.disabled=false);},500);}};
+  function lightStar(n){const s=starsEl.querySelectorAll(".star");if(s[n-1])s[n-1].classList.add("lit");}
+  function confettiBurst(){const c=["#fb7185","#fbbf24","#34d399","#60a5fa","#a78bfa","#f472b6"];for(let i=0;i<50;i++){const e=document.createElement("div");e.className="confetti";e.style.left=Math.random()*100+"vw";e.style.background=c[Math.floor(Math.random()*c.length)];e.style.animationDelay=(Math.random()*.8)+"s";document.body.appendChild(e);setTimeout(()=>e.remove(),2600);}}
+  function win(){S.win();confettiBurst();celebration.textContent="🎉 Story solver! 🎉";celebration.classList.add("show");post(true,true);setTimeout(()=>{celebration.classList.remove("show");stars=0;starsEl.querySelectorAll(".star").forEach(s=>s.classList.remove("lit"));nextRound();},2600);}
+  function post(correct,complete=false){try{parent.postMessage({type:"labProgress",lab:"word-problems",round,correct,answer,stars,complete},"*");}catch{}}
+  nextRound();
+</script>
+</body>
+</html>

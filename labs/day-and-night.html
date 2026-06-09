@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Day or Night 🌙</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+  html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#c7d2fe 0%,#6366f1 100%);color:#1a1612}
+  .wrap{display:flex;flex-direction:column;height:100%;padding:18px 16px;max-width:760px;margin:0 auto}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .title{font-size:22px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .stars{display:flex;gap:4px;font-size:24px}.star{filter:grayscale(1);opacity:.45;transition:all .35s}.star.lit{filter:none;opacity:1;transform:scale(1.2) rotate(-8deg)}
+  .question{font-size:clamp(18px,4.5vw,24px);font-weight:700;text-align:center;color:#fff;margin:6px 0 14px;text-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .stage{background:#fff;border-radius:24px;border:3px solid #a5b4fc;padding:24px;display:flex;flex-direction:column;align-items:center;gap:8px;box-shadow:0 4px 0 rgba(0,0,0,.15);margin-bottom:20px}
+  .obj{font-size:clamp(64px,17vw,100px)}
+  .oname{font-size:clamp(15px,3.8vw,19px);font-weight:600;color:#4338ca;text-align:center}
+  .choices{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .choice{border:none;border-radius:20px;padding:24px 10px;font-family:'Quicksand',sans-serif;cursor:pointer;transition:all .15s;touch-action:manipulation;display:flex;flex-direction:column;align-items:center;gap:8px;color:#fff;font-weight:700}
+  .choice.day{background:linear-gradient(135deg,#fbbf24,#f59e0b);box-shadow:0 4px 0 #d97706}
+  .choice.night{background:linear-gradient(135deg,#4338ca,#312e81);box-shadow:0 4px 0 #1e1b4b}
+  .choice .ic{font-size:clamp(40px,10vw,56px)}.choice .lb{font-size:clamp(18px,4.5vw,24px)}
+  .choice:active{transform:translateY(2px)}
+  .choice.wrong{animation:shake .4s}.choice.right{outline:4px solid #22c55e}
+  @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  .celebration{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(36px,9vw,54px);font-weight:700;color:#4338ca;pointer-events:none;opacity:0;transition:opacity .25s;background:rgba(255,255,255,.85);text-align:center}.celebration.show{opacity:1}
+  .confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards}@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+  .help{font-size:13px;color:#fff;text-align:center;margin-top:8px;font-weight:500;opacity:.9}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar"><div class="title">🌙 Day or Night</div>
+    <div class="stars" id="stars"><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span></div></div>
+  <div class="question">When do you see this?</div>
+  <div class="stage"><div class="obj" id="obj"></div><div class="oname" id="oname"></div></div>
+  <div class="choices">
+    <button class="choice day" onclick="pick('day',this)"><span class="ic">☀️</span><span class="lb">Daytime</span></button>
+    <button class="choice night" onclick="pick('night',this)"><span class="ic">🌙</span><span class="lb">Nighttime</span></button>
+  </div>
+  <div class="help">The Sun gives us day. The Moon and stars come out at night.</div>
+</div>
+<div class="celebration" id="celebration"></div>
+<script>
+  const ITEMS=[{e:"☀️",n:"The bright sun",a:"day"},{e:"🌝",n:"The full moon",a:"night"},{e:"⭐",n:"Twinkling stars",a:"night"},{e:"🌅",n:"Sunrise breakfast",a:"day"},{e:"🦉",n:"A hooting owl",a:"night"},{e:"🐓",n:"A crowing rooster",a:"day"},{e:"🏖️",n:"Playing at the beach",a:"day"},{e:"😴",n:"Sleeping in bed",a:"night"},{e:"🌻",n:"Sunflowers open",a:"day"},{e:"🦇",n:"Flying bats",a:"night"},{e:"🎆",n:"Fireworks in the sky",a:"night"},{e:"🛝",n:"Recess at school",a:"day"},{e:"🔦",n:"Using a flashlight",a:"night"},{e:"🌈",n:"A rainbow after rain",a:"day"}];
+  const objEl=document.getElementById("obj"),onameEl=document.getElementById("oname"),starsEl=document.getElementById("stars"),celebration=document.getElementById("celebration");
+  let stars=0,round=0,answer="";
+  let actx=null;function tone(f,d=.15,t="sine",v=.18){try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(actx.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+d);o.stop(actx.currentTime+d)}catch{}}
+  const S={right:()=>{[523,659,784].forEach((f,i)=>setTimeout(()=>tone(f,.18,"triangle",.22),i*100))},wrong:()=>tone(220,.25,"sawtooth",.1),win:()=>{[523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.22,"triangle",.25),i*120))}};
+  function speak(t){try{const u=new SpeechSynthesisUtterance(t);u.rate=.85;u.pitch=1.05;speechSynthesis.cancel();speechSynthesis.speak(u);}catch{}}
+  function nextRound(){round++;const it=ITEMS[Math.floor(Math.random()*ITEMS.length)];answer=it.a;objEl.textContent=it.e;onameEl.textContent=it.n;setTimeout(()=>speak(it.n),250);
+    [...document.querySelectorAll(".choice")].forEach(b=>{b.disabled=false;b.classList.remove("wrong","right");});}
+  window.pick=function(a,btn){[...document.querySelectorAll(".choice")].forEach(b=>b.disabled=true);
+    if(a===answer){btn.classList.add("right");S.right();stars++;lightStar(stars);post(true);if(stars>=5)setTimeout(win,700);else setTimeout(nextRound,900);}
+    else{btn.classList.add("wrong");S.wrong();post(false);setTimeout(()=>{btn.classList.remove("wrong");[...document.querySelectorAll(".choice")].forEach(b=>b.disabled=false);},500);}};
+  function lightStar(n){const s=starsEl.querySelectorAll(".star");if(s[n-1])s[n-1].classList.add("lit");}
+  function confettiBurst(){const c=["#fb7185","#fbbf24","#34d399","#60a5fa","#a78bfa","#f472b6"];for(let i=0;i<50;i++){const e=document.createElement("div");e.className="confetti";e.style.left=Math.random()*100+"vw";e.style.background=c[Math.floor(Math.random()*c.length)];e.style.animationDelay=(Math.random()*.8)+"s";document.body.appendChild(e);setTimeout(()=>e.remove(),2600);}}
+  function win(){S.win();confettiBurst();celebration.textContent="🎉 Sky watcher! 🎉";celebration.classList.add("show");post(true,true);setTimeout(()=>{celebration.classList.remove("show");stars=0;starsEl.querySelectorAll(".star").forEach(s=>s.classList.remove("lit"));nextRound();},2600);}
+  function post(correct,complete=false){try{parent.postMessage({type:"labProgress",lab:"day-and-night",round,correct,answer,stars,complete},"*");}catch{}}
+  nextRound();
+</script>
+</body>
+</html>
