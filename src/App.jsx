@@ -1895,14 +1895,45 @@ function WaitlistModal({ campus, onClose }) {
 }
 
 function CampusInterestForm({ onClose }) {
+  const SUPABASE_URL = "https://dwpxsaamaehtmhsuuprg.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_eM_rkri5KfdnheOZyCNN3w_hqmN7M4k";
   const [form, setForm] = useState({
     name:"", email:"", phone:"", city:"", state:"",
     role:"", grades:"", timing:"",
     background:"", motivation:"",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
   const up = (k,v) => setForm(f => ({...f,[k]:v}));
   const canSubmit = form.name && form.email && form.city && form.role && form.motivation;
+
+  const submitFounder = async () => {
+    if (!canSubmit || sending) return;
+    setSending(true);
+    const record = {
+      type: "founder_interest",
+      source: "launch-a-campus",
+      ...form,
+      submitted_at: new Date().toISOString(),
+      id: `founder_${Date.now()}`,
+    };
+    // 1. Local mirror (admin Interest list reads neo_waitlist_interest)
+    try {
+      const local = JSON.parse(localStorage.getItem("neo_waitlist_interest") || "[]");
+      local.push(record);
+      localStorage.setItem("neo_waitlist_interest", JSON.stringify(local));
+    } catch {}
+    // 2. Best-effort send to Edge Function (email to Jennie + DB when available)
+    try {
+      await fetch(`${SUPABASE_URL}/functions/v1/submit-application`, {
+        method: "POST",
+        headers: { "Content-Type":"application/json", "apikey":SUPABASE_ANON_KEY, "Authorization":`Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify({ campus: form.city, child_name:"", grade:"", form_data: record }),
+      });
+    } catch {}
+    setSending(false);
+    setSubmitted(true);
+  };
 
   return (
     <div onClick={onClose} style={{
@@ -1974,8 +2005,8 @@ function CampusInterestForm({ onClose }) {
                 <label className="lbl">Relevant background</label>
                 <textarea className="ta inp" rows={2} placeholder="Teaching, business, parenting experience, community ties, etc." value={form.background} onChange={e=>up("background",e.target.value)}/>
               </div>
-              <button className="btn bo fw" onClick={() => setSubmitted(true)} disabled={!canSubmit}>
-                Submit interest →
+              <button className="btn bo fw" onClick={submitFounder} disabled={!canSubmit || sending}>
+                {sending ? "Submitting…" : "Submit interest →"}
               </button>
               <p style={{ fontSize:11, color:"var(--mu)", textAlign:"center", marginTop:4 }}>
                 Confirmation goes to <strong>{form.email || "your email"}</strong>
@@ -6402,6 +6433,28 @@ export default function App() {
       };
       localStorage.setItem("neo_current", JSON.stringify(demoParent));
       setUser(demoParent); setRole("parent"); setScreen("app");
+      window.history.replaceState({}, "", window.location.pathname);
+      startSyncLoop(30000);
+      return;
+    }
+    if (params.get("demo") === "teacher" || params.get("demo") === "guide") {
+      const demoGuide = {
+        name: "Maria Lopez", email: "guide-demo@neoschool.me",
+        role: "guide", id: "guide-demo@neoschool.me",
+      };
+      localStorage.setItem("neo_current", JSON.stringify(demoGuide));
+      setUser(demoGuide); setRole("guide"); setScreen("app");
+      window.history.replaceState({}, "", window.location.pathname);
+      startSyncLoop(30000);
+      return;
+    }
+    if (params.get("demo") === "director" || params.get("demo") === "school") {
+      const demoDirector = {
+        name: "Jennie Yang", email: "director-demo@neoschool.me",
+        role: "director", id: "director-demo@neoschool.me",
+      };
+      localStorage.setItem("neo_current", JSON.stringify(demoDirector));
+      setUser(demoDirector); setRole("director"); setScreen("app");
       window.history.replaceState({}, "", window.location.pathname);
       startSyncLoop(30000);
       return;
