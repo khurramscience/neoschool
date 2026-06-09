@@ -591,16 +591,16 @@ function Marketing({ onStart }) {
                     ...r(160), fontSize:18, color: textSecondary, lineHeight:1.75,
                   }}>
                     <p style={{ marginBottom:18 }}>
-                      Same classroom. Same chalkboard. Same rote memorization. But the kids entering kindergarten this fall likely won't go to a traditional college — AI has already begun making the industrial "degree pipeline" obsolete. So how do we teach them now?
+                      Same classroom. Same rote memorization. But the kids entering kindergarten this fall likely won't follow the traditional college path — AI has already begun making the degree pipeline obsolete. So how do we prepare them?
                     </p>
                     <p style={{ marginBottom:18 }}>
-                      The traditional model isn't just outdated; it's actively breaking. Teachers are resigning <em>en masse</em>. Trust in the system has been shattered by school violence, bullying, and institutional failure. And the burden has fallen entirely on mothers — forced to act as unpaid "general contractors" for their children's futures. Even parents paying $30,000–$50,000 a year for private school still find themselves hiring tutors and managing weekend logistics just to keep up.
+                      The system isn't just outdated. Teachers are resigning. Trust has been shattered by school violence and institutional failure. And the burden has fallen on parents, forced to act as unpaid general contractors for their children's futures. Even families paying top dollar for private school find themselves hiring tutors and managing weekend logistics just to keep up.
                     </p>
                     <p style={{ marginBottom:18 }}>
-                      Homeschooling has nearly doubled since COVID, to almost 6% of US students. But parents don't want to build a school from scratch in their living rooms — they want a system upgrade.
+                      Homeschooling has nearly doubled since COVID. But parents don't want to build a school from scratch. They want a system upgrade.
                     </p>
                     <p style={{ marginBottom:32, color: textPrimary, fontWeight:500 }}>
-                      After years in education, technology, and public health — and after scouring the market for a school we'd actually send our own children to — we stopped looking and started building.
+                      We looked for a school we'd actually send our own children to. We couldn't find one. So we built it.
                     </p>
                   </div>
 
@@ -612,12 +612,12 @@ function Marketing({ onStart }) {
                       The model
                     </p>
                     <p className="font-body" style={{ fontSize:17, lineHeight:1.65, color: textPrimary }}>
-                      neoschool is <strong>instructor-led first</strong>. We hire experienced educators and academics who deliver best-in-class classroom instruction — and the AI tutor <em>supplements</em> their teaching, personalizing practice for every child in <strong>two focused hours each morning</strong>. The rest of the day belongs to building, creating, and solving real problems with professional coaches — engineers, artists, scientists. <span style={{ color: textSecondary }}>No busywork. No six-hour days of sitting still.</span>
+                      neoschool is <strong>guide-led first</strong>. Experienced educators deliver real instruction, and our AI tutor personalizes practice for every child in <strong>two focused hours each morning</strong>. The rest of the day belongs to building, creating, and solving real problems alongside professional coaches: engineers, artists, scientists. <span style={{ color: textSecondary }}>Plenty of outside time; no six hours of sitting still.</span>
                     </p>
                   </div>
 
                   <p className="font-body" style={{ ...r(360), fontSize:14, color: textSecondary, fontStyle:"italic", lineHeight:1.65 }}>
-                    The focused two-hour academic block is validated by other microschool operators and by peer-reviewed research (Nature / Scientific Reports, 2025) on the power of personalized tutoring. Our own AI tutoring platform — used alongside teachers — has been tested with 100,000+ students across 800 schools.
+                    The two-hour academic block is validated by peer-reviewed research and by our own platform, tested with 100,000+ students across 800 schools.
                   </p>
                 </div>
               </section>
@@ -660,7 +660,7 @@ function Marketing({ onStart }) {
                     color: textSecondary, lineHeight:1.7,
                     marginBottom: 48,
                   }}>
-                    <strong style={{ color: textPrimary, fontWeight:600 }}>Esther Wojcicki</strong> — pioneering educator, founder of <em style={{ fontStyle:"italic" }}>Global Moonshots in Education</em>, and best-selling author of <em style={{ fontStyle:"italic" }}>How to Raise Successful People</em> and <em style={{ fontStyle:"italic" }}>Moonshots in Education</em> — is co-building neoschool around the framework she's spent <strong style={{ color: textPrimary, fontWeight:500 }}>30+ years</strong> refining at Palo Alto High School, where she grew the country's largest journalism program from 20 students to 600+. MacArthur Research Fellow. 2002 California Teacher of the Year.
+                    <strong style={{ color: textPrimary, fontWeight:600 }}>Esther Wojcicki</strong> — pioneering educator, author of <em style={{ fontStyle:"italic" }}>How to Raise Successful People</em>, and MacArthur Research Fellow — is co-building neoschool around the framework she spent <strong style={{ color: textPrimary, fontWeight:500 }}>30+ years</strong> refining. At Palo Alto High School, she grew the country's largest journalism program from 20 students to 600+.
                   </p>
 
                   <div style={{
@@ -720,9 +720,9 @@ function Marketing({ onStart }) {
                         Two hours of academics. Then the real learning starts.
                       </h2>
                       {[
-                        "Your child doesn't need six hours in a classroom. They need focused, personalized instruction that meets them exactly where they are. AI tutoring — already validated with over 100,000 students — delivers that in two hours each morning. Real mastery, not seat time.",
-                        "The rest of the day belongs to the things AI will never replace. Professional coaches — engineers, biologists, artists — work alongside your child on real projects. They model curiosity, guide hands-on work, and ask harder questions when the easy answers come too quickly.",
-                        "No homework. No busywork. Your child comes home at 4:30 having built something — not having memorized something. Your evening belongs to your family.",
+                        "Your child doesn't need six hours in a classroom. They need focused, personalized instruction that meets them exactly where they are, delivered in two hours each morning.",
+                        "The rest of the day belongs to what AI will never replace. Professional coaches work alongside your child on real projects. They model curiosity, guide hands-on work, and push harder when the easy answers come too quickly.",
+                        "No homework. No busywork. Your child comes home after 4:30 having built something. Your evening belongs to your family.",
                       ].map((p, i) => (
                         <p key={i} className="prose-neo" style={{ ...r(200 + i * 120), marginTop: i === 0 ? 40 : 28 }}>{p}</p>
                       ))}
@@ -760,11 +760,11 @@ function Marketing({ onStart }) {
               transition: `opacity 400ms cubic-bezier(0.22,1,0.36,1) ${d}ms, transform 400ms cubic-bezier(0.22,1,0.36,1) ${d}ms, filter 400ms cubic-bezier(0.22,1,0.36,1) ${d}ms`,
             });
             const projects = [
-              { title:"Build a weather station.",                tag:"Engineering · Ages 7-11",     body:"Design, wire, and program a real weather station that collects data from the schoolyard. Read the data. Spot the patterns. Present your findings to the class like a scientist — because you are one." },
-              { title:"Run a real business.",                    tag:"Entrepreneurship · Ages 8-11", body:"Start with $50. Source materials, design a product, set a price, and sell it at a community market. The goal isn't a grade — it's profit. And the lessons come from what didn't sell." },
-              { title:"Write, direct, and perform a show.",      tag:"Public Speaking · Ages 6-10",  body:"Seven weeks of improv, sketch comedy, and stagecraft. Then your child writes, directs, and performs their own show in front of a live audience. Not a recital. A production." },
-              { title:"Order your own meal at a restaurant.",    tag:"Independence · Ages 5-7",      body:"Walk in. Request a table. Make eye contact with the server. Order. Say thank you. For a five-year-old, this is a real achievement — and the beginning of a lifetime of confidence." },
-              { title:"Climb a 40-foot wall.",                   tag:"Grit · Ages 5-8",              body:"Train at a climbing gym for weeks, building physical skills and mental resilience. The test isn't a worksheet. It's reaching the top — on your own." },
+              { title:"Plant a garden and watch it grow.",       tag:"Science · Ages 5-7",        body:"Push a seed into the soil. Water it every morning. Measure the sprout as it climbs. Weeks later, harvest something you can actually eat — and understand exactly how it got there." },
+              { title:"Open a lemonade stand.",                  tag:"Entrepreneurship · Ages 5-7", body:"Pick a price. Count out the coins. Make change for a real customer. The goal isn't a worksheet — it's a full cup sold and a handful of coins counted correctly." },
+              { title:"Put on a puppet show.",                   tag:"Storytelling · Ages 5-7",   body:"Invent the characters. Make the puppets. Practice the voices. Then perform a real show for the class — beginning, middle, and a big happy ending." },
+              { title:"Order your own meal at a restaurant.",    tag:"Independence · Ages 5-7",   body:"Walk in. Ask for a table. Look the server in the eye. Order, and say thank you. For a five-year-old, this is a real achievement — and the start of a lifetime of confidence." },
+              { title:"Climb to the top.",                       tag:"Grit · Ages 5-7",           body:"Train at a climbing wall week after week, building strength and courage. The test isn't a grade. It's reaching the very top — all by yourself." },
             ];
             return (
               <section id="afternoons" style={{ position:"relative", background: bgSecondary, padding:"140px 0" }}>
@@ -773,9 +773,6 @@ function Marketing({ onStart }) {
                   <h2 className="font-body text-section-heading" style={{ ...r(0), fontWeight:400, color: textPrimary, position:"relative" }}>
                     What afternoons look like.
                   </h2>
-                  <p className="font-body" style={{ ...r(120), marginTop:20, maxWidth:560, fontSize:18, fontStyle:"italic", color: textSecondary, lineHeight:1.55 }}>
-                    After two hours of AI-powered academics, your child spends the rest of the day on projects that matter. Here's a taste.
-                  </p>
                   <div style={{ marginTop:64, display:"flex", flexDirection:"column" }}>
                     {projects.map((project, i) => (
                       <div key={i} style={{ ...r(300 + i * 200), padding:"48px 0", borderTop: i === 0 ? "none" : `1px solid ${borderSubtle}` }}>
