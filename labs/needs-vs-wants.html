@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Needs vs Wants Market 🛒</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+  html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#d1fae5 0%,#6ee7b7 100%);color:#1a1612;-webkit-font-smoothing:antialiased}
+  .wrap{display:flex;flex-direction:column;height:100%;padding:16px 14px;max-width:760px;margin:0 auto}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .title{font-size:20px;font-weight:700;color:#047857}
+  .stars{display:flex;gap:3px;font-size:22px}
+  .star{filter:grayscale(1);opacity:.35;transition:all .35s}
+  .star.lit{filter:none;opacity:1;transform:scale(1.2) rotate(-8deg)}
+  .hud{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+  .chip{background:#fff;border-radius:99px;padding:5px 14px;font-size:13px;font-weight:700;color:#047857;box-shadow:0 2px 0 #34d399}
+  .chip.flame{background:#fff7ed;color:#c2410c;box-shadow:0 2px 0 #fb923c;opacity:.35;transition:all .25s}
+  .chip.flame.hot{opacity:1;transform:scale(1.08);animation:flicker .6s ease-in-out infinite alternate}
+  @keyframes flicker{from{transform:scale(1.05) rotate(-1deg)}to{transform:scale(1.12) rotate(1.5deg)}}
+  .chip.bonus{background:#fef9c3;color:#a16207;box-shadow:0 2px 0 #facc15;animation:bpulse .8s ease-in-out infinite}
+  @keyframes bpulse{50%{transform:scale(1.1)}}
+  .qbox{background:#fff;border-radius:22px;border:3px solid #34d399;padding:16px 14px;box-shadow:0 4px 0 #34d399;text-align:center;margin-bottom:12px;min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+  .qtext{font-size:clamp(17px,4.4vw,23px);font-weight:700;color:#1a1f3a;line-height:1.35}
+  .qsub{font-size:13.5px;color:#6b7280;font-weight:600}
+  .qtext b,.qtext u{color:#047857}
+  .qsvg svg{max-width:min(64vw,240px);height:auto}
+  .stage{flex:1;display:flex;flex-direction:column;min-height:0}
+  .choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:auto}
+  .choice{min-height:64px;background:#fff;border:none;border-radius:18px;font-family:'Quicksand',sans-serif;font-size:clamp(16px,4.4vw,21px);font-weight:700;color:#047857;cursor:pointer;box-shadow:0 4px 0 #34d399;transition:transform .12s,box-shadow .12s;touch-action:manipulation;padding:10px 8px;line-height:1.25}
+  .choice:active{transform:translateY(2px);box-shadow:0 2px 0 #34d399}
+  .choice.wrong{background:#fecaca;color:#b91c1c;box-shadow:0 4px 0 #f87171;animation:shake .4s}
+  .choice.right{background:#bbf7d0;color:#15803d;box-shadow:0 4px 0 #4ade80}
+  .choice:disabled{cursor:default}
+  @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  .sortItem{background:#fff;border-radius:22px;border:3px solid #34d399;box-shadow:0 4px 0 #34d399;padding:22px 16px;text-align:center;font-size:clamp(20px,5.5vw,28px);font-weight:700;color:#1a1f3a;margin:auto 0;animation:popIn .35s ease-out}
+  .bins{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+  .bin{min-height:86px;border:none;border-radius:20px;font-family:'Quicksand',sans-serif;font-size:clamp(15px,4vw,19px);font-weight:700;color:#fff;cursor:pointer;touch-action:manipulation;transition:transform .12s;padding:10px}
+  .bin:active{transform:scale(.97)}
+  .bin.b0{background:#047857;box-shadow:0 5px 0 rgba(0,0,0,.18)}
+  .bin.b1{background:#f59e0b;box-shadow:0 5px 0 rgba(0,0,0,.18)}
+  .bin .big{font-size:26px;display:block;margin-bottom:2px}
+  .orderChips{display:flex;flex-direction:column;gap:10px;margin:auto 0}
+  .ochip{background:#fff;border:3px solid #34d399;border-radius:16px;padding:13px 14px;font-family:'Quicksand',sans-serif;font-size:clamp(15px,4vw,18px);font-weight:700;color:#1a1f3a;cursor:pointer;text-align:left;box-shadow:0 4px 0 #34d399;transition:all .15s;display:flex;align-items:center;gap:10px;touch-action:manipulation}
+  .ochip:active{transform:translateY(2px)}
+  .ochip.picked{background:#ecfdf5;border-color:#047857}
+  .ochip .num{min-width:30px;height:30px;border-radius:50%;background:#047857;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px}
+  .ochip .num.empty{background:#e5e7eb;color:#9ca3af}
+  .scorePop{position:fixed;font-size:26px;font-weight:700;color:#047857;pointer-events:none;animation:rise .8s ease-out forwards;z-index:60}
+  @keyframes rise{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-56px) scale(1.4)}}
+  @keyframes popIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+  .overlay{position:fixed;inset:0;background:rgba(255,255,255,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:50;text-align:center;padding:20px}
+  .overlay.show{opacity:1;pointer-events:auto}
+  .overlay h2{font-size:clamp(28px,7vw,40px);color:#047857}
+  .overlay .bigstars{font-size:44px;letter-spacing:4px}
+  .overlay .sc{font-size:19px;font-weight:700;color:#374151}
+  .overlay button{background:#047857;color:#fff;border:none;border-radius:99px;padding:14px 34px;font-family:'Quicksand',sans-serif;font-size:19px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2);margin-top:6px}
+  .overlay button:active{transform:translateY(2px)}
+  .overlay .again{background:#fff;color:#047857;box-shadow:0 4px 0 #34d399;font-size:15px;padding:10px 26px}
+  .fb{text-align:center;font-size:15px;font-weight:700;min-height:22px;margin-top:8px;color:#047857}
+  .confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards;z-index:70}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="title">🛒 Needs vs Wants Market</div>
+    <div class="stars" id="stars"></div>
+  </div>
+  <div class="hud">
+    <div class="chip" id="lvl">Level 1</div>
+    <div class="chip" id="score">0 pts</div>
+    <div class="chip flame" id="flame">🔥 streak 0</div>
+    <div class="chip bonus" id="bonusTag" style="display:none">⭐ 2× BONUS</div>
+    <div class="chip" id="prog">1/10</div>
+  </div>
+  <div class="stage" id="stage"></div>
+  <div class="fb" id="fb"></div>
+</div>
+<div class="overlay" id="ov">
+  <h2 id="ovTitle">Level complete!</h2>
+  <div class="bigstars" id="ovStars"></div>
+  <div class="sc" id="ovScore"></div>
+  <button id="ovNext">Next level →</button>
+  <button class="again" id="ovAgain">Play this level again</button>
+</div>
+<script>
+const GAME = { id:"needs-vs-wants", mode:"sort", maxLevel:3, gen:function(level){
+  const needs={1:["water 💧","food 🍎","a home 🏠","warm clothes 🧥","air 🌬️","sleep 😴"],
+   2:["medicine when sick 💊","healthy meals 🥗","a safe place to live 🏡","clean water 🚰","shoes that fit 👟","a doctor visit 🩺"],
+   3:["electricity for heat ⚡","school supplies 📚","transportation to work 🚌","fresh vegetables 🥦","a winter coat 🧣","toothpaste 🪥"]};
+  const wants={1:["video games 🎮","candy 🍬","toys 🧸","ice cream 🍦","balloons 🎈","stickers ⭐"],
+   2:["a new phone 📱","designer sneakers 👟","a trip to a theme park 🎢","a pet parrot 🦜","comic books 📖","a skateboard 🛹"],
+   3:["the newest game console 🕹️","a bigger TV 📺","brand-name backpack 🎒","concert tickets 🎫","fancy desserts 🍰","a drone 🛸"]};
+  const items=[];
+  for(let i=0;i<6;i++){ items.push({t:needs[level][i],bin:0}); items.push({t:wants[level][i],bin:1}); }
+  return {bins:["Need — must have","Want — nice to have"],binEmoji:["✅","🎁"],items};
+ } };
+
+// ── state ────────────────────────────────────────────────────────────────
+let level=1, qIndex=0, correct=0, score=0, streak=0, bestStreak=0, round=0;
+let bonusQ=-1, roundData=null, locked=false;
+const QS=10;
+
+// ── audio (dopamine tones) ───────────────────────────────────────────────
+let AC=null;
+function ac(){ if(!AC){ try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch{} } return AC; }
+function tone(f,t=0.14,type="sine",g=0.16,when=0){ const c=ac(); if(!c)return; const o=c.createOscillator(),v=c.createGain(); o.type=type;o.frequency.value=f; v.gain.setValueAtTime(g,c.currentTime+when); v.gain.exponentialRampToValueAtTime(0.001,c.currentTime+when+t); o.connect(v).connect(c.destination); o.start(c.currentTime+when); o.stop(c.currentTime+when+t+0.02); }
+function sfxRight(){ const base=440+Math.min(streak,8)*46; tone(base,.12);tone(base*1.25,.12,"sine",.16,.09);tone(base*1.5,.16,"sine",.16,.18); }
+function sfxWrong(){ tone(196,.22,"triangle",.12); tone(147,.26,"triangle",.1,.08); }
+function sfxFanfare(){ [523,659,784,1047].forEach((f,i)=>tone(f,.22,"sine",.18,i*.12)); }
+function sfxBonus(){ tone(880,.1,"square",.07); tone(1174,.12,"square",.07,.09); }
+
+// ── confetti ─────────────────────────────────────────────────────────────
+const CCOL=["#047857","#f59e0b","#ec4899","#22c55e","#3b82f6","#eab308"];
+function confetti(n=26){ for(let i=0;i<n;i++){ const d=document.createElement("div"); d.className="confetti"; d.style.left=Math.random()*100+"vw"; d.style.background=CCOL[i%CCOL.length]; d.style.animationDelay=(Math.random()*.4)+"s"; d.style.animationDuration=(1.2+Math.random()*.8)+"s"; document.body.appendChild(d); setTimeout(()=>d.remove(),2400);} }
+
+// ── hud ──────────────────────────────────────────────────────────────────
+function drawStars(){ const s=document.getElementById("stars"); s.innerHTML=""; const lit=Math.min(5,Math.floor(correct/2)); for(let i=0;i<5;i++){ const sp=document.createElement("span"); sp.className="star"+(i<lit?" lit":""); sp.textContent="⭐"; s.appendChild(sp);} }
+function hud(){ document.getElementById("lvl").textContent="Level "+level; document.getElementById("score").textContent=score+" pts"; document.getElementById("prog").textContent=(Math.min(qIndex+1,QS))+"/"+QS; const fl=document.getElementById("flame"); fl.textContent="🔥 streak "+streak; fl.classList.toggle("hot",streak>=3); document.getElementById("bonusTag").style.display=(qIndex===bonusQ)?"":"none"; if(qIndex===bonusQ)sfxBonus(); drawStars(); }
+function pop(txt,x,y){ const p=document.createElement("div"); p.className="scorePop"; p.textContent=txt; p.style.left=(x-20)+"px"; p.style.top=(y-30)+"px"; document.body.appendChild(p); setTimeout(()=>p.remove(),820); }
+function feedback(t){ document.getElementById("fb").textContent=t; }
+
+// ── progress bridge ──────────────────────────────────────────────────────
+function report(complete=false){ try{ parent.postMessage({type:"labProgress",lab:GAME.id,round,level,correct,total:QS,score,bestStreak,stars:Math.min(5,Math.floor(correct/2)),complete},"*"); }catch{} }
+
+// ── scoring ──────────────────────────────────────────────────────────────
+function award(ev){ let pts=10; if(streak>=3)pts*=2; if(qIndex===bonusQ)pts*=2; score+=pts; const x=ev&&ev.clientX?ev.clientX:window.innerWidth/2, y=ev&&ev.clientY?ev.clientY:window.innerHeight/2; pop("+"+pts,x,y); if(streak>=3)confetti(8); }
+const CHEERS=["Nice!","You got it!","Brilliant!","On fire!","Boom!","Exactly right!","Genius move!","Keep going!"];
+const NUDGES=["So close — look again!","Almost! Try the next one!","Good thinking — not quite.","You'll get the next one!"];
+
+// ── modes ────────────────────────────────────────────────────────────────
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+const stage=document.getElementById("stage");
+
+function renderChoice(item){
+  stage.innerHTML="";
+  const qb=document.createElement("div"); qb.className="qbox";
+  const qt=document.createElement("div"); qt.className="qtext"+(item.svg?" qsvg":""); qt.innerHTML=item.q; qb.appendChild(qt);
+  if(item.sub){ const s=document.createElement("div"); s.className="qsub"; s.textContent=item.sub; qb.appendChild(s); }
+  stage.appendChild(qb);
+  const grid=document.createElement("div"); grid.className="choices";
+  const order=shuffle(item.choices.map((c,i)=>({c,i})));
+  order.forEach(({c,i})=>{ const b=document.createElement("button"); b.className="choice"; b.innerHTML=c;
+    b.onclick=(ev)=>{ if(locked)return; locked=true;
+      const ok=(i===item.answer);
+      if(ok){ b.classList.add("right"); streak++; bestStreak=Math.max(bestStreak,streak); correct++; award(ev); sfxRight(); feedback(CHEERS[Math.floor(Math.random()*CHEERS.length)]); }
+      else{ b.classList.add("wrong"); streak=0; sfxWrong(); feedback(NUDGES[Math.floor(Math.random()*NUDGES.length)]);
+        [...grid.children].forEach(btn=>{ if(btn.dataset.idx==item.answer)btn.classList.add("right"); }); }
+      [...grid.children].forEach(btn=>btn.disabled=true);
+      hud(); setTimeout(nextQ, ok?750:1400);
+    };
+    b.dataset.idx=i; grid.appendChild(b);
+  });
+  stage.appendChild(grid);
+}
+
+function renderSort(item){
+  stage.innerHTML="";
+  const card=document.createElement("div"); card.className="sortItem"; card.innerHTML=item.t; stage.appendChild(card);
+  const bins=document.createElement("div"); bins.className="bins";
+  [0,1].forEach(bi=>{ const b=document.createElement("button"); b.className="bin b"+bi; b.innerHTML='<span class="big">'+roundData.binEmoji[bi]+'</span>'+roundData.bins[bi];
+    b.onclick=(ev)=>{ if(locked)return; locked=true;
+      const ok=(bi===item.bin);
+      if(ok){ streak++; bestStreak=Math.max(bestStreak,streak); correct++; award(ev); sfxRight(); card.style.background="#bbf7d0"; feedback(CHEERS[Math.floor(Math.random()*CHEERS.length)]); }
+      else{ streak=0; sfxWrong(); card.style.background="#fecaca"; feedback("It goes in “"+roundData.bins[item.bin]+"”"); }
+      hud(); setTimeout(nextQ, ok?650:1400);
+    }; bins.appendChild(b); });
+  stage.appendChild(bins);
+}
+
+let orderPick=[];
+function renderOrder(item){
+  stage.innerHTML=""; orderPick=[];
+  const qb=document.createElement("div"); qb.className="qbox"; qb.innerHTML='<div class="qtext">'+item.q+'</div><div class="qsub">Tap in order — first to last</div>'; stage.appendChild(qb);
+  const list=document.createElement("div"); list.className="orderChips";
+  const shuffled=shuffle(item.items.map((t,i)=>({t,i})));
+  shuffled.forEach(({t,i})=>{ const c=document.createElement("button"); c.className="ochip"; c.innerHTML='<span class="num empty">•</span><span>'+t+'</span>';
+    c.onclick=(ev)=>{ if(locked||c.classList.contains("picked"))return;
+      c.classList.add("picked"); orderPick.push(i); c.querySelector(".num").classList.remove("empty"); c.querySelector(".num").textContent=orderPick.length;
+      if(orderPick.length===item.items.length){ locked=true;
+        const ok=orderPick.every((v,k)=>v===k);
+        if(ok){ streak++; bestStreak=Math.max(bestStreak,streak); correct++; award(ev); sfxRight(); feedback("Perfect sequence! 🎯"); }
+        else{ streak=0; sfxWrong(); feedback("Right order: "+item.items.join(" → ")); }
+        hud(); setTimeout(nextQ, ok?800:2300);
+      }
+    }; list.appendChild(c); });
+  stage.appendChild(list);
+}
+
+// ── flow ─────────────────────────────────────────────────────────────────
+function nextQ(){
+  locked=false; qIndex++;
+  if(qIndex>=QS) return endRound();
+  hud(); feedback("");
+  const item=roundData.items[qIndex];
+  if(GAME.mode==="choice")renderChoice(item);
+  else if(GAME.mode==="sort")renderSort(item);
+  else renderOrder(item);
+}
+function sanitizeChoices(it){
+  // dedupe (correct answer is index 0 by construction), then pad numerics back to 4
+  const seen=new Set(); const out=[];
+  it.choices.forEach((c,i)=>{ const key=String(c); if(!seen.has(key)){ seen.add(key); out.push(c);} });
+  const m=String(out[0]).match(/^(-?\d+(?:\.\d+)?)(.*)$/);
+  let tries=0;
+  while(out.length<4 && m && tries<20){
+    const base=parseFloat(m[1]); const delta=(1+Math.floor(Math.random()*5))*(Math.random()<.5?-1:1);
+    const cand=(Number.isInteger(base)?base+delta:Math.round((base+delta)*10)/10);
+    const s=String(cand)+m[2];
+    if(cand>=0 && !seen.has(s)){ seen.add(s); out.push(s); }
+    tries++;
+  }
+  it.choices=out; it.answer=0; return it;
+}
+function startRound(){
+  qIndex=-1; correct=0; streak=0; round++;
+  bonusQ=2+Math.floor(Math.random()*(QS-2));
+  const gen=GAME.gen(level);
+  roundData = gen.items ? gen : {items:gen};
+  if(GAME.mode==="choice") roundData.items=roundData.items.map(sanitizeChoices);
+  while(roundData.items.length<QS) roundData.items=roundData.items.concat(roundData.items);
+  roundData.items=shuffle(roundData.items).slice(0,QS);
+  document.getElementById("ov").classList.remove("show");
+  nextQ();
+}
+function endRound(){
+  report(level>=GAME.maxLevel && correct>=7);
+  sfxFanfare(); confetti(60);
+  const stars=Math.min(5,Math.floor(correct/2));
+  document.getElementById("ovStars").textContent="⭐".repeat(Math.max(1,stars))+"☆".repeat(5-Math.max(1,stars));
+  document.getElementById("ovScore").textContent=correct+"/"+QS+" correct · "+score+" pts · best streak 🔥"+bestStreak;
+  const done=level>=GAME.maxLevel;
+  document.getElementById("ovTitle").textContent = correct>=7 ? (done?"You mastered it! 🏆":"Level "+level+" cleared!") : "Round over!";
+  const nb=document.getElementById("ovNext");
+  nb.textContent = correct>=7 ? (done?"Champion run again 🏆":"Next level →") : "Try again 💪";
+  nb.onclick=()=>{ if(correct>=7&&!done)level++; else if(correct>=7&&done){level=1;score=0;} startRound(); };
+  document.getElementById("ovAgain").onclick=()=>startRound();
+  document.getElementById("ov").classList.add("show");
+}
+startRound();
+</script>
+</body>
+</html>
