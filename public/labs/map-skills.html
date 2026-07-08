@@ -60,6 +60,15 @@
   .overlay button:active{transform:translateY(2px)}
   .overlay .again{background:#fff;color:#0369a1;box-shadow:0 4px 0 #38bdf8;font-size:15px;padding:10px 26px}
   .fb{text-align:center;font-size:15px;font-weight:700;min-height:22px;margin-top:8px;color:#0369a1}
+  .speedbar{height:6px;border-radius:99px;background:#ffffff88;margin-bottom:10px;overflow:hidden}
+  .speedbar i{display:block;height:100%;background:linear-gradient(90deg,#f59e0b,#facc15);border-radius:99px;width:100%}
+  .speedbar i.run{transition:width 4s linear;width:0}
+  .npDisplay{background:#fff;border:3px solid #38bdf8;border-radius:16px;min-height:56px;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;color:#0369a1;margin-bottom:10px;letter-spacing:2px}
+  .numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:auto}
+  .npBtn{min-height:54px;background:#fff;border:none;border-radius:14px;font-family:'Quicksand',sans-serif;font-size:22px;font-weight:700;color:#0369a1;cursor:pointer;box-shadow:0 3px 0 #38bdf8;touch-action:manipulation}
+  .npBtn:active{transform:translateY(2px);box-shadow:0 1px 0 #38bdf8}
+  .npBtn.go{background:#0369a1;color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.25)}
+  .npBtn.util{background:#f0f9ff}
   .confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards;z-index:70}
   @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
 </style>
@@ -77,6 +86,7 @@
     <div class="chip bonus" id="bonusTag" style="display:none">⭐ 2× BONUS</div>
     <div class="chip" id="prog">1/10</div>
   </div>
+  <div class="speedbar"><i id="sbar"></i></div>
   <div class="stage" id="stage"></div>
   <div class="fb" id="fb"></div>
 </div>
@@ -114,7 +124,7 @@ const GAME = { id:"map-skills", mode:"choice", maxLevel:3, gen:function(level){
 // ── state ────────────────────────────────────────────────────────────────
 let level=1, qIndex=0, correct=0, score=0, streak=0, bestStreak=0, round=0;
 let bonusQ=-1, roundData=null, locked=false;
-const QS=10;
+let QS=10;
 
 // ── audio (dopamine tones) ───────────────────────────────────────────────
 let AC=null;
@@ -139,7 +149,12 @@ function feedback(t){ document.getElementById("fb").textContent=t; }
 function report(complete=false){ try{ parent.postMessage({type:"labProgress",lab:GAME.id,round,level,correct,total:QS,score,bestStreak,stars:Math.min(5,Math.floor(correct/2)),complete},"*"); }catch{} }
 
 // ── scoring ──────────────────────────────────────────────────────────────
-function award(ev){ let pts=10; if(streak>=3)pts*=2; if(qIndex===bonusQ)pts*=2; score+=pts; const x=ev&&ev.clientX?ev.clientX:window.innerWidth/2, y=ev&&ev.clientY?ev.clientY:window.innerHeight/2; pop("+"+pts,x,y); if(streak>=3)confetti(8); }
+let qStart=0;
+function award(ev){ let pts=10; const fast=(Date.now()-qStart)<4000;
+  if(fast)pts+=5;
+  if(streak>=3)pts*=2; if(qIndex===bonusQ)pts*=2; score+=pts;
+  const x=ev&&ev.clientX?ev.clientX:window.innerWidth/2, y=ev&&ev.clientY?ev.clientY:window.innerHeight/2;
+  pop("+"+pts+(fast?" ⚡":""),x,y); if(streak>=3)confetti(8); }
 const CHEERS=["Nice!","You got it!","Brilliant!","On fire!","Boom!","Exactly right!","Genius move!","Keep going!"];
 const NUDGES=["So close — look again!","Almost! Try the next one!","Good thinking — not quite.","You'll get the next one!"];
 
@@ -167,6 +182,36 @@ function renderChoice(item){
     b.dataset.idx=i; grid.appendChild(b);
   });
   stage.appendChild(grid);
+}
+
+function renderNumpad(item){
+  stage.innerHTML="";
+  const qb=document.createElement("div"); qb.className="qbox";
+  const qt=document.createElement("div"); qt.className="qtext"+(item.svg?" qsvg":""); qt.innerHTML=item.q; qb.appendChild(qt);
+  const s0=document.createElement("div"); s0.className="qsub"; s0.textContent="⌨️ Type your answer!"; qb.appendChild(s0);
+  stage.appendChild(qb);
+  const disp=document.createElement("div"); disp.className="npDisplay"; disp.textContent="_"; stage.appendChild(disp);
+  const answerStr=String(item.choices[item.answer]).replace(/<[^>]*>/g,"").trim();
+  let entry="";
+  const pad=document.createElement("div"); pad.className="numpad";
+  const keys=["1","2","3","4","5","6","7","8","9",(answerStr.startsWith("-")?"−":"⌫"),"0","✓"];
+  keys.forEach(k=>{ const b=document.createElement("button"); b.className="npBtn"+(k==="✓"?" go":(k==="⌫"||k==="−"?" util":"")); b.textContent=k;
+    b.onclick=(ev)=>{ if(locked)return;
+      if(k==="⌫"){ entry=entry.slice(0,-1); }
+      else if(k==="−"){ entry=entry.startsWith("-")?entry.slice(1):"-"+entry; }
+      else if(k==="✓"){
+        if(!entry||entry==="-")return;
+        locked=true;
+        const ok=(entry===answerStr)||(parseFloat(entry)===parseFloat(answerStr));
+        if(ok){ disp.style.background="#bbf7d0"; streak++; bestStreak=Math.max(bestStreak,streak); correct++; award(ev); sfxRight(); feedback(CHEERS[Math.floor(Math.random()*CHEERS.length)]); }
+        else{ disp.style.background="#fecaca"; streak=0; sfxWrong(); feedback("The answer was "+answerStr); }
+        hud(); setTimeout(nextQ, ok?750:1600); return;
+      }
+      else{ if(entry.replace("-","").length<5)entry+=k; }
+      disp.textContent=entry||"_";
+    };
+    pad.appendChild(b); });
+  stage.appendChild(pad);
 }
 
 function renderSort(item){
@@ -203,12 +248,15 @@ function renderOrder(item){
 }
 
 // ── flow ─────────────────────────────────────────────────────────────────
+const NUMRE=/^-?\d{1,4}$/;
+function isNumeric(it){ return it && Array.isArray(it.choices) && NUMRE.test(String(it.choices[it.answer]).replace(/<[^>]*>/g,"").trim()); }
+function armSpeedBar(){ const b=document.getElementById("sbar"); b.classList.remove("run"); void b.offsetWidth; b.classList.add("run"); }
 function nextQ(){
   locked=false; qIndex++;
   if(qIndex>=QS) return endRound();
-  hud(); feedback("");
+  hud(); feedback(""); qStart=Date.now(); armSpeedBar();
   const item=roundData.items[qIndex];
-  if(GAME.mode==="choice")renderChoice(item);
+  if(GAME.mode==="choice"){ if(item.useNumpad) renderNumpad(item); else renderChoice(item); }
   else if(GAME.mode==="sort")renderSort(item);
   else renderOrder(item);
 }
@@ -229,12 +277,21 @@ function sanitizeChoices(it){
 }
 function startRound(){
   qIndex=-1; correct=0; streak=0; round++;
-  bonusQ=2+Math.floor(Math.random()*(QS-2));
-  const gen=GAME.gen(level);
-  roundData = gen.items ? gen : {items:gen};
-  if(GAME.mode==="choice") roundData.items=roundData.items.map(sanitizeChoices);
-  while(roundData.items.length<QS) roundData.items=roundData.items.concat(roundData.items);
-  roundData.items=shuffle(roundData.items).slice(0,QS);
+  // repeat-free round: draw from gen() up to 6 times, dedupe by content
+  const keyOf = GAME.mode==="sort" ? (it)=>String(it.t) : GAME.mode==="order" ? (it)=>it.q+"|"+it.items.join("|") : (it)=>String(it.q).replace(/\s+/g," ");
+  const seen=new Set(); let pool=[]; let meta=null;
+  for(let draw=0; draw<6 && pool.length<12; draw++){
+    const gen=GAME.gen(level);
+    const batch = gen.items ? gen.items : gen;
+    if(gen.items && !meta) meta=gen;
+    for(const it of batch){ const k=keyOf(it); if(!seen.has(k)){ seen.add(k); pool.push(it); } }
+  }
+  QS=Math.max(4, Math.min(10, pool.length));
+  pool=shuffle(pool).slice(0,QS);
+  if(GAME.mode==="choice"){ pool=pool.map(sanitizeChoices);
+    pool.forEach(it=>{ if(isNumeric(it) && Math.random()<0.5) it.useNumpad=true; }); }
+  roundData = meta ? {bins:meta.bins, binEmoji:meta.binEmoji, items:pool} : {items:pool};
+  bonusQ=2+Math.floor(Math.random()*Math.max(1,QS-2));
   document.getElementById("ov").classList.remove("show");
   nextQ();
 }
