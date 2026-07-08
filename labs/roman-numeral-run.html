@@ -35,7 +35,10 @@
   .choice.right{background:#bbf7d0;color:#15803d;box-shadow:0 4px 0 #4ade80}
   .choice:disabled{cursor:default}
   @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
-  .sortItem{background:#fff;border-radius:22px;border:3px solid #facc15;box-shadow:0 4px 0 #facc15;padding:22px 16px;text-align:center;font-size:clamp(20px,5.5vw,28px);font-weight:700;color:#1a1f3a;margin:auto 0;animation:popIn .35s ease-out}
+  .sortItem{background:#fff;border-radius:22px;border:3px solid #facc15;box-shadow:0 4px 0 #facc15;padding:22px 16px;text-align:center;font-size:clamp(20px,5.5vw,28px);font-weight:700;color:#1a1f3a;margin:auto 0;animation:popIn .35s ease-out;touch-action:none;cursor:grab;position:relative;z-index:5}
+  .sortItem.dragging{cursor:grabbing;transition:none;box-shadow:0 12px 24px rgba(0,0,0,.18);animation:none}
+  .sortHint{text-align:center;font-size:12.5px;font-weight:700;color:#a16207;opacity:.7;margin-top:6px}
+  .bin.hot{transform:scale(1.06);filter:brightness(1.15)}
   .bins{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
   .bin{min-height:86px;border:none;border-radius:20px;font-family:'Quicksand',sans-serif;font-size:clamp(15px,4vw,19px);font-weight:700;color:#fff;cursor:pointer;touch-action:manipulation;transition:transform .12s;padding:10px}
   .bin:active{transform:scale(.97)}
@@ -203,15 +206,31 @@ function renderNumpad(item){
 function renderSort(item){
   stage.innerHTML="";
   const card=document.createElement("div"); card.className="sortItem"; card.innerHTML=item.t; stage.appendChild(card);
+  const hint=document.createElement("div"); hint.className="sortHint"; hint.textContent="👆 Drag the card into a bin — or tap the bin"; stage.appendChild(hint);
   const bins=document.createElement("div"); bins.className="bins";
+  const binEls=[];
+  function resolve(bi,ev){
+    if(locked)return; locked=true;
+    const ok=(bi===item.bin);
+    if(ok){ streak++; bestStreak=Math.max(bestStreak,streak); correct++; award(ev); sfxRight(); card.style.background="#bbf7d0"; feedback(CHEERS[Math.floor(Math.random()*CHEERS.length)]); }
+    else{ streak=0; sfxWrong(); card.style.background="#fecaca"; feedback("It goes in \u201c"+roundData.bins[item.bin]+"\u201d"); binEls[item.bin].classList.add("hot"); }
+    hud(); setTimeout(nextQ, ok?650:1400);
+  }
   [0,1].forEach(bi=>{ const b=document.createElement("button"); b.className="bin b"+bi; b.innerHTML='<span class="big">'+roundData.binEmoji[bi]+'</span>'+roundData.bins[bi];
-    b.onclick=(ev)=>{ if(locked)return; locked=true;
-      const ok=(bi===item.bin);
-      if(ok){ streak++; bestStreak=Math.max(bestStreak,streak); correct++; award(ev); sfxRight(); card.style.background="#bbf7d0"; feedback(CHEERS[Math.floor(Math.random()*CHEERS.length)]); }
-      else{ streak=0; sfxWrong(); card.style.background="#fecaca"; feedback("It goes in “"+roundData.bins[item.bin]+"”"); }
-      hud(); setTimeout(nextQ, ok?650:1400);
-    }; bins.appendChild(b); });
+    b.onclick=(ev)=>resolve(bi,ev); binEls.push(b); bins.appendChild(b); });
   stage.appendChild(bins);
+  let dx=0,dy=0,dragging=false;
+  card.addEventListener("pointerdown",(e)=>{ if(locked)return; dragging=true; dx=e.clientX; dy=e.clientY;
+    card.classList.add("dragging"); if(card.setPointerCapture)try{card.setPointerCapture(e.pointerId)}catch(_){} });
+  card.addEventListener("pointermove",(e)=>{ if(!dragging)return;
+    card.style.transform="translate("+(e.clientX-dx)+"px,"+(e.clientY-dy)+"px) rotate("+((e.clientX-dx)/40)+"deg)";
+    binEls.forEach(b=>{ const r=b.getBoundingClientRect();
+      b.classList.toggle("hot", e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom); }); });
+  card.addEventListener("pointerup",(e)=>{ if(!dragging)return; dragging=false; card.classList.remove("dragging");
+    let hit=-1;
+    binEls.forEach((b,bi)=>{ const r=b.getBoundingClientRect(); b.classList.remove("hot");
+      if(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom) hit=bi; });
+    if(hit>=0){ resolve(hit,e); } else { card.style.transform=""; } });
 }
 
 let orderPick=[];
@@ -239,7 +258,7 @@ function isNumeric(it){ return it && Array.isArray(it.choices) && NUMRE.test(Str
 function armSpeedBar(){ const b=document.getElementById("sbar"); b.classList.remove("run"); void b.offsetWidth; b.classList.add("run"); }
 function nextQ(){
   locked=false; qIndex++;
-  if(qIndex>=QS) return endRound();
+  if(qIndex>=QS || !roundData.items[qIndex]) return endRound();
   hud(); feedback(""); qStart=Date.now(); armSpeedBar();
   const item=roundData.items[qIndex];
   if(GAME.mode==="choice"){ if(item.useNumpad) renderNumpad(item); else renderChoice(item); }
@@ -264,7 +283,7 @@ function sanitizeChoices(it){
 function startRound(){
   qIndex=-1; correct=0; streak=0; round++;
   // repeat-free round: draw from gen() up to 6 times, dedupe by content
-  const keyOf = GAME.mode==="sort" ? (it)=>String(it.t) : GAME.mode==="order" ? (it)=>it.q+"|"+it.items.join("|") : (it)=>String(it.q).replace(/\s+/g," ");
+  const keyOf = GAME.mode==="sort" ? (it)=>String(it.t) : GAME.mode==="order" ? (it)=>it.q+"|"+it.items.join("|") : (it)=>String(it.q).replace(/\s+/g," ")+"|"+(it.choices||[]).map(String).join("|");
   const seen=new Set(); let pool=[]; let meta=null;
   for(let draw=0; draw<6 && pool.length<12; draw++){
     const gen=GAME.gen(level);
@@ -272,10 +291,10 @@ function startRound(){
     if(gen.items && !meta) meta=gen;
     for(const it of batch){ const k=keyOf(it); if(!seen.has(k)){ seen.add(k); pool.push(it); } }
   }
-  QS=Math.max(4, Math.min(10, pool.length));
+  QS=Math.min(10, pool.length);
   pool=shuffle(pool).slice(0,QS);
   if(GAME.mode==="choice"){ pool=pool.map(sanitizeChoices);
-    pool.forEach(it=>{ if(isNumeric(it) && Math.random()<0.5) it.useNumpad=true; }); }
+    pool.forEach(it=>{ if(isNumeric(it) && !/which|choose|pick|select/i.test(String(it.q)) && Math.random()<0.5) it.useNumpad=true; }); }
   roundData = meta ? {bins:meta.bins, binEmoji:meta.binEmoji, items:pool} : {items:pool};
   bonusQ=2+Math.floor(Math.random()*Math.max(1,QS-2));
   document.getElementById("ov").classList.remove("show");
