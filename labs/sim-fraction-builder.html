@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Fraction Builder 🍰</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#fce7f3,#f9a8d4)}
+.wrap{display:flex;flex-direction:column;height:100%;padding:14px;max-width:560px;margin:0 auto}
+.topbar{display:flex;justify-content:space-between;align-items:center}
+.title{font-size:18px;font-weight:700;color:#be185d}
+.chip{background:#fff;border-radius:99px;padding:5px 13px;font-size:13px;font-weight:700;color:#be185d;box-shadow:0 2px 0 #f472b6}
+.task{background:#fff;border:3px solid #f472b6;border-radius:16px;box-shadow:0 4px 0 #f472b6;padding:10px 14px;text-align:center;font-size:clamp(15px,4.4vw,19px);font-weight:700;color:#1a1f3a;margin:10px 0}
+.svgbox{flex:1;display:flex;align-items:center;justify-content:center}
+svg{width:100%;max-width:340px;height:auto}
+.slice{cursor:pointer;transition:fill .15s}
+.readout{text-align:center;font-size:clamp(19px,5.5vw,24px);font-weight:700;color:#be185d;margin:4px 0}
+.check{min-height:54px;width:100%;background:#be185d;color:#fff;border:none;border-radius:16px;font-family:'Quicksand',sans-serif;font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2);touch-action:manipulation}
+.check:active{transform:translateY(2px)}
+.fb{text-align:center;font-size:14.5px;font-weight:700;min-height:20px;margin-top:8px;color:#be185d}
+.overlay{position:fixed;inset:0;background:rgba(255,255,255,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:50;text-align:center;padding:20px}
+.overlay.show{opacity:1;pointer-events:auto}
+.overlay h2{font-size:clamp(26px,7vw,36px);color:#be185d}
+.overlay .sc{font-size:17px;font-weight:700;color:#374151}
+.overlay button{background:#be185d;color:#fff;border:none;border-radius:99px;padding:13px 32px;font-family:'Quicksand',sans-serif;font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2)}
+.confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards;z-index:70}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+</style></head><body>
+<div class="wrap">
+  <div class="topbar"><div class="title">🍰 Fraction Builder</div><div style="display:flex;gap:6px"><div class="chip" id="score">0 pts</div><div class="chip" id="prog">1/5</div></div></div>
+  <div class="task" id="task"></div>
+  <div class="svgbox"><svg viewBox="0 0 200 200" id="pie"></svg></div>
+  <div class="readout" id="readout">0/8 shaded</div>
+  <button class="check" id="check">Check my fraction ✓</button>
+  <div class="fb" id="fb">Tap slices to shade them!</div>
+</div>
+<div class="overlay" id="ov"><h2 id="ovTitle"></h2><div class="sc" id="ovScore"></div><button id="ovNext">Next →</button></div>
+<script>
+const GAME={id:"sim-fraction-builder"};
+function genChallenges(){
+  const ch=[];
+  // ch: {d: slices shown, n: slices to shade, label: fraction asked}
+  ch.push({d:4,n:2,ask:"2/4",text:"Shade <b>2/4</b> of the circle"});
+  ch.push({d:6,n:4,ask:"4/6",text:"Shade <b>4/6</b> of the circle"});
+  ch.push({d:8,n:4,ask:"1/2",text:"Shade <b>1/2</b> using the 8 slices"});          // equivalence
+  ch.push({d:6,n:2,ask:"1/3",text:"Shade <b>1/3</b> using the 6 slices"});          // equivalence
+  ch.push({d:8,n:6,ask:"3/4",text:"Shade <b>3/4</b> using the 8 slices"});          // equivalence
+  return ch;
+}
+const CH=genChallenges();
+let idx=0,score=0,tries=0,shaded=new Set();
+let AC=null;function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch{}}return AC;}
+function tone(f,t=.12,ty="sine",g=.15,w=0){const c=ac();if(!c)return;const o=c.createOscillator(),v=c.createGain();o.type=ty;o.frequency.value=f;v.gain.setValueAtTime(g,c.currentTime+w);v.gain.exponentialRampToValueAtTime(.001,c.currentTime+w+t);o.connect(v).connect(c.destination);o.start(c.currentTime+w);o.stop(c.currentTime+w+t+.02);}
+const CC=["#be185d","#f59e0b","#ec4899","#22c55e","#3b82f6"];
+function confetti(n){for(let i=0;i<n;i++){const d=document.createElement("div");d.className="confetti";d.style.left=Math.random()*100+"vw";d.style.background=CC[i%5];d.style.animationDelay=Math.random()*.4+"s";document.body.appendChild(d);setTimeout(()=>d.remove(),2300);}}
+function report(complete){try{parent.postMessage({type:"labProgress",lab:GAME.id,score,complete},"*");}catch{}}
+function slicePath(i,d){
+  const a0=(i/d)*2*Math.PI-Math.PI/2, a1=((i+1)/d)*2*Math.PI-Math.PI/2;
+  const x0=100+88*Math.cos(a0),y0=100+88*Math.sin(a0),x1=100+88*Math.cos(a1),y1=100+88*Math.sin(a1);
+  return "M100,100 L"+x0.toFixed(1)+","+y0.toFixed(1)+" A88,88 0 0 1 "+x1.toFixed(1)+","+y1.toFixed(1)+" Z";
+}
+function render(){
+  const c=CH[idx];
+  let s="";
+  for(let i=0;i<c.d;i++){
+    s+='<path class="slice" data-i="'+i+'" d="'+slicePath(i,c.d)+'" fill="'+(shaded.has(i)?"#f472b6":"#fff")+'" stroke="#be185d" stroke-width="2.5"/>';
+  }
+  document.getElementById("pie").innerHTML=s;
+  [...document.querySelectorAll(".slice")].forEach(p=>{p.onclick=()=>{const i=+p.dataset.i;
+    if(shaded.has(i))shaded.delete(i);else shaded.add(i);
+    tone(shaded.has(i)?560:440,.06,"sine",.07);render();};});
+  document.getElementById("readout").textContent=shaded.size+"/"+c.d+" shaded";
+  document.getElementById("prog").textContent=(idx+1)+"/5";
+  document.getElementById("score").textContent=score+" pts";
+}
+function load(){shaded=new Set();tries=0;
+  document.getElementById("task").innerHTML=CH[idx].text;
+  document.getElementById("fb").textContent="Tap slices to shade them!";
+  render();}
+document.getElementById("check").onclick=()=>{
+  const c=CH[idx];tries++;
+  if(shaded.size===c.n){
+    const pts=Math.max(10,35-(tries-1)*10);score+=pts;
+    tone(660,.12);tone(880,.14,"sine",.15,.1);confetti(30);
+    document.getElementById("fb").textContent="🎉 "+shaded.size+"/"+c.d+" = "+c.ask+"  (+"+pts+" pts)";
+    document.getElementById("score").textContent=score+" pts";
+    setTimeout(next,1300);
+  } else {
+    tone(200,.2,"triangle",.1);
+    const frac=shaded.size+"/"+c.d;
+    document.getElementById("fb").textContent="You shaded "+frac+" — the target is "+c.ask+". "+(shaded.size<c.n?"Shade more!":"Unshade some!");
+  }
+};
+function next(){idx++;
+  if(idx>=CH.length){report(true);confetti(60);
+    document.getElementById("ovTitle").textContent="Fraction artist! 🏆";
+    document.getElementById("ovScore").textContent=score+" pts · you SEE fractions now";
+    document.getElementById("ovNext").onclick=()=>{idx=0;score=0;load();document.getElementById("ov").classList.remove("show");};
+    document.getElementById("ov").classList.add("show");return;}
+  load();}
+window.__qa={solve:()=>{const c=CH[idx];shaded=new Set();for(let i=0;i<c.n;i++)shaded.add(i);render();document.getElementById("check").click();}};
+load();
+</script></body></html>

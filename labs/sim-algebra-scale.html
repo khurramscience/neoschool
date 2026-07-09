@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Algebra Scale 🧿</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#ede9fe,#c4b5fd)}
+.wrap{display:flex;flex-direction:column;height:100%;padding:14px;max-width:600px;margin:0 auto}
+.topbar{display:flex;justify-content:space-between;align-items:center}
+.title{font-size:18px;font-weight:700;color:#6d28d9}
+.chip{background:#fff;border-radius:99px;padding:5px 13px;font-size:13px;font-weight:700;color:#6d28d9;box-shadow:0 2px 0 #a78bfa}
+.eq{background:#fff;border:3px solid #a78bfa;border-radius:16px;box-shadow:0 4px 0 #a78bfa;padding:10px;text-align:center;font-size:clamp(20px,6vw,28px);font-weight:700;color:#1a1f3a;margin:10px 0;font-variant-numeric:tabular-nums}
+.pans{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:center}
+.pan{background:rgba(255,255,255,.6);border:3px dashed #a78bfa;border-radius:18px;min-height:150px;padding:12px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;justify-content:center;position:relative}
+.pan::after{content:attr(data-side);position:absolute;bottom:6px;right:10px;font-size:11px;font-weight:700;color:#6d28d9;opacity:.5}
+.blk{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.2);animation:pin .25s}
+@keyframes pin{from{transform:scale(0)}to{transform:scale(1)}}
+.blk.x{background:#6d28d9}
+.blk.u{background:#f59e0b}
+.ops{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px}
+.ops button{min-height:54px;background:#fff;border:none;border-radius:14px;font-family:'Quicksand',sans-serif;font-size:16px;font-weight:700;color:#6d28d9;cursor:pointer;box-shadow:0 3px 0 #a78bfa;touch-action:manipulation}
+.ops button:disabled{opacity:.35}
+.ops button:active{transform:translateY(2px)}
+.fb{text-align:center;font-size:14.5px;font-weight:700;min-height:20px;margin-top:8px;color:#6d28d9}
+.overlay{position:fixed;inset:0;background:rgba(255,255,255,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:50;text-align:center;padding:20px}
+.overlay.show{opacity:1;pointer-events:auto}
+.overlay h2{font-size:clamp(26px,7vw,36px);color:#6d28d9}
+.overlay .sc{font-size:17px;font-weight:700;color:#374151}
+.overlay button{background:#6d28d9;color:#fff;border:none;border-radius:99px;padding:13px 32px;font-family:'Quicksand',sans-serif;font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2)}
+.confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards;z-index:70}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+</style></head><body>
+<div class="wrap">
+  <div class="topbar"><div class="title">🧿 Algebra Scale</div><div style="display:flex;gap:6px"><div class="chip" id="score">0 pts</div><div class="chip" id="prog">1/5</div></div></div>
+  <div class="eq" id="eq"></div>
+  <div class="pans">
+    <div class="pan" id="left" data-side="LEFT"></div>
+    <div class="pan" id="right" data-side="RIGHT"></div>
+  </div>
+  <div class="ops">
+    <button id="opSub">➖ Remove 1 from both sides</button>
+    <button id="opDiv">➗ Split both sides</button>
+    <button id="opReset">↺ Reset</button>
+  </div>
+  <div class="fb" id="fb">Whatever you do to one side, do to the other!</div>
+</div>
+<div class="overlay" id="ov"><h2 id="ovTitle"></h2><div class="sc" id="ovScore"></div><button id="ovNext">Next →</button></div>
+<script>
+const GAME={id:"sim-algebra-scale"};
+function genChallenges(){
+  const ch=[];
+  const combos=[];
+  for(let a=1;a<=3;a++)for(let x=1;x<=5;x++)for(let b=0;b<=5;b++){
+    const c=a*x+b; if(c<=15&&!(a===1&&b===0))combos.push({a,b,c,x});}
+  ch.push({a:1,b:3,c:7,x:4});
+  while(ch.length<5)ch.push(combos[Math.floor(Math.random()*combos.length)]);
+  return ch;
+}
+const CH=genChallenges();
+let idx=0,score=0,moves=0,st=null;
+let AC=null;function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch{}}return AC;}
+function tone(f,t=.12,ty="sine",g=.15,w=0){const c=ac();if(!c)return;const o=c.createOscillator(),v=c.createGain();o.type=ty;o.frequency.value=f;v.gain.setValueAtTime(g,c.currentTime+w);v.gain.exponentialRampToValueAtTime(.001,c.currentTime+w+t);o.connect(v).connect(c.destination);o.start(c.currentTime+w);o.stop(c.currentTime+w+t+.02);}
+const CC=["#6d28d9","#f59e0b","#ec4899","#22c55e","#3b82f6"];
+function confetti(n){for(let i=0;i<n;i++){const d=document.createElement("div");d.className="confetti";d.style.left=Math.random()*100+"vw";d.style.background=CC[i%5];d.style.animationDelay=Math.random()*.4+"s";document.body.appendChild(d);setTimeout(()=>d.remove(),2300);}}
+function report(complete){try{parent.postMessage({type:"labProgress",lab:GAME.id,score,complete},"*");}catch{}}
+function eqText(){return (st.a>1?st.a:"")+"x"+(st.b>0?" + "+st.b:"")+" = "+st.c;}
+function render(){
+  document.getElementById("eq").textContent=eqText();
+  const L=document.getElementById("left");L.innerHTML="";
+  for(let i=0;i<st.a;i++){const d=document.createElement("div");d.className="blk x";d.textContent="x";L.appendChild(d);}
+  for(let i=0;i<st.b;i++){const d=document.createElement("div");d.className="blk u";d.textContent="1";L.appendChild(d);}
+  const R=document.getElementById("right");R.innerHTML="";
+  for(let i=0;i<st.c;i++){const d=document.createElement("div");d.className="blk u";d.textContent="1";R.appendChild(d);}
+  document.getElementById("opSub").disabled=st.b<=0;
+  document.getElementById("opDiv").disabled=!(st.b===0&&st.a>1&&st.c%st.a===0);
+  document.getElementById("prog").textContent=(idx+1)+"/5";
+  document.getElementById("score").textContent=score+" pts";
+  if(st.a===1&&st.b===0){
+    const c=CH[idx];
+    const pts=Math.max(15,50-Math.max(0,moves-(c.b+ (c.a>1?1:0)))*8);score+=pts;
+    tone(660,.12);tone(880,.14,"sine",.15,.1);confetti(30);
+    document.getElementById("fb").textContent="🎉 Solved! x = "+st.c+"  (+"+pts+" pts)";
+    document.getElementById("score").textContent=score+" pts";
+    document.getElementById("opSub").disabled=true;document.getElementById("opDiv").disabled=true;
+    setTimeout(next,1300);
+  }
+}
+function load(){const c=CH[idx];st={a:c.a,b:c.b,c:c.c};moves=0;
+  document.getElementById("fb").textContent="Get x alone: remove units, then split into equal groups.";
+  render();}
+document.getElementById("opSub").onclick=()=>{if(st.b<=0)return;moves++;st.b--;st.c--;tone(500,.07,"sine",.08);document.getElementById("fb").textContent="Removed 1 from both pans — still balanced!";render();};
+document.getElementById("opDiv").onclick=()=>{if(!(st.b===0&&st.a>1&&st.c%st.a===0))return;moves++;st.c=st.c/st.a;st.a=1;tone(560,.08,"sine",.08);document.getElementById("fb").textContent="Split both sides into equal groups!";render();};
+document.getElementById("opReset").onclick=()=>load();
+function next(){idx++;
+  if(idx>=CH.length){report(true);confetti(60);
+    document.getElementById("ovTitle").textContent="Equation whisperer! 🏆";
+    document.getElementById("ovScore").textContent=score+" pts · you solved for x like DragonBox";
+    document.getElementById("ovNext").onclick=()=>{idx=0;score=0;load();document.getElementById("ov").classList.remove("show");};
+    document.getElementById("ov").classList.add("show");return;}
+  load();}
+window.__qa={solve:()=>{let guard=0;while(!(st.a===1&&st.b===0)&&guard++<25){if(st.b>0)document.getElementById("opSub").click();else document.getElementById("opDiv").click();}}};
+load();
+</script></body></html>
