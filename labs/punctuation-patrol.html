@@ -306,7 +306,11 @@ function sanitizeChoices(it){
 function startRound(){
   qIndex=-1; correct=0; streak=0; round++;
   // repeat-free round: draw from gen() up to 6 times, dedupe by content
-  const keyOf = GAME.mode==="sort" ? (it)=>String(it.t) : GAME.mode==="order" ? (it)=>it.q+"|"+it.items.join("|") : (it)=>String(it.q).replace(/\s+/g," ")+"|"+(it.choices||[]).map(String).join("|");
+  const NUMKEY=/^-?\d{1,4}$/;
+  const keyOf = GAME.mode==="sort" ? (it)=>String(it.t) : GAME.mode==="order" ? (it)=>it.q+"|"+it.items.join("|") : (it)=>{
+    const qn=String(it.q).replace(/\s+/g," ");
+    const ans=String((it.choices||[])[it.answer||0]).replace(/<[^>]*>/g,"").trim();
+    return NUMKEY.test(ans) ? qn : qn+"|"+(it.choices||[]).map(String).join("|"); };
   const seen=new Set(); let pool=[]; let meta=null;
   for(let draw=0; draw<6 && pool.length<12; draw++){
     const gen=GAME.gen(level);
