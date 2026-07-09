@@ -4,6 +4,9 @@ import { resolveTool } from "./toolResolver.js";
 import { claude, genJSON, genCurriculum, genMultiCurriculum, genBriefing, genParentComm } from "./api.js";
 import { getMemory, saveSession, saveTutorFeedback, buildRecommendations, buildCrossContext } from "./memory.js";
 import { getCredits, useCredits, addCredits, PLANS, COSTS, FREE_DEMO_CREDITS } from "./credits.js";
+import { supabase, supabaseEnabled, supabaseReady } from "./supabase.js";
+import { loadTaxonomy, labsForTopic, coveredTopicIds, masteredTopics, prereqPath, suggestNext, ageLabel } from "./learningGraph.js";
+import { LAB_TOPIC } from "./labTopicMap.js";
 import { getTutorConfig, saveTutorConfig } from "./tutorConfig.js";
 import { getStudentGraph, recordLabVisit, recordLabEvent, getRecommendations as kgRecs, getSkillsSummary, getStudentPath, getGraphData } from "./knowledgeGraph.js";
 import { generateMCQ, shouldSpawnMCQ, recordMCQResult, getMCQStats } from "./mcqGenerator.js";
@@ -2017,22 +2020,84 @@ function CampusInterestForm({ onClose }) {
 }
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
+const COMMON_PW = new Set(["password","password1","12345678","123456789","1234567890","qwerty123","11111111","abc12345","letmein1","iloveyou1","admin123","welcome1","sunshine1","password123","qwertyuiop"]);
+function passwordIssues(pw, email) {
+  const issues = [];
+  if ((pw||"").length < 8) issues.push("At least 8 characters");
+  if (!/[a-zA-Z]/.test(pw) || !/[0-9]/.test(pw)) issues.push("Mix letters and numbers");
+  if (COMMON_PW.has((pw||"").toLowerCase())) issues.push("Too common — pick something unique");
+  const local = (email||"").split("@")[0];
+  if (local && local.length > 3 && (pw||"").toLowerCase().includes(local.toLowerCase())) issues.push("Must not contain your email");
+  return issues;
+}
+
 function Auth({ role, onAuth }) {
   const [mode, setMode] = useState("signin");
   const [form, setForm] = useState({ name: "", email: "", password: "" });
-  const up = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const [busy, setBusy] = useState(false);
+  const [err, setErr]   = useState("");
+  const [confirmSent, setConfirmSent] = useState(false);
+  const up = (k, v) => { setErr(""); setForm(f => ({ ...f, [k]: v })); };
   const roleLabels = { parent:"Parent", guide:"Guide / Facilitator", director:"Campus Director", student:"Student", admin:"Admin" };
+  const pwIssues = mode === "signup" ? passwordIssues(form.password, form.email) : [];
+  const emailOk  = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email);
 
-  const submit = () => {
+  const finishLocal = () => {
     const user = { name: form.name, email: form.email };
-    const stored = JSON.parse(localStorage.getItem("neo_users") || "{}");
-    if (mode === "signup") stored[form.email] = { ...user, role, password: form.password };
-    localStorage.setItem("neo_users", JSON.stringify(stored));
-    const fullUser = { ...user, role, id: user.email };
+    const fullUser = { ...user, role, id: form.email };
     localStorage.setItem("neo_current", JSON.stringify(fullUser));
-    getCredits(fullUser.id); // initialise 30 free credits for new user
+    getCredits(fullUser.id);
     onAuth(fullUser);
   };
+
+  const submit = async () => {
+    setErr("");
+    if (!emailOk) { setErr("Enter a valid email address."); return; }
+    if (mode === "signup" && pwIssues.length) { setErr("Please fix your password first."); return; }
+    setBusy(true);
+    try {
+      await supabaseReady();
+      if (supabaseEnabled()) {
+        const sb = supabase;
+        if (mode === "signup") {
+          const { data, error } = await sb.auth.signUp({
+            email: form.email, password: form.password,
+            options: { emailRedirectTo: "https://neoschool.me", data: { name: form.name, role } },
+          });
+          if (error) throw error;
+          if (data?.user && !data.session) { setConfirmSent(true); setBusy(false); return; } // confirmation email required
+          finishLocal();
+        } else {
+          const { data, error } = await sb.auth.signInWithPassword({ email: form.email, password: form.password });
+          if (error) throw error;
+          const meta = data?.user?.user_metadata || {};
+          const fullUser = { name: meta.name || form.email.split("@")[0], email: form.email, role: meta.role || role, id: form.email };
+          localStorage.setItem("neo_current", JSON.stringify(fullUser));
+          getCredits(fullUser.id);
+          onAuth(fullUser);
+        }
+      } else {
+        finishLocal(); // dev fallback when Supabase env not configured
+      }
+    } catch (e) {
+      setErr(/confirm/i.test(e.message||"") ? "Please confirm your email first — check your inbox." : (e.message || "Something went wrong. Try again."));
+    }
+    setBusy(false);
+  };
+
+  if (confirmSent) return (
+    <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+      <div className="card fu" style={{ maxWidth: 400, width: "100%", textAlign: "center", padding: "36px 28px" }}>
+        <div style={{ fontSize: 44, marginBottom: 12 }}>📬</div>
+        <h1 className="h1" style={{ marginBottom: 8 }}>Confirm your email</h1>
+        <p className="mu" style={{ fontSize: 13.5, lineHeight: 1.6 }}>
+          We sent a confirmation link to <b>{form.email}</b>.<br/>
+          Click it to activate your account, then come back and sign in.
+        </p>
+        <button className="btn bn fw" style={{ marginTop: 18 }} onClick={() => { setConfirmSent(false); setMode("signin"); }}>Back to sign in</button>
+      </div>
+    </div>
+  );
 
   return (
     <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
@@ -2042,26 +2107,35 @@ function Auth({ role, onAuth }) {
           <h1 className="h1" style={{ marginTop: 20, marginBottom: 6 }}>
             {mode === "signin" ? "Welcome back" : "Create account"}
           </h1>
-          <p className="mu" style={{ fontSize: 13 }}>
-            {roleLabels[role]} portal
-          </p>
+          <p className="mu" style={{ fontSize: 13 }}>{roleLabels[role]} portal</p>
         </div>
         <div className="card fu d1">
           <div style={{ display: "flex", gap: 6, marginBottom: 20, background: "var(--p)", padding: 4, borderRadius: 12 }}>
             {[["signin", "Sign in"], ["signup", "Sign up"]].map(([m, l]) => (
-              <div key={m} onClick={() => setMode(m)} style={{ flex: 1, textAlign: "center", padding: "8px", borderRadius: 9, cursor: "pointer", fontSize: 12.5, fontWeight: 600, background: mode === m ? "#fff" : "transparent", color: mode === m ? "var(--nv)" : "var(--mu)", transition: "all .2s" }}>{l}</div>
+              <div key={m} onClick={() => { setMode(m); setErr(""); }} style={{ flex: 1, textAlign: "center", padding: "8px", borderRadius: 9, cursor: "pointer", fontSize: 12.5, fontWeight: 600, background: mode === m ? "#fff" : "transparent", color: mode === m ? "var(--nv)" : "var(--mu)", transition: "all .2s" }}>{l}</div>
             ))}
           </div>
-          {(
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              {mode === "signup" && <div className="fg"><label className="lbl">Full name</label><input className="inp" placeholder="Sarah Chen" value={form.name} onChange={e => up("name", e.target.value)} /></div>}
-              <div className="fg"><label className="lbl">Email</label><input className="inp" type="email" placeholder="you@example.com" value={form.email} onChange={e => up("email", e.target.value)} /></div>
-              <div className="fg"><label className="lbl">Password</label><input className="inp" type="password" placeholder="••••••••" value={form.password} onChange={e => up("password", e.target.value)} /></div>
-              <button className="btn bn fw" onClick={submit} disabled={!form.email || !form.password}>{mode === "signup" ? "Create account →" : "Sign in →"}</button>
-            </div>
-          )}
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {mode === "signup" && <div className="fg"><label className="lbl">Full name</label><input className="inp" placeholder="Sarah Chen" value={form.name} onChange={e => up("name", e.target.value)} /></div>}
+            <div className="fg"><label className="lbl">Email</label><input className="inp" type="email" placeholder="you@example.com" value={form.email} onChange={e => up("email", e.target.value)} /></div>
+            <div className="fg"><label className="lbl">Password</label><input className="inp" type="password" placeholder="••••••••" value={form.password} onChange={e => up("password", e.target.value)} /></div>
+            {mode === "signup" && form.password && (
+              <div style={{ fontSize: 11.5, lineHeight: 1.7, marginTop: -6 }}>
+                {["At least 8 characters","Mix letters and numbers","Too common — pick something unique","Must not contain your email"].map(rule => {
+                  const relevant = rule.startsWith("At least") || rule.startsWith("Mix") || pwIssues.includes(rule);
+                  if (!relevant) return null;
+                  const ok = !pwIssues.includes(rule);
+                  return <div key={rule} style={{ color: ok ? "#15803d" : "#b45309", fontWeight: 600 }}>{ok ? "✓" : "•"} {rule}</div>;
+                })}
+              </div>
+            )}
+            {err && <div style={{ fontSize: 12, color: "#b91c1c", fontWeight: 600, background:"#fef2f2", padding:"8px 10px", borderRadius:8 }}>{err}</div>}
+            <button className="btn bn fw" onClick={submit} disabled={busy || !form.email || !form.password || (mode==="signup" && pwIssues.length>0)}>
+              {busy ? "One moment…" : mode === "signup" ? "Create account →" : "Sign in →"}
+            </button>
+          </div>
         </div>
-        <p style={{ textAlign: "center", fontSize: 11, color: "var(--mu)", marginTop: 14 }}>🔒 COPPA & FERPA compliant</p>
+        <p style={{ textAlign: "center", fontSize: 11, color: "var(--mu)", marginTop: 14 }}>🔒 Email-verified accounts · COPPA & FERPA compliant</p>
       </div>
     </div>
   );
@@ -3693,13 +3767,13 @@ function StudentPortal({ user }) {
       </div>
       {activeTool && <SimViewer tool={activeTool} onClose={() => setActiveTool(null)} />}
       <div style={{ display:"flex", background:"var(--p)", padding:"4px", margin:"10px 11px 0", borderRadius:11, flexShrink:0 }}>
-        {[{id:"labs",l:"🎮 Activities"},{id:"journey",l:"🗺 Journey"},{id:"tools",l:"🛠 Tools"},{id:"tutors",l:"🤖 Tutors"},{id:"memory",l:"🧠 Memory"}].map(t => (
+        {[{id:"labs",l:"🎮 Activities"},{id:"journey",l:"🧭 My Map"},{id:"tools",l:"🛠 Tools"},{id:"tutors",l:"🤖 Tutors"},{id:"memory",l:"🧠 Memory"}].map(t => (
           <div key={t.id} onClick={() => setActiveTab(t.id)} style={{ flex:1, textAlign:"center", padding:"7px", borderRadius:8, cursor:"pointer", fontWeight:600, fontSize:11, background:activeTab===t.id?"#fff":"transparent", color:activeTab===t.id?"var(--nv)":"var(--mu)", transition:"all .2s" }}>{t.l}</div>
         ))}
       </div>
       <div style={{ flex:1, overflowY:"auto", padding:"11px" }}>
         {activeTab === "journey" && (
-          <JourneyView studentId={user?.id || "demo"} allLabs={LABS} onOpenLab={(lab) => { window.location.hash = `lab/${lab.id}`; }}/>
+          <LearningMap userId={user?.id || "demo"} onOpenLab={(lab) => setActiveLab(lab)} />
         )}
         {activeTab === "tools" && (
           <ContentProviders onOpenTool={setActiveTool}/>
@@ -6384,11 +6458,121 @@ function AdminPortal({ user }) {
 }
 
 // ── ROOT APP ──────────────────────────────────────────────────────────────────
-export default function App() {
+export default 
+// ── LEARNING MAP ──────────────────────────────────────────────────────────────
+// Personal knowledge graph per student, powered by the Marble Skill Taxonomy
+// (1,590 micro-topics / 3,221 prerequisite edges, withmarble.com · CC BY-SA).
+function LearningMap({ userId, onOpenLab }) {
+  const [tax, setTax] = useState(null);
+  const [subject, setSubject] = useState("Mathematics");
+  const [goal, setGoal] = useState(null);
+  const progress = (() => { try { return JSON.parse(localStorage.getItem("neo_lab_progress_" + userId) || "{}"); } catch { return {}; } })();
+  const mastered = masteredTopics(progress);
+
+  useEffect(() => { loadTaxonomy().then(setTax).catch(()=>{}); }, []);
+  if (!tax) return <div className="mu" style={{ padding: 40, textAlign: "center" }}>Loading your learning map…</div>;
+
+  const covered = new Set(coveredTopicIds());
+  const subjects = ["Mathematics","English","Science","History"];
+  const nodes = tax.nodes
+    .filter(n => n.s === subject && (covered.has(n.id) || mastered.has(n.id)))
+    .sort((a,b) => a.a0 - b.a0 || b.c - a.c);
+
+  // layout: x by age, lanes by domain
+  const domains = [...new Set(nodes.map(n => n.d))];
+  const laneY = {}; domains.forEach((d,i) => laneY[d] = 46 + i * 54);
+  const AX = a => 60 + (Math.min(13, Math.max(4, a)) - 4) * 62;
+  const H = 46 + domains.length * 54 + 20;
+  const pos = {}; nodes.forEach(n => { pos[n.id] = { x: AX(n.a0), y: laneY[n.d] }; });
+  // spread collisions within a lane
+  const seen = {};
+  nodes.forEach(n => { const k = n.d + "|" + Math.round(pos[n.id].x); seen[k] = (seen[k]||0); pos[n.id].y += seen[k]*16; pos[n.id].x += seen[k]*8; seen[k]++; });
+
+  const edges = tax.edges.filter(e => pos[e.t] && pos[e.p]);
+  const path = goal ? prereqPath(tax, goal.id, mastered) : [];
+  const pathSet = new Set(path);
+  const readySet = new Set(suggestNext(tax, mastered, 50).map(n => n.id));
+  const col = id => mastered.has(id) ? "#22c55e" : pathSet.has(id) ? "#f59e0b" : readySet.has(id) ? "#3b82f6" : "#cbd5e1";
+
+  return (
+    <div className="fu">
+      <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginBottom:12 }}>
+        {subjects.map(s => (
+          <button key={s} onClick={() => { setSubject(s); setGoal(null); }} style={{ padding:"7px 14px", borderRadius:99, border:"none", cursor:"pointer", fontFamily:"inherit", fontSize:12, fontWeight:700, background: subject===s ? "var(--nv)" : "#fff", color: subject===s ? "#fff" : "var(--nv)", boxShadow:"0 1px 3px rgba(0,0,0,.08)" }}>{s}</button>
+        ))}
+      </div>
+      <div style={{ display:"flex", gap:14, fontSize:11, fontWeight:700, marginBottom:8, flexWrap:"wrap" }}>
+        <span style={{color:"#22c55e"}}>● mastered</span><span style={{color:"#3b82f6"}}>● ready for you</span><span style={{color:"#f59e0b"}}>● on your path</span><span style={{color:"#94a3b8"}}>● later</span>
+      </div>
+      <div style={{ background:"#fff", borderRadius:14, border:"1px solid var(--p)", overflowX:"auto", marginBottom:14 }}>
+        <svg width={AX(13)+80} height={H} style={{ display:"block" }}>
+          {[4,6,8,10,12].map(a => (
+            <g key={a}><line x1={AX(a)} y1={20} x2={AX(a)} y2={H-10} stroke="#f1f5f9" strokeWidth="1"/><text x={AX(a)} y={14} fontSize="9" textAnchor="middle" fill="#94a3b8" fontWeight="700">age {a}</text></g>
+          ))}
+          {edges.map((e,i) => { const a=pos[e.p], b=pos[e.t]; const onPath = pathSet.has(e.t)&&pathSet.has(e.p);
+            return <path key={i} d={`M${a.x},${a.y} C${(a.x+b.x)/2},${a.y} ${(a.x+b.x)/2},${b.y} ${b.x},${b.y}`} fill="none" stroke={onPath?"#f59e0b":"#e2e8f0"} strokeWidth={onPath?2.2:1} opacity={onPath?0.95:0.7}/>; })}
+          {nodes.map(n => (
+            <g key={n.id} style={{ cursor:"pointer" }} onClick={() => setGoal(n)}>
+              <circle cx={pos[n.id].x} cy={pos[n.id].y} r={goal?.id===n.id?9:6.5} fill={col(n.id)} stroke={goal?.id===n.id?"var(--nv)":"#fff"} strokeWidth="2"/>
+              <title>{n.n} ({ageLabel(n.a0,n.a1)}) — tap to set as goal</title>
+            </g>
+          ))}
+        </svg>
+      </div>
+      {!goal && <p className="mu" style={{ fontSize:12.5, textAlign:"center" }}>Tap any dot to set it as your goal — I'll chart the optimal path to it.</p>}
+      {goal && (
+        <div className="card">
+          <p style={{ fontSize:13, fontWeight:800, marginBottom:2 }}>🎯 Goal: {goal.n} <span className="mu" style={{fontWeight:600}}>({ageLabel(goal.a0,goal.a1)})</span></p>
+          {path.length === 0
+            ? <p style={{ fontSize:12.5, color:"#15803d", fontWeight:700 }}>You've already mastered everything on this path. 🏆</p>
+            : <>
+              <p className="mu" style={{ fontSize:11.5, marginBottom:10 }}>Your optimal path — {path.length} step{path.length>1?"s":""}, in the exact order the ideas build on each other:</p>
+              <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+                {path.slice(0, 12).map((id, i) => {
+                  const n = tax.byId[id]; const gameList = labsForTopic(id);
+                  return (
+                    <div key={id} style={{ display:"flex", alignItems:"center", gap:10, padding:"9px 12px", background: i===0 ? "#fff7ed" : "var(--p)", borderRadius:10, border: i===0 ? "1.5px solid #f59e0b" : "1px solid transparent" }}>
+                      <div style={{ minWidth:22, height:22, borderRadius:"50%", background: i===0 ? "#f59e0b" : "var(--nv)", color:"#fff", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:800 }}>{i+1}</div>
+                      <div style={{ flex:1 }}>
+                        <div style={{ fontSize:12.5, fontWeight:700 }}>{n.n}</div>
+                        <div className="mu" style={{ fontSize:10.5 }}>{n.d} · {ageLabel(n.a0,n.a1)}</div>
+                      </div>
+                      {gameList[0] && <button className="btn bn" style={{ fontSize:11, padding:"6px 12px" }} onClick={() => onOpenLab(gameList[0])}>{gameList[0].emoji} Play</button>}
+                    </div>
+                  );
+                })}
+                {path.length > 12 && <p className="mu" style={{ fontSize:11, textAlign:"center" }}>…and {path.length-12} more steps after these.</p>}
+              </div>
+            </>}
+        </div>
+      )}
+      <p style={{ fontSize:9.5, color:"var(--mu)", marginTop:12, textAlign:"center" }}>Knowledge graph: Marble Skill Taxonomy · withmarble.com · CC BY-SA 4.0</p>
+    </div>
+  );
+}
+
+function App() {
   const [screen, setScreen] = useState("marketing");
   const [role, setRole]     = useState(null);
   const [user, setUser]     = useState(null);
   const [parentData, setParentData] = useState(null);
+
+  useEffect(() => {
+    const onMsg = (ev) => {
+      const d = ev?.data;
+      if (!d || d.type !== "labProgress" || !d.lab) return;
+      try {
+        const cur = JSON.parse(localStorage.getItem("neo_current") || "null");
+        const key = "neo_lab_progress_" + (cur?.id || "anon");
+        const store = JSON.parse(localStorage.getItem(key) || "{}");
+        const prev = store[d.lab] || {};
+        store[d.lab] = { ...prev, ...d, complete: prev.complete || !!d.complete, ts: Date.now() };
+        localStorage.setItem(key, JSON.stringify(store));
+      } catch {}
+    };
+    window.addEventListener("message", onMsg);
+    return () => window.removeEventListener("message", onMsg);
+  }, []);
 
   useEffect(() => {
     const saved = localStorage.getItem("neo_current");
