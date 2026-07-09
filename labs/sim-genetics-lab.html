@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Genetics Lab 🧬</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#d1fae5,#6ee7b7)}
+.wrap{display:flex;flex-direction:column;height:100%;padding:14px;max-width:560px;margin:0 auto}
+.topbar{display:flex;justify-content:space-between;align-items:center}
+.title{font-size:18px;font-weight:700;color:#047857}
+.chip{background:#fff;border-radius:99px;padding:5px 13px;font-size:13px;font-weight:700;color:#047857;box-shadow:0 2px 0 #34d399}
+.task{background:#fff;border:3px solid #34d399;border-radius:16px;box-shadow:0 4px 0 #34d399;padding:10px 14px;text-align:center;font-size:clamp(13.5px,3.9vw,16px);font-weight:700;color:#1a1f3a;margin:10px 0}
+.legend{text-align:center;font-size:12px;color:#047857;margin-bottom:6px;font-weight:600}
+.board{flex:1;display:flex;align-items:center;justify-content:center;min-height:0}
+.punnett{display:grid;grid-template-columns:44px 1fr 1fr;grid-template-rows:44px 1fr 1fr;gap:6px;width:min(100%,300px);aspect-ratio:1}
+.pcell{display:flex;align-items:center;justify-content:center;border-radius:10px;font-weight:700;font-size:clamp(16px,5vw,22px)}
+.head{background:#047857;color:#fff;cursor:pointer;user-select:none}
+.head.empty{background:#a7f3d0;color:#047857}
+.corner{background:transparent}
+.child{background:#fff;border:2px solid #34d399;color:#065f46;flex-direction:column}
+.child .ph{font-size:10px;font-weight:600;color:#059669}
+.picker{display:flex;gap:8px;justify-content:center;margin-top:8px}
+.picker button{min-width:58px;min-height:46px;border:none;border-radius:12px;font-family:'Quicksand',sans-serif;font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.15);background:#fff;color:#047857;touch-action:manipulation}
+.picker button.sel{background:#047857;color:#fff}
+.check{min-height:50px;width:100%;background:#047857;color:#fff;border:none;border-radius:14px;font-family:'Quicksand',sans-serif;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2);margin-top:8px;touch-action:manipulation}
+.fb{text-align:center;font-size:13.5px;font-weight:700;min-height:20px;margin-top:6px;color:#047857}
+.overlay{position:fixed;inset:0;background:rgba(255,255,255,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:50;text-align:center;padding:20px}
+.overlay.show{opacity:1;pointer-events:auto}
+.overlay h2{font-size:clamp(26px,7vw,36px);color:#047857}
+.overlay .sc{font-size:17px;font-weight:700;color:#374151}
+.overlay button{background:#047857;color:#fff;border:none;border-radius:99px;padding:13px 32px;font-family:'Quicksand',sans-serif;font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2)}
+.confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards;z-index:70}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+</style></head><body>
+<div class="wrap">
+  <div class="topbar"><div class="title">🧬 Genetics Lab</div><div style="display:flex;gap:6px"><div class="chip" id="score">0 pts</div><div class="chip" id="prog">1/5</div></div></div>
+  <div class="task" id="task"></div>
+  <div class="legend" id="legend"></div>
+  <div class="board"><div class="punnett" id="grid"></div></div>
+  <div class="picker" id="picker"></div>
+  <button class="check" id="check">Check offspring ✓</button>
+  <div class="fb" id="fb">Tap a top/side box, then pick an allele. Fill all 4 parent alleles.</div>
+</div>
+<div class="overlay" id="ov"><h2 id="ovTitle"></h2><div class="sc" id="ovScore"></div><button id="ovNext">Next →</button></div>
+<script>
+const GAME={id:"sim-genetics-lab"};
+// challenges: dominant allele letter, trait names, target described by parents to build
+function genChallenges(){
+  return [
+    {A:"B",dom:"Brown eyes",rec:"blue eyes",p1:"Bb",p2:"Bb",text:"Cross two <b>Bb</b> parents (brown eyes). Build the square.",ask:"Expect 3 brown : 1 blue"},
+    {A:"T",dom:"Tall",rec:"short",p1:"Tt",p2:"tt",text:"Cross <b>Tt × tt</b> pea plants.",ask:"Expect 1 tall : 1 short"},
+    {A:"R",dom:"Round seed",rec:"wrinkled",p1:"RR",p2:"rr",text:"Cross <b>RR × rr</b>.",ask:"Expect all round (carriers)"},
+    {A:"W",dom:"Widow's peak",rec:"straight",p1:"Ww",p2:"ww",text:"Cross <b>Ww × ww</b>.",ask:"Expect 1 peak : 1 straight"},
+    {A:"F",dom:"Freckles",rec:"none",p1:"Ff",p2:"Ff",text:"Cross two <b>Ff</b> parents.",ask:"Expect 3 freckled : 1 none"},
+  ];
+}
+const CH=genChallenges();
+let idx=0,score=0,tries=0;
+let top=["",""],side=["",""],selected=null;
+let AC=null;function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch{}}return AC;}
+function tone(f,t=.12,ty="sine",g=.15,w=0){const c=ac();if(!c)return;const o=c.createOscillator(),v=c.createGain();o.type=ty;o.frequency.value=f;v.gain.setValueAtTime(g,c.currentTime+w);v.gain.exponentialRampToValueAtTime(.001,c.currentTime+w+t);o.connect(v).connect(c.destination);o.start(c.currentTime+w);o.stop(c.currentTime+w+t+.02);}
+const CC=["#047857","#f59e0b","#ec4899","#22c55e","#3b82f6"];
+function confetti(n){for(let i=0;i<n;i++){const d=document.createElement("div");d.className="confetti";d.style.left=Math.random()*100+"vw";d.style.background=CC[i%5];d.style.animationDelay=Math.random()*.4+"s";document.body.appendChild(d);setTimeout(()=>d.remove(),2300);}}
+function report(complete){try{parent.postMessage({type:"labProgress",lab:GAME.id,score,complete},"*");}catch{}}
+function childGeno(r,c){
+  const combo=[side[r],top[c]].sort((a,b)=>{const A=a.toUpperCase()===a,B=b.toUpperCase()===b;return A===B?a.localeCompare(b):(A?-1:1);}).join("");
+  return combo;
+}
+function pheno(geno){const A=CH[idx].A;return geno.includes(A)?CH[idx].dom:CH[idx].rec;}
+function render(){
+  const c=CH[idx];
+  const g=document.getElementById("grid");g.innerHTML="";
+  const mk=(cls,txt,onClick,slot)=>{const d=document.createElement("div");d.className="pcell "+cls;d.innerHTML=txt;if(onClick)d.onclick=onClick;if(slot&&selected&&selected[0]===slot[0]&&selected[1]===slot[1])d.style.outline="3px solid #f59e0b";return d;};
+  g.appendChild(mk("corner",""));
+  [0,1].forEach(i=>g.appendChild(mk(top[i]?"head":"head empty",top[i]||"?",()=>{selected=["top",i];render();},["top",i])));
+  [0,1].forEach(r=>{
+    g.appendChild(mk(side[r]?"head":"head empty",side[r]||"?",()=>{selected=["side",r];render();},["side",r]));
+    [0,1].forEach(cc=>{
+      const filled=top[cc]&&side[r];
+      const geno=filled?childGeno(r,cc):"";
+      g.appendChild(mk("child",filled?geno+'<span class="ph">'+pheno(geno)+'</span>':""));
+    });
+  });
+  document.getElementById("prog").textContent=(idx+1)+"/5";
+  document.getElementById("score").textContent=score+" pts";
+  document.getElementById("legend").innerHTML="<b>"+c.A+"</b> = "+c.dom+" (dominant) · <b>"+c.A.toLowerCase()+"</b> = "+c.rec+" (recessive)";
+}
+function buildPicker(){
+  const c=CH[idx];const p=document.getElementById("picker");p.innerHTML="";
+  [c.A,c.A.toLowerCase()].forEach(al=>{const b=document.createElement("button");b.textContent=al;
+    b.onclick=()=>{if(!selected){document.getElementById("fb").textContent="Tap a top or side box first!";return;}
+      const [which,i]=selected;if(which==="top")top[i]=al;else side[i]=al;
+      tone(500,.06,"sine",.07);selected=null;render();};p.appendChild(b);});
+}
+document.getElementById("check").onclick=()=>{
+  const c=CH[idx];tries++;
+  if(!(top[0]&&top[1]&&side[0]&&side[1])){document.getElementById("fb").textContent="Fill all four parent alleles first!";return;}
+  // validate parents match the cross (order-independent)
+  const norm=s=>s.split("").sort().join("");
+  const gotTop=norm(top.join("")),gotSide=norm(side.join(""));
+  const wantA=norm(c.p1),wantB=norm(c.p2);
+  const ok=(gotTop===wantA&&gotSide===wantB)||(gotTop===wantB&&gotSide===wantA);
+  if(ok){
+    const pts=Math.max(15,45-(tries-1)*10);score+=pts;
+    tone(660,.12);tone(880,.14,"sine",.15,.1);confetti(35);
+    document.getElementById("fb").textContent="🧬 Correct cross! "+c.ask+"  (+"+pts+" pts)";
+    document.getElementById("score").textContent=score+" pts";
+    setTimeout(next,1500);
+  } else {
+    tone(200,.2,"triangle",.1);
+    document.getElementById("fb").textContent="Those parents don't match the cross. Need "+c.p1+" × "+c.p2+".";
+  }
+};
+function load(){tries=0;top=["",""];side=["",""];selected=null;
+  document.getElementById("task").innerHTML=CH[idx].text;
+  document.getElementById("fb").textContent="Tap a top/side box, then pick an allele. Fill all 4 parent alleles.";
+  buildPicker();render();}
+function next(){idx++;
+  if(idx>=CH.length){report(true);confetti(60);
+    document.getElementById("ovTitle").textContent="Geneticist! 🏆";
+    document.getElementById("ovScore").textContent=score+" pts · Punnett squares & inheritance mastered";
+    document.getElementById("ovNext").onclick=()=>{idx=0;score=0;load();document.getElementById("ov").classList.remove("show");};
+    document.getElementById("ov").classList.add("show");return;}
+  load();}
+window.__qa={solve:()=>{const c=CH[idx];top=[c.p1[0],c.p1[1]];side=[c.p2[0],c.p2[1]];render();document.getElementById("check").click();}};
+load();
+</script></body></html>

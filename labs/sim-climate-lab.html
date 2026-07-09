@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Climate Lab 🌍</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#cffafe,#67e8f9)}
+.wrap{display:flex;flex-direction:column;height:100%;padding:14px;max-width:600px;margin:0 auto}
+.topbar{display:flex;justify-content:space-between;align-items:center}
+.title{font-size:18px;font-weight:700;color:#0e7490}
+.chip{background:#fff;border-radius:99px;padding:5px 13px;font-size:13px;font-weight:700;color:#0e7490;box-shadow:0 2px 0 #22d3ee}
+.task{background:#fff;border:3px solid #22d3ee;border-radius:16px;box-shadow:0 4px 0 #22d3ee;padding:10px 14px;text-align:center;font-size:clamp(14px,4vw,17px);font-weight:700;color:#1a1f3a;margin:10px 0}
+.svgbox{flex:1;display:flex;align-items:center;justify-content:center;min-height:0}
+svg{max-width:100%;height:auto}
+.sliders{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.srow{display:flex;align-items:center;gap:10px;background:#fff;border-radius:14px;padding:8px 12px;box-shadow:0 3px 0 #22d3ee}
+.srow label{font-weight:700;color:#0e7490;min-width:96px;font-size:13px}
+.srow input{flex:1;accent-color:#0e7490;height:28px}
+.srow .val{min-width:52px;text-align:right;font-weight:700;color:#1a1f3a;font-size:13px}
+.check{min-height:52px;width:100%;background:#0e7490;color:#fff;border:none;border-radius:14px;font-family:'Quicksand',sans-serif;font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2);margin-top:8px;touch-action:manipulation}
+.check:active{transform:translateY(2px)}
+.fb{text-align:center;font-size:14px;font-weight:700;min-height:20px;margin-top:6px;color:#0e7490}
+.overlay{position:fixed;inset:0;background:rgba(255,255,255,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:50;text-align:center;padding:20px}
+.overlay.show{opacity:1;pointer-events:auto}
+.overlay h2{font-size:clamp(26px,7vw,36px);color:#0e7490}
+.overlay .sc{font-size:17px;font-weight:700;color:#374151}
+.overlay button{background:#0e7490;color:#fff;border:none;border-radius:99px;padding:13px 32px;font-family:'Quicksand',sans-serif;font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2)}
+.confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards;z-index:70}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+</style></head><body>
+<div class="wrap">
+  <div class="topbar"><div class="title">🌍 Climate Lab</div><div style="display:flex;gap:6px"><div class="chip" id="score">0 pts</div><div class="chip" id="prog">1/5</div></div></div>
+  <div class="task" id="task"></div>
+  <div class="svgbox"><svg viewBox="0 0 400 210" id="scene"></svg></div>
+  <div class="sliders">
+    <div class="srow"><label>🏭 Emissions</label><input type="range" id="emit" min="0" max="10" step="1" value="6"><span class="val" id="emitv">6 Gt</span></div>
+    <div class="srow"><label>☀️ Renewables</label><input type="range" id="ren" min="0" max="10" step="1" value="2"><span class="val" id="renv">20%</span></div>
+    <div class="srow"><label>🌳 Forests</label><input type="range" id="for" min="0" max="10" step="1" value="5"><span class="val" id="forv">50%</span></div>
+  </div>
+  <button class="check" id="check">Run 50-year projection ▶</button>
+  <div class="fb" id="fb">More CO₂ traps more heat. Renewables & forests pull it back.</div>
+</div>
+<div class="overlay" id="ov"><h2 id="ovTitle"></h2><div class="sc" id="ovScore"></div><button id="ovNext">Next →</button></div>
+<script>
+const GAME={id:"sim-climate-lab"};
+// net CO2 forcing → warming. temp = 1.0 baseline + k*(emissions - renewables_offset - forest_offset)
+function warming(emit,ren,forr){
+  const net=emit - ren*0.55 - forr*0.28; // Gt-equivalent net
+  return +(1.0 + Math.max(-0.5,net)*0.22).toFixed(2); // °C above pre-industrial
+}
+function genChallenges(){
+  return [
+    {target:1.5,tol:0.15,text:"The Paris goal: keep warming to <b>+1.5 °C</b>"},
+    {target:2.0,tol:0.15,text:"Danger line: hold warming at <b>+2.0 °C</b> — no higher"},
+    {target:1.2,tol:0.15,text:"Ambitious: cool the path to <b>+1.2 °C</b>"},
+    {target:1.0,tol:0.15,text:"Net-zero era: reach a stable <b>+1.0 °C</b>"},
+    {target:2.5,tol:0.2,text:"Model a high-emissions future: <b>+2.5 °C</b>"},
+  ];
+}
+const CH=genChallenges();
+let idx=0,score=0,tries=0;
+let AC=null;function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch{}}return AC;}
+function tone(f,t=.12,ty="sine",g=.15,w=0){const c=ac();if(!c)return;const o=c.createOscillator(),v=c.createGain();o.type=ty;o.frequency.value=f;v.gain.setValueAtTime(g,c.currentTime+w);v.gain.exponentialRampToValueAtTime(.001,c.currentTime+w+t);o.connect(v).connect(c.destination);o.start(c.currentTime+w);o.stop(c.currentTime+w+t+.02);}
+const CC=["#0e7490","#f59e0b","#ec4899","#22c55e","#3b82f6"];
+function confetti(n){for(let i=0;i<n;i++){const d=document.createElement("div");d.className="confetti";d.style.left=Math.random()*100+"vw";d.style.background=CC[i%5];d.style.animationDelay=Math.random()*.4+"s";document.body.appendChild(d);setTimeout(()=>d.remove(),2300);}}
+function report(complete){try{parent.postMessage({type:"labProgress",lab:GAME.id,score,complete},"*");}catch{}}
+function tempColor(t){return t<=1.3?"#22c55e":t<=1.8?"#facc15":t<=2.3?"#f97316":"#dc2626";}
+function render(){
+  const emit=+document.getElementById("emit").value,ren=+document.getElementById("ren").value,forr=+document.getElementById("for").value;
+  document.getElementById("emitv").textContent=emit+" Gt";
+  document.getElementById("renv").textContent=(ren*10)+"%";
+  document.getElementById("forv").textContent=(forr*10)+"%";
+  const t=warming(emit,ren,forr);
+  const col=tempColor(t);
+  // earth + thermometer
+  let s='<circle cx="120" cy="105" r="66" fill="'+col+'" opacity="0.85"/>';
+  s+='<ellipse cx="105" cy="90" rx="26" ry="18" fill="#16a34a" opacity="0.5"/><ellipse cx="140" cy="125" rx="20" ry="14" fill="#16a34a" opacity="0.5"/>';
+  // CO2 haze density by emissions
+  for(let i=0;i<emit;i++)s+='<circle cx="'+(70+Math.random()*100)+'" cy="'+(45+Math.random()*120)+'" r="'+(3+Math.random()*3)+'" fill="#6b7280" opacity="0.28"/>';
+  // thermometer
+  s+='<rect x="300" y="30" width="20" height="130" rx="10" fill="#e5e7eb"/>';
+  const fillH=Math.min(120,Math.max(8,(t-0.8)*70));
+  s+='<rect x="303" y="'+(157-fillH)+'" width="14" height="'+fillH+'" rx="7" fill="'+col+'"/><circle cx="310" cy="168" r="16" fill="'+col+'"/>';
+  s+='<text x="310" y="20" font-size="13" text-anchor="middle" fill="#0e7490" font-weight="bold">+'+t.toFixed(2)+'°C</text>';
+  const ty=CH[idx].target, tgtY=157-Math.min(120,Math.max(8,(ty-0.8)*70));
+  s+='<line x1="292" y1="'+tgtY+'" x2="328" y2="'+tgtY+'" stroke="#1f2937" stroke-width="2" stroke-dasharray="3 3"/><text x="288" y="'+(tgtY+4)+'" font-size="10" text-anchor="end" fill="#1f2937" font-weight="bold">'+ty+'°</text>';
+  document.getElementById("scene").innerHTML=s;
+  document.getElementById("prog").textContent=(idx+1)+"/5";
+  document.getElementById("score").textContent=score+" pts";
+}
+["emit","ren","for"].forEach(id=>document.getElementById(id).oninput=render);
+document.getElementById("check").onclick=()=>{
+  const c=CH[idx];tries++;
+  const emit=+document.getElementById("emit").value,ren=+document.getElementById("ren").value,forr=+document.getElementById("for").value;
+  const t=warming(emit,ren,forr);
+  if(Math.abs(t-c.target)<=c.tol){
+    const pts=Math.max(15,45-(tries-1)*10);score+=pts;
+    tone(660,.12);tone(880,.14,"sine",.15,.1);confetti(35);
+    document.getElementById("fb").textContent="🌍 Stabilized at +"+t.toFixed(2)+"°C!  (+"+pts+" pts)";
+    document.getElementById("score").textContent=score+" pts";
+    setTimeout(next,1400);
+  } else {
+    tone(200,.2,"triangle",.1);
+    document.getElementById("fb").textContent="Projected +"+t.toFixed(2)+"°C — "+(t>c.target?"too hot. Cut emissions or add renewables/forests.":"cooler than the target. Allow a bit more emissions.");
+  }
+};
+function load(){tries=0;document.getElementById("emit").value=6;document.getElementById("ren").value=2;document.getElementById("for").value=5;
+  document.getElementById("task").innerHTML=CH[idx].text;
+  document.getElementById("fb").textContent="More CO₂ traps more heat. Renewables & forests pull it back.";
+  render();}
+function next(){idx++;
+  if(idx>=CH.length){report(true);confetti(60);
+    document.getElementById("ovTitle").textContent="Climate scientist! 🏆";
+    document.getElementById("ovScore").textContent=score+" pts · you balanced the carbon budget";
+    document.getElementById("ovNext").onclick=()=>{idx=0;score=0;load();document.getElementById("ov").classList.remove("show");};
+    document.getElementById("ov").classList.add("show");return;}
+  load();}
+// solver: search the discrete slider space for a hit
+window.__qa={solve:()=>{const c=CH[idx];
+  for(let e=0;e<=10;e++)for(let r=0;r<=10;r++)for(let f=0;f<=10;f++){
+    if(Math.abs(warming(e,r,f)-c.target)<=c.tol){
+      document.getElementById("emit").value=e;document.getElementById("ren").value=r;document.getElementById("for").value=f;
+      render();document.getElementById("check").click();return;}}
+}};
+load();
+</script></body></html>
