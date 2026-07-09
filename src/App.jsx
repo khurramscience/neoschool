@@ -2022,16 +2022,9 @@ function Auth({ role, onAuth }) {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const up = (k, v) => setForm(f => ({ ...f, [k]: v }));
   const roleLabels = { parent:"Parent", guide:"Guide / Facilitator", director:"Campus Director", student:"Student", admin:"Admin" };
-  const demoAccounts = {
-    parent: { name: "Sarah Chen", email: "sarah@example.com" },
-    guide: { name: "Coach Rivera", email: "guide@neoschool.me" },
-    director: { name: "Dr. Sandra Reyes", email: "director@neoschool.me" },
-    student: { name: "Ava Chen", email: "ava@neo" },
-    admin: { name: "Andrew (CEO)", email: "andrew@neoschool.me" },
-  };
 
   const submit = () => {
-    const user = mode === "demo" ? demoAccounts[role] : { name: form.name, email: form.email };
+    const user = { name: form.name, email: form.email };
     const stored = JSON.parse(localStorage.getItem("neo_users") || "{}");
     if (mode === "signup") stored[form.email] = { ...user, role, password: form.password };
     localStorage.setItem("neo_users", JSON.stringify(stored));
@@ -2047,7 +2040,7 @@ function Auth({ role, onAuth }) {
         <div className="fu" style={{ textAlign: "center", marginBottom: 28 }}>
           <Logo sz={18} />
           <h1 className="h1" style={{ marginTop: 20, marginBottom: 6 }}>
-            {mode === "demo" ? "Demo login" : mode === "signin" ? "Welcome back" : "Create account"}
+            {mode === "signin" ? "Welcome back" : "Create account"}
           </h1>
           <p className="mu" style={{ fontSize: 13 }}>
             {roleLabels[role]} portal
@@ -2055,20 +2048,11 @@ function Auth({ role, onAuth }) {
         </div>
         <div className="card fu d1">
           <div style={{ display: "flex", gap: 6, marginBottom: 20, background: "var(--p)", padding: 4, borderRadius: 12 }}>
-            {[["demo", "Demo"], ["signin", "Sign in"], ["signup", "Sign up"]].map(([m, l]) => (
+            {[["signin", "Sign in"], ["signup", "Sign up"]].map(([m, l]) => (
               <div key={m} onClick={() => setMode(m)} style={{ flex: 1, textAlign: "center", padding: "8px", borderRadius: 9, cursor: "pointer", fontSize: 12.5, fontWeight: 600, background: mode === m ? "#fff" : "transparent", color: mode === m ? "var(--nv)" : "var(--mu)", transition: "all .2s" }}>{l}</div>
             ))}
           </div>
-          {mode === "demo" ? (
-            <div>
-              <div style={{ background: "var(--p)", borderRadius: 12, padding: "14px 16px", marginBottom: 16 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: "var(--mu)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 8 }}>Demo account</div>
-                <div style={{ fontWeight: 600 }}>{demoAccounts[role]?.name}</div>
-                <div style={{ fontSize: 12, color: "var(--mu)" }}>{demoAccounts[role]?.email}</div>
-              </div>
-              <button className="btn bo fw" onClick={submit}>Enter as demo user →</button>
-            </div>
-          ) : (
+          {(
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {mode === "signup" && <div className="fg"><label className="lbl">Full name</label><input className="inp" placeholder="Sarah Chen" value={form.name} onChange={e => up("name", e.target.value)} /></div>}
               <div className="fg"><label className="lbl">Email</label><input className="inp" type="email" placeholder="you@example.com" value={form.email} onChange={e => up("email", e.target.value)} /></div>
@@ -6407,56 +6391,6 @@ export default function App() {
   const [parentData, setParentData] = useState(null);
 
   useEffect(() => {
-    // ── Quick-test URL parameter: ?demo=labs ──────────────────────────────────
-    // Drops you straight into a demo Student account on the Activities tab.
-    // Handy for testing the AI tutor + simulations without sign-up friction.
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("demo") === "labs" || params.get("demo") === "student") {
-      const demoStudent = {
-        name: "Ava Chen", email: "ava-demo@neoschool.me",
-        role: "student", id: "ava-demo@neoschool.me",
-      };
-      localStorage.setItem("neo_current", JSON.stringify(demoStudent));
-      setUser(demoStudent); setRole("student"); setScreen("app");
-      // Strip the param so refreshes don't re-trigger
-      window.history.replaceState({}, "", window.location.pathname);
-      startSyncLoop(30000);
-      return;
-    }
-    if (params.get("demo") === "parent") {
-      const demoParent = {
-        name: "Sarah Chen", email: "sarah-demo@neoschool.me",
-        role: "parent", id: "sarah-demo@neoschool.me",
-      };
-      localStorage.setItem("neo_current", JSON.stringify(demoParent));
-      setUser(demoParent); setRole("parent"); setScreen("app");
-      window.history.replaceState({}, "", window.location.pathname);
-      startSyncLoop(30000);
-      return;
-    }
-    if (params.get("demo") === "teacher" || params.get("demo") === "guide") {
-      const demoGuide = {
-        name: "Maria Lopez", email: "guide-demo@neoschool.me",
-        role: "guide", id: "guide-demo@neoschool.me",
-      };
-      localStorage.setItem("neo_current", JSON.stringify(demoGuide));
-      setUser(demoGuide); setRole("guide"); setScreen("app");
-      window.history.replaceState({}, "", window.location.pathname);
-      startSyncLoop(30000);
-      return;
-    }
-    if (params.get("demo") === "director" || params.get("demo") === "school") {
-      const demoDirector = {
-        name: "Jennie Yang", email: "director-demo@neoschool.me",
-        role: "director", id: "director-demo@neoschool.me",
-      };
-      localStorage.setItem("neo_current", JSON.stringify(demoDirector));
-      setUser(demoDirector); setRole("director"); setScreen("app");
-      window.history.replaceState({}, "", window.location.pathname);
-      startSyncLoop(30000);
-      return;
-    }
-
     const saved = localStorage.getItem("neo_current");
     if (saved) { const u = JSON.parse(saved); setUser(u); setRole(u.role); setScreen("app"); }
     // Restore parent data + screen position
