@@ -3662,7 +3662,7 @@ function LabPlayer({ lab, userId, onBack }) {
   );
 }
 function StudentPortal({ user }) {
-  const [activeTab, setActiveTab]   = useState("labs");
+  const [activeTab, setActiveTab]   = useState("home");
   const [activeLab, setActiveLab]   = useState(null);
   const [activeTutor, setActiveTutor] = useState(null);
   const [msgs, setMsgs]             = useState([]);
@@ -3767,13 +3767,16 @@ function StudentPortal({ user }) {
       </div>
       {activeTool && <SimViewer tool={activeTool} onClose={() => setActiveTool(null)} />}
       <div style={{ display:"flex", background:"var(--p)", padding:"4px", margin:"10px 11px 0", borderRadius:11, flexShrink:0 }}>
-        {[{id:"labs",l:"🎮 Activities"},{id:"journey",l:"🧭 My Map"},{id:"tools",l:"🛠 Tools"},{id:"tutors",l:"🤖 Tutors"},{id:"memory",l:"🧠 Memory"}].map(t => (
+        {[{id:"home",l:"🏠 Home"},{id:"journey",l:"📚 My Curriculum"},{id:"labs",l:"🎮 Play"},{id:"tutors",l:"🤖 Tutors"}].map(t => (
           <div key={t.id} onClick={() => setActiveTab(t.id)} style={{ flex:1, textAlign:"center", padding:"7px", borderRadius:8, cursor:"pointer", fontWeight:600, fontSize:11, background:activeTab===t.id?"#fff":"transparent", color:activeTab===t.id?"var(--nv)":"var(--mu)", transition:"all .2s" }}>{t.l}</div>
         ))}
       </div>
       <div style={{ flex:1, overflowY:"auto", padding:"11px" }}>
+        {activeTab === "home" && (
+          <StudentHome userId={user?.id || "demo"} name={user?.name} onOpenLab={(lab) => setActiveLab(lab)} onGoTab={setActiveTab} />
+        )}
         {activeTab === "journey" && (
-          <LearningMap userId={user?.id || "demo"} onOpenLab={(lab) => setActiveLab(lab)} />
+          <Curriculum userId={user?.id || "demo"} onOpenLab={(lab) => setActiveLab(lab)} />
         )}
         {activeTab === "tools" && (
           <ContentProviders onOpenTool={setActiveTool}/>
@@ -6457,12 +6460,124 @@ function AdminPortal({ user }) {
   );
 }
 
-// ── ROOT APP ──────────────────────────────────────────────────────────────────
-export default 
+// ── PERSONALIZED CURRICULUM (Coursera-style) ─────────────────────────────────
+const GRADE_AGE = { "Kindergarten":[4,7],"1st Grade":[5,8],"2nd Grade":[6,9],"3rd Grade":[7,10],"4th Grade":[8,11],"5th Grade":[9,12],"6th Grade":[10,13],"7th Grade":[11,13],"8th Grade":[12,13] };
+function useCurriculum(userId) {
+  const [tax, setTax] = useState(null);
+  useEffect(() => { loadTaxonomy().then(setTax).catch(()=>{}); }, []);
+  const progress = (() => { try { return JSON.parse(localStorage.getItem("neo_lab_progress_" + userId) || "{}"); } catch { return {}; } })();
+  const mastered = masteredTopics(progress);
+  const grade = localStorage.getItem("neo_child_grade") || "3rd Grade";
+  const [aMin,aMax] = GRADE_AGE[grade] || [7,10];
+  const build = (subject) => {
+    if (!tax) return null;
+    const covered = new Set(coveredTopicIds());
+    // goal: the most central covered topic near the top of the student's age band
+    const cands = tax.nodes.filter(n => n.s===subject && covered.has(n.id) && n.a0>=aMin && n.a0<=aMax+1);
+    const goal = cands.sort((a,b)=> (b.a0-a.a0) || (b.c-a.c))[0]
+      || tax.nodes.filter(n=>n.s===subject && covered.has(n.id)).sort((a,b)=>b.c-a.c)[0];
+    if (!goal) return null;
+    const fullPath = prereqPath(tax, goal.id, new Set());
+    const remaining = prereqPath(tax, goal.id, mastered);
+    const lessons = fullPath.map(id => ({
+      id, node: tax.byId[id],
+      done: mastered.has(id),
+      labs: labsForTopic(id),
+    }));
+    const doneCount = lessons.filter(l=>l.done).length;
+    return { subject, goal, lessons, doneCount, total: lessons.length, remaining: remaining.length,
+      pct: lessons.length ? Math.round(100*doneCount/lessons.length) : 0 };
+  };
+  return { tax, mastered, grade, build };
+}
+
+function Curriculum({ userId, onOpenLab }) {
+  const { tax, grade, build } = useCurriculum(userId);
+  const [subject, setSubject] = useState("Mathematics");
+  const [showMap, setShowMap] = useState(false);
+  if (!tax) return <div className="mu" style={{ padding: 40, textAlign: "center" }}>Building your curriculum…</div>;
+  const subjects = ["Mathematics","English","Science","History"];
+  const cur = build(subject);
+  const nextIdx = cur ? cur.lessons.findIndex(l=>!l.done) : -1;
+  return (
+    <div className="fu">
+      <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginBottom:12 }}>
+        {subjects.map(s => { const c = build(s);
+          return (
+            <button key={s} onClick={() => { setSubject(s); setShowMap(false); }} style={{ flex:"1 1 40%", minWidth:130, textAlign:"left", padding:"11px 13px", borderRadius:12, border: subject===s?"2px solid var(--nv)":"1px solid var(--p)", cursor:"pointer", fontFamily:"inherit", background:"#fff" }}>
+              <div style={{ fontSize:12.5, fontWeight:800, color:"var(--nv)" }}>{s==="Mathematics"?"🔢 Math":s==="English"?"📖 English":s==="Science"?"🔬 Science":"🏛️ History"}</div>
+              <div style={{ height:6, borderRadius:99, background:"var(--p)", marginTop:7, overflow:"hidden" }}><div style={{ width:(c?.pct||0)+"%", height:"100%", background:"#22c55e", transition:"width .4s" }}/></div>
+              <div className="mu" style={{ fontSize:10, marginTop:4 }}>{c ? c.doneCount+"/"+c.total+" lessons" : "—"}</div>
+            </button>
+          );})}
+      </div>
+      {cur && (
+        <div className="card">
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:4 }}>
+            <p style={{ fontSize:13.5, fontWeight:800 }}>Your {subject==="Mathematics"?"Math":subject} path · {grade}</p>
+            <button onClick={()=>setShowMap(m=>!m)} style={{ background:"none", border:"none", cursor:"pointer", fontSize:11, fontWeight:700, color:"var(--bl)" }}>{showMap?"Hide map":"🗺 View map"}</button>
+          </div>
+          <p className="mu" style={{ fontSize:11, marginBottom:12 }}>Built for you from how {cur.total} ideas connect — finish a lesson and the next unlocks naturally. Goal: <b>{cur.goal.n}</b>.</p>
+          {showMap && <div style={{ marginBottom:12 }}><LearningMap userId={userId} onOpenLab={onOpenLab} embedded /></div>}
+          <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+            {cur.lessons.map((L, i) => {
+              const isNext = i === nextIdx;
+              return (
+                <div key={L.id} style={{ display:"flex", alignItems:"center", gap:10, padding:"10px 12px", borderRadius:11, background: L.done ? "#f0fdf4" : isNext ? "#fff7ed" : "#fff", border: isNext ? "1.5px solid #f59e0b" : "1px solid var(--p)" }}>
+                  <div style={{ minWidth:24, height:24, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:800, background: L.done ? "#22c55e" : isNext ? "#f59e0b" : "var(--p)", color: L.done||isNext ? "#fff" : "var(--mu)" }}>{L.done ? "✓" : i+1}</div>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontSize:12.5, fontWeight:700, color: L.done ? "#15803d" : "var(--nv)" }}>{L.node.n}</div>
+                    <div className="mu" style={{ fontSize:10 }}>{L.node.d} · {ageLabel(L.node.a0, L.node.a1)}{L.labs.length===0 ? " · coming soon" : ""}</div>
+                  </div>
+                  {L.labs[0] && <button className="btn bn" style={{ fontSize:11, padding:"7px 14px", opacity: L.done ? .55 : 1 }} onClick={() => onOpenLab(L.labs[0])}>{L.done ? "Replay" : isNext ? "▶ Start" : "Play"}</button>}
+                </div>
+              );})}
+          </div>
+          <p style={{ fontSize:9, color:"var(--mu)", marginTop:10, textAlign:"center" }}>Knowledge graph: Marble Skill Taxonomy · withmarble.com · CC BY-SA 4.0</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── STUDENT HOME (Coursera-style landing) ────────────────────────────────────
+function StudentHome({ userId, name, onOpenLab, onGoTab }) {
+  const { tax, build } = useCurriculum(userId);
+  if (!tax) return <div className="mu" style={{ padding: 40, textAlign: "center" }}>Loading…</div>;
+  const subjects = ["Mathematics","English","Science","History"];
+  const curs = subjects.map(build).filter(Boolean);
+  // next lesson: the least-finished subject's first undone step with a lab
+  const withNext = curs.map(c => ({ c, next: c.lessons.find(l => !l.done && l.labs.length) })).filter(x => x.next);
+  withNext.sort((a,b) => a.c.pct - b.c.pct);
+  const cont = withNext[0];
+  return (
+    <div className="fu" style={{ display:"flex", flexDirection:"column", gap:12 }}>
+      {cont && (
+        <div className="card" style={{ background:"linear-gradient(135deg, var(--nv), #3b4a8f)", border:"none" }}>
+          <p style={{ color:"rgba(255,255,255,.65)", fontSize:10.5, fontWeight:700, textTransform:"uppercase", letterSpacing:".08em", marginBottom:6 }}>Continue learning</p>
+          <p style={{ color:"#fff", fontSize:16, fontWeight:800, marginBottom:2 }}>{cont.next.node.n}</p>
+          <p style={{ color:"rgba(255,255,255,.6)", fontSize:11.5, marginBottom:12 }}>{cont.c.subject==="Mathematics"?"Math":cont.c.subject} path · lesson {cont.c.doneCount+1} of {cont.c.total}</p>
+          <button className="btn" style={{ background:"#fff", color:"var(--nv)", fontWeight:800, fontSize:13.5, padding:"11px 22px", border:"none" }} onClick={() => onOpenLab(cont.next.labs[0])}>▶ Continue</button>
+        </div>
+      )}
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
+        {curs.map(c => (
+          <div key={c.subject} onClick={() => onGoTab("journey")} style={{ cursor:"pointer", padding:"12px 13px", background:"#fff", borderRadius:12, border:"1px solid var(--p)" }}>
+            <div style={{ fontSize:12, fontWeight:800 }}>{c.subject==="Mathematics"?"🔢 Math":c.subject==="English"?"📖 English":c.subject==="Science"?"🔬 Science":"🏛️ History"}</div>
+            <div style={{ height:6, borderRadius:99, background:"var(--p)", margin:"8px 0 4px", overflow:"hidden" }}><div style={{ width:c.pct+"%", height:"100%", background:"#22c55e" }}/></div>
+            <div className="mu" style={{ fontSize:10 }}>{c.pct}% · {c.doneCount}/{c.total} lessons</div>
+          </div>
+        ))}
+      </div>
+      <button className="btn bo fw" style={{ fontSize:13, padding:"12px" }} onClick={() => onGoTab("labs")}>🎮 Free play — all {LABS.length} games & sims</button>
+    </div>
+  );
+}
+
 // ── LEARNING MAP ──────────────────────────────────────────────────────────────
 // Personal knowledge graph per student, powered by the Marble Skill Taxonomy
 // (1,590 micro-topics / 3,221 prerequisite edges, withmarble.com · CC BY-SA).
-function LearningMap({ userId, onOpenLab }) {
+function LearningMap({ userId, onOpenLab, embedded }) {
   const [tax, setTax] = useState(null);
   const [subject, setSubject] = useState("Mathematics");
   const [goal, setGoal] = useState(null);
@@ -6546,12 +6661,14 @@ function LearningMap({ userId, onOpenLab }) {
             </>}
         </div>
       )}
-      <p style={{ fontSize:9.5, color:"var(--mu)", marginTop:12, textAlign:"center" }}>Knowledge graph: Marble Skill Taxonomy · withmarble.com · CC BY-SA 4.0</p>
+      {!embedded && <p style={{ fontSize:9.5, color:"var(--mu)", marginTop:12, textAlign:"center" }}>Knowledge graph: Marble Skill Taxonomy · withmarble.com · CC BY-SA 4.0</p>}
     </div>
   );
 }
 
-function App() {
+
+// ── ROOT APP ──────────────────────────────────────────────────────────────────
+export default function App() {
   const [screen, setScreen] = useState("marketing");
   const [role, setRole]     = useState(null);
   const [user, setUser]     = useState(null);
