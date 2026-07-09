@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Balance Lab ⚖️</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#ffedd5,#fdba74)}
+.wrap{display:flex;flex-direction:column;height:100%;padding:14px;max-width:640px;margin:0 auto}
+.topbar{display:flex;justify-content:space-between;align-items:center}
+.title{font-size:18px;font-weight:700;color:#c2410c}
+.chip{background:#fff;border-radius:99px;padding:5px 13px;font-size:13px;font-weight:700;color:#c2410c;box-shadow:0 2px 0 #fb923c}
+.task{background:#fff;border:3px solid #fb923c;border-radius:16px;box-shadow:0 4px 0 #fb923c;padding:10px 14px;text-align:center;font-size:clamp(14px,4vw,17px);font-weight:700;color:#1a1f3a;margin:10px 0}
+.svgbox{flex:1;display:flex;align-items:center;justify-content:center}
+svg{width:100%;max-width:560px;height:auto}
+.beam{transition:transform .8s cubic-bezier(.3,1.4,.4,1);transform-origin:280px 150px}
+.posbtns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px}
+.posbtns button{min-height:52px;background:#fff;border:none;border-radius:14px;font-family:'Quicksand',sans-serif;font-size:16px;font-weight:700;color:#c2410c;cursor:pointer;box-shadow:0 3px 0 #fb923c;touch-action:manipulation}
+.posbtns button:active{transform:translateY(2px)}
+.posbtns button:disabled{opacity:.4}
+.fb{text-align:center;font-size:14.5px;font-weight:700;min-height:20px;margin-top:8px;color:#c2410c}
+.overlay{position:fixed;inset:0;background:rgba(255,255,255,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:50;text-align:center;padding:20px}
+.overlay.show{opacity:1;pointer-events:auto}
+.overlay h2{font-size:clamp(26px,7vw,36px);color:#c2410c}
+.overlay .sc{font-size:17px;font-weight:700;color:#374151}
+.overlay button{background:#c2410c;color:#fff;border:none;border-radius:99px;padding:13px 32px;font-family:'Quicksand',sans-serif;font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2)}
+.confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards;z-index:70}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+</style></head><body>
+<div class="wrap">
+  <div class="topbar"><div class="title">⚖️ Balance Lab</div><div style="display:flex;gap:6px"><div class="chip" id="score">0 pts</div><div class="chip" id="prog">1/5</div></div></div>
+  <div class="task" id="task"></div>
+  <div class="svgbox"><svg viewBox="0 0 560 260" id="scene"></svg></div>
+  <div class="task" style="margin:0 0 4px;font-size:13.5px;padding:7px">Where should the <b id="wlabel"></b> weight go to balance the beam?</div>
+  <div class="posbtns" id="btns"></div>
+  <div class="fb" id="fb">Torque = weight × distance. Balance both sides!</div>
+</div>
+<div class="overlay" id="ov"><h2 id="ovTitle"></h2><div class="sc" id="ovScore"></div><button id="ovNext">Next →</button></div>
+<script>
+const GAME={id:"sim-balance-lab"};
+// challenges: fixed weight wL at position pL (left). Player places wR at pos 1-4 right. Solution: pL*wL/wR (integer 1..4)
+function genChallenges(){
+  const ch=[];const combos=[];
+  for(let wL=1;wL<=6;wL++)for(let pL=1;pL<=4;pL++)for(let wR=1;wR<=6;wR++){
+    const s=wL*pL/wR; if(Number.isInteger(s)&&s>=1&&s<=4&&!(wL===wR&&pL===s))combos.push({wL,pL,wR,sol:s});}
+  for(let i=0;i<5;i++)ch.push(combos[Math.floor(Math.random()*combos.length)]);
+  // first one easy: equal weights
+  ch[0]={wL:3,pL:2,wR:3,sol:2};
+  return ch;
+}
+const CH=genChallenges();
+window.__qaSolutions=CH.map(c=>c.sol);
+let idx=0,score=0,tries=0;
+let AC=null;function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch{}}return AC;}
+function tone(f,t=.13,ty="sine",g=.15,w=0){const c=ac();if(!c)return;const o=c.createOscillator(),v=c.createGain();o.type=ty;o.frequency.value=f;v.gain.setValueAtTime(g,c.currentTime+w);v.gain.exponentialRampToValueAtTime(.001,c.currentTime+w+t);o.connect(v).connect(c.destination);o.start(c.currentTime+w);o.stop(c.currentTime+w+t+.02);}
+const CC=["#c2410c","#f59e0b","#ec4899","#22c55e","#3b82f6"];
+function confetti(n){for(let i=0;i<n;i++){const d=document.createElement("div");d.className="confetti";d.style.left=Math.random()*100+"vw";d.style.background=CC[i%5];d.style.animationDelay=Math.random()*.4+"s";document.body.appendChild(d);setTimeout(()=>d.remove(),2300);}}
+function report(complete){try{parent.postMessage({type:"labProgress",lab:GAME.id,score,complete},"*");}catch{}}
+const WCOL={1:"#60a5fa",2:"#34d399",3:"#f472b6",4:"#a78bfa",5:"#facc15",6:"#f87171"};
+function draw(placedPos,tilt){
+  const c=CH[idx];
+  const px=p=>280+p*55, pxl=p=>280-p*55;
+  let s='<rect x="255" y="150" width="50" height="70" fill="#92400e" rx="6"/><polygon points="280,140 250,220 310,220" fill="#b45309"/>';
+  s+='<g class="beam" style="transform:rotate('+tilt+'deg)">';
+  s+='<rect x="60" y="142" width="440" height="14" rx="7" fill="#78350f"/>';
+  for(let p=1;p<=4;p++){s+='<text x="'+pxl(p)+'" y="136" font-size="12" text-anchor="middle" fill="#78350f" font-weight="bold">'+p+'</text>';
+    s+='<text x="'+px(p)+'" y="136" font-size="12" text-anchor="middle" fill="#78350f" font-weight="bold">'+p+'</text>';}
+  // left fixed weight
+  const hL=14+c.wL*7;
+  s+='<rect x="'+(pxl(c.pL)-20)+'" y="'+(142-hL)+'" width="40" height="'+hL+'" rx="6" fill="'+WCOL[c.wL]+'" stroke="#1f2937" stroke-width="2"/><text x="'+pxl(c.pL)+'" y="'+(142-hL/2+5)+'" font-size="14" text-anchor="middle" fill="#fff" font-weight="bold">'+c.wL+'kg</text>';
+  // right placed weight
+  if(placedPos){const hR=14+c.wR*7;
+    s+='<rect x="'+(px(placedPos)-20)+'" y="'+(142-hR)+'" width="40" height="'+hR+'" rx="6" fill="'+WCOL[c.wR]+'" stroke="#1f2937" stroke-width="2"/><text x="'+px(placedPos)+'" y="'+(142-hR/2+5)+'" font-size="14" text-anchor="middle" fill="#fff" font-weight="bold">'+c.wR+'kg</text>';}
+  s+='</g>';
+  document.getElementById("scene").innerHTML=s;
+}
+function load(){
+  const c=CH[idx];tries=0;
+  document.getElementById("task").innerHTML="A <b>"+c.wL+" kg</b> weight sits at position <b>"+c.pL+"</b> on the left.";
+  document.getElementById("wlabel").textContent=c.wR+" kg";
+  document.getElementById("prog").textContent=(idx+1)+"/5";
+  document.getElementById("score").textContent=score+" pts";
+  document.getElementById("fb").textContent="Torque = weight × distance. Balance both sides!";
+  const B=document.getElementById("btns");B.innerHTML="";
+  for(let p=1;p<=4;p++){const b=document.createElement("button");b.textContent="Position "+p;b.dataset.p=p;
+    b.onclick=()=>place(p);B.appendChild(b);}
+  draw(null,-8);
+}
+function place(p){
+  const c=CH[idx];tries++;
+  const tL=c.wL*c.pL, tR=c.wR*p;
+  const tilt=Math.max(-14,Math.min(14,(tR-tL)*2.2));
+  draw(p,tilt);
+  if(tL===tR){
+    const pts=Math.max(10,40-(tries-1)*10);score+=pts;
+    tone(660,.12);tone(880,.14,"sine",.15,.1);confetti(30);
+    document.getElementById("fb").textContent="⚖️ Balanced! "+c.wL+"×"+c.pL+" = "+c.wR+"×"+p+" (+"+pts+" pts)";
+    document.getElementById("score").textContent=score+" pts";
+    [...document.getElementById("btns").children].forEach(b=>b.disabled=true);
+    setTimeout(next,1300);
+  } else {
+    tone(200,.2,"triangle",.1);
+    document.getElementById("fb").textContent=(tR>tL?"Too much torque on the right!":"Not enough torque — ")+" left is "+tL+", right is "+tR+".";
+  }
+}
+function next(){
+  idx++;
+  if(idx>=CH.length){report(true);confetti(60);
+    document.getElementById("ovTitle").textContent="Torque master! 🏆";
+    document.getElementById("ovScore").textContent=score+" pts · weight × distance conquered";
+    document.getElementById("ovNext").onclick=()=>{idx=0;score=0;location.reload?window.location.reload():0;};
+    document.getElementById("ov").classList.add("show");return;}
+  load();
+}
+window.__qa={solve:()=>{const btn=[...document.getElementById("btns").children].find(b=>+b.dataset.p===CH[idx].sol);if(btn&&!btn.disabled)btn.click();}};
+load();
+</script></body></html>

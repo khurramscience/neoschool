@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Graph Slider 📈</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#dbeafe,#93c5fd)}
+.wrap{display:flex;flex-direction:column;height:100%;padding:14px;max-width:560px;margin:0 auto}
+.topbar{display:flex;justify-content:space-between;align-items:center}
+.title{font-size:18px;font-weight:700;color:#1d4ed8}
+.chip{background:#fff;border-radius:99px;padding:5px 13px;font-size:13px;font-weight:700;color:#1d4ed8;box-shadow:0 2px 0 #60a5fa}
+.eq{background:#fff;border:3px solid #60a5fa;border-radius:16px;box-shadow:0 4px 0 #60a5fa;padding:8px;text-align:center;font-size:clamp(17px,5vw,22px);font-weight:700;color:#1a1f3a;margin:10px 0;font-variant-numeric:tabular-nums}
+.eq .you{color:#1d4ed8}
+.svgbox{flex:1;display:flex;align-items:center;justify-content:center;min-height:0}
+svg{max-width:100%;max-height:100%;height:auto}
+.sliders{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.srow{display:flex;align-items:center;gap:10px;background:#fff;border-radius:14px;padding:8px 12px;box-shadow:0 3px 0 #60a5fa}
+.srow label{font-weight:700;color:#1d4ed8;min-width:88px;font-size:14px}
+.srow input{flex:1;accent-color:#1d4ed8;height:28px}
+.srow .val{min-width:34px;text-align:right;font-weight:700;color:#1a1f3a}
+.check{min-height:50px;width:100%;background:#1d4ed8;color:#fff;border:none;border-radius:14px;font-family:'Quicksand',sans-serif;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2);margin-top:8px;touch-action:manipulation}
+.fb{text-align:center;font-size:14px;font-weight:700;min-height:20px;margin-top:6px;color:#1d4ed8}
+.overlay{position:fixed;inset:0;background:rgba(255,255,255,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:50;text-align:center;padding:20px}
+.overlay.show{opacity:1;pointer-events:auto}
+.overlay h2{font-size:clamp(26px,7vw,36px);color:#1d4ed8}
+.overlay .sc{font-size:17px;font-weight:700;color:#374151}
+.overlay button{background:#1d4ed8;color:#fff;border:none;border-radius:99px;padding:13px 32px;font-family:'Quicksand',sans-serif;font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2)}
+.confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards;z-index:70}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+</style></head><body>
+<div class="wrap">
+  <div class="topbar"><div class="title">📈 Graph Slider</div><div style="display:flex;gap:6px"><div class="chip" id="score">0 pts</div><div class="chip" id="prog">1/5</div></div></div>
+  <div class="eq" id="eq"></div>
+  <div class="svgbox"><svg viewBox="0 0 240 240" id="grid"></svg></div>
+  <div class="sliders">
+    <div class="srow"><label>slope m</label><input type="range" id="m" min="-4" max="4" step="1" value="1"><span class="val" id="mv">1</span></div>
+    <div class="srow"><label>intercept b</label><input type="range" id="b" min="-5" max="5" step="1" value="0"><span class="val" id="bv">0</span></div>
+  </div>
+  <button class="check" id="check">Lock it in ✓</button>
+  <div class="fb" id="fb">Slide m and b — watch your blue line move!</div>
+</div>
+<div class="overlay" id="ov"><h2 id="ovTitle"></h2><div class="sc" id="ovScore"></div><button id="ovNext">Next →</button></div>
+<script>
+const GAME={id:"sim-graph-slider"};
+function genChallenges(){
+  const ch=[];const R=n=>Math.floor(Math.random()*n);
+  ch.push({m:1,b:2});ch.push({m:2,b:-1});ch.push({m:-1,b:3});
+  while(ch.length<5){const m=(R(2)?1:-1)*(1+R(3)),b=(R(2)?1:-1)*R(5);if(!ch.some(c=>c.m===m&&c.b===b))ch.push({m,b});}
+  return ch;
+}
+const CH=genChallenges();
+let idx=0,score=0,tries=0;
+let AC=null;function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch{}}return AC;}
+function tone(f,t=.12,ty="sine",g=.15,w=0){const c=ac();if(!c)return;const o=c.createOscillator(),v=c.createGain();o.type=ty;o.frequency.value=f;v.gain.setValueAtTime(g,c.currentTime+w);v.gain.exponentialRampToValueAtTime(.001,c.currentTime+w+t);o.connect(v).connect(c.destination);o.start(c.currentTime+w);o.stop(c.currentTime+w+t+.02);}
+const CC=["#1d4ed8","#f59e0b","#ec4899","#22c55e","#3b82f6"];
+function confetti(n){for(let i=0;i<n;i++){const d=document.createElement("div");d.className="confetti";d.style.left=Math.random()*100+"vw";d.style.background=CC[i%5];d.style.animationDelay=Math.random()*.4+"s";document.body.appendChild(d);setTimeout(()=>d.remove(),2300);}}
+function report(complete){try{parent.postMessage({type:"labProgress",lab:GAME.id,score,complete},"*");}catch{}}
+const X=v=>120+v*20, Y=v=>120-v*20;
+function linePts(m,b){const y1=m*(-6)+b,y2=m*6+b;return X(-6)+","+Y(y1)+" "+X(6)+","+Y(y2);}
+function fmt(m,b){return "y = "+(m===1?"":m===-1?"−":m<0?"−"+(-m):m)+"x "+(b>0?"+ "+b:b<0?"− "+(-b):"");}
+function render(){
+  const t=CH[idx];
+  const m=+document.getElementById("m").value,b=+document.getElementById("b").value;
+  document.getElementById("mv").textContent=m;document.getElementById("bv").textContent=b;
+  let s="";
+  for(let i=-5;i<=5;i++){s+='<line x1="'+X(i)+'" y1="'+Y(-6)+'" x2="'+X(i)+'" y2="'+Y(6)+'" stroke="#bfdbfe" stroke-width="1"/><line x1="'+X(-6)+'" y1="'+Y(i)+'" x2="'+X(6)+'" y2="'+Y(i)+'" stroke="#bfdbfe" stroke-width="1"/>';}
+  s+='<line x1="'+X(-6)+'" y1="'+Y(0)+'" x2="'+X(6)+'" y2="'+Y(0)+'" stroke="#1d4ed8" stroke-width="2"/><line x1="'+X(0)+'" y1="'+Y(-6)+'" x2="'+X(0)+'" y2="'+Y(6)+'" stroke="#1d4ed8" stroke-width="2"/>';
+  s+='<polyline points="'+linePts(t.m,t.b)+'" fill="none" stroke="#f59e0b" stroke-width="4" stroke-dasharray="8 6" stroke-linecap="round"/>';
+  s+='<polyline points="'+linePts(m,b)+'" fill="none" stroke="#1d4ed8" stroke-width="3.5" stroke-linecap="round"/>';
+  document.getElementById("grid").innerHTML=s;
+  document.getElementById("eq").innerHTML="🎯 target: <b style='color:#b45309'>"+fmt(t.m,t.b)+"</b> · yours: <b class='you'>"+fmt(m,b)+"</b>";
+  document.getElementById("prog").textContent=(idx+1)+"/5";
+  document.getElementById("score").textContent=score+" pts";
+}
+document.getElementById("m").oninput=render;
+document.getElementById("b").oninput=render;
+document.getElementById("check").onclick=()=>{
+  const t=CH[idx];tries++;
+  const m=+document.getElementById("m").value,b=+document.getElementById("b").value;
+  if(m===t.m&&b===t.b){
+    const pts=Math.max(10,35-(tries-1)*10);score+=pts;
+    tone(660,.12);tone(880,.14,"sine",.15,.1);confetti(30);
+    document.getElementById("fb").textContent="🎉 Perfect overlap! "+fmt(t.m,t.b)+"  (+"+pts+" pts)";
+    document.getElementById("score").textContent=score+" pts";
+    setTimeout(next,1300);
+  } else {
+    tone(200,.2,"triangle",.1);
+    document.getElementById("fb").textContent=(m!==t.m?"Tilt doesn't match — adjust the slope. ":"Slope is right! ")+(b!==t.b?"Where does the target cross the y-axis?":"");
+  }
+};
+function load(){tries=0;document.getElementById("m").value=1;document.getElementById("b").value=0;
+  document.getElementById("fb").textContent="Slide m and b — watch your blue line move!";render();}
+function next(){idx++;
+  if(idx>=CH.length){report(true);confetti(60);
+    document.getElementById("ovTitle").textContent="Line legend! 🏆";
+    document.getElementById("ovScore").textContent=score+" pts · slope and intercept mastered";
+    document.getElementById("ovNext").onclick=()=>{idx=0;score=0;load();document.getElementById("ov").classList.remove("show");};
+    document.getElementById("ov").classList.add("show");return;}
+  load();}
+window.__qa={solve:()=>{const t=CH[idx];document.getElementById("m").value=t.m;document.getElementById("b").value=t.b;render();document.getElementById("check").click();}};
+load();
+</script></body></html>
