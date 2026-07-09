@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Sight Word Splash 👀</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(170deg,#fef9c3,#fde047)}
+.wrap{display:flex;flex-direction:column;height:100%;padding:14px;max-width:640px;margin:0 auto}
+.topbar{display:flex;justify-content:space-between;align-items:center}
+.title{font-size:18px;font-weight:700;color:#a16207}
+.rule{background:#fff;border:3px solid #facc15;border-radius:16px;box-shadow:0 4px 0 #facc15;padding:10px 14px;text-align:center;font-size:clamp(15px,4.2vw,19px);font-weight:700;color:#1a1f3a;margin:10px 0}
+.hud{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.chip{background:#fff;border-radius:99px;padding:5px 13px;font-size:13px;font-weight:700;color:#a16207;box-shadow:0 2px 0 #facc15}
+.chip.flame{background:#fff7ed;color:#c2410c;box-shadow:0 2px 0 #fb923c;opacity:.35;transition:all .25s}
+.chip.flame.hot{opacity:1;transform:scale(1.08)}
+.tank{flex:1;position:relative;overflow:hidden;border-radius:20px;background:rgba(255,255,255,.35)}
+.bubble{position:absolute;bottom:-90px;border:none;border-radius:50%;background:radial-gradient(circle at 32% 30%,#ffffffee,#fefce8 45%,#facc15);color:#a16207;font-family:'Quicksand',sans-serif;font-weight:700;font-size:clamp(13px,3.8vw,17px);width:84px;height:84px;cursor:pointer;box-shadow:inset -4px -6px 12px rgba(0,0,0,.08),0 4px 10px rgba(0,0,0,.12);animation:float var(--dur) linear forwards;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.1;padding:6px;touch-action:manipulation}
+@keyframes float{to{transform:translateY(calc(-100vh - 120px)) rotate(var(--rot))}}
+.bubble.popGood{animation:none;background:#bbf7d0;transform:scale(1.35);opacity:0;transition:all .28s}
+.bubble.popBad{animation:none;background:#fecaca;transform:scale(.6) rotate(15deg);opacity:0;transition:all .3s}
+.fb{text-align:center;font-size:14.5px;font-weight:700;min-height:20px;margin-top:8px;color:#a16207}
+.scorePop{position:fixed;font-size:24px;font-weight:700;color:#a16207;pointer-events:none;animation:rise .8s ease-out forwards;z-index:60}
+@keyframes rise{to{opacity:0;transform:translateY(-50px) scale(1.35)}}
+.overlay{position:fixed;inset:0;background:rgba(255,255,255,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:50;text-align:center;padding:20px}
+.overlay.show{opacity:1;pointer-events:auto}
+.overlay h2{font-size:clamp(26px,7vw,38px);color:#a16207}
+.overlay .bigstars{font-size:42px;letter-spacing:4px}
+.overlay .sc{font-size:18px;font-weight:700;color:#374151}
+.overlay button{background:#a16207;color:#fff;border:none;border-radius:99px;padding:13px 32px;font-family:'Quicksand',sans-serif;font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2)}
+.confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards;z-index:70}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="topbar"><div class="title">👀 Sight Word Splash</div><div class="chip" id="lvl">Level 1</div></div>
+  <div class="rule" id="rule"></div>
+  <div class="hud">
+    <div class="chip" id="score">0 pts</div>
+    <div class="chip flame" id="flame">🔥 combo 0</div>
+    <div class="chip" id="prog">0/10 popped</div>
+    <div class="chip" id="lives">❤️❤️❤️</div>
+  </div>
+  <div class="tank" id="tank"></div>
+  <div class="fb" id="fb">Pop ONLY the bubbles that match the rule!</div>
+</div>
+<div class="overlay" id="ov">
+  <h2 id="ovTitle">Level cleared!</h2>
+  <div class="bigstars" id="ovStars"></div>
+  <div class="sc" id="ovScore"></div>
+  <button id="ovNext">Next level →</button>
+</div>
+<script>
+const GAME={id:"pop-sight-words",maxLevel:3,levels:[{"rule":"Pop the word THE!","good":["the","the","the","the","the","the"],"bad":["and","see","dog","cat","run","big"]},{"rule":"Pop the words that start with S!","good":["see","said","she","some","so","stop"],"bad":["the","and","play","went","look","away"]},{"rule":"Pop the REAL words!","good":["play","jump","help","little","funny","down"],"bad":["plup","jomp","hulp","luttle","fenny","dewn"]}]};
+const TARGET=10;
+let level=1,score=0,combo=0,best=0,popped=0,lives=3,over=false,spawnTimer=null;
+let AC=null;function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch{}}return AC;}
+function tone(f,t=.12,ty="sine",g=.15,w=0){const c=ac();if(!c)return;const o=c.createOscillator(),v=c.createGain();o.type=ty;o.frequency.value=f;v.gain.setValueAtTime(g,c.currentTime+w);v.gain.exponentialRampToValueAtTime(.001,c.currentTime+w+t);o.connect(v).connect(c.destination);o.start(c.currentTime+w);o.stop(c.currentTime+w+t+.02);}
+function sfxPop(){tone(560+Math.min(combo,8)*55,.1,"sine",.16);tone(840+combo*40,.09,"sine",.1,.06);}
+function sfxBad(){tone(180,.22,"triangle",.12);}
+function sfxWin(){[523,659,784,1047].forEach((f,i)=>tone(f,.2,"sine",.17,i*.11));}
+const CC=["#a16207","#f59e0b","#ec4899","#22c55e","#3b82f6"];
+function confetti(n){for(let i=0;i<n;i++){const d=document.createElement("div");d.className="confetti";d.style.left=Math.random()*100+"vw";d.style.background=CC[i%5];d.style.animationDelay=Math.random()*.4+"s";document.body.appendChild(d);setTimeout(()=>d.remove(),2300);}}
+function popFx(t,x,y){const p=document.createElement("div");p.className="scorePop";p.textContent=t;p.style.left=(x-18)+"px";p.style.top=(y-28)+"px";document.body.appendChild(p);setTimeout(()=>p.remove(),820);}
+function R(n){return Math.floor(Math.random()*n);}
+function hud(){document.getElementById("score").textContent=score+" pts";document.getElementById("prog").textContent=popped+"/"+TARGET+" popped";document.getElementById("lvl").textContent="Level "+level;document.getElementById("lives").textContent="❤️".repeat(lives)+"🖤".repeat(3-lives);const f=document.getElementById("flame");f.textContent="🔥 combo "+combo;f.classList.toggle("hot",combo>=3);}
+function report(complete){try{parent.postMessage({type:"labProgress",lab:GAME.id,level,score,complete},"*");}catch{}}
+function spawn(){
+  if(over)return;
+  const L=GAME.levels[level-1];
+  const liveGood=document.querySelectorAll('.bubble[data-good="1"]:not([data-done])').length;
+  const good=liveGood<2?true:Math.random()<0.45;
+  const pool=good?L.good:L.bad;
+  const b=document.createElement("button");
+  b.className="bubble";b.dataset.good=good?"1":"0";
+  b.textContent=pool[R(pool.length)];
+  b.style.left=(4+R(72))+"%";
+  b.style.setProperty("--dur",(7.5-level*1.1+Math.random()*2)+"s");
+  b.style.setProperty("--rot",(R(2)?"":"-")+(4+R(10))+"deg");
+  b.onclick=(ev)=>hit(b,ev);
+  document.getElementById("tank").appendChild(b);
+  setTimeout(()=>{if(b.parentNode&&!over)b.remove();},9000);
+}
+function hit(b,ev){
+  if(over||b.dataset.done)return;b.dataset.done="1";
+  if(b.dataset.good==="1"){
+    combo++;best=Math.max(best,combo);popped++;
+    let pts=10+(combo>=3?combo*5:0);score+=pts;
+    popFx("+"+pts,ev.clientX||innerWidth/2,ev.clientY||innerHeight/2);
+    sfxPop();if(combo>=3)confetti(6);
+    b.classList.add("popGood");
+    document.getElementById("fb").textContent=["Pop!","Nice pop!","Combo popping! 🔥","On fire!"][Math.min(Math.max(combo-1,0),3)];
+    spawn();
+  } else {
+    combo=0;lives--;sfxBad();
+    b.classList.add("popBad");
+    document.getElementById("fb").textContent="Oops — that one doesn't match the rule!";
+    spawn();
+  }
+  setTimeout(()=>b.remove(),320);
+  hud();
+  if(popped>=TARGET)return win();
+  if(lives<=0)return lose();
+}
+function clearTank(){document.getElementById("tank").innerHTML="";if(spawnTimer)clearInterval(spawnTimer);}
+function win(){
+  over=true;clearTank();report(level>=GAME.maxLevel);sfxWin();confetti(60);
+  const stars=lives===3?5:lives===2?4:3;
+  document.getElementById("ovStars").textContent="⭐".repeat(stars)+"☆".repeat(5-stars);
+  document.getElementById("ovScore").textContent=score+" pts · best combo 🔥"+best+" · "+lives+" ❤️ left";
+  const done=level>=GAME.maxLevel;
+  document.getElementById("ovTitle").textContent=done?"Pop champion! 🏆":"Level cleared!";
+  const nb=document.getElementById("ovNext");nb.textContent=done?"Play again 🏆":"Next level →";
+  nb.onclick=()=>{if(!done)level++;else{level=1;score=0;}start();};
+  document.getElementById("ov").classList.add("show");
+}
+function lose(){
+  over=true;clearTank();
+  document.getElementById("ovStars").textContent="⭐☆☆☆☆";
+  document.getElementById("ovScore").textContent=score+" pts · "+popped+"/"+TARGET+" popped";
+  document.getElementById("ovTitle").textContent="Out of hearts!";
+  const nb=document.getElementById("ovNext");nb.textContent="Try again 💪";
+  nb.onclick=()=>start();
+  document.getElementById("ov").classList.add("show");
+}
+function start(){
+  over=false;popped=0;lives=3;combo=0;
+  clearTank();
+  document.getElementById("rule").textContent="🎯 "+GAME.levels[level-1].rule;
+  document.getElementById("ov").classList.remove("show");
+  document.getElementById("fb").textContent="Pop ONLY the bubbles that match the rule!";
+  hud();
+  for(let i=0;i<5;i++)spawn();
+  spawnTimer=setInterval(spawn,Math.max(700,1500-level*250));
+}
+start();
+</script></body></html>

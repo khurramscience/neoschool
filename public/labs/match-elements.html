@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Match: Element Symbols 🧪</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#ede9fe,#c4b5fd);color:#1a1612}
+.wrap{display:flex;flex-direction:column;height:100%;padding:14px;max-width:640px;margin:0 auto}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.title{font-size:19px;font-weight:700;color:#6d28d9}
+.hud{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.chip{background:#fff;border-radius:99px;padding:5px 13px;font-size:13px;font-weight:700;color:#6d28d9;box-shadow:0 2px 0 #a78bfa}
+.chip.flame{background:#fff7ed;color:#c2410c;box-shadow:0 2px 0 #fb923c;opacity:.35;transition:all .25s}
+.chip.flame.hot{opacity:1;transform:scale(1.08)}
+.grid{flex:1;display:grid;gap:8px;align-content:center}
+.mcard{position:relative;border:none;background:transparent;cursor:pointer;perspective:600px;min-height:64px;font-family:'Quicksand',sans-serif;touch-action:manipulation}
+.mcard .inner{position:absolute;inset:0;transition:transform .4s;transform-style:preserve-3d}
+.mcard.flipped .inner,.mcard.matched .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:14px;backface-visibility:hidden;font-weight:700;padding:6px;text-align:center;line-height:1.2}
+.back{background:#6d28d9;color:#fff;font-size:24px;box-shadow:0 3px 0 rgba(0,0,0,.2)}
+.front{background:#fff;color:#6d28d9;transform:rotateY(180deg);border:2.5px solid #a78bfa;box-shadow:0 3px 0 #a78bfa;font-size:clamp(12px,3.4vw,17px)}
+.mcard.matched .front{background:#bbf7d0;border-color:#4ade80;color:#15803d;animation:pulse .4s}
+.mcard.wrongpair .front{background:#fecaca;border-color:#f87171}
+@keyframes pulse{50%{transform:rotateY(180deg) scale(1.12)}}
+.fb{text-align:center;font-size:14.5px;font-weight:700;min-height:20px;margin-top:8px;color:#6d28d9}
+.scorePop{position:fixed;font-size:24px;font-weight:700;color:#6d28d9;pointer-events:none;animation:rise .8s ease-out forwards;z-index:60}
+@keyframes rise{to{opacity:0;transform:translateY(-50px) scale(1.35)}}
+.overlay{position:fixed;inset:0;background:rgba(255,255,255,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:50;text-align:center;padding:20px}
+.overlay.show{opacity:1;pointer-events:auto}
+.overlay h2{font-size:clamp(26px,7vw,38px);color:#6d28d9}
+.overlay .bigstars{font-size:42px;letter-spacing:4px}
+.overlay .sc{font-size:18px;font-weight:700;color:#374151}
+.overlay button{background:#6d28d9;color:#fff;border:none;border-radius:99px;padding:13px 32px;font-family:'Quicksand',sans-serif;font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2)}
+.confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards;z-index:70}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="topbar"><div class="title">🧪 Match: Element Symbols</div><div class="chip" id="lvl">Level 1</div></div>
+  <div class="hud">
+    <div class="chip" id="score">0 pts</div>
+    <div class="chip flame" id="flame">🔥 combo 0</div>
+    <div class="chip" id="moves">0 flips</div>
+    <div class="chip" id="left">6 pairs left</div>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="fb" id="fb">Flip two cards to find a matching pair!</div>
+</div>
+<div class="overlay" id="ov">
+  <h2 id="ovTitle">Board cleared!</h2>
+  <div class="bigstars" id="ovStars"></div>
+  <div class="sc" id="ovScore"></div>
+  <button id="ovNext">Next level →</button>
+</div>
+<script>
+const GAME={id:"match-elements",maxLevel:3,pairs:[[["H","Hydrogen"],["O","Oxygen"],["C","Carbon"],["N","Nitrogen"],["He","Helium"],["S","Sulfur"],["Ca","Calcium"],["Al","Aluminum"],["Ne","Neon"],["Si","Silicon"]],[["Na","Sodium"],["K","Potassium"],["Fe","Iron"],["Cu","Copper"],["Zn","Zinc"],["Mg","Magnesium"],["Cl","Chlorine"],["P","Phosphorus"],["Li","Lithium"],["Ar","Argon"]],[["Au","Gold"],["Ag","Silver"],["Pb","Lead"],["Hg","Mercury"],["Sn","Tin"],["W","Tungsten"],["Kr","Krypton"],["Ti","Titanium"],["Ni","Nickel"],["Co","Cobalt"]]]};
+let level=1,score=0,combo=0,best=0,moves=0,matched=0,total=0,lockB=false,first=null;
+let AC=null;function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch{}}return AC;}
+function tone(f,t=.13,ty="sine",g=.15,w=0){const c=ac();if(!c)return;const o=c.createOscillator(),v=c.createGain();o.type=ty;o.frequency.value=f;v.gain.setValueAtTime(g,c.currentTime+w);v.gain.exponentialRampToValueAtTime(.001,c.currentTime+w+t);o.connect(v).connect(c.destination);o.start(c.currentTime+w);o.stop(c.currentTime+w+t+.02);}
+function sfxMatch(){const b=520+Math.min(combo,8)*50;tone(b,.11);tone(b*1.25,.11,"sine",.15,.08);tone(b*1.5,.15,"sine",.15,.16);}
+function sfxMiss(){tone(196,.2,"triangle",.1);}
+function sfxWin(){[523,659,784,1047].forEach((f,i)=>tone(f,.2,"sine",.17,i*.11));}
+const CC=["#6d28d9","#f59e0b","#ec4899","#22c55e","#3b82f6"];
+function confetti(n){for(let i=0;i<n;i++){const d=document.createElement("div");d.className="confetti";d.style.left=Math.random()*100+"vw";d.style.background=CC[i%5];d.style.animationDelay=Math.random()*.4+"s";document.body.appendChild(d);setTimeout(()=>d.remove(),2300);}}
+function pop(t,x,y){const p=document.createElement("div");p.className="scorePop";p.textContent=t;p.style.left=(x-18)+"px";p.style.top=(y-28)+"px";document.body.appendChild(p);setTimeout(()=>p.remove(),820);}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function hud(){document.getElementById("score").textContent=score+" pts";document.getElementById("moves").textContent=moves+" flips";document.getElementById("left").textContent=(total-matched)+" pairs left";document.getElementById("lvl").textContent="Level "+level;const f=document.getElementById("flame");f.textContent="🔥 combo "+combo;f.classList.toggle("hot",combo>=2);}
+function report(complete){try{parent.postMessage({type:"labProgress",lab:GAME.id,level,score,moves,complete},"*");}catch{}}
+function start(){
+  first=null;lockB=false;moves=0;matched=0;combo=0;
+  const bank=shuffle(GAME.pairs[level-1]).slice(0,level===1?6:level===2?8:10);
+  total=bank.length;
+  const cards=shuffle(bank.flatMap((p,i)=>[{k:i,t:p[0]},{k:i,t:p[1]}]));
+  const g=document.getElementById("grid");
+  g.innerHTML="";g.style.gridTemplateColumns="repeat("+(total<=6?3:4)+",1fr)";
+  cards.forEach(c=>{
+    const b=document.createElement("button");b.className="mcard";b.dataset.k=c.k;
+    b.innerHTML='<div class="inner"><div class="face back">🧪</div><div class="face front">'+c.t+'</div></div>';
+    b.onclick=(ev)=>flip(b,ev);g.appendChild(b);
+  });
+  document.getElementById("ov").classList.remove("show");
+  document.getElementById("fb").textContent="Flip two cards to find a matching pair!";
+  hud();
+}
+function flip(b,ev){
+  if(lockB||b.classList.contains("flipped")||b.classList.contains("matched"))return;
+  b.classList.add("flipped");
+  if(!first){first=b;return;}
+  moves++;lockB=true;
+  const a=first;first=null;
+  if(a.dataset.k===b.dataset.k){
+    combo++;best=Math.max(best,combo);matched++;
+    let pts=20+(combo>=2?combo*10:0);score+=pts;
+    pop("+"+pts,ev.clientX||innerWidth/2,ev.clientY||innerHeight/2);
+    sfxMatch();if(combo>=2)confetti(8);
+    a.classList.add("matched");b.classList.add("matched");
+    document.getElementById("fb").textContent=["Perfect match!","You remembered! 🧠","Combo brain!","Unstoppable!"][Math.min(combo-1,3)];
+    hud();lockB=false;
+    if(matched===total){report(level>=GAME.maxLevel);sfxWin();confetti(60);
+      const eff=total*2/Math.max(moves,1);const stars=eff>=.9?5:eff>=.7?4:eff>=.55?3:eff>=.4?2:1;
+      document.getElementById("ovStars").textContent="⭐".repeat(stars)+"☆".repeat(5-stars);
+      document.getElementById("ovScore").textContent=score+" pts · "+moves+" flips · best combo 🔥"+best;
+      const done=level>=GAME.maxLevel;
+      document.getElementById("ovTitle").textContent=done?"Memory master! 🏆":"Board cleared!";
+      const nb=document.getElementById("ovNext");nb.textContent=done?"Play again 🏆":"Next level →";
+      nb.onclick=()=>{if(!done)level++;else{level=1;score=0;}start();};
+      setTimeout(()=>document.getElementById("ov").classList.add("show"),450);
+    }
+  } else {
+    combo=0;sfxMiss();
+    a.classList.add("wrongpair");b.classList.add("wrongpair");
+    document.getElementById("fb").textContent="Not a pair — remember where they are!";
+    hud();
+    setTimeout(()=>{a.classList.remove("flipped","wrongpair");b.classList.remove("flipped","wrongpair");lockB=false;},900);
+  }
+}
+start();
+</script></body></html>

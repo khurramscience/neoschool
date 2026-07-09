@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Word Lab: Math Words ➗</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(165deg,#dbeafe,#93c5fd)}
+.wrap{display:flex;flex-direction:column;height:100%;padding:14px;max-width:520px;margin:0 auto}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.title{font-size:18px;font-weight:700;color:#1d4ed8}
+.chip{background:#fff;border-radius:99px;padding:5px 13px;font-size:13px;font-weight:700;color:#1d4ed8;box-shadow:0 2px 0 #60a5fa}
+.hint{background:#fff;border:3px solid #60a5fa;border-radius:16px;box-shadow:0 4px 0 #60a5fa;padding:10px 14px;text-align:center;font-size:clamp(13.5px,3.9vw,16px);font-weight:600;color:#1a1f3a;margin-bottom:10px}
+.hint b{color:#1d4ed8}
+.board{flex:1;display:flex;flex-direction:column;gap:6px;justify-content:center;align-items:center}
+.row{display:flex;gap:6px}
+.tile{width:clamp(44px,12vw,58px);height:clamp(44px,12vw,58px);border:2.5px solid #60a5fa;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:clamp(20px,6vw,26px);font-weight:700;color:#1a1f3a;text-transform:uppercase;transition:all .25s}
+.tile.g{background:#4ade80;border-color:#22c55e;color:#fff;transform:scale(1.05)}
+.tile.y{background:#facc15;border-color:#eab308;color:#fff}
+.tile.x{background:#cbd5e1;border-color:#94a3b8;color:#fff}
+.kb{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.krow{display:flex;gap:5px;justify-content:center}
+.kb button{min-width:clamp(26px,8vw,38px);height:46px;border:none;border-radius:9px;background:#fff;font-family:'Quicksand',sans-serif;font-size:15px;font-weight:700;color:#1d4ed8;cursor:pointer;box-shadow:0 3px 0 #60a5fa;text-transform:uppercase;touch-action:manipulation;padding:0 6px}
+.kb button:active{transform:translateY(2px)}
+.kb button.wide{min-width:56px;background:#eff6ff}
+.kb button.g{background:#4ade80;color:#fff;box-shadow:0 3px 0 #16a34a}
+.kb button.y{background:#facc15;color:#fff;box-shadow:0 3px 0 #ca8a04}
+.kb button.x{background:#cbd5e1;color:#fff;box-shadow:0 3px 0 #94a3b8}
+.fb{text-align:center;font-size:14px;font-weight:700;min-height:20px;margin-top:6px;color:#1d4ed8}
+.overlay{position:fixed;inset:0;background:rgba(255,255,255,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:50;text-align:center;padding:20px}
+.overlay.show{opacity:1;pointer-events:auto}
+.overlay h2{font-size:clamp(26px,7vw,36px);color:#1d4ed8}
+.overlay .sc{font-size:17px;font-weight:700;color:#374151}
+.overlay button{background:#1d4ed8;color:#fff;border:none;border-radius:99px;padding:13px 32px;font-family:'Quicksand',sans-serif;font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2)}
+.confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards;z-index:70}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+@keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.row.bad{animation:shake .35s}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="topbar"><div class="title">➗ Word Lab: Math Words</div><div style="display:flex;gap:6px"><div class="chip" id="score">0 pts</div><div class="chip" id="wcount">Word 1/3</div></div></div>
+  <div class="hint" id="hint"></div>
+  <div class="board" id="board"></div>
+  <div class="kb" id="kb"></div>
+  <div class="fb" id="fb">Guess the word — colors are clues!</div>
+</div>
+<div class="overlay" id="ov">
+  <h2 id="ovTitle"></h2>
+  <div class="sc" id="ovScore"></div>
+  <button id="ovNext">Next word →</button>
+</div>
+<script>
+const GAME={id:"word-lab-math",words:[{"w":"ANGLE","hint":"measured in degrees, can be acute"},{"w":"DIGIT","hint":"any symbol 0 through 9"},{"w":"EQUAL","hint":"what the = sign means"},{"w":"GRAPH","hint":"a picture of data"},{"w":"WHOLE","hint":"a complete number, no fraction"},{"w":"THIRD","hint":"one of three equal parts"},{"w":"TOTAL","hint":"the answer when you add everything"},{"w":"WIDTH","hint":"how wide something is"},{"w":"PRIME","hint":"a number with exactly two factors"},{"w":"RATIO","hint":"compares two quantities, like 3:2"}]}; // [{w:"PLANT",hint:"..."},...]
+const ROUND=3;
+let wIdx=0,score=0,answer="",hintTxt="",guess="",rowI=0,LEN=5,ROWS=5,done=false,solvedCount=0;
+let AC=null;function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch{}}return AC;}
+function tone(f,t=.12,ty="sine",g=.15,w=0){const c=ac();if(!c)return;const o=c.createOscillator(),v=c.createGain();o.type=ty;o.frequency.value=f;v.gain.setValueAtTime(g,c.currentTime+w);v.gain.exponentialRampToValueAtTime(.001,c.currentTime+w+t);o.connect(v).connect(c.destination);o.start(c.currentTime+w);o.stop(c.currentTime+w+t+.02);}
+function sfxKey(){tone(500,.05,"sine",.06);}
+function sfxWin(){[523,659,784,1047].forEach((f,i)=>tone(f,.2,"sine",.17,i*.11));}
+function sfxNo(){tone(200,.18,"triangle",.1);}
+const CC=["#1d4ed8","#f59e0b","#ec4899","#22c55e","#3b82f6"];
+function confetti(n){for(let i=0;i<n;i++){const d=document.createElement("div");d.className="confetti";d.style.left=Math.random()*100+"vw";d.style.background=CC[i%5];d.style.animationDelay=Math.random()*.4+"s";document.body.appendChild(d);setTimeout(()=>d.remove(),2300);}}
+function report(complete){try{parent.postMessage({type:"labProgress",lab:GAME.id,score,complete},"*");}catch{}}
+function pickWords(){const a=GAME.words.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a.slice(0,ROUND);}
+let roundWords=pickWords();
+function buildBoard(){
+  const b=document.getElementById("board");b.innerHTML="";
+  for(let r=0;r<ROWS;r++){const row=document.createElement("div");row.className="row";row.id="r"+r;
+    for(let c=0;c<LEN;c++){const t=document.createElement("div");t.className="tile";row.appendChild(t);}
+    b.appendChild(row);}
+}
+function buildKb(){
+  const kb=document.getElementById("kb");kb.innerHTML="";
+  ["QWERTYUIOP","ASDFGHJKL","⏎ZXCVBNM⌫"].forEach(rw=>{
+    const row=document.createElement("div");row.className="krow";
+    [...rw].forEach(ch=>{
+      const b=document.createElement("button");
+      b.textContent=ch==="⏎"?"ENTER":ch==="⌫"?"⌫":ch;
+      if(ch==="⏎"||ch==="⌫")b.classList.add("wide");
+      b.dataset.k=ch;
+      b.onclick=()=>key(ch);
+      row.appendChild(b);
+    });kb.appendChild(row);});
+}
+function paintGuess(){
+  const row=document.getElementById("r"+rowI);
+  [...row.children].forEach((t,i)=>{t.textContent=guess[i]||"";});
+}
+function key(ch){
+  if(done)return;
+  if(ch==="⌫"){guess=guess.slice(0,-1);paintGuess();return;}
+  if(ch==="⏎"){submit();return;}
+  if(guess.length<LEN){guess+=ch;sfxKey();paintGuess();}
+}
+function submit(){
+  if(guess.length<LEN){document.getElementById("r"+rowI).classList.add("bad");sfxNo();
+    setTimeout(()=>document.getElementById("r"+rowI).classList.remove("bad"),400);
+    document.getElementById("fb").textContent="Need "+LEN+" letters!";return;}
+  const row=document.getElementById("r"+rowI);
+  const marks=Array(LEN).fill("x");
+  const remain={};
+  for(let i=0;i<LEN;i++){if(guess[i]===answer[i])marks[i]="g";else remain[answer[i]]=(remain[answer[i]]||0)+1;}
+  for(let i=0;i<LEN;i++){if(marks[i]!=="g"&&remain[guess[i]]>0){marks[i]="y";remain[guess[i]]--;}}
+  [...row.children].forEach((t,i)=>{setTimeout(()=>{t.classList.add(marks[i]);},i*90);});
+  // keyboard coloring (green > yellow > gray)
+  [...document.querySelectorAll(".kb button")].forEach(b=>{
+    const k=b.dataset.k;if(k==="⏎"||k==="⌫")return;
+    for(let i=0;i<LEN;i++){if(guess[i]!==k)continue;
+      const m=marks[i];
+      if(m==="g")b.className="g";
+      else if(m==="y"&&b.className!=="g")b.className="y";
+      else if(m==="x"&&!b.className)b.className="x";}
+  });
+  if(guess===answer){
+    done=true;solvedCount++;
+    const pts=(ROWS-rowI)*20;score+=pts;
+    sfxWin();confetti(40);
+    document.getElementById("score").textContent=score+" pts";
+    showOv("You got it! 🎉",answer+" — "+hintTxt+"  ·  +"+pts+" pts");
+    return;
+  }
+  rowI++;guess="";
+  if(rowI>=ROWS){done=true;sfxNo();showOv("So close!","The word was "+answer+" — "+hintTxt);return;}
+  document.getElementById("fb").textContent=["Good guess — use the colors!","🟩 right spot · 🟨 wrong spot","Narrow it down!","Last chance — think!"][Math.min(rowI-1,3)];
+}
+function showOv(title,sub){
+  document.getElementById("ovTitle").textContent=title;
+  document.getElementById("ovScore").textContent=sub;
+  const nb=document.getElementById("ovNext");
+  const last=wIdx>=ROUND-1;
+  nb.textContent=last?(solvedCount===ROUND?"Word wizard — again! 🏆":"Play again →"):"Next word →";
+  nb.onclick=()=>{if(last){wIdx=0;solvedCount=0;score=0;roundWords=pickWords();report(true);}else wIdx++;startWord();};
+  document.getElementById("ov").classList.add("show");
+}
+function startWord(){
+  const item=roundWords[wIdx];
+  answer=item.w.toUpperCase();hintTxt=item.hint;LEN=answer.length;ROWS=LEN<=4?6:5;
+  guess="";rowI=0;done=false;
+  document.getElementById("hint").innerHTML="💡 Clue: <b>"+hintTxt+"</b> ("+LEN+" letters)";
+  document.getElementById("wcount").textContent="Word "+(wIdx+1)+"/"+ROUND;
+  document.getElementById("score").textContent=score+" pts";
+  document.getElementById("fb").textContent="Guess the word — colors are clues!";
+  document.getElementById("ov").classList.remove("show");
+  buildBoard();buildKb();
+}
+startWord();
+</script></body></html>
