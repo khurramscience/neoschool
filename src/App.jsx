@@ -2055,20 +2055,20 @@ function Auth({ role, onAuth }) {
     if (!emailOk) { setErr("Enter a valid email address."); return; }
     if (mode === "signup" && pwIssues.length) { setErr("Please fix your password first."); return; }
     setBusy(true);
+    const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), ms))]);
     try {
-      await supabaseReady();
-      if (supabaseEnabled()) {
+      if (supabaseEnabled() && supabase) {
         const sb = supabase;
         if (mode === "signup") {
-          const { data, error } = await sb.auth.signUp({
+          const { data, error } = await withTimeout(sb.auth.signUp({
             email: form.email, password: form.password,
-            options: { emailRedirectTo: "https://neoschool.me", data: { name: form.name, role } },
-          });
+            options: { emailRedirectTo: window.location.origin, data: { name: form.name, role } },
+          }), 12000);
           if (error) throw error;
           if (data?.user && !data.session) { setConfirmSent(true); setBusy(false); return; } // confirmation email required
           finishLocal();
         } else {
-          const { data, error } = await sb.auth.signInWithPassword({ email: form.email, password: form.password });
+          const { data, error } = await withTimeout(sb.auth.signInWithPassword({ email: form.email, password: form.password }), 12000);
           if (error) throw error;
           const meta = data?.user?.user_metadata || {};
           const fullUser = { name: meta.name || form.email.split("@")[0], email: form.email, role: meta.role || role, id: form.email };
@@ -2080,7 +2080,11 @@ function Auth({ role, onAuth }) {
         finishLocal(); // dev fallback when Supabase env not configured
       }
     } catch (e) {
-      setErr(/confirm/i.test(e.message||"") ? "Please confirm your email first — check your inbox." : (e.message || "Something went wrong. Try again."));
+      const m = e?.message || "";
+      if (/timeout|fetch|network/i.test(m)) setErr("Couldn't reach the server. Check your connection and try again.");
+      else if (/confirm/i.test(m)) setErr("Please confirm your email first — check your inbox.");
+      else if (/already registered|already exists/i.test(m)) setErr("That email already has an account — try signing in.");
+      else setErr(m || "Something went wrong. Try again.");
     }
     setBusy(false);
   };
