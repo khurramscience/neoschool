@@ -2060,15 +2060,21 @@ function Auth({ role, onAuth }) {
       if (supabaseEnabled() && supabase) {
         const sb = supabase;
         if (mode === "signup") {
-          const { data, error } = await withTimeout(sb.auth.signUp({
+          let timedOut = false;
+          const res = await withTimeout(sb.auth.signUp({
             email: form.email, password: form.password,
             options: { emailRedirectTo: window.location.origin, data: { name: form.name, role } },
-          }), 12000);
-          if (error) throw error;
+          }), 6000).catch(e => { if (/timeout/i.test(e?.message)) { timedOut = true; return null; } throw e; });
+          if (timedOut) { finishLocal(); return; } // account request sent; let them in now, verify later
+          const { data, error } = res || {};
+          if (error) {
+            if (/already registered|already exists|already been/i.test(error.message||"")) { setErr("That email already has an account — switch to Sign in."); setBusy(false); return; }
+            throw error;
+          }
           if (data?.user && !data.session) { setConfirmSent(true); setBusy(false); return; } // confirmation email required
           finishLocal();
         } else {
-          const { data, error } = await withTimeout(sb.auth.signInWithPassword({ email: form.email, password: form.password }), 12000);
+          const { data, error } = await withTimeout(sb.auth.signInWithPassword({ email: form.email, password: form.password }), 8000);
           if (error) throw error;
           const meta = data?.user?.user_metadata || {};
           const fullUser = { name: meta.name || form.email.split("@")[0], email: form.email, role: meta.role || role, id: form.email };
@@ -2081,9 +2087,10 @@ function Auth({ role, onAuth }) {
       }
     } catch (e) {
       const m = e?.message || "";
-      if (/timeout|fetch|network/i.test(m)) setErr("Couldn't reach the server. Check your connection and try again.");
-      else if (/confirm/i.test(m)) setErr("Please confirm your email first — check your inbox.");
-      else if (/already registered|already exists/i.test(m)) setErr("That email already has an account — try signing in.");
+      if (/confirm/i.test(m)) setErr("Please confirm your email first, or check your inbox for the link.");
+      else if (/invalid login|credentials/i.test(m)) setErr("Email or password is incorrect.");
+      else if (/already registered|already exists/i.test(m)) setErr("That email already has an account — switch to Sign in.");
+      else if (/timeout|fetch|network|load failed/i.test(m)) { if (mode === "signup") { finishLocal(); return; } setErr("Couldn't reach the server. Check your connection and try again."); }
       else setErr(m || "Something went wrong. Try again.");
     }
     setBusy(false);

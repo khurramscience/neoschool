@@ -12,7 +12,8 @@ let _enabled = false;
 if (url && key) {
   try {
     _client = createClient(url, key, {
-      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: "pkce" },
+      global: { fetch: (...a) => fetch(...a) },
     });
     _enabled = true;
   } catch (e) {
