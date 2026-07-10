@@ -2037,6 +2037,9 @@ function Auth({ role, onAuth }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr]   = useState("");
   const [confirmSent, setConfirmSent] = useState(false);
+  useEffect(() => { // warm TLS+TCP to auth server while the user types
+    try { if (supabaseEnabled()) fetch("https://dwpxsaamaehtmhsuuprg.supabase.co/auth/v1/health", { mode: "no-cors" }).catch(()=>{}); } catch {}
+  }, []);
   const up = (k, v) => { setErr(""); setForm(f => ({ ...f, [k]: v })); };
   const roleLabels = { parent:"Parent", guide:"Guide / Facilitator", director:"Campus Director", student:"Student", admin:"Admin" };
   const pwIssues = mode === "signup" ? passwordIssues(form.password, form.email) : [];
@@ -2342,7 +2345,18 @@ function ParentOnboarding({ user, onDone }) {
               <p className="mu fu d1" style={{ fontSize: 13, marginBottom: 20 }}>Shapes {form.childName}'s curriculum.</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
                 <div className="fu d1"><label className="lbl" style={{ marginBottom: 8 }}>Learning goals</label>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>{GOALS.map(g => <div key={g} className={`pill${form.goals.includes(g) ? " on" : ""}`} onClick={() => tog("goals", g)}>{g}</div>)}</div>
+                  <textarea className="inp" rows={4} placeholder="Describe what you're looking for in your own words — e.g. 'Mia is strong in reading but needs to catch up in 3rd-grade math, loves animals and space, and we'd like more hands-on science.'" value={form.goalsText || ""} onChange={e => up("goalsText", e.target.value)} style={{ resize:"vertical", lineHeight:1.5, fontSize:13 }} />
+                  <p className="mu" style={{ fontSize:11, margin:"8px 0 6px" }}>Or start from a template:</p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>{[
+                    "Catch up in math",
+                    "Reading confidence & love of books",
+                    "Ahead of grade level — keep challenged",
+                    "Hands-on science & experiments",
+                    "Prepare for state assessments",
+                    "Project-based, less screen time",
+                    "Social confidence in small groups",
+                  ].map(t => <div key={t} className="pill" style={{ fontSize:11.5 }} onClick={() => up("goalsText", ((form.goalsText||"").trim() ? (form.goalsText.trim()+ ". ") : "") + t)}>{t} +</div>)}</div>
+                  <p className="mu" style={{ fontSize:10.5, marginTop:8 }}>✨ We assemble {form.childName ? form.childName + "'s" : "your child's"} package and curriculum from this — including areas we don't cover yet, which we'll build or source for you.</p>
                 </div>
                 <div className="fg fu d2"><label className="lbl">Biggest concern about traditional school?</label><textarea className="ta inp" rows={2} placeholder="Not enough individualization..." value={form.concerns} onChange={e => up("concerns", e.target.value)} /></div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }} className="fu d3">
@@ -3736,6 +3750,11 @@ function StudentPortal({ user }) {
     setTimeout(() => chatRef.current?.scrollTo({ top:99999, behavior:"smooth" }), 80);
   };
 
+  useEffect(() => {
+    const onExit = (ev) => { if (ev?.data?.type === "labExit") setActiveLab(null); };
+    window.addEventListener("message", onExit);
+    return () => window.removeEventListener("message", onExit);
+  }, []);
   if (activeLab) return <LabPlayer lab={activeLab} userId={user.id} onBack={() => setActiveLab(null)} />;
 
   if (activeTab === "chat" && activeTutor) return (
@@ -3797,7 +3816,7 @@ function StudentPortal({ user }) {
           const bandObj = GRADE_BANDS.find(b => b.id === gradeBand) || GRADE_BANDS[0];
 
           // Apply grade + subject filters
-          const filtered = LABS.filter(l => {
+          const filtered = LABS.filter(l => l.url && l.url.startsWith("./labs")).filter(l => {
             const gOk = labMatchesGrade(l, bandObj.val);
             const sOk = subjectF === "All" || l.subject === subjectF;
             return gOk && sOk;
@@ -4154,7 +4173,7 @@ function CoachOS({ user }) {
   const [loadComm, setLoadComm] = useState(false);
   const [sent, setSent] = useState({});
   const [nudges] = useState([
-    { id: 1, student: "Ava Chen", msg: "Stalled on fractions 9 min", action: "Switch to PhET Fraction Matcher", sev: "high", time: "2min ago" },
+    { id: 1, student: "Ava Chen", msg: "Stalled on fractions 9 min", action: "Switch to Fraction Builder lab", sev: "high", time: "2min ago" },
     { id: 2, student: "Marcus Johnson", msg: "Completed multiplication ahead of schedule", action: "Unlock division track", sev: "positive", time: "5min ago" },
     { id: 3, student: "Ethan Park", msg: "ELA stalled 4 days", action: "Schedule 1:1 reading session", sev: "high", time: "1hr ago" },
   ]);
@@ -5284,6 +5303,9 @@ function ApplicationScreen({ user, data, onDone }) {
             </div>
           ))}
         </div>
+        <a href="https://calendly.com/neoschool/intro-call" target="_blank" rel="noreferrer" style={{ display:"block", textDecoration:"none", marginBottom:10 }}>
+          <button className="btn bn fw" style={{ fontSize:14.5, padding:"13px" }}>📅 Book your intro call — next step</button>
+        </a>
         <button className="btn bo fw" onClick={onDone}>Go to {childName}'s dashboard →</button>
         <p style={{ fontSize:11, color:"var(--mu)", marginTop:12 }}>Confirmation sent to <strong>{form.parentEmail}</strong> · Questions? <strong>admissions@neoschool.me</strong></p>
       </div>
@@ -6490,16 +6512,42 @@ function useCurriculum(userId) {
     if (!goal) return null;
     const fullPath = prereqPath(tax, goal.id, new Set());
     const remaining = prereqPath(tax, goal.id, mastered);
-    const lessons = fullPath.map(id => ({
-      id, node: tax.byId[id],
-      done: mastered.has(id),
-      labs: labsForTopic(id),
-    }));
+    const lessons = fullPath
+      .map(id => ({ id, node: tax.byId[id], done: mastered.has(id), labs: labsForTopic(id) }))
+      .filter(L => L.node.a0 <= aMax + 1); // never show topics above the student's band
     const doneCount = lessons.filter(l=>l.done).length;
     return { subject, goal, lessons, doneCount, total: lessons.length, remaining: remaining.length,
       pct: lessons.length ? Math.round(100*doneCount/lessons.length) : 0 };
   };
   return { tax, mastered, grade, build };
+}
+
+
+function CurriculumAgenda({ lessons, nextIdx, onOpenLab }) {
+  const [expanded, setExpanded] = useState(false);
+  const start = Math.max(0, nextIdx === -1 ? lessons.length - 3 : nextIdx - 1);
+  const visible = expanded ? lessons : lessons.slice(start, start + 3);
+  const offset = expanded ? 0 : start;
+  return (
+    <div>
+      <div style={{ display:"flex", flexDirection:"column" }}>
+        {visible.map((L, vi) => {
+          const i = vi + offset;
+          const isNext = i === nextIdx;
+          return (
+            <div key={L.id} onClick={() => L.labs[0] && onOpenLab(L.labs[0])} style={{ display:"flex", alignItems:"center", gap:10, padding:"10px 4px", borderBottom:"1px solid var(--p)", cursor: L.labs[0] ? "pointer" : "default", opacity: L.labs[0] ? 1 : .55 }}>
+              <div style={{ minWidth:22, textAlign:"center", fontSize:11, fontWeight:800, color: L.done ? "#22c55e" : isNext ? "#f59e0b" : "var(--mu)" }}>{L.done ? "✓" : i+1}</div>
+              <div style={{ flex:1, fontSize:12.5, fontWeight: isNext ? 800 : 600, color: L.done ? "#15803d" : "var(--nv)" }}>{L.node.n}</div>
+              {isNext && L.labs[0] && <span style={{ fontSize:11, fontWeight:800, color:"#f59e0b" }}>▶ Start</span>}
+              {L.done && <span style={{ fontSize:10, color:"#22c55e", fontWeight:700 }}>done</span>}
+            </div>
+          );})}
+      </div>
+      <button onClick={() => setExpanded(e => !e)} style={{ width:"100%", marginTop:10, background:"none", border:"1.5px dashed var(--p2)", borderRadius:10, padding:"9px", cursor:"pointer", fontFamily:"inherit", fontSize:12, fontWeight:700, color:"var(--bl)" }}>
+        {expanded ? "Collapse ↑" : `Explore full path — ${lessons.length} steps →`}
+      </button>
+    </div>
+  );
 }
 
 function Curriculum({ userId, onOpenLab }) {
@@ -6528,22 +6576,9 @@ function Curriculum({ userId, onOpenLab }) {
             <p style={{ fontSize:13.5, fontWeight:800 }}>Your {subject==="Mathematics"?"Math":subject} path · {grade}</p>
             <button onClick={()=>setShowMap(m=>!m)} style={{ background:"none", border:"none", cursor:"pointer", fontSize:11, fontWeight:700, color:"var(--bl)" }}>{showMap?"Hide map":"🗺 View map"}</button>
           </div>
-          <p className="mu" style={{ fontSize:11, marginBottom:12 }}>Built for you from how {cur.total} ideas connect — finish a lesson and the next unlocks naturally. Goal: <b>{cur.goal.n}</b>.</p>
+          <p className="mu" style={{ fontSize:11, marginBottom:12 }}>🎯 {cur.goal.n}</p>
           {showMap && <div style={{ marginBottom:12 }}><LearningMap userId={userId} onOpenLab={onOpenLab} embedded /></div>}
-          <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
-            {cur.lessons.map((L, i) => {
-              const isNext = i === nextIdx;
-              return (
-                <div key={L.id} style={{ display:"flex", alignItems:"center", gap:10, padding:"10px 12px", borderRadius:11, background: L.done ? "#f0fdf4" : isNext ? "#fff7ed" : "#fff", border: isNext ? "1.5px solid #f59e0b" : "1px solid var(--p)" }}>
-                  <div style={{ minWidth:24, height:24, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:800, background: L.done ? "#22c55e" : isNext ? "#f59e0b" : "var(--p)", color: L.done||isNext ? "#fff" : "var(--mu)" }}>{L.done ? "✓" : i+1}</div>
-                  <div style={{ flex:1 }}>
-                    <div style={{ fontSize:12.5, fontWeight:700, color: L.done ? "#15803d" : "var(--nv)" }}>{L.node.n}</div>
-                    <div className="mu" style={{ fontSize:10 }}>{L.node.d} · {ageLabel(L.node.a0, L.node.a1)}{L.labs.length===0 ? " · coming soon" : ""}</div>
-                  </div>
-                  {L.labs[0] && <button className="btn bn" style={{ fontSize:11, padding:"7px 14px", opacity: L.done ? .55 : 1 }} onClick={() => onOpenLab(L.labs[0])}>{L.done ? "Replay" : isNext ? "▶ Start" : "Play"}</button>}
-                </div>
-              );})}
-          </div>
+          <CurriculumAgenda lessons={cur.lessons} nextIdx={nextIdx} onOpenLab={onOpenLab} />
           <p style={{ fontSize:9, color:"var(--mu)", marginTop:10, textAlign:"center" }}>Knowledge graph: Marble Skill Taxonomy · withmarble.com · CC BY-SA 4.0</p>
         </div>
       )}

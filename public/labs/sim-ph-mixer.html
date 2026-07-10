@@ -118,4 +118,4 @@ window.__qa={solve:()=>{const c=CH[idx];let guard=0;
   while(Math.abs(ph-c.target)>0.01&&guard++<40){
     if(ph>c.target)document.getElementById("addAcid").click();else document.getElementById("addBase").click();}}};
 load();
-</script></body></html>
+</script><button id="neoExit" aria-label="Back" style="position:fixed;top:10px;right:10px;z-index:90;width:38px;height:38px;border:none;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 2px 8px rgba(0,0,0,.18);font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;color:#334155">✕</button><script>(function(){var b=document.getElementById("neoExit");b.onclick=function(){try{if(window.parent!==window){parent.postMessage({type:"labExit"},"*");return}}catch(e){}try{history.back()}catch(e){}};})();</script></body></html>

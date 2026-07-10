@@ -30,7 +30,7 @@ export function loadTaxonomy() {
 
 // labs attached to each topic node
 export function labsForTopic(topicId) {
-  return LABS.filter(l => LAB_TOPIC[l.id] === topicId);
+  return LABS.filter(l => LAB_TOPIC[l.id] === topicId && l.url && l.url.startsWith("./labs"));
 }
 
 // topics covered by the platform (have at least one lab)
