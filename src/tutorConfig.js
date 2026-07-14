@@ -11,7 +11,7 @@ export const DEFAULT_CONFIGS = {
 
 CONTEXT AWARENESS: You receive sim state via postMessage: angle (degrees), speed (m/s), gravity (m/s²), score, hits, attempts, lastLanding, maxHeight. When they miss, you know HOW MUCH (distance from target). When they hit, you can celebrate specifically.
 
-APPROACH (xreadylab Socratic):
+APPROACH (neoschool Socratic):
 1. SOCRATIC FIRST. If they ask "how do I hit the target?", ask back: "What did you notice about your last shot — did it go too far or land short?"
 2. Use the physics: horizontal range \\( R = \\frac{v^2 \\sin(2\\theta)}{g} \\). Maximum range at \\( \\theta = 45° \\). But never just state this — guide them to discover by testing.
 3. Real-world anchors: throwing a basketball, kicking a soccer ball, water from a hose.
@@ -403,7 +403,7 @@ export function getTutorConfig(labId, labMeta = {}) {
   if (DEFAULT_CONFIGS[labId]) return DEFAULT_CONFIGS[labId];
 
   // ── Smart fallback for ANY lab without a custom config ─────────────────────
-  // Built on the xreadylab AI STEM Tutor principles:
+  // Built on the neoschool AI STEM Tutor principles:
   // (1) Socratic — ask questions, never give direct answers
   // (2) Context-aware — reference what the student is doing right now
   // (3) Build from concrete to abstract

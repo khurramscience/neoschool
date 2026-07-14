@@ -32,7 +32,7 @@ export const LABS = [
   {id:"sx-division-with-remainder",title:"Division With Remainder",emoji:"➗",grades:"Gr 3–5",topic:"Division",desc:"Division With Remainder — interactive division lab",skills:["division","remainders","even/odd"],difficulty:"medium",time:15,url:"./labs-pack/division-with-remainder/index.html",caPoints:[]},
   {id:"sx-egyptian",title:"Egyptian",emoji:"🏛️",grades:"Gr 3–7",topic:"Number Systems",desc:"Egyptian — interactive number systems lab",skills:["number systems","place value","numerals"],difficulty:"hard",time:15,url:"./labs-pack/egyptian/Egyptian account_ AVATAR_+GPT_RU+ верстка/index.html",caPoints:[]},
   {id:"sx-fractions-fix",title:"Fractions Fix",emoji:"🍕",grades:"Gr 3–6",topic:"Fractions",desc:"Fractions Fix — interactive fractions lab",skills:["fractions","numerator","denominator"],difficulty:"medium",time:15,url:"./labs-pack/fractions-fix/index.html",caPoints:[]},
-  {id:"sx-fractions-mixed-numbers",title:"Fractions Mixed Numbers",emoji:"🍕",grades:"Gr 3–6",topic:"Fractions",desc:"Fractions Mixed Numbers — interactive fractions lab",skills:["fractions","numerator","denominator"],difficulty:"medium",time:15,url:"./labs-pack/fractions-mixed-numbers/fractions-mixed-numbers-xreadylab.html",caPoints:[]},
+  {id:"sx-fractions-mixed-numbers",title:"Fractions Mixed Numbers",emoji:"🍕",grades:"Gr 3–6",topic:"Fractions",desc:"Fractions Mixed Numbers — interactive fractions lab",skills:["fractions","numerator","denominator"],difficulty:"medium",time:15,url:"./labs-pack/fractions-mixed-numbers/index2.html",caPoints:[]},
   {id:"sx-infinite-addition",title:"Infinite Addition",emoji:"➕",grades:"Gr 1–4",topic:"Addition & Subtraction",desc:"Infinite Addition — interactive addition & subtraction lab",skills:["addition","subtraction","mental math"],difficulty:"easy",time:15,url:"./labs-pack/infinite-addition/index.html",caPoints:[]},
   {id:"sx-lab-29",title:"Lab 29",emoji:"🧮",grades:"Gr 2–6",topic:"Math Practice",desc:"Lab 29 — interactive math practice lab",skills:["practice","fluency","speed"],difficulty:"medium",time:15,url:"./labs-pack/lab-29/square and triangular numbers/index.html",caPoints:[]},
   {id:"sx-lab-33",title:"Lab 33",emoji:"🧮",grades:"Gr 2–6",topic:"Math Practice",desc:"Lab 33 — interactive math practice lab",skills:["practice","fluency","speed"],difficulty:"medium",time:15,url:"./labs-pack/lab-33/index.html",caPoints:[]},
@@ -62,8 +62,8 @@ export const LABS = [
   {id:"sx-the-sum-of-even-and-odd-numbers",title:"The Sum of Even and Odd Numbers",emoji:"🎯",grades:"Gr 1–4",topic:"Number Sense",desc:"The Sum of Even and Odd Numbers — interactive number sense lab",skills:["number sense","digit recognition"],difficulty:"easy",time:15,url:"./labs-pack/the-sum-of-even-and-odd-numbers/index.html",caPoints:[]},
   {id:"sx-zero",title:"Zero",emoji:"0️⃣",grades:"Gr 1–3",topic:"Number Sense",desc:"Zero — interactive number sense lab",skills:["number sense","digit recognition"],difficulty:"easy",time:15,url:"./labs-pack/zero/index.html",caPoints:[]},
 
-  // ── xreadylab.com web games (21 additional) ──
-// xreadylab.com — Biology (5), Physics (8), Math (8 missing from labs-pack)
+  // ── (removed: externally-hosted web games) ──
+
 // Total new: 21 labs
 
   // ── KINDERGARTEN GAMES (Pre-K & K) ── built-in, mobile-first, with sound + tutor bridge ──
