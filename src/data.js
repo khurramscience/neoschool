@@ -311,6 +311,9 @@ export const LABS = [
   {id:"sim-area-blocks",title:"Area Blocks",emoji:"🧱",grades:"Gr 3–6",topic:"Multiplication",subject:"Math",desc:"Break two-digit multiplication into four easy rectangles — the area model that makes big products click.",skills:["multiplication","area model","place value","partial products"],difficulty:"easy-hard",time:9,url:"./labs/sim-area-blocks.html",caPoints:["4.NBT.B.5"],arcade:"sim"},
   {id:"sim-density-lab",title:"Density Dock",emoji:"🛟",grades:"Gr 5–9",topic:"Density",subject:"Science",desc:"Change mass and volume to make objects float or sink — density = mass ÷ volume, the reason ships float.",skills:["density","mass","volume","buoyancy","floating"],difficulty:"easy-hard",time:8,url:"./labs/sim-density-lab.html",caPoints:["NGSS.MS-PS1-2"],arcade:"sim"},
 
+  {id:"sim-cell-gate",title:"Cell Gate",emoji:"🦠",grades:"Gr 6–11",topic:"Cell Biology",subject:"Science",desc:"Open membrane channels to move ions and molecules across a living cell — watch real diffusion drive oxygen in, fire a nerve impulse, and balance salt (homeostasis).",skills:["cell membrane","diffusion","ions","nerve impulse","homeostasis","biology"],difficulty:"medium-hard",time:10,url:"./labs/sim-cell-gate.html",caPoints:["NGSS.MS-LS1-2","NGSS.HS-LS1-3"],arcade:"sim"},
+  {id:"sim-lens-lab",title:"Lens Lab",emoji:"🔎",grades:"Gr 8–12",topic:"Optics",subject:"Science",desc:"Trace real light rays through a lens to focus a camera, magnify with a microscope, and lock a telescope onto a star — the thin-lens equation made visual.",skills:["optics","lenses","ray tracing","focal length","magnification"],difficulty:"medium-hard",time:10,url:"./labs/sim-lens-lab.html",caPoints:["NGSS.MS-PS4-2","NGSS.HS-PS4-3"],arcade:"sim"},
+
 ];
 
 
