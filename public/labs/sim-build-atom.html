@@ -51,7 +51,7 @@ const CH=[
  {p:8,n:8,e:8,text:"Build a neutral <b>Oxygen</b> atom"},
  {p:3,n:4,e:2,text:"Build a <b>Lithium ion</b> with a +1 charge (one fewer electron)"},
 ];
-let idx=0,score=0,tries=0,st={p:0,n:0,e:0};
+let idx=0,score=0,tries=0,__perfects=0,st={p:0,n:0,e:0};
 let AC=null;function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch{}}return AC;}
 function tone(f,t=.12,ty="sine",g=.15,w=0){const c=ac();if(!c)return;const o=c.createOscillator(),v=c.createGain();o.type=ty;o.frequency.value=f;v.gain.setValueAtTime(g,c.currentTime+w);v.gain.exponentialRampToValueAtTime(.001,c.currentTime+w+t);o.connect(v).connect(c.destination);o.start(c.currentTime+w);o.stop(c.currentTime+w+t+.02);}
 const CC=["#6d28d9","#f59e0b","#ec4899","#22c55e","#3b82f6"];
@@ -84,7 +84,7 @@ document.querySelectorAll(".pc button").forEach(b=>b.onclick=()=>{
 document.getElementById("check").onclick=()=>{
   const c=CH[idx];tries++;
   if(st.p===c.p&&st.n===c.n&&st.e===c.e){
-    const pts=Math.max(15,45-(tries-1)*10);score+=pts;
+    const pts=Math.max(15,45-(tries-1)*10);score+=pts;if(tries===1)__perfects++;
     tone(660,.12);tone(880,.14,"sine",.15,.1);confetti(35);
     document.getElementById("fb").textContent="⚛️ Correct atom!  (+"+pts+" pts)";
     document.getElementById("score").textContent=score+" pts";setTimeout(next,1400);
@@ -99,8 +99,8 @@ function load(){tries=0;st={p:0,n:0,e:0};
 function next(){idx++;
   if(idx>=CH.length){report(true);confetti(60);
     document.getElementById("ovTitle").textContent="Atom architect! 🏆";
-    document.getElementById("ovScore").textContent=score+" pts · protons, neutrons, electrons & ions";
-    document.getElementById("ovNext").onclick=()=>{idx=0;score=0;load();document.getElementById("ov").classList.remove("show");};
+    var __st=__perfects>=5?5:__perfects>=4?4:__perfects>=3?3:__perfects>=2?2:1;document.getElementById("ovScore").textContent="⭐".repeat(__st)+"☆".repeat(5-__st)+"   "+(__perfects===5?"PERFECT RUN! ⚡  ":"")+score+" pts · protons, neutrons, electrons & ions";
+    document.getElementById("ovNext").onclick=()=>{idx=0;score=0;__perfects=0;load();document.getElementById("ov").classList.remove("show");};
     document.getElementById("ov").classList.add("show");return;}
   load();}
 window.__qa={solve:()=>{const c=CH[idx];st={p:c.p,n:c.n,e:c.e};render();document.getElementById("check").click();}};
