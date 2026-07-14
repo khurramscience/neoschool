@@ -2041,6 +2041,7 @@ function startDemo(band) {
   localStorage.setItem("neo_child_grade", b.grade);
   const prog = {}; b.seed.forEach(l => prog[l] = { complete: true, score: 180, ts: Date.now() });
   localStorage.setItem("neo_lab_progress_" + id, JSON.stringify(prog));
+  localStorage.setItem("neo_last_screen", "app");
   window.location.reload();
 }
 const COMMON_PW = new Set(["password","password1","12345678","123456789","1234567890","qwerty123","11111111","abc12345","letmein1","iloveyou1","admin123","welcome1","sunshine1","password123","qwertyuiop"]);
@@ -7071,7 +7072,10 @@ export default function App() {
       try { setParentData(JSON.parse(pd)); } catch {}
     }
     const lastScreen = localStorage.getItem("neo_last_screen");
-    if (lastScreen && saved) setScreen(lastScreen);
+    if (lastScreen && saved) {
+      const u = JSON.parse(saved);
+      setScreen(u.role === "student" ? "app" : lastScreen); // students have exactly one home
+    }
     // Start opportunistic Supabase sync loop — flushes queued events when SQL is reachable
     startSyncLoop(30000);
   }, []);

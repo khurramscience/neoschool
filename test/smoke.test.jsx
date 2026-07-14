@@ -124,3 +124,26 @@ describe("STUDENT JOURNEY", () => {
     await waitFor(() => expect(document.body.textContent.length).toBeGreaterThan(50));
   });
 });
+
+describe("DEMO ACCESS", () => {
+  it("demo tile boots into the student portal even with a stale last-screen", async () => {
+    localStorage.setItem("neo_last_screen", "auth"); // the regression: stale screen
+    localStorage.setItem("neo_current", JSON.stringify({ name:"Explorer", email:"demo-mid@demo", role:"student", id:"demo-mid", demo:"mid" }));
+    localStorage.setItem("neo_child_grade", "7th Grade");
+    render(<App />);
+    await waitFor(() => {
+      expect(document.body.textContent).toMatch(/Demo · exploring|Hand-picked|Continue learning/i);
+    }, { timeout: 8000 });
+    expect(document.body.textContent).not.toMatch(/Welcome back|Create account, sign in/i);
+  });
+
+  it("auth screen shows the three demo bands", async () => {
+    render(<App />);
+    const candidates = screen.getAllByText(/parent/i);
+    for (const c of candidates) { fireEvent.click(c); if (/explore a live demo/i.test(document.body.textContent)) break; }
+    await waitFor(() => expect(document.body.textContent).toMatch(/explore a live demo/i));
+    expect(document.body.textContent).toMatch(/Elementary/);
+    expect(document.body.textContent).toMatch(/Middle School/);
+    expect(document.body.textContent).toMatch(/High School/);
+  });
+});
