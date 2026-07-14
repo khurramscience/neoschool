@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Cell Gate 🦠</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#d1fae5,#5eead4)}
+.wrap{display:flex;flex-direction:column;height:100%;padding:14px;max-width:600px;margin:0 auto}
+.topbar{display:flex;justify-content:space-between;align-items:center}
+.title{font-size:18px;font-weight:700;color:#047857}
+.chip{background:#fff;border-radius:99px;padding:5px 13px;font-size:13px;font-weight:700;color:#047857;box-shadow:0 2px 0 #34d399}
+.lvlbadge{text-align:center;font-size:11px;font-weight:800;color:#059669;letter-spacing:.06em;margin-top:4px}
+.task{background:#fff;border:3px solid #34d399;border-radius:16px;box-shadow:0 4px 0 #34d399;padding:10px 14px;text-align:center;font-size:clamp(13px,3.8vw,16px);font-weight:700;color:#1a1f3a;margin:8px 0}
+.svgbox{flex:1;display:flex;align-items:center;justify-content:center;min-height:0}
+svg{max-width:100%;max-height:100%}
+.tele{display:flex;gap:6px;justify-content:center;margin:4px 0}
+.tele div{background:#fff;border-radius:9px;padding:5px 11px;font-size:12px;font-weight:700;color:#047857;box-shadow:0 2px 0 #34d399}
+.controls{display:flex;flex-direction:column;gap:7px}
+.brow{display:flex;gap:7px;justify-content:center;flex-wrap:wrap}
+.gate{min-width:74px;border:none;border-radius:12px;background:#fff;box-shadow:0 3px 0 #34d399;font-family:'Quicksand',sans-serif;font-weight:700;color:#047857;cursor:pointer;padding:8px 10px;font-size:12px;touch-action:manipulation}
+.gate.on{background:#047857;color:#fff}
+.check{min-height:50px;width:100%;background:#047857;color:#fff;border:none;border-radius:14px;font-family:'Quicksand',sans-serif;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2);margin-top:8px;touch-action:manipulation}
+.fb{text-align:center;font-size:12.5px;font-weight:700;min-height:20px;margin-top:6px;color:#047857}
+.overlay{position:fixed;inset:0;background:rgba(255,255,255,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:50;text-align:center;padding:20px}
+.overlay.show{opacity:1;pointer-events:auto}
+.overlay h2{font-size:clamp(26px,7vw,36px);color:#047857}
+.overlay .sc{font-size:17px;font-weight:700;color:#374151}
+.overlay button{background:#047857;color:#fff;border:none;border-radius:99px;padding:13px 28px;font-family:'Quicksand',sans-serif;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2);margin:0 4px}
+.confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards;z-index:70}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+</style></head><body>
+<div class="wrap">
+  <div class="topbar"><div class="title">🦠 Cell Gate</div><div style="display:flex;gap:6px"><div class="chip" id="score">0 pts</div><div class="chip" id="prog">Mission 1/3</div></div></div>
+  <div class="lvlbadge" id="lvlname"></div>
+  <div class="task" id="task"></div>
+  <div class="svgbox"><svg viewBox="0 0 320 240" id="scene"></svg></div>
+  <div class="tele"><div id="tin">inside —</div><div id="tout">outside —</div></div>
+  <div class="controls"><div class="brow" id="gates"></div></div>
+  <button class="check" id="check">Open the gates 🌊</button>
+  <div class="fb" id="fb"></div>
+</div>
+<div class="overlay" id="ov"><h2 id="ovTitle"></h2><div class="sc" id="ovScore"></div><div><button id="ovNext">Play again ↻</button><button id="ovDone" style="background:#1a1f3a">Finish ✓</button></div></div>
+<script>
+const GAME={id:"sim-cell-gate"};
+let idx=0,score=0,tries=0,__perfects=0,animId=null,busy=false;
+let AC=null;function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}return AC;}
+function tone(f,t,ty,g){t=t||.12;ty=ty||"sine";g=g||.15;const c=ac();if(!c)return;const o=c.createOscillator(),v=c.createGain();o.type=ty;o.frequency.value=f;v.gain.setValueAtTime(g,c.currentTime);v.gain.exponentialRampToValueAtTime(.001,c.currentTime+t);o.connect(v).connect(c.destination);o.start();o.stop(c.currentTime+t+.02);}
+const CC=["#047857","#f59e0b","#ec4899","#22c55e","#3b82f6"];
+function confetti(n){for(let i=0;i<n;i++){const d=document.createElement("div");d.className="confetti";d.style.left=Math.random()*100+"vw";d.style.background=CC[i%5];d.style.animationDelay=Math.random()*.4+"s";document.body.appendChild(d);setTimeout(()=>d.remove(),2300);}}
+function report(complete){try{parent.postMessage({type:"labProgress",lab:GAME.id,score,complete},"*");}catch(e){}}
+function win(pts,msg){score+=pts;if(tries===1)__perfects++;tone(660,.12);tone(880,.14);confetti(30);
+ document.getElementById("fb").textContent=msg+"  (+"+pts+" pts)";document.getElementById("score").textContent=score+" pts";setTimeout(next,1600);}
+function lose(msg){tone(200,.2,"triangle",.1);document.getElementById("fb").textContent=msg;busy=false;S("check").disabled=false;}
+const S=id=>document.getElementById(id);
+const ION={Na:{c:"#ef4444",lbl:"Na⁺"},K:{c:"#3b82f6",lbl:"K⁺"},Cl:{c:"#22c55e",lbl:"Cl⁻"},O2:{c:"#a855f7",lbl:"O₂"}};
+// particles: {x,y,vx,vy,type,side} side: -1 outside(top), 1 inside(bottom); membrane at y=120
+let parts=[],gatesOpen={};
+function membraneChannels(){ // channel x-positions per ion type currently open
+  const xs={Na:70,K:130,Cl:190,O2:250};
+  return Object.keys(gatesOpen).filter(k=>gatesOpen[k]).map(k=>({type:k,x:xs[k]}));
+}
+function step(){
+  const chans=membraneChannels();
+  parts.forEach(p=>{
+    p.vx=Math.max(-3,Math.min(3,p.vx));p.vy=Math.max(-3,Math.min(3,p.vy));p.x+=p.vx;p.y+=p.vy;
+    if(p.x<12){p.x=12;p.vx*=-1;}if(p.x>308){p.x=308;p.vx*=-1;}
+    // reflect off top/bottom
+    if(p.y<14){p.y=14;p.vy*=-1;}if(p.y>226){p.y=226;p.vy*=-1;}
+    const myChan=chans.find(c=>c.type===p.type);
+    if(myChan && !p.crossed){
+      // steer toward the channel, then pump straight through it (concentration-driven)
+      p.vx+=Math.sign(myChan.x-p.x)*0.28;
+      if(Math.abs(p.x-myChan.x)<20){ p.x=myChan.x+(Math.random()-.5)*6;
+        const goalDir=(p.startSide===-1)?1:-1; // outside→in or inside→out based on where it began
+        p.vy+=goalDir*0.5;
+        if((goalDir>0&&p.y>140)||(goalDir<0&&p.y<100))p.crossed=true;
+      }
+    }
+    // membrane collision unless aligned with an open channel of its type
+    const nearMem=p.y>106&&p.y<134;
+    if(nearMem){
+      const ch=chans.find(c=>c.type===p.type&&Math.abs(p.x-c.x)<24);
+      if(!ch){ if(p.y<120){p.y=106;if(p.vy>0)p.vy*=-1;} else {p.y=134;if(p.vy<0)p.vy*=-1;} }
+    }
+  });
+}
+function draw(){
+  let s='<rect x="0" y="0" width="320" height="120" fill="#dbeafe"/><rect x="0" y="120" width="320" height="120" fill="#fce7f3"/>';
+  s+='<text x="10" y="18" font-size="11" fill="#1e40af" font-weight="bold">OUTSIDE the cell</text><text x="10" y="236" font-size="11" fill="#be185d" font-weight="bold">INSIDE the cell</text>';
+  // membrane bilayer
+  s+='<rect x="0" y="114" width="320" height="12" fill="#fbbf24"/>';
+  for(let x=6;x<320;x+=16)s+='<circle cx="'+x+'" cy="116" r="3.5" fill="#f59e0b"/><line x1="'+x+'" y1="119" x2="'+x+'" y2="125" stroke="#d97706" stroke-width="2"/>';
+  // open channels
+  membraneChannels().forEach(c=>{s+='<rect x="'+(c.x-13)+'" y="112" width="26" height="16" rx="4" fill="#'+(ION[c.type].c.slice(1))+'" opacity="0.35"/><rect x="'+(c.x-13)+'" y="112" width="26" height="16" rx="4" fill="none" stroke="'+ION[c.type].c+'" stroke-width="2"/>';});
+  // particles
+  parts.forEach(p=>{s+='<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="7" fill="'+ION[p.type].c+'" stroke="#fff" stroke-width="1"/><text x="'+p.x.toFixed(1)+'" y="'+(p.y+3).toFixed(1)+'" font-size="7" text-anchor="middle" fill="#fff" font-weight="bold">'+ION[p.type].lbl+'</text>';});
+  S("scene").innerHTML=s;
+  const inside={},outside={};
+  parts.forEach(p=>{const bucket=p.y>120?inside:outside;bucket[p.type]=(bucket[p.type]||0)+1;});
+  const fmt=o=>Object.keys(ION).map(k=>o[k]?ION[k].lbl+":"+o[k]:null).filter(Boolean).join("  ")||"—";
+  S("tin").textContent="inside  "+fmt(inside);S("tout").textContent="outside  "+fmt(outside);
+  return {inside,outside};
+}
+function loop(){if(busy){step();draw();animId=requestAnimationFrame(loop);}}
+
+const LV=[
+ {name:"MISSION 1 · 💧 LET OXYGEN IN",gateChoices:["O2"],
+  text:"Your cell is suffocating! <b>Oxygen (O₂)</b> is stuck outside. Open the right channel so it diffuses IN — high to low concentration.",
+  setup(){parts=[];for(let i=0;i<8;i++)parts.push({type:"O2",side:-1,startSide:-1,x:20+Math.random()*280,y:20+Math.random()*80,vx:(Math.random()-.5)*2.4,vy:(Math.random()-.5)*2.4});
+   for(let i=0;i<3;i++)parts.push({type:"Na",side:1,startSide:1,x:20+Math.random()*280,y:135+Math.random()*80,vx:(Math.random()-.5)*2,vy:(Math.random()-.5)*2});},
+  judge(){const inside=parts.filter(p=>p.type==="O2"&&p.y>120).length;return inside>=3?"win":inside>=1?"partial":"none";},
+  winMsg:"💧 Oxygen flooded in through its channel — the cell can breathe!",
+  hint(r){return r==="none"?"No O₂ got in — did you open the O₂ channel (not the ion gates)?":"Some got in — give it a moment, or make sure only O₂'s gate is open."},
+  solve(){gatesOpen={O2:true};}},
+
+ {name:"MISSION 2 · ⚡ FIRE THE NERVE",gateChoices:["Na","K"],
+  text:"A nerve signal! Sodium (Na⁺) must rush <b>IN</b> to spark the impulse — but Potassium (K⁺) must stay put for now. Open ONLY the sodium gate.",
+  setup(){parts=[];for(let i=0;i<7;i++)parts.push({type:"Na",side:-1,startSide:-1,x:20+Math.random()*280,y:20+Math.random()*80,vx:(Math.random()-.5)*2.6,vy:(Math.random()-.5)*2.6});
+   for(let i=0;i<6;i++)parts.push({type:"K",side:1,startSide:1,x:20+Math.random()*280,y:135+Math.random()*80,vx:(Math.random()-.5)*2.6,vy:(Math.random()-.5)*2.6});},
+  judge(){const naIn=parts.filter(p=>p.type==="Na"&&p.y>120).length; const kOut=parts.filter(p=>p.type==="K"&&p.y<120).length;
+   if(naIn>=3&&kOut===0)return "win"; if(kOut>0)return "leak"; return "slow";},
+  winMsg:"⚡ Sodium rushed in, potassium held — the nerve fires! That's an action potential.",
+  hint(r){return r==="leak"?"Potassium leaked out! Close the K⁺ gate — open ONLY sodium.":"Not enough sodium in yet — keep the Na⁺ gate open a little longer."},
+  solve(){gatesOpen={Na:true};}},
+
+ {name:"MISSION 3 · ⚖️ BALANCE THE SALT",gateChoices:["Na","K","Cl"],
+  text:"The cell is too salty inside! Let excess <b>Cl⁻ AND Na⁺ diffuse OUT</b> to balance concentrations — open both their gates, keep K⁺ shut.",
+  setup(){parts=[];
+   for(let i=0;i<6;i++)parts.push({type:"Na",side:1,startSide:1,x:20+Math.random()*280,y:135+Math.random()*80,vx:(Math.random()-.5)*2.6,vy:(Math.random()-.5)*2.6});
+   for(let i=0;i<6;i++)parts.push({type:"Cl",side:1,startSide:1,x:20+Math.random()*280,y:135+Math.random()*80,vx:(Math.random()-.5)*2.6,vy:(Math.random()-.5)*2.6});
+   for(let i=0;i<4;i++)parts.push({type:"K",side:1,startSide:1,x:20+Math.random()*280,y:135+Math.random()*80,vx:(Math.random()-.5)*2,vy:(Math.random()-.5)*2});},
+  judge(){const naOut=parts.filter(p=>p.type==="Na"&&p.y<120).length; const clOut=parts.filter(p=>p.type==="Cl"&&p.y<120).length; const kOut=parts.filter(p=>p.type==="K"&&p.y<120).length;
+   if(naOut>=2&&clOut>=2&&kOut===0)return "win"; if(kOut>0)return "kleak"; return "slow";},
+  winMsg:"⚖️ Salt balanced — Na⁺ and Cl⁻ diffused out, K⁺ stayed. Homeostasis restored!",
+  hint(r){return r==="kleak"?"Potassium escaped — keep K⁺ closed! Only open Na⁺ and Cl⁻.":"Keep going — more Na⁺ and Cl⁻ need to diffuse out."},
+  solve(){gatesOpen={Na:true,Cl:true};}},
+];
+function buildGates(){const box=S("gates");box.innerHTML="";
+ LV[idx].gateChoices.forEach(k=>{const b=document.createElement("button");b.className="gate"+(gatesOpen[k]?" on":"");
+  b.innerHTML=ION[k].lbl+" gate";b.onclick=()=>{gatesOpen[k]=!gatesOpen[k];tone(gatesOpen[k]?520:360,.06,"sine",.07);buildGates();};box.appendChild(b);});}
+function check(){ // run the diffusion for a fixed time, then judge
+ if(busy)return;tries++;busy=true;S("check").disabled=true;S("check").textContent="Diffusing…";
+ let frames=0;
+ const run=()=>{step();frames++;
+  if(frames<180){animId=requestAnimationFrame(run);return;}
+  draw();busy=false;S("check").disabled=false;S("check").textContent="Open the gates 🌊";
+  const r=LV[idx].judge();
+  if(r==="win")win(Math.max(20,50-(tries-1)*12),LV[idx].winMsg);
+  else lose(LV[idx].hint(r));};
+ // draw during animation for visuals
+ const visual=()=>{ if(busy&&frames<90){draw();requestAnimationFrame(visual);} };
+ requestAnimationFrame(visual);
+ run();}
+S("check").onclick=check;
+function load(){tries=0;if(animId)cancelAnimationFrame(animId);busy=false;S("check").disabled=false;S("check").textContent="Open the gates 🌊";
+ gatesOpen={};LV[idx].setup();
+ S("lvlname").textContent=LV[idx].name;S("task").innerHTML=LV[idx].text;
+ S("fb").textContent="Diffusion moves particles from crowded to empty — channels only let the right ion through.";
+ S("prog").textContent="Mission "+(idx+1)+"/3";buildGates();draw();}
+function next(){idx++;
+ if(idx>=LV.length){report(true);confetti(60);
+  S("ovTitle").textContent="Cell biologist! 🏆";
+  var st=__perfects>=3?5:__perfects>=2?4:__perfects>=1?3:2;
+  S("ovScore").textContent="⭐".repeat(st)+"☆".repeat(5-st)+"   "+(__perfects===3?"PERFECT RUN! ⚡  ":"")+score+" pts · diffusion, nerve impulses & homeostasis";
+  S("ovNext").onclick=()=>{idx=0;score=0;__perfects=0;load();S("ov").classList.remove("show");};
+  S("ovDone").onclick=()=>{try{parent.postMessage({type:"labExit"},"*")}catch(e){}if(window===window.top)try{history.back()}catch(e){}};
+  S("ov").classList.add("show");return;}
+ load();}
+window.__qa={solve:()=>{LV[idx].solve();buildGates();check();}};
+load();
+</script>
+<button id="neoExit" aria-label="Back" style="position:fixed;top:10px;right:10px;z-index:90;width:38px;height:38px;border:none;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 2px 8px rgba(0,0,0,.18);font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;color:#334155">✕</button><script>(function(){var b=document.getElementById("neoExit");b.onclick=function(){try{if(window.parent!==window){parent.postMessage({type:"labExit"},"*");return}}catch(e){}try{history.back()}catch(e){}};})();</script>
+<script>(function(){function post(kind,text){try{parent.postMessage({type:"labEvent",kind:kind,text:String(text).slice(0,140),ts:Date.now()},"*")}catch(e){}}
+function watch(id,kind){var el=document.getElementById(id);if(!el)return;var last=el.textContent;new MutationObserver(function(){var t=el.textContent;if(t&&t!==last){last=t;post(kind,t)}}).observe(el,{childList:true,characterData:true,subtree:true})}
+watch("fb","feedback");watch("task","challenge");watch("score","score");
+document.addEventListener("click",function(e){var b=e.target.closest("button");if(b&&b.id!=="neoExit")post("action","clicked: "+(b.textContent||b.id).trim().slice(0,60))},true);
+post("start","sim loaded: "+document.title);})();</script>
+</body></html>
