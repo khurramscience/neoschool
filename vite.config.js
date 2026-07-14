@@ -7,7 +7,15 @@ export default defineConfig({
   base: process.env.GITHUB_PAGES === "true" ? "/neoschool/" : "/",
   build: {
     outDir: "dist",
-    chunkSizeWarningLimit: 1500,  // App.jsx is large
+    chunkSizeWarningLimit: 900,
     assetsInlineLimit: 4096,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom"],
+          supabase: ["@supabase/supabase-js"],
+        },
+      },
+    },
   },
 });

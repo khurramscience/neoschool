@@ -2077,7 +2077,9 @@ function Auth({ role, onAuth }) {
           if (data?.user && !data.session) { setConfirmSent(true); setBusy(false); return; } // confirmation email required
           finishLocal();
         } else {
-          const { data, error } = await withTimeout(sb.auth.signInWithPassword({ email: form.email, password: form.password }), 8000);
+          const attempt=(ms)=>withTimeout(sb.auth.signInWithPassword({ email: form.email, password: form.password }), ms);
+          let __res; try { __res = await attempt(6000); } catch(e1){ if(!/timeout|fetch|network/i.test(e1?.message||"")) throw e1; try { __res = await attempt(12000); } catch(e2){ throw new Error("network"); } }
+          const { data, error } = __res;
           if (error) throw error;
           const meta = data?.user?.user_metadata || {};
           const fullUser = { name: meta.name || form.email.split("@")[0], email: form.email, role: meta.role || role, id: form.email };
@@ -2093,7 +2095,7 @@ function Auth({ role, onAuth }) {
       if (/confirm/i.test(m)) setErr("Please confirm your email first, or check your inbox for the link.");
       else if (/invalid login|credentials/i.test(m)) setErr("Email or password is incorrect.");
       else if (/already registered|already exists/i.test(m)) setErr("That email already has an account — switch to Sign in.");
-      else if (/timeout|fetch|network|load failed/i.test(m)) { if (mode === "signup") { finishLocal(); return; } setErr("Couldn't reach the server. Check your connection and try again."); }
+      else if (/timeout|fetch|network|load failed/i.test(m)) { if (mode === "signup") { finishLocal(); return; } setErr("offline-option"); }
       else setErr(m || "Something went wrong. Try again.");
     }
     setBusy(false);
@@ -2143,9 +2145,14 @@ function Auth({ role, onAuth }) {
                 })}
               </div>
             )}
-            {err && <div style={{ fontSize: 12, color: "#b91c1c", fontWeight: 600, background:"#fef2f2", padding:"8px 10px", borderRadius:8 }}>{err}</div>}
+            {err === "offline-option" ? (
+              <div style={{ fontSize: 12, fontWeight: 600, background:"#fffbeb", padding:"10px", borderRadius:8, color:"#92400e" }}>
+                The server is taking too long right now.
+                <button className="btn bo fw" style={{ marginTop:8, fontSize:12, padding:"9px" }} onClick={finishLocal}>Continue offline — sync later →</button>
+              </div>
+            ) : err ? <div style={{ fontSize: 12, color: "#b91c1c", fontWeight: 600, background:"#fef2f2", padding:"8px 10px", borderRadius:8 }}>{err}</div> : null}
             <button className="btn bn fw" onClick={submit} disabled={busy || !form.email || !form.password || (mode==="signup" && pwIssues.length>0)}>
-              {busy ? "One moment…" : mode === "signup" ? "Create account →" : "Sign in →"}
+              {busy ? "Connecting…" : mode === "signup" ? "Create account →" : "Sign in →"}
             </button>
           </div>
         </div>
