@@ -8,6 +8,7 @@ import { supabase, supabaseEnabled, supabaseReady } from "./supabase.js";
 import { loadTaxonomy, labsForTopic, coveredTopicIds, masteredTopics, prereqPath, suggestNext, ageLabel } from "./learningGraph.js";
 import { LAB_TOPIC } from "./labTopicMap.js";
 import { getTutorConfig, saveTutorConfig } from "./tutorConfig.js";
+import { buildTutorSystem, logExchange, rateExchange, getLogs, getPipeline, savePipeline, getGuidance, addGuidance, closeTutorSession, getProfile } from "./tutorEngine.js";
 import { getStudentGraph, recordLabVisit, recordLabEvent, getRecommendations as kgRecs, getSkillsSummary, getStudentPath, getGraphData } from "./knowledgeGraph.js";
 import { generateMCQ, shouldSpawnMCQ, recordMCQResult, getMCQStats } from "./mcqGenerator.js";
 import { startSyncLoop, flushSync, getSyncStatus } from "./supabaseSync.js";
@@ -16,7 +17,7 @@ import { BYOKRequiredError } from "./api.js";
 
 // ── SHARED ────────────────────────────────────────────────────────────────────
 const Logo = ({ l, sz = 16 }) => (
-  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+  <div onClick={() => { if (window.confirm("Back to the main page?")) { window.location.hash=""; window.location.reload(); } }} title="Back to main" style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
     <div style={{ width: sz + 14, height: sz + 14, borderRadius: 8, background: l ? "rgba(255,255,255,.15)" : "var(--nv)", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <svg width={sz} height={sz} viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="2.8" fill="white" /><path d="M10 2C10 2 14 5 14 10C14 15 10 18 10 18" stroke="white" strokeWidth="1.4" strokeLinecap="round" /><path d="M10 2C10 2 6 5 6 10C6 15 10 18 10 18" stroke="white" strokeWidth="1.4" strokeLinecap="round" /><path d="M2 10H18" stroke="white" strokeWidth="1.4" strokeLinecap="round" /></svg>
     </div>
@@ -2096,6 +2097,9 @@ function Auth({ role, onAuth }) {
             if (/already registered|already exists|already been/i.test(error.message||"")) { setErr("That email already has an account — switch to Sign in."); setBusy(false); return; }
             throw error;
           }
+          if (data?.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+            setErr("That email is already registered — switch to Sign in (or use Forgot password)."); setBusy(false); return;
+          }
           if (data?.user && !data.session) { setConfirmSent(true); setBusy(false); return; } // confirmation email required
           finishLocal();
         } else {
@@ -2799,6 +2803,108 @@ function ParentMessages({ user, childName }) {
   );
 }
 
+
+// ── Parent Insights: profile, activity, learning curve, goal gap ─────────────
+function ParentInsights({ user, childName, form }) {
+  const [tax, setTax] = useState(null);
+  useEffect(() => { loadTaxonomy().then(setTax).catch(() => {}); }, []);
+  // find the student's progress store (own child = same account family; demo-safe)
+  const keys = Object.keys(localStorage).filter(k => k.startsWith("neo_lab_progress_"));
+  const progKey = keys.find(k => !k.includes("demo")) || keys[0];
+  const prog = progKey ? JSON.parse(localStorage.getItem(progKey) || "{}") : {};
+  const entries = Object.entries(prog).map(([id, v]) => ({ id, ...v, lab: LABS.find(l => l.id === id) })).filter(e => e.lab);
+  const done = entries.filter(e => e.complete);
+  const grade = form?.grade || localStorage.getItem("neo_child_grade") || "3rd Grade";
+  const profile = getProfile((progKey || "").replace("neo_lab_progress_", "") || "demo");
+
+  // learning curve: completions bucketed by day
+  const byDay = {};
+  done.forEach(e => { const d = new Date(e.ts || Date.now()).toLocaleDateString("en-US", { month: "short", day: "numeric" }); byDay[d] = (byDay[d] || 0) + 1; });
+  const days = Object.entries(byDay).slice(-10);
+  const maxDay = Math.max(1, ...days.map(([, n]) => n));
+
+  // subject mastery
+  const bySubj = {};
+  for (const e of done) { const s = e.lab.subject || "Other"; bySubj[s] = (bySubj[s] || 0) + 1; }
+  const subjTotals = {};
+  for (const l of LABS) { const s = l.subject || "Other"; subjTotals[s] = (subjTotals[s] || 0) + 1; }
+
+  // goal gap: remaining steps to current curriculum goal
+  const [gap, setGap] = useState(null);
+  useEffect(() => { (async () => {
+    try {
+      const t = await loadTaxonomy();
+      const sid = (progKey || "").replace("neo_lab_progress_", "") || "demo";
+      const mastered = masteredTopics(sid, t);
+      const goalId = localStorage.getItem("neo_goal_" + sid);
+      if (goalId && t.byId[goalId]) {
+        const remaining = prereqPath(t, goalId, mastered);
+        setGap({ goal: t.byId[goalId].n, remaining: remaining.length, next: remaining.slice(0, 3).map(id => t.byId[id].n) });
+      }
+    } catch {}
+  })(); }, [progKey]);
+
+  const totalMins = done.reduce((a, e) => a + (e.lab.time || 8), 0);
+  const avgScore = done.length ? Math.round(done.reduce((a, e) => a + (e.score || 0), 0) / done.length) : 0;
+
+  return (
+    <div>
+      <div className="card fu" style={{ marginBottom: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ width: 48, height: 48, borderRadius: "50%", background: "var(--nv)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 700 }}>{(childName || "S")[0].toUpperCase()}</div>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: 15, fontWeight: 800 }}>{childName}</p>
+            <p className="mu" style={{ fontSize: 11 }}>{grade} · {profile.sessions || 0} tutor sessions · learning style: {profile.style}</p>
+          </div>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginTop: 14 }}>
+          {[["🎮", done.length, "labs completed"], ["⏱️", totalMins + "m", "learning time"], ["⭐", avgScore, "avg score"]].map(([e, v, l]) => (
+            <div key={l} style={{ background: "var(--p)", borderRadius: 12, padding: "10px 8px", textAlign: "center" }}>
+              <div style={{ fontSize: 16 }}>{e}</div><div style={{ fontSize: 16, fontWeight: 800 }}>{v}</div><div className="mu" style={{ fontSize: 9.5 }}>{l}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="card fu d1" style={{ marginBottom: 12 }}>
+        <p style={{ fontSize: 12.5, fontWeight: 800, marginBottom: 10 }}>📈 Learning curve</p>
+        {days.length === 0 ? <p className="mu" style={{ fontSize: 12 }}>Activity will chart here as {childName} completes labs.</p> : (
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 6, height: 90 }}>
+            {days.map(([d, n]) => (
+              <div key={d} style={{ flex: 1, textAlign: "center" }}>
+                <div style={{ height: (n / maxDay) * 70, background: "var(--or)", borderRadius: "6px 6px 0 0", minHeight: 6 }} />
+                <div className="mu" style={{ fontSize: 8.5, marginTop: 3 }}>{d}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="card fu d2" style={{ marginBottom: 12 }}>
+        <p style={{ fontSize: 12.5, fontWeight: 800, marginBottom: 10 }}>🧭 Mastery by subject</p>
+        {Object.entries(subjTotals).filter(([s]) => ["Math", "Reading", "Science", "Social Studies"].includes(s)).map(([s, tot]) => (
+          <div key={s} style={{ marginBottom: 8 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11.5, fontWeight: 700 }}><span>{s}</span><span className="mu">{bySubj[s] || 0} done</span></div>
+            <PBar v={((bySubj[s] || 0) / Math.max(6, Math.min(tot, 30))) * 100} c="var(--sg)" h={6} />
+          </div>
+        ))}
+      </div>
+
+      <div className="card fu d3">
+        <p style={{ fontSize: 12.5, fontWeight: 800, marginBottom: 6 }}>🎯 Path to the goal</p>
+        {gap ? (
+          <>
+            <p style={{ fontSize: 12 }}>Goal: <b>{gap.goal}</b> — <b>{gap.remaining}</b> steps remaining.</p>
+            <p className="mu" style={{ fontSize: 11, marginTop: 6 }}>Next up: {gap.next.join(" → ")}</p>
+          </>
+        ) : <p className="mu" style={{ fontSize: 12 }}>Once {childName} picks a goal in My Curriculum, the remaining path shows here — every step to becoming the best at what you set together.</p>}
+        {profile.struggles?.length > 0 && <p style={{ fontSize: 11, marginTop: 10, padding: "8px 10px", background: "#fffbeb", borderRadius: 8 }}>💡 Worth attention: {profile.struggles.slice(-2).join(", ")} — the tutor is already adapting.</p>}
+        {profile.wins?.length > 0 && <p style={{ fontSize: 11, marginTop: 6, padding: "8px 10px", background: "#dff2ea", borderRadius: 8 }}>🏆 Recent wins: {profile.wins.slice(-2).join(", ")}</p>}
+      </div>
+    </div>
+  );
+}
+
 function ParentDashboard({ user, data }) {
   const [pulseScore, setPulseScore]  = useState(null);
   const [pulseWin, setPulseWin]      = useState("");
@@ -2879,10 +2985,12 @@ function ParentDashboard({ user, data }) {
 
         {/* Tabs — refined editorial pill bar */}
         <div style={{ display:"flex", background:"var(--p)", padding:"4px", marginBottom:18, borderRadius:99, border:"1px solid var(--p2)" }}>
-          {[{id:"home",l:"Home"},{id:"activity",l:"Activity"},{id:"messages",l:"Messages"},{id:"coaching",l:"Coaching"},{id:"future",l:"Future"}].map(t => (
+          {[{id:"home",l:"Home"},{id:"insights",l:"📈 Insights"},{id:"activity",l:"Activity"},{id:"messages",l:"Messages"},{id:"coaching",l:"Coaching"},{id:"future",l:"Future"}].map(t => (
             <div key={t.id} onClick={() => setTab(t.id)} style={{ flex:1, textAlign:"center", padding:"8px 4px", borderRadius:99, cursor:"pointer", fontFamily:"'Fraunces',serif", fontSize:12.5, fontWeight:500, background:tab===t.id?"#fff":"transparent", color:tab===t.id?"var(--nv)":"var(--mu)", transition:"all .2s", letterSpacing:"-.005em", boxShadow: tab===t.id ? "var(--shadow-sm)" : "none" }}>{t.l}</div>
           ))}
         </div>
+
+        {tab === "insights" && <ParentInsights user={user} childName={childName} form={form} />}
 
         {/* ── ACTIVITY TAB ── all saved sessions across labs */}
         {tab === "activity" && <ActivityTimeline studentId={user?.id || "demo"} childName={childName} />}
@@ -2982,6 +3090,12 @@ function ParentDashboard({ user, data }) {
           </div>
 
           {/* Collapsible: Subject progress */}
+          {curriculum?.customAreas?.length > 0 && (
+            <div className="card fu" style={{ marginBottom:12, background:"#fffbeb", border:"1px solid #fcd34d" }}>
+              <p style={{ fontSize:12, fontWeight:800, marginBottom:6 }}>✨ Areas you asked for that we'll build into the plan</p>
+              {curriculum.customAreas.map((c,i) => <p key={i} style={{ fontSize:11.5, padding:"3px 0" }}>· {c} <span className="mu" style={{ fontSize:10 }}>— our team sources or builds this for you</span></p>)}
+            </div>
+          )}
           {curriculum?.subjects && (
             <div id="subjects-panel" style={{ marginBottom:10, scrollMarginTop:80 }}>
               <button onClick={() => setShowSubjects(s => !s)} style={{ width:"100%", background:"#fff", border:"1px solid var(--p2)", borderRadius:11, padding:"11px 14px", display:"flex", alignItems:"center", gap:10, cursor:"pointer", textAlign:"left" }}>
@@ -3232,6 +3346,17 @@ function LabPlayer({ lab, userId, onBack }) {
   const [showPay, setShowPay] = useState(false);
   const [sessionStart] = useState(Date.now());
   const [simState, setSimState] = useState(null); // postMessage bridge: knows current sim state
+  const [evLog, setEvLog] = useState([]);          // granular event stream from the sim (tutor sees everything)
+  useEffect(() => {
+    const onEvt = (e) => { if (e?.data?.type === "labEvent") setEvLog(prev => [...prev.slice(-30), `${e.data.kind}: ${e.data.text}`]); };
+    window.addEventListener("message", onEvt);
+    return () => {
+      window.removeEventListener("message", onEvt);
+      const fails = evLog.filter(x => /too |not quite|✗|wrong/i.test(x)).length;
+      const wins = evLog.filter(x => /🎉|correct|solved|\+\d+ pts|charged|stabilized|match/i.test(x)).length;
+      closeTutorSession(userId, lab.id, { solved: wins, fails });
+    };
+  }, [lab.id]);
   const [lastMCQAt, setLastMCQAt] = useState(0);
   const [ttsEnabled, setTtsEnabled] = useState(() => localStorage.getItem("neo_tts_enabled") === "1");
   const [byokOpen, setByokOpen] = useState(false);
@@ -3351,13 +3476,14 @@ function LabPlayer({ lab, userId, onBack }) {
       gradeCtx = `\n\nGRADE ADAPTATION: This student (${studentGrade}) is reviewing material below their grade level. They may need a quick challenge or extension question to stay engaged. Ask them to explain it as if teaching a younger student.`;
     }
 
-    const sys = `${tutorCfg.system}${gradeCtx}${simCtx}\n\nSESSION CONTEXT: ${evtCtx}\nSTUDENT CROSS-SUBJECT MEMORY: ${crossCtx}`;
+    const sys = await buildTutorSystem({ lab, studentId: userId, events: evLog, simState, baseSystem: `${tutorCfg.system}${gradeCtx}${simCtx}` }) + `\n\nSESSION CONTEXT: ${evtCtx}\nSTUDENT CROSS-SUBJECT MEMORY: ${crossCtx}`;
     const m = { role:"user", content:inp.trim() };
     const all = [...msgs, m];
     setMsgs(all); setInp(""); setTyping(true);
     try {
-      const r = await claude(sys, all.map(x => ({ role:x.role, content:x.content })), 180);
-      const newMsgs = [...all, { role:"assistant", content:r, id:Date.now() }];
+      const r = await claude(sys, all.map(x => ({ role:x.role, content:x.content })), getPipeline().maxTokens || 180);
+      const li = logExchange({ studentId: userId, labId: lab.id, q: m.content, a: r });
+      const newMsgs = [...all, { role:"assistant", content:r, id:Date.now(), li }];
       setMsgs(newMsgs);
 
       // Speak the reply if TTS is enabled (browser-native, no API needed)
@@ -3421,6 +3547,7 @@ function LabPlayer({ lab, userId, onBack }) {
   };
 
   const rateMsg = (msgId, rating) => {
+    { const mm=(msgs||[]).find(x=>x.id===msgId); if(mm&&mm.li!==undefined) rateExchange(mm.li, rating==="good"?1:-1); }
     setRatings(r => ({ ...r, [msgId]:rating }));
     saveTutorFeedback(userId||"demo", { lab:lab.id, msgId, rating, msg:msgs.find(m=>m.id===msgId)?.content });
   };
@@ -3669,6 +3796,13 @@ function LabPlayer({ lab, userId, onBack }) {
                   onChange={e=>setInp(e.target.value)}
                   onKeyDown={e=>e.key==="Enter"&&send()}
                 />
+                <button onClick={() => {
+                  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+                  if (!SR) { alert("Voice input needs Chrome or Edge."); return; }
+                  const rec = new SR(); rec.lang = "en-US"; rec.interimResults = false;
+                  rec.onresult = (e) => setInp(e.results[0][0].transcript);
+                  rec.start();
+                }} title="Speak your question" style={{ minWidth:42, border:"1px solid var(--p2)", background:"#fff", borderRadius:10, fontSize:16, cursor:"pointer" }}>🎙️</button>
                 <button onClick={()=>{
                   if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
                     alert("Voice input isn't supported in this browser. Try Chrome.");
@@ -4081,6 +4215,91 @@ function StudentPortal({ user }) {
 
 
 // ── TUTOR ADMIN PANEL ────────────────────────────────────────────────────────
+
+// ── Tutor Pipeline: the blocks graph (model-agnostic, live-editable) ─────────
+function TutorPipelineEditor() {
+  const [pipe, setPipe] = useState(getPipeline());
+  const save = (p) => { setPipe({ ...p }); savePipeline(p); };
+  return (
+    <div className="card">
+      <p style={{ fontSize:12.5, fontWeight:800, marginBottom:4 }}>🧩 Tutor pipeline — every block feeds the next</p>
+      <p className="mu" style={{ fontSize:11, marginBottom:14 }}>Toggle blocks on/off, swap the model. Changes apply to the very next student message — no redeploy.</p>
+      <div style={{ display:"flex", flexDirection:"column", gap:0 }}>
+        {pipe.blocks.map((b, i) => (
+          <div key={b.id}>
+            <div onClick={() => { pipe.blocks[i].on = !b.on; save(pipe); }} style={{ display:"flex", alignItems:"center", gap:10, padding:"11px 13px", borderRadius:12, cursor:"pointer", background: b.on ? "#dff2ea" : "var(--p)", border: b.on ? "1.5px solid #4a7c6a" : "1px solid var(--p2)", opacity: b.on ? 1 : .55 }}>
+              <div style={{ width:34, height:20, borderRadius:99, background:b.on?"#4a7c6a":"#cbd5e1", position:"relative", flexShrink:0 }}><div style={{ position:"absolute", top:2, left:b.on?16:2, width:16, height:16, borderRadius:"50%", background:"#fff", transition:"left .15s" }}/></div>
+              <div style={{ flex:1 }}><div style={{ fontSize:12.5, fontWeight:800 }}>{b.label}</div><div className="mu" style={{ fontSize:10.5 }}>{b.desc}</div></div>
+            </div>
+            {i < pipe.blocks.length - 1 && <div style={{ textAlign:"center", color:"var(--mu)", fontSize:13, lineHeight:"14px" }}>↓</div>}
+          </div>
+        ))}
+        <div style={{ textAlign:"center", color:"var(--mu)", fontSize:13, lineHeight:"14px" }}>↓</div>
+        <div style={{ display:"flex", alignItems:"center", gap:10, padding:"11px 13px", borderRadius:12, background:"#1a1f3a", color:"#fff" }}>
+          <span style={{ fontSize:16 }}>🧠</span>
+          <div style={{ flex:1 }}><div style={{ fontSize:12.5, fontWeight:800 }}>Model</div><div style={{ fontSize:10.5, opacity:.7 }}>Swap anytime — pipeline is model-agnostic</div></div>
+          <select value={pipe.model} onChange={e => save({ ...pipe, model: e.target.value })} style={{ fontFamily:"inherit", fontSize:11.5, padding:"6px 8px", borderRadius:8, border:"none" }}>
+            {pipe.models.map(m => <option key={m} value={m}>{m}</option>)}
+          </select>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Teacher Guidance: real-time tutor improvement, per lab/topic ─────────────
+function TutorGuidanceEditor({ selLab }) {
+  const [note, setNote] = useState("");
+  const [tick, setTick] = useState(0);
+  const notes = getGuidance(selLab);
+  const lab = LABS.find(l => l.id === selLab);
+  return (
+    <div className="card">
+      <p style={{ fontSize:12.5, fontWeight:800, marginBottom:4 }}>📝 Teach the tutor — {lab?.title}</p>
+      <p className="mu" style={{ fontSize:11, marginBottom:12 }}>Write how YOU would address this topic. Your note is injected into the tutor's brain for every future student on this lab, instantly.</p>
+      <textarea className="inp" rows={3} placeholder='e.g. "For fractions, always start with pizza slices before number lines. If a student says 1/8 > 1/4, ask which slice they would rather have."' value={note} onChange={e => setNote(e.target.value)} style={{ resize:"vertical", fontSize:12.5, lineHeight:1.5 }} />
+      <button className="btn bn fw" style={{ marginTop:8, fontSize:12.5 }} disabled={!note.trim()} onClick={() => { addGuidance(selLab, note.trim()); setNote(""); setTick(t => t + 1); }}>Add to tutor's brain →</button>
+      <div style={{ marginTop:14 }}>
+        <p className="lbl" style={{ marginBottom:8 }}>Active guidance ({notes.length})</p>
+        {notes.length === 0 ? <p className="mu" style={{ fontSize:12 }}>None yet — the tutor uses its default approach.</p>
+          : notes.slice().reverse().map((n, i) => (
+            <div key={i} style={{ padding:"8px 10px", background:"var(--p)", borderRadius:10, marginBottom:6 }}>
+              <p style={{ fontSize:12, lineHeight:1.5 }}>{n.note}</p>
+              <p className="mu" style={{ fontSize:9.5, marginTop:3 }}>{n.by} · {new Date(n.ts).toLocaleDateString()}</p>
+            </div>
+          ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Tutor Logs: every exchange, teacher-rateable (feeds guidance) ────────────
+function TutorLogsViewer({ selLab }) {
+  const [tick, setTick] = useState(0);
+  const [comment, setComment] = useState({});
+  const logs = getLogs(selLab).slice(-30).reverse();
+  return (
+    <div className="card">
+      <p style={{ fontSize:12.5, fontWeight:800, marginBottom:4 }}>💬 Student ↔ tutor exchanges</p>
+      <p className="mu" style={{ fontSize:11, marginBottom:12 }}>Rate any reply. A 👎 with a note becomes instant guidance — the tutor improves from your feedback in real time.</p>
+      {logs.length === 0 ? <p className="mu" style={{ fontSize:12 }}>No exchanges on this lab yet.</p>
+        : logs.map((l, i) => {
+          const idx = getLogs().indexOf(l);
+          return (
+            <div key={i} style={{ padding:"10px 0", borderBottom:"1px solid var(--p)" }}>
+              <p style={{ fontSize:11.5, fontWeight:700, color:"var(--bl)" }}>🧒 {l.q}</p>
+              <p style={{ fontSize:11.5, marginTop:4, lineHeight:1.5 }}>🤖 {l.a}</p>
+              <div style={{ display:"flex", gap:6, marginTop:6, alignItems:"center" }}>
+                <button onClick={() => { rateExchange(idx, 1); setTick(t=>t+1); }} style={{ background:l.fb===1?"#dff2ea":"transparent", border:"1px solid var(--p2)", borderRadius:6, padding:"3px 8px", fontSize:11, cursor:"pointer" }}>👍</button>
+                <button onClick={() => { rateExchange(idx, -1, comment[i] || ""); setTick(t=>t+1); }} style={{ background:l.fb===-1?"#fde8e8":"transparent", border:"1px solid var(--p2)", borderRadius:6, padding:"3px 8px", fontSize:11, cursor:"pointer" }}>👎</button>
+                <input className="inp" style={{ flex:1, fontSize:10.5, padding:"5px 8px" }} placeholder="How should the tutor have said it? (becomes guidance)" value={comment[i] || ""} onChange={e => setComment({ ...comment, [i]: e.target.value })} />
+              </div>
+            </div>
+          );})}
+    </div>
+  );
+}
+
 function TutorAdminPanel() {
   const [selLab, setSelLab] = useState(LABS[0].id);
   const [config, setConfig] = useState(null);
@@ -4134,11 +4353,14 @@ function TutorAdminPanel() {
         {/* Editor */}
         <div style={{ flex:1 }}>
           <div style={{ display:"flex", gap:4, marginBottom:11, background:"var(--p)", padding:4, borderRadius:10 }}>
-            {[["prompt","Prompt"],["persona","Persona"],["feedback","Feedback"],["analytics","Analytics"]].map(([id,lbl]) => (
+            {[["prompt","Prompt"],["pipeline","🧩 Pipeline"],["guidance","📝 Guidance"],["logs","💬 Logs"],["persona","Persona"],["feedback","Feedback"],["analytics","Analytics"]].map(([id,lbl]) => (
               <div key={id} onClick={()=>setTab(id)} style={{ flex:1, textAlign:"center", padding:"6px", borderRadius:7, cursor:"pointer", fontSize:11.5, fontWeight:600, background:tab===id?"#fff":"transparent", color:tab===id?"var(--nv)":"var(--mu)", transition:"all .2s" }}>{lbl}</div>
             ))}
           </div>
 
+          {tab==="pipeline" && <TutorPipelineEditor />}
+          {tab==="guidance" && <TutorGuidanceEditor selLab={selLab} />}
+          {tab==="logs" && <TutorLogsViewer selLab={selLab} />}
           {tab==="prompt" && <div className="card">
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:11 }}>
               <div><div style={{ fontWeight:700, fontSize:14 }}>{config.avatar} {config.name}</div><div style={{ fontSize:11, color:"var(--mu)" }}>v{config.version||1} · {LABS.find(l=>l.id===selLab)?.title}</div></div>

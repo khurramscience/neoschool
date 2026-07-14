@@ -150,6 +150,49 @@ function pickLabsForSubject(subjectName, gradeStr) {
   return shuffled.slice(0, 3).map(l => ({ id: l.id, title: l.title, emoji: l.emoji, url: l.url }));
 }
 
+
+// ── Deterministic personalization from the parent's own words ────────────────
+const SUBJ_KEYWORDS = {
+  Math:     ["math","number","fraction","algebra","multiplic","division","count","geometry","calcul"],
+  Reading:  ["read","book","literacy","phonics","comprehension","writing","spell","vocab","story","ela"],
+  Science:  ["science","physics","chemis","biolog","space","nature","experiment","stem","climate","anima"],
+  "Social Studies": ["history","geograph","econom","civic","culture","social studies","government"],
+  Coding:   ["cod","program","computer","robot","ai","tech","scratch","game design"],
+  Arts:     ["art","draw","paint","music","creativ","design","craft"],
+};
+export function personalizePlan(form) {
+  const text = ((form.goalsText || "") + " " + (form.goals || []).join(" ") + " " + (form.concerns || "")).toLowerCase();
+  const grade = form.grade || "3rd Grade";
+  const weights = {}; const matchedWhy = {};
+  for (const [subj, kws] of Object.entries(SUBJ_KEYWORDS)) {
+    const hits = kws.filter(k => text.includes(k));
+    weights[subj] = 1 + hits.length * 2;                 // base 1, +2 per mention
+    if (hits.length) matchedWhy[subj] = hits[0];
+  }
+  if (/catch up|behind|struggl/.test(text)) { for (const s of Object.keys(matchedWhy)) weights[s] += 2; }
+  if (/ahead|advanced|gifted|challenge/.test(text)) { for (const s of Object.keys(matchedWhy)) weights[s] += 1; }
+  const total = Object.values(weights).reduce((a, b) => a + b, 0);
+  const dayMins = 165;
+  const subjects = Object.entries(weights)
+    .sort((a, b) => b[1] - a[1]).slice(0, 5)
+    .map(([name, w]) => ({
+      name,
+      emoji: { Math:"🔢", Reading:"📖", Science:"🔬", "Social Studies":"🗺️", Coding:"💻", Arts:"🎨" }[name] || "📘",
+      tool: "neoschool Labs",
+      mins: Math.max(20, Math.round((w / total) * dayMins / 5) * 5),
+      focus: matchedWhy[name]
+        ? `Prioritized because you mentioned "${matchedWhy[name]}" — ${/catch up|behind|struggl/.test(text) ? "we start below grade level and rebuild confidence fast." : /ahead|advanced/.test(text) ? "we extend above grade level to keep the challenge alive." : "woven through daily practice with our interactive labs."}`
+        : "Steady foundation practice, adapted to pace.",
+      labs: pickLabsForSubject(name === "Coding" ? "Math" : name, grade).slice(0, 3),
+      emphasized: !!matchedWhy[name],
+    }));
+  // custom areas we don't cover yet — honor them explicitly
+  const covered = Object.values(SUBJ_KEYWORDS).flat();
+  const custom = (form.goalsText || "").split(/[.,;\n]/).map(s => s.trim())
+    .filter(s => s.length > 8 && !covered.some(k => s.toLowerCase().includes(k))).slice(0, 3);
+  return { subjects, custom };
+}
+
 export async function genCurriculum(form) {
   const name  = form.childName || "your child";
   const grade = form.grade || "3rd Grade";
@@ -186,16 +229,11 @@ For "uniqueGenius" — be SPECIFIC to ${name}'s grade and goals, not generic. Fr
   } catch (e) {
     console.warn("genCurriculum used fallback:", e.message);
     return {
-      tagline: `A personalized ${grade} learning journey for ${name}`,
+      tagline: `Built from your words: a ${grade} plan for ${name}${form.goalsText ? " — \"" + form.goalsText.slice(0,70) + (form.goalsText.length>70?"…":"") + "\"" : ""}`,
       morning: `${name} starts with a focused 2-hour academic block covering math and reading using AI-powered tools that adapt to their pace.`,
       afternoon: "Afternoons are for creative projects, outdoor exploration, and real-world skills that AI can never replace.",
-      subjects: [
-        { name:"Math",    emoji:"🔢", tool:"neoschool Labs",        focus:"Building strong number sense with adaptive daily practice.", mins:60, labs: pickLabsForSubject("Math", grade) },
-        { name:"Reading", emoji:"📖", tool:"neoschool Labs",    focus:"Developing comprehension through engaging grade-level texts.", mins:45, labs: pickLabsForSubject("Reading", grade) },
-        { name:"Science", emoji:"🔬", tool:"neoschool Labs",         focus:"Hands-on inquiry using interactive simulations.", mins:30, labs: pickLabsForSubject("Science", grade) },
-        { name:"Coding",  emoji:"💻", tool:"neoschool Labs",      focus:"Building logical thinking through creative projects.", mins:30, labs: [] },
-        { name:"Arts",    emoji:"🎨", tool:"neoschool Labs",        focus:"Creative expression and visual design thinking.", mins:30, labs: [] },
-      ],
+      subjects: personalizePlan(form).subjects,
+      customAreas: personalizePlan(form).custom,
       workshops: [
         { name:"Cooking",                emoji:"🍳", cadence:"1x/week", desc:"Real-world math, fractions, and self-sufficiency through kitchen science." },
         { name:"Emotional intelligence", emoji:"💛", cadence:"2x/week", desc:"Naming feelings, building empathy, and learning to repair relationships." },

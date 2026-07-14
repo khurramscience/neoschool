@@ -101,4 +101,9 @@ window.__qa={solve:()=>{const c=CH[idx];let n=c.n;const len=digits.length;
 load();
 </script>
 <button id="neoExit" aria-label="Back" style="position:fixed;top:10px;right:10px;z-index:90;width:38px;height:38px;border:none;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 2px 8px rgba(0,0,0,.18);font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;color:#334155">✕</button><script>(function(){var b=document.getElementById("neoExit");b.onclick=function(){try{if(window.parent!==window){parent.postMessage({type:"labExit"},"*");return}}catch(e){}try{history.back()}catch(e){}};})();</script>
-</body></html>
+<script>(function(){function post(kind,text){try{parent.postMessage({type:"labEvent",kind:kind,text:String(text).slice(0,140),ts:Date.now()},"*")}catch(e){}}
+function watch(id,kind){var el=document.getElementById(id);if(!el)return;var last=el.textContent;new MutationObserver(function(){var t=el.textContent;if(t&&t!==last){last=t;post(kind,t)}}).observe(el,{childList:true,characterData:true,subtree:true})}
+if(document.getElementById("fb"))watch("fb","feedback");if(document.getElementById("task"))watch("task","challenge");if(document.getElementById("score"))watch("score","score");
+document.addEventListener("click",function(e){var b=e.target.closest("button");if(b&&b.id!=="neoExit")post("action","clicked: "+(b.textContent||b.id).trim().slice(0,60))},true);
+var inputs=document.querySelectorAll("input[type=range]");inputs.forEach(function(r){r.addEventListener("change",function(){post("adjust",(r.id||"slider")+" → "+r.value)})});
+post("start","sim loaded: "+document.title);})();</script></body></html>
