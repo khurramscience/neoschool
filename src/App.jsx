@@ -2020,6 +2020,28 @@ function CampusInterestForm({ onClose }) {
 }
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
+
+const DEMO_BANDS = {
+  elem: { label:"Elementary", emoji:"🎈", grade:"2nd Grade", sub:"K–5 · playful foundations",
+    featured:["sim-fraction-builder","pop-sight-words","match-animal-groups","sim-states-matter"],
+    seed:["match-opposites","pop-even-odd"] },
+  mid: { label:"Middle School", emoji:"🚀", grade:"7th Grade", sub:"6–8 · real-world science",
+    featured:["sim-ai-trainer","sim-climate-lab","sim-genetics-lab","sim-algebra-scale"],
+    seed:["sim-fraction-builder","match-elements"] },
+  high: { label:"High School", emoji:"🎓", grade:"8th Grade", sub:"9–12 · exam-grade depth",
+    featured:["sim-gravity-orbits","sim-capacitor-lab","sim-graph-slider","sim-market-lab"],
+    seed:["sim-circuit-lab","sim-forces-motion"] },
+};
+function startDemo(band) {
+  const b = DEMO_BANDS[band];
+  const id = "demo-" + band;
+  const user = { name: "Explorer", email: id + "@demo", role: "student", id, demo: band };
+  localStorage.setItem("neo_current", JSON.stringify(user));
+  localStorage.setItem("neo_child_grade", b.grade);
+  const prog = {}; b.seed.forEach(l => prog[l] = { complete: true, score: 180, ts: Date.now() });
+  localStorage.setItem("neo_lab_progress_" + id, JSON.stringify(prog));
+  window.location.reload();
+}
 const COMMON_PW = new Set(["password","password1","12345678","123456789","1234567890","qwerty123","11111111","abc12345","letmein1","iloveyou1","admin123","welcome1","sunshine1","password123","qwertyuiop"]);
 function passwordIssues(pw, email) {
   const issues = [];
@@ -2157,6 +2179,18 @@ function Auth({ role, onAuth }) {
           </div>
         </div>
         <p style={{ textAlign: "center", fontSize: 11, color: "var(--mu)", marginTop: 14 }}>🔒 Email-verified accounts · COPPA & FERPA compliant</p>
+        <div className="fu d2" style={{ marginTop: 22 }}>
+          <p style={{ textAlign:"center", fontSize:11.5, fontWeight:700, color:"var(--mu)", marginBottom:10 }}>— or explore a live demo, no account needed —</p>
+          <div style={{ display:"flex", gap:8 }}>
+            {Object.entries(DEMO_BANDS).map(([k2, b]) => (
+              <button key={k2} onClick={() => startDemo(k2)} style={{ flex:1, background:"#fff", border:"1px solid var(--p2)", borderRadius:14, padding:"12px 6px", cursor:"pointer", fontFamily:"inherit", textAlign:"center" }}>
+                <div style={{ fontSize:22 }}>{b.emoji}</div>
+                <div style={{ fontSize:11.5, fontWeight:800, color:"var(--nv)", marginTop:3 }}>{b.label}</div>
+                <div style={{ fontSize:9, color:"var(--mu)", marginTop:2 }}>{b.sub}</div>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -2367,7 +2401,7 @@ function ParentOnboarding({ user, onDone }) {
                 </div>
                 <div className="fg fu d2"><label className="lbl">Biggest concern about traditional school?</label><textarea className="ta inp" rows={2} placeholder="Not enough individualization..." value={form.concerns} onChange={e => up("concerns", e.target.value)} /></div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }} className="fu d3">
-                  <button className="btn bo fw" onClick={next} disabled={form.goals.length === 0}>✦ Build my curriculum</button>
+                  <button className="btn bo fw" onClick={() => { if ((form.goalsText||"").trim()) form.goals = [form.goalsText.trim()]; next(); }} disabled={!(form.goalsText||"").trim() && form.goals.length === 0}>✦ Build my curriculum</button>
                   <button className="btn bg fw" onClick={() => setStep(2)}>← Back</button>
                 </div>
               </div>
@@ -3757,12 +3791,20 @@ function StudentPortal({ user }) {
     setTimeout(() => chatRef.current?.scrollTo({ top:99999, behavior:"smooth" }), 80);
   };
 
+  const demoBand = user?.demo && DEMO_BANDS[user.demo];
   useEffect(() => {
     const onExit = (ev) => { if (ev?.data?.type === "labExit") setActiveLab(null); };
     window.addEventListener("message", onExit);
     return () => window.removeEventListener("message", onExit);
   }, []);
   if (activeLab) return <LabPlayer lab={activeLab} userId={user.id} onBack={() => setActiveLab(null)} />;
+  const demoBanner = demoBand ? (
+    <div style={{ display:"flex", alignItems:"center", gap:10, background:"linear-gradient(90deg,#fff7ed,#ffedd5)", border:"1px solid #fdba74", borderRadius:12, padding:"9px 12px", marginBottom:12 }}>
+      <span style={{ fontSize:18 }}>{demoBand.emoji}</span>
+      <span style={{ flex:1, fontSize:12, fontWeight:700, color:"#9a3412" }}>Demo · exploring as a {demoBand.label.toLowerCase()} student</span>
+      <button onClick={() => { localStorage.removeItem("neo_current"); window.location.reload(); }} style={{ background:"#ea580c", color:"#fff", border:"none", borderRadius:99, padding:"7px 14px", fontFamily:"inherit", fontSize:11.5, fontWeight:800, cursor:"pointer" }}>Create account →</button>
+    </div>
+  ) : null;
 
   if (activeTab === "chat" && activeTutor) return (
     <div style={{ display:"flex", flexDirection:"column", height:"100%" }}>
@@ -3809,8 +3851,26 @@ function StudentPortal({ user }) {
         ))}
       </div>
       <div style={{ flex:1, overflowY:"auto", padding:"11px" }}>
+        {demoBanner}
         {activeTab === "home" && (
-          <StudentHome userId={user?.id || "demo"} name={user?.name} onOpenLab={(lab) => setActiveLab(lab)} onGoTab={setActiveTab} />
+          <>
+            {demoBand && (
+              <div className="card fu" style={{ marginBottom:12 }}>
+                <p style={{ fontSize:12.5, fontWeight:800, marginBottom:8 }}>✨ Hand-picked for {demoBand.label.toLowerCase()}</p>
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
+                  {demoBand.featured.map(fid => { const lab = LABS.find(l => l.id === fid); if (!lab) return null;
+                    return (
+                      <button key={fid} onClick={() => setActiveLab(lab)} style={{ background:"var(--p)", border:"none", borderRadius:12, padding:"11px 10px", cursor:"pointer", fontFamily:"inherit", textAlign:"left" }}>
+                        <div style={{ fontSize:20 }}>{lab.emoji}</div>
+                        <div style={{ fontSize:11.5, fontWeight:800, color:"var(--nv)", marginTop:3 }}>{lab.title}</div>
+                        <div style={{ fontSize:9.5, color:"var(--mu)", marginTop:1 }}>{lab.topic}</div>
+                      </button>
+                    );})}
+                </div>
+              </div>
+            )}
+            <StudentHome userId={user?.id || "demo"} name={user?.name} onOpenLab={(lab) => setActiveLab(lab)} onGoTab={setActiveTab} />
+          </>
         )}
         {activeTab === "journey" && (
           <Curriculum userId={user?.id || "demo"} onOpenLab={(lab) => setActiveLab(lab)} />
