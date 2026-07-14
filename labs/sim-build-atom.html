@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Build an Atom ⚛️</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#ede9fe,#c4b5fd)}
+.wrap{display:flex;flex-direction:column;height:100%;padding:14px;max-width:560px;margin:0 auto}
+.topbar{display:flex;justify-content:space-between;align-items:center}
+.title{font-size:18px;font-weight:700;color:#6d28d9}
+.chip{background:#fff;border-radius:99px;padding:5px 13px;font-size:13px;font-weight:700;color:#6d28d9;box-shadow:0 2px 0 #a78bfa}
+.task{background:#fff;border:3px solid #a78bfa;border-radius:16px;box-shadow:0 4px 0 #a78bfa;padding:10px 14px;text-align:center;font-size:clamp(14px,4vw,17px);font-weight:700;color:#1a1f3a;margin:10px 0}
+.svgbox{flex:1;display:flex;align-items:center;justify-content:center;min-height:0}
+svg{max-width:100%;max-height:100%}
+.counters{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:6px}
+.pc{background:#fff;border-radius:12px;padding:8px 6px;text-align:center;box-shadow:0 3px 0 #a78bfa}
+.pc .lb{font-size:11px;font-weight:700;color:#6d28d9;margin-bottom:5px}
+.pc .btns{display:flex;gap:5px;justify-content:center;align-items:center}
+.pc button{width:30px;height:30px;border:none;border-radius:8px;font-size:17px;font-weight:700;cursor:pointer;background:#ede9fe;color:#6d28d9;touch-action:manipulation}
+.pc .n{min-width:22px;font-weight:700;font-size:16px}
+.check{min-height:50px;width:100%;background:#6d28d9;color:#fff;border:none;border-radius:14px;font-family:'Quicksand',sans-serif;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2);margin-top:8px;touch-action:manipulation}
+.fb{text-align:center;font-size:13px;font-weight:700;min-height:20px;margin-top:6px;color:#6d28d9}
+.overlay{position:fixed;inset:0;background:rgba(255,255,255,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:50;text-align:center;padding:20px}
+.overlay.show{opacity:1;pointer-events:auto}
+.overlay h2{font-size:clamp(26px,7vw,36px);color:#6d28d9}
+.overlay .sc{font-size:17px;font-weight:700;color:#374151}
+.overlay button{background:#6d28d9;color:#fff;border:none;border-radius:99px;padding:13px 32px;font-family:'Quicksand',sans-serif;font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2)}
+.confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards;z-index:70}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+</style></head><body>
+<div class="wrap">
+  <div class="topbar"><div class="title">⚛️ Build an Atom</div><div style="display:flex;gap:6px"><div class="chip" id="score">0 pts</div><div class="chip" id="prog">1/5</div></div></div>
+  <div class="task" id="task"></div>
+  <div class="svgbox"><svg viewBox="0 0 300 240" id="scene"></svg></div>
+  <div class="counters">
+    <div class="pc"><div class="lb">🔴 Protons</div><div class="btns"><button data-p="p" data-d="-1">−</button><span class="n" id="np">0</span><button data-p="p" data-d="1">+</button></div></div>
+    <div class="pc"><div class="lb">⚪ Neutrons</div><div class="btns"><button data-p="n" data-d="-1">−</button><span class="n" id="nn">0</span><button data-p="n" data-d="1">+</button></div></div>
+    <div class="pc"><div class="lb">🔵 Electrons</div><div class="btns"><button data-p="e" data-d="-1">−</button><span class="n" id="ne">0</span><button data-p="e" data-d="1">+</button></div></div>
+  </div>
+  <button class="check" id="check">Check atom ✓</button>
+  <div class="fb" id="fb">Protons set the element · electrons set the charge · neutrons set the mass.</div>
+</div>
+<div class="overlay" id="ov"><h2 id="ovTitle"></h2><div class="sc" id="ovScore"></div><button id="ovNext">Next →</button></div>
+<script>
+const GAME={id:"sim-build-atom"};
+const EL={1:"Hydrogen",2:"Helium",3:"Lithium",4:"Beryllium",5:"Boron",6:"Carbon",7:"Nitrogen",8:"Oxygen",9:"Fluorine",10:"Neon"};
+const CH=[
+ {p:1,n:0,e:1,text:"Build a neutral <b>Hydrogen</b> atom (1 proton)"},
+ {p:2,n:2,e:2,text:"Build a neutral <b>Helium</b> atom"},
+ {p:6,n:6,e:6,text:"Build a neutral <b>Carbon</b> atom (6 protons)"},
+ {p:8,n:8,e:8,text:"Build a neutral <b>Oxygen</b> atom"},
+ {p:3,n:4,e:2,text:"Build a <b>Lithium ion</b> with a +1 charge (one fewer electron)"},
+];
+let idx=0,score=0,tries=0,st={p:0,n:0,e:0};
+let AC=null;function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch{}}return AC;}
+function tone(f,t=.12,ty="sine",g=.15,w=0){const c=ac();if(!c)return;const o=c.createOscillator(),v=c.createGain();o.type=ty;o.frequency.value=f;v.gain.setValueAtTime(g,c.currentTime+w);v.gain.exponentialRampToValueAtTime(.001,c.currentTime+w+t);o.connect(v).connect(c.destination);o.start(c.currentTime+w);o.stop(c.currentTime+w+t+.02);}
+const CC=["#6d28d9","#f59e0b","#ec4899","#22c55e","#3b82f6"];
+function confetti(n){for(let i=0;i<n;i++){const d=document.createElement("div");d.className="confetti";d.style.left=Math.random()*100+"vw";d.style.background=CC[i%5];d.style.animationDelay=Math.random()*.4+"s";document.body.appendChild(d);setTimeout(()=>d.remove(),2300);}}
+function report(complete){try{parent.postMessage({type:"labProgress",lab:GAME.id,score,complete},"*");}catch{}}
+function render(){
+  document.getElementById("np").textContent=st.p;document.getElementById("nn").textContent=st.n;document.getElementById("ne").textContent=st.e;
+  const cx=150,cy=110;
+  let s='';
+  // electron shells
+  [40,66].forEach(r=>s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="#c4b5fd" stroke-width="1.5" stroke-dasharray="3 4"/>');
+  // nucleus
+  const nuc=st.p+st.n;
+  for(let i=0;i<nuc;i++){const a=i*2.4,rr=Math.min(18,i*1.4);const x=cx+Math.cos(a)*rr,y=cy+Math.sin(a)*rr;
+    s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="7" fill="'+(i<st.p?"#ef4444":"#9ca3af")+'" stroke="#fff" stroke-width="1"/>';}
+  // electrons on shells
+  const sh=[Math.min(2,st.e),Math.max(0,st.e-2)];
+  [40,66].forEach((r,si)=>{const cnt=sh[si];for(let i=0;i<cnt;i++){const a=(i/Math.max(cnt,1))*2*Math.PI+si;
+    s+='<circle cx="'+(cx+Math.cos(a)*r).toFixed(1)+'" cy="'+(cy+Math.sin(a)*r).toFixed(1)+'" r="5" fill="#3b82f6" stroke="#fff" stroke-width="1"/>';}});
+  // readout
+  const charge=st.p-st.e;
+  const name=st.p===0?"—":EL[st.p]||("Element "+st.p);
+  s+='<text x="150" y="205" font-size="14" text-anchor="middle" fill="#6d28d9" font-weight="bold">'+name+(charge!==0?" ion":"")+'</text>';
+  s+='<text x="150" y="224" font-size="11" text-anchor="middle" fill="#64748b">Mass '+nuc+' · Charge '+(charge>0?"+"+charge:charge)+'</text>';
+  document.getElementById("scene").innerHTML=s;
+}
+document.querySelectorAll(".pc button").forEach(b=>b.onclick=()=>{
+  const p=b.dataset.p,d=+b.dataset.d;const key=p==="p"?"p":p==="n"?"n":"e";
+  st[key]=Math.max(0,Math.min(10,st[key]+d));tone(d>0?520:400,.05,"sine",.06);render();});
+document.getElementById("check").onclick=()=>{
+  const c=CH[idx];tries++;
+  if(st.p===c.p&&st.n===c.n&&st.e===c.e){
+    const pts=Math.max(15,45-(tries-1)*10);score+=pts;
+    tone(660,.12);tone(880,.14,"sine",.15,.1);confetti(35);
+    document.getElementById("fb").textContent="⚛️ Correct atom!  (+"+pts+" pts)";
+    document.getElementById("score").textContent=score+" pts";setTimeout(next,1400);
+  } else { tone(200,.2,"triangle",.1);
+    const msgs=[];if(st.p!==c.p)msgs.push("protons "+(st.p<c.p?"too few":"too many"));if(st.n!==c.n)msgs.push("neutrons off");if(st.e!==c.e)msgs.push("electrons off");
+    document.getElementById("fb").textContent="Not quite — "+msgs.join(", ")+"."; }
+};
+function load(){tries=0;st={p:0,n:0,e:0};
+  document.getElementById("task").innerHTML=CH[idx].text;
+  document.getElementById("fb").textContent="Protons set the element · electrons set the charge · neutrons set the mass.";
+  document.getElementById("prog").textContent=(idx+1)+"/5";render();}
+function next(){idx++;
+  if(idx>=CH.length){report(true);confetti(60);
+    document.getElementById("ovTitle").textContent="Atom architect! 🏆";
+    document.getElementById("ovScore").textContent=score+" pts · protons, neutrons, electrons & ions";
+    document.getElementById("ovNext").onclick=()=>{idx=0;score=0;load();document.getElementById("ov").classList.remove("show");};
+    document.getElementById("ov").classList.add("show");return;}
+  load();}
+window.__qa={solve:()=>{const c=CH[idx];st={p:c.p,n:c.n,e:c.e};render();document.getElementById("check").click();}};
+load();
+</script><button id="neoExit" aria-label="Back" style="position:fixed;top:10px;right:10px;z-index:90;width:38px;height:38px;border:none;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 2px 8px rgba(0,0,0,.18);font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;color:#334155">✕</button><script>(function(){var b=document.getElementById("neoExit");b.onclick=function(){try{if(window.parent!==window){parent.postMessage({type:"labExit"},"*");return}}catch(e){}try{history.back()}catch(e){}};})();</script></body></html>
