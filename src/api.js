@@ -175,7 +175,7 @@ Return ONLY this JSON (no extra text):
 }
 
 Include 5 subjects and 4 workshops (Life skills: cooking, gardening, communication, financial literacy, entrepreneurship, emotional intelligence, survival skills).
-Prefer iframe-friendly tools: Zearn, PhET, Scratch, GeoGebra, Desmos, Code.org, Canva, Duolingo, CommonLit.
+Use ONLY neoschool Labs — our in-house library of 285+ interactive games and simulations. Never reference external education brands or products.
 For "uniqueGenius" — be SPECIFIC to ${name}'s grade and goals, not generic. Frame as their unique super-power.`, 1200);
 
     // After getting the AI response, enrich each subject with specific labs from our catalog
@@ -190,11 +190,11 @@ For "uniqueGenius" — be SPECIFIC to ${name}'s grade and goals, not generic. Fr
       morning: `${name} starts with a focused 2-hour academic block covering math and reading using AI-powered tools that adapt to their pace.`,
       afternoon: "Afternoons are for creative projects, outdoor exploration, and real-world skills that AI can never replace.",
       subjects: [
-        { name:"Math",    emoji:"🔢", tool:"Zearn",        focus:"Building strong number sense with adaptive daily practice.", mins:60, labs: pickLabsForSubject("Math", grade) },
-        { name:"Reading", emoji:"📖", tool:"CommonLit",    focus:"Developing comprehension through engaging grade-level texts.", mins:45, labs: pickLabsForSubject("Reading", grade) },
-        { name:"Science", emoji:"🔬", tool:"PhET",         focus:"Hands-on inquiry using interactive simulations.", mins:30, labs: pickLabsForSubject("Science", grade) },
-        { name:"Coding",  emoji:"💻", tool:"Scratch",      focus:"Building logical thinking through creative projects.", mins:30, labs: [] },
-        { name:"Arts",    emoji:"🎨", tool:"Canva",        focus:"Creative expression and visual design thinking.", mins:30, labs: [] },
+        { name:"Math",    emoji:"🔢", tool:"neoschool Labs",        focus:"Building strong number sense with adaptive daily practice.", mins:60, labs: pickLabsForSubject("Math", grade) },
+        { name:"Reading", emoji:"📖", tool:"neoschool Labs",    focus:"Developing comprehension through engaging grade-level texts.", mins:45, labs: pickLabsForSubject("Reading", grade) },
+        { name:"Science", emoji:"🔬", tool:"neoschool Labs",         focus:"Hands-on inquiry using interactive simulations.", mins:30, labs: pickLabsForSubject("Science", grade) },
+        { name:"Coding",  emoji:"💻", tool:"neoschool Labs",      focus:"Building logical thinking through creative projects.", mins:30, labs: [] },
+        { name:"Arts",    emoji:"🎨", tool:"neoschool Labs",        focus:"Creative expression and visual design thinking.", mins:30, labs: [] },
       ],
       workshops: [
         { name:"Cooking",                emoji:"🍳", cadence:"1x/week", desc:"Real-world math, fractions, and self-sufficiency through kitchen science." },
@@ -237,10 +237,10 @@ Include ${Math.min(weeks, 4)} weeks. Each weekday should have 2-3 time blocks ro
     console.warn("genMultiCurriculum fallback:", e.message);
     const subj = (i) => subjects[i % subjects.length] || subjects[0];
     const sampleDays = {
-      Monday:    [{time:"9:00-10:30",subject:subj(0),activity:`${subj(0)} foundations & warm-up`,tool:"Khan Academy"},{time:"10:45-11:30",subject:subj(1),activity:`${subj(1)} hands-on practice`,tool:"PhET"}],
-      Tuesday:   [{time:"9:00-10:30",subject:subj(2),activity:`${subj(2)} deep dive`,tool:"CommonLit"},{time:"10:45-11:30",subject:subj(3),activity:`${subj(3)} review & games`,tool:"Math Playground"}],
-      Wednesday: [{time:"9:00-11:00",subject:"Integrated Project",activity:`Project combining ${subjectList}`,tool:"Scratch"}],
-      Thursday:  [{time:"9:00-10:30",subject:subj(4),activity:`${subj(4)} application`,tool:"Code.org"},{time:"10:45-11:30",subject:subj(0),activity:`${subj(0)} group discussion`,tool:""}],
+      Monday:    [{time:"9:00-10:30",subject:subj(0),activity:`${subj(0)} foundations & warm-up`,tool:"neoschool Labs"},{time:"10:45-11:30",subject:subj(1),activity:`${subj(1)} hands-on practice`,tool:"neoschool Labs"}],
+      Tuesday:   [{time:"9:00-10:30",subject:subj(2),activity:`${subj(2)} deep dive`,tool:"neoschool Labs"},{time:"10:45-11:30",subject:subj(3),activity:`${subj(3)} review & games`,tool:"Math Playground"}],
+      Wednesday: [{time:"9:00-11:00",subject:"Integrated Project",activity:`Project combining ${subjectList}`,tool:"neoschool Labs"}],
+      Thursday:  [{time:"9:00-10:30",subject:subj(4),activity:`${subj(4)} application`,tool:"neoschool Labs"},{time:"10:45-11:30",subject:subj(0),activity:`${subj(0)} group discussion`,tool:""}],
       Friday:    [{time:"9:00-10:00",subject:"Reflection",activity:"Week reflection + showcase",tool:""},{time:"10:00-11:30",subject:"Choice Time",activity:"Free exploration in any subject",tool:""}],
     };
     return {
@@ -251,11 +251,11 @@ Include ${Math.min(weeks, 4)} weeks. Each weekday should have 2-3 time blocks ro
         title: `Week ${i + 1}: Exploring ${subjects[i % subjects.length]}`,
         theme: `Connections between ${subjectList}`,
         days: sampleDays,
-        bySubject: Object.fromEntries(subjects.map(s => [s, { objective: `Build foundational ${s} skills`, activity: `Interactive ${s} activity`, tool: "Khan Academy / PhET" }])),
+        bySubject: Object.fromEntries(subjects.map(s => [s, { objective: `Build foundational ${s} skills`, activity: `Interactive ${s} activity`, tool: "neoschool Labs" }])),
         assessment: "Portfolio observation",
         parentTip: `This week ask your child to teach you one thing they learned about ${subjects[i % subjects.length]}.`,
       })),
-      materials: ["Khan Academy (free)", "PhET Simulations (free)", "Scratch (free)"],
+      materials: ["neoschool Labs — 285+ interactive games & simulations (included)", "neoschool learning map & progress tracking (included)"],
       differentiationTips: "For advanced learners, add cross-subject connections. For learners who need support, focus on one subject at a time.",
       networkInsight: "Schools using integrated curricula report 23% higher engagement than single-subject approaches.",
     };
