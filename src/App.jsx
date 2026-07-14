@@ -2061,8 +2061,10 @@ function Auth({ role, onAuth }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr]   = useState("");
   const [confirmSent, setConfirmSent] = useState(false);
-  useEffect(() => { // warm TLS+TCP to auth server while the user types
-    try { if (supabaseEnabled()) fetch("https://dwpxsaamaehtmhsuuprg.supabase.co/auth/v1/health", { mode: "no-cors" }).catch(()=>{}); } catch {}
+  useEffect(() => { // keep the auth server warm the whole time the user is on this screen
+    const warm = () => { try { if (supabaseEnabled()) fetch("https://dwpxsaamaehtmhsuuprg.supabase.co/auth/v1/health", { mode: "no-cors" }).catch(()=>{}); } catch {} };
+    warm(); const iv = setInterval(warm, 45000);
+    return () => clearInterval(iv);
   }, []);
   const up = (k, v) => { setErr(""); setForm(f => ({ ...f, [k]: v })); };
   const roleLabels = { parent:"Parent", guide:"Guide / Facilitator", director:"Campus Director", student:"Student", admin:"Admin" };
@@ -2858,8 +2860,15 @@ function ParentInsights({ user, childName, form }) {
             <p className="mu" style={{ fontSize: 11 }}>{grade} · {profile.sessions || 0} tutor sessions · learning style: {profile.style}</p>
           </div>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginTop: 14 }}>
-          {[["🎮", done.length, "labs completed"], ["⏱️", totalMins + "m", "learning time"], ["⭐", avgScore, "avg score"]].map(([e, v, l]) => (
+        {(() => {
+          const stKey = Object.keys(localStorage).find(k => k.startsWith("neo_sim_stats_") && !k.includes("demo")) || Object.keys(localStorage).find(k => k.startsWith("neo_sim_stats_"));
+          const st = stKey ? JSON.parse(localStorage.getItem(stKey) || "{}") : {};
+          const tot = Object.values(st).reduce((a, s) => ({ attempts: a.attempts + (s.attempts||0), wins: a.wins + (s.wins||0) }), { attempts: 0, wins: 0 });
+          window.__neoAcc = tot.attempts ? Math.round((tot.wins / tot.attempts) * 100) : null;
+          return null;
+        })()}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8, marginTop: 14 }}>
+          {[["🎮", done.length, "labs completed"], ["⏱️", totalMins + "m", "learning time"], ["⭐", avgScore, "avg score"], ["🎯", window.__neoAcc !== null && window.__neoAcc !== undefined ? window.__neoAcc + "%" : "—", "accuracy"]].map(([e, v, l]) => (
             <div key={l} style={{ background: "var(--p)", borderRadius: 12, padding: "10px 8px", textAlign: "center" }}>
               <div style={{ fontSize: 16 }}>{e}</div><div style={{ fontSize: 16, fontWeight: 800 }}>{v}</div><div className="mu" style={{ fontSize: 9.5 }}>{l}</div>
             </div>
@@ -3378,9 +3387,25 @@ function LabPlayer({ lab, userId, onBack }) {
   const [sessionStart] = useState(Date.now());
   const [simState, setSimState] = useState(null); // postMessage bridge: knows current sim state
   const [evLog, setEvLog] = useState([]);          // granular event stream from the sim (tutor sees everything)
+  const [failNudge, setFailNudge] = useState(null); // consecutive-fail explainer
+  const failStreak = useRef(0);
+  const statsRef = useRef({ attempts: 0, fails: 0, wins: 0 });
   useEffect(() => {
     const onEvt = (e) => {
-      if (e?.data?.type === "labEvent") setEvLog(prev => [...prev.slice(-30), `${e.data.kind}: ${e.data.text}`]);
+      if (e?.data?.type === "labEvent") {
+        setEvLog(prev => [...prev.slice(-30), `${e.data.kind}: ${e.data.text}`]);
+        if (e.data.kind === "feedback") {
+          const t = e.data.text || "";
+          const isFail = /too |not quite|not balanced|wrong spot|✗|that's \d|hmm|off|don't match|too many|too much|not enough/i.test(t) && !/\+\d+ pts/.test(t);
+          const isWin = /\+\d+ pts/.test(t);
+          if (isWin) { statsRef.current.wins++; statsRef.current.attempts++; failStreak.current = 0; setFailNudge(null); }
+          else if (isFail) {
+            statsRef.current.fails++; statsRef.current.attempts++;
+            failStreak.current++;
+            if (failStreak.current >= 2) setFailNudge(t);
+          }
+        }
+      }
       if (e?.data?.type === "labExit") onBack && onBack();
     };
     const onKey = (e) => { if (e.key === "Escape") onBack && onBack(); };
@@ -3389,6 +3414,14 @@ function LabPlayer({ lab, userId, onBack }) {
     return () => {
       window.removeEventListener("message", onEvt);
       window.removeEventListener("keydown", onKey);
+      try {
+        const key = "neo_sim_stats_" + userId;
+        const all = JSON.parse(localStorage.getItem(key) || "{}");
+        const prev = all[lab.id] || { attempts: 0, fails: 0, wins: 0, sessions: 0 };
+        all[lab.id] = { attempts: prev.attempts + statsRef.current.attempts, fails: prev.fails + statsRef.current.fails,
+          wins: prev.wins + statsRef.current.wins, sessions: prev.sessions + 1, last: Date.now(), subject: lab.subject, title: lab.title };
+        localStorage.setItem(key, JSON.stringify(all));
+      } catch {}
       const fails = evLog.filter(x => /too |not quite|✗|wrong/i.test(x)).length;
       const wins = evLog.filter(x => /🎉|correct|solved|\+\d+ pts|charged|stabilized|match/i.test(x)).length;
       closeTutorSession(userId, lab.id, { solved: wins, fails });
@@ -3595,6 +3628,17 @@ function LabPlayer({ lab, userId, onBack }) {
       {/* Header */}
       <div style={{ background:"var(--nv)", padding:"11px 16px", display:"flex", alignItems:"center", gap:10, flexShrink:0 }}>
         <button onClick={onBack} style={{ background:"rgba(255,255,255,.18)", border:"none", cursor:"pointer", color:"#fff", minWidth:64, height:32, borderRadius:8, fontSize:12.5, fontWeight:700, fontFamily:"inherit", display:"flex", alignItems:"center", justifyContent:"center", gap:4 }}>← Exit</button>
+        {failNudge && (
+          <div style={{ position:"fixed", left:"50%", transform:"translateX(-50%)", bottom:18, zIndex:95, background:"#fff", borderRadius:14, boxShadow:"0 8px 30px rgba(0,0,0,.25)", padding:"11px 14px", maxWidth:420, width:"calc(100% - 32px)", display:"flex", alignItems:"center", gap:10 }}>
+            <span style={{ fontSize:18 }}>💡</span>
+            <div style={{ flex:1 }}>
+              <p style={{ fontSize:11.5, fontWeight:800, color:"var(--nv)" }}>Where it went wrong</p>
+              <p style={{ fontSize:11, color:"var(--mu)", lineHeight:1.4 }}>{failNudge}</p>
+            </div>
+            <button onClick={() => { setShowTutor(true); setInp("I keep failing this challenge — can you help me understand where I'm going wrong? Latest feedback: " + failNudge); setFailNudge(null); }} style={{ background:"var(--or)", color:"#fff", border:"none", borderRadius:99, padding:"8px 13px", fontSize:11, fontWeight:800, cursor:"pointer", fontFamily:"inherit", whiteSpace:"nowrap" }}>Ask coach →</button>
+            <button onClick={() => setFailNudge(null)} style={{ background:"none", border:"none", fontSize:14, cursor:"pointer", color:"var(--mu)" }}>✕</button>
+          </div>
+        )}
         <span style={{ fontSize:18 }}>{lab.emoji}</span>
         <div style={{ flex:1 }}>
           <div style={{ color:"#fff", fontWeight:600, fontSize:13 }}>{lab.title}</div>
@@ -4040,7 +4084,7 @@ function StudentPortal({ user }) {
                 </div>
               </div>
             )}
-            <StudentHome userId={user?.id || "demo"} name={user?.name} onOpenLab={(lab) => setActiveLab(lab)} onGoTab={setActiveTab} />
+            <StudentHome userId={user?.id || "demo"} name={user?.name} onOpenLab={(lab) => setActiveLab(lab)} onGoTab={setActiveTab} onSubject={(s) => { setSubjectF(s); setGradeBand("All"); setActiveTab("labs"); }} />
           </>
         )}
         {activeTab === "journey" && (
@@ -5404,6 +5448,12 @@ function LearningTrajectory({ studentName, studentGrade, mem }) {
 function SimViewer({ tool, onClose }) {
   const [loaded, setLoaded] = useState(!tool.embed); // skip loading state entirely for non-embeddable
   const [error, setError]   = useState(false);
+  useEffect(() => {
+    const onMsg = (e) => { if (e?.data?.type === "labExit") onClose && onClose(); };
+    const onKey = (e) => { if (e.key === "Escape") onClose && onClose(); };
+    window.addEventListener("message", onMsg); window.addEventListener("keydown", onKey);
+    return () => { window.removeEventListener("message", onMsg); window.removeEventListener("keydown", onKey); };
+  }, []);
 
   // Auto-open in new tab for known-blocked providers after 1.5s so user isn't stuck
   useEffect(() => {
@@ -6913,7 +6963,7 @@ function Curriculum({ userId, onOpenLab }) {
 }
 
 // ── STUDENT HOME (Coursera-style landing) ────────────────────────────────────
-function StudentHome({ userId, name, onOpenLab, onGoTab }) {
+function StudentHome({ userId, name, onOpenLab, onGoTab, onSubject }) {
   const { tax, build } = useCurriculum(userId);
   if (!tax) return <div className="mu" style={{ padding: 40, textAlign: "center" }}>Loading…</div>;
   const subjects = ["Mathematics","English","Science","History"];
@@ -6934,7 +6984,7 @@ function StudentHome({ userId, name, onOpenLab, onGoTab }) {
       )}
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
         {curs.map(c => (
-          <div key={c.subject} onClick={() => onGoTab("journey")} style={{ cursor:"pointer", padding:"12px 13px", background:"#fff", borderRadius:12, border:"1px solid var(--p)" }}>
+          <div key={c.subject} onClick={() => onSubject ? onSubject(c.subject) : onGoTab("journey")} style={{ cursor:"pointer", padding:"12px 13px", background:"#fff", borderRadius:12, border:"1px solid var(--p)" }}>
             <div style={{ fontSize:12, fontWeight:800 }}>{c.subject==="Mathematics"?"🔢 Math":c.subject==="English"?"📖 English":c.subject==="Science"?"🔬 Science":"🏛️ History"}</div>
             <div style={{ height:6, borderRadius:99, background:"var(--p)", margin:"8px 0 4px", overflow:"hidden" }}><div style={{ width:c.pct+"%", height:"100%", background:"#22c55e" }}/></div>
             <div className="mu" style={{ fontSize:10 }}>{c.pct}% · {c.doneCount}/{c.total} lessons</div>
