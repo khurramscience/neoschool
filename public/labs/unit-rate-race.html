@@ -66,6 +66,8 @@
   .speedbar{height:6px;border-radius:99px;background:#ffffff88;margin-bottom:10px;overflow:hidden}
   .speedbar i{display:block;height:100%;background:linear-gradient(90deg,#f59e0b,#facc15);border-radius:99px;width:100%}
   .speedbar i.run{transition:width 4s linear;width:0}
+  .tbar{height:4px;border-radius:99px;background:#00000018;margin-bottom:8px;overflow:hidden}
+  .tbar i{display:block;height:100%;background:linear-gradient(90deg,#22c55e,#f59e0b,#dc2626);border-radius:99px;width:100%}
   .npDisplay{background:#fff;border:3px solid #a78bfa;border-radius:16px;min-height:56px;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;color:#6d28d9;margin-bottom:10px;letter-spacing:2px}
   .numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:auto}
   .npBtn{min-height:54px;background:#fff;border:none;border-radius:14px;font-family:'Quicksand',sans-serif;font-size:22px;font-weight:700;color:#6d28d9;cursor:pointer;box-shadow:0 3px 0 #a78bfa;touch-action:manipulation}
@@ -90,6 +92,7 @@
     <div class="chip" id="prog">1/10</div>
   </div>
   <div class="speedbar"><i id="sbar"></i></div>
+  <div class="tbar"><i id="tbar"></i></div>
   <div class="stage" id="stage"></div>
   <div class="fb" id="fb"></div>
 </div>
@@ -137,8 +140,8 @@ function report(complete=false){ try{ parent.postMessage({type:"labProgress",lab
 
 // ── scoring ──────────────────────────────────────────────────────────────
 let qStart=0;
-function award(ev){ let pts=10; const fast=(Date.now()-qStart)<4000;
-  if(fast)pts+=5;
+function award(ev){ let pts=10; const el=Date.now()-qStart;
+  const spd=el<2000?8:el<4000?6:el<6000?4:el<8000?2:0; pts+=spd; const fast=spd>=6;
   if(streak>=3)pts*=2; if(qIndex===bonusQ)pts*=2; score+=pts;
   const x=ev&&ev.clientX?ev.clientX:window.innerWidth/2, y=ev&&ev.clientY?ev.clientY:window.innerHeight/2;
   pop("+"+pts+(fast?" ⚡":""),x,y); if(streak>=3)confetti(8); }
@@ -161,7 +164,8 @@ function renderChoice(item){
     b.onclick=(ev)=>{ if(locked)return; locked=true;
       const ok=(i===item.answer);
       if(ok){ b.classList.add("right"); streak++; bestStreak=Math.max(bestStreak,streak); correct++; award(ev); sfxRight(); feedback(CHEERS[Math.floor(Math.random()*CHEERS.length)]); }
-      else{ b.classList.add("wrong"); streak=0; sfxWrong(); feedback(NUDGES[Math.floor(Math.random()*NUDGES.length)]);
+      else{ b.classList.add("wrong"); streak=0; sfxWrong();
+        feedback("✗ It was: "+plainAnswer(item)+(item.why?" — "+item.why:""));
         [...grid.children].forEach(btn=>{ if(btn.dataset.idx==item.answer)btn.classList.add("right"); }); }
       [...grid.children].forEach(btn=>btn.disabled=true);
       hud(); setTimeout(nextQ, ok?750:1400);
@@ -254,11 +258,25 @@ function renderOrder(item){
 const NUMRE=/^-?\d{1,4}$/;
 function isNumeric(it){ return it && Array.isArray(it.choices) && NUMRE.test(String(it.choices[it.answer]).replace(/<[^>]*>/g,"").trim()); }
 function armSpeedBar(){ const b=document.getElementById("sbar"); b.classList.remove("run"); void b.offsetWidth; b.classList.add("run"); }
+let toKill=null,tickKill=null,barRaf=null,curItem=null;
+function armCountdown(item){ curItem=item;
+  if(toKill)clearTimeout(toKill); if(tickKill)clearTimeout(tickKill); if(barRaf)cancelAnimationFrame(barRaf);
+  const bar=document.getElementById("tbar"); const t0=Date.now();
+  const paint=()=>{ const k=Math.min(1,(Date.now()-t0)/12000); bar.style.width=((1-k)*100)+"%"; if(k<1&&!locked)barRaf=requestAnimationFrame(paint); };
+  barRaf=requestAnimationFrame(paint);
+  tickKill=setTimeout(()=>{ if(!locked){ try{ tone(700,.07,"square",.05); }catch(e){} } },8000);
+  toKill=setTimeout(()=>{ if(locked)return; locked=true; streak=0; sfxWrong();
+    feedback("⏰ Time's up! It was: "+plainAnswer(curItem));
+    revealAnswer(); setTimeout(nextQ,1200); },12000); }
+function plainAnswer(item){ if(!item)return ""; const d=document.createElement("div");
+  d.innerHTML = item.choices ? String(item.choices[item.answer]) : (item.a!==undefined?String(item.a):"");
+  return d.textContent.slice(0,60); }
+function revealAnswer(){ document.querySelectorAll(".choice").forEach(btn=>{ if(btn.dataset.idx==(curItem&&curItem.answer))btn.classList.add("right"); }); }
 function nextQ(){
   locked=false; qIndex++;
   if(qIndex>=QS || !roundData.items[qIndex]) return endRound();
   hud(); feedback(""); qStart=Date.now(); armSpeedBar();
-  const item=roundData.items[qIndex];
+  const item=roundData.items[qIndex]; armCountdown(item);
   if(GAME.mode==="choice"){ if(item.useNumpad) renderNumpad(item); else renderChoice(item); }
   else if(GAME.mode==="sort")renderSort(item);
   else renderOrder(item);
@@ -305,9 +323,14 @@ function startRound(){
 function endRound(){
   report(level>=GAME.maxLevel && correct>=7);
   sfxFanfare(); confetti(60);
+  if(toKill)clearTimeout(toKill); if(barRaf)cancelAnimationFrame(barRaf);
+  let recordLine="";
+  try{ const bk="neo_best_"+GAME.id; const prev=+localStorage.getItem(bk)||0;
+    if(score>prev){ localStorage.setItem(bk,score); if(prev>0){recordLine=" · 🏆 NEW RECORD!"; confetti(40);} }
+    else if(prev>0) recordLine=" · best: "+prev; }catch(e){}
   const stars=Math.min(5,Math.floor(correct/2));
   document.getElementById("ovStars").textContent="⭐".repeat(Math.max(1,stars))+"☆".repeat(5-Math.max(1,stars));
-  document.getElementById("ovScore").textContent=correct+"/"+QS+" correct · "+score+" pts · best streak 🔥"+bestStreak;
+  document.getElementById("ovScore").textContent=correct+"/"+QS+" correct · "+score+" pts · best streak 🔥"+bestStreak+recordLine;
   const done=level>=GAME.maxLevel;
   document.getElementById("ovTitle").textContent = correct>=7 ? (done?"You mastered it! 🏆":"Level "+level+" cleared!") : "Round over!";
   const nb=document.getElementById("ovNext");
@@ -318,5 +341,7 @@ function endRound(){
 }
 startRound();
 </script>
-<button id="neoExit" aria-label="Back" style="position:fixed;top:10px;right:10px;z-index:90;width:38px;height:38px;border:none;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 2px 8px rgba(0,0,0,.18);font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;color:#334155">✕</button><script>(function(){var b=document.getElementById("neoExit");b.onclick=function(){try{if(window.parent!==window){parent.postMessage({type:"labExit"},"*");return}}catch(e){}try{history.back()}catch(e){}};})();</script></body>
+<button id="neoExit" aria-label="Back" style="position:fixed;top:10px;right:10px;z-index:90;width:38px;height:38px;border:none;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 2px 8px rgba(0,0,0,.18);font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;color:#334155">✕</button><script>(function(){var b=document.getElementById("neoExit");b.onclick=function(){try{if(window.parent!==window){parent.postMessage({type:"labExit"},"*");return}}catch(e){}try{history.back()}catch(e){}};})();</script><script>(function(){function post(kind,text){try{parent.postMessage({type:"labEvent",kind:kind,text:String(text).slice(0,140),ts:Date.now()},"*")}catch(e){}}
+document.addEventListener("click",function(e){var b=e.target.closest("button,.choice,.tile,.bubble");if(b&&b.id!=="neoExit")post("action","clicked: "+(b.textContent||b.className).trim().slice(0,60))},true);
+post("start","game loaded: "+document.title);})();</script></body>
 </html>
