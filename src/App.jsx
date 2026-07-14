@@ -1573,7 +1573,6 @@ function JourneyView({ studentId, allLabs, onOpenLab }) {
               </button>
             ))}
           </div>
-          <button onClick={startGuideDemo} style={{ width:"100%", marginTop:8, background:"transparent", border:"1.5px dashed var(--p2)", borderRadius:12, padding:"10px", cursor:"pointer", fontFamily:"inherit", fontSize:11.5, fontWeight:800, color:"var(--nv)" }}>🧑‍🏫 I'm a Guide — explore the classroom demo →</button>
         </div>
       )}
 
@@ -2203,6 +2202,7 @@ function Auth({ role, onAuth }) {
               </button>
             ))}
           </div>
+          <button onClick={startGuideDemo} style={{ width:"100%", marginTop:8, background:"transparent", border:"1.5px dashed var(--p2)", borderRadius:12, padding:"10px", cursor:"pointer", fontFamily:"inherit", fontSize:11.5, fontWeight:800, color:"var(--nv)" }}>🧑‍🏫 I'm a Guide — explore the classroom demo →</button>
         </div>
       </div>
     </div>
