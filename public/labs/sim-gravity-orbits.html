@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Gravity & Orbits 🪐</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#1e1b4b,#312e81)}
+.wrap{display:flex;flex-direction:column;height:100%;padding:14px;max-width:560px;margin:0 auto}
+.topbar{display:flex;justify-content:space-between;align-items:center}
+.title{font-size:18px;font-weight:700;color:#c7d2fe}
+.chip{background:#ffffff22;border-radius:99px;padding:5px 13px;font-size:13px;font-weight:700;color:#e0e7ff}
+.task{background:#ffffff14;border:2px solid #6366f1;border-radius:16px;padding:10px 14px;text-align:center;font-size:clamp(14px,4vw,17px);font-weight:700;color:#e0e7ff;margin:10px 0}
+.svgbox{flex:1;display:flex;align-items:center;justify-content:center;min-height:0}
+svg{max-width:100%;max-height:100%}
+.srow{display:flex;align-items:center;gap:10px;background:#ffffff14;border-radius:14px;padding:8px 12px;margin-top:6px}
+.srow label{font-weight:700;color:#c7d2fe;min-width:74px;font-size:13px}
+.srow input{flex:1;accent-color:#818cf8;height:28px}
+.srow .val{min-width:44px;text-align:right;font-weight:700;font-size:13px;color:#e0e7ff}
+.check{min-height:50px;width:100%;background:#6366f1;color:#fff;border:none;border-radius:14px;font-family:'Quicksand',sans-serif;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.35);margin-top:8px;touch-action:manipulation}
+.fb{text-align:center;font-size:13px;font-weight:700;min-height:20px;margin-top:6px;color:#c7d2fe}
+.overlay{position:fixed;inset:0;background:rgba(30,27,75,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:50;text-align:center;padding:20px}
+.overlay.show{opacity:1;pointer-events:auto}
+.overlay h2{font-size:clamp(26px,7vw,36px);color:#c7d2fe}
+.overlay .sc{font-size:17px;font-weight:700;color:#e0e7ff}
+.overlay button{background:#6366f1;color:#fff;border:none;border-radius:99px;padding:13px 32px;font-family:'Quicksand',sans-serif;font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.35)}
+.confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards;z-index:70}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+</style></head><body>
+<div class="wrap">
+  <div class="topbar"><div class="title">🪐 Gravity & Orbits</div><div style="display:flex;gap:6px"><div class="chip" id="score">0 pts</div><div class="chip" id="prog">1/5</div></div></div>
+  <div class="task" id="task"></div>
+  <div class="svgbox"><svg viewBox="0 0 300 260" id="scene"></svg></div>
+  <div class="srow"><label>🚀 Speed</label><input type="range" id="speed" min="10" max="40" step="1" value="15"><span class="val" id="speedv">15</span></div>
+  <button class="check" id="check">Launch orbit 🛰️</button>
+  <div class="fb" id="fb">Too slow → crashes into the star. Too fast → flies away. Find the balance!</div>
+</div>
+<div class="overlay" id="ov"><h2 id="ovTitle"></h2><div class="sc" id="ovScore"></div><button id="ovNext">Next →</button></div>
+<script>
+const GAME={id:"sim-gravity-orbits"};
+const CH=[
+ {r:70,text:"Put the planet into a <b>stable circular orbit</b> at this distance",band:[9,13]},
+ {r:95,text:"Farther out — find the stable orbit speed here",band:[8,11]},
+ {r:55,text:"Close orbit — needs a faster speed to stay up",band:[10,14]},
+ {r:110,text:"Distant orbit — a gentle speed keeps it round",band:[7,10]},
+ {r:80,text:"Find the balance for a moon at this distance",band:[9,12]},
+];
+let idx=0,score=0,tries=0,anim=null;
+let AC=null;function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch{}}return AC;}
+function tone(f,t=.12,ty="sine",g=.15,w=0){const c=ac();if(!c)return;const o=c.createOscillator(),v=c.createGain();o.type=ty;o.frequency.value=f;v.gain.setValueAtTime(g,c.currentTime+w);v.gain.exponentialRampToValueAtTime(.001,c.currentTime+w+t);o.connect(v).connect(c.destination);o.start(c.currentTime+w);o.stop(c.currentTime+w+t+.02);}
+const CC=["#818cf8","#f59e0b","#ec4899","#22c55e","#38bdf8"];
+function confetti(n){for(let i=0;i<n;i++){const d=document.createElement("div");d.className="confetti";d.style.left=Math.random()*100+"vw";d.style.background=CC[i%5];d.style.animationDelay=Math.random()*.4+"s";document.body.appendChild(d);setTimeout(()=>d.remove(),2300);}}
+function report(complete){try{parent.postMessage({type:"labProgress",lab:GAME.id,score,complete},"*");}catch{}}
+function drawStatic(){
+  const c=CH[idx];
+  let s='';
+  for(let i=0;i<30;i++)s+='<circle cx="'+(Math.random()*300)+'" cy="'+(Math.random()*260)+'" r="'+(Math.random()*1.2)+'" fill="#ffffff77"/>';
+  s+='<circle cx="150" cy="130" r="'+c.r+'" fill="none" stroke="#ffffff22" stroke-width="1" stroke-dasharray="3 5"/>';
+  s+='<circle cx="150" cy="130" r="22" fill="#fbbf24"/><circle cx="150" cy="130" r="30" fill="#fbbf24" opacity="0.25"/>';
+  s+='<circle cx="'+(150+c.r)+'" cy="130" r="9" fill="#38bdf8" stroke="#fff" stroke-width="1.5"/>';
+  const spd=+document.getElementById("speed").value;
+  s+='<line x1="'+(150+c.r)+'" y1="130" x2="'+(150+c.r)+'" y2="'+(130-spd*1.5)+'" stroke="#22c55e" stroke-width="3"/><polygon points="'+(150+c.r)+','+(130-spd*1.5)+' '+(150+c.r-5)+','+(130-spd*1.5+7)+' '+(150+c.r+5)+','+(130-spd*1.5+7)+'" fill="#22c55e"/>';
+  document.getElementById("scene").innerHTML=s;
+}
+document.getElementById("speed").oninput=()=>{document.getElementById("speedv").textContent=document.getElementById("speed").value;drawStatic();};
+document.getElementById("check").onclick=()=>{
+  const c=CH[idx];tries++;
+  const spd=+document.getElementById("speed").value;
+  if(anim)clearInterval(anim);
+  // simulate orbit: physics-ish. position + velocity, gravity toward star
+  let px=150+c.r,py=130,vx=0,vy=-spd*0.11,steps=0,minR=999,maxR=0;
+  const trail=[];
+  anim=setInterval(()=>{
+    const dx=150-px,dy=130-py,d=Math.hypot(dx,dy);
+    const g=90/(d*d);vx+=g*dx/d;vy+=g*dy/d;px+=vx;py+=vy;steps++;
+    minR=Math.min(minR,d);maxR=Math.max(maxR,d);
+    trail.push([px,py]);if(trail.length>90)trail.shift();
+    let s='';for(let i=0;i<30;i++)s+='<circle cx="'+((i*97)%300)+'" cy="'+((i*53)%260)+'" r="0.8" fill="#ffffff55"/>';
+    s+='<circle cx="150" cy="130" r="22" fill="#fbbf24"/><circle cx="150" cy="130" r="30" fill="#fbbf24" opacity="0.25"/>';
+    s+='<polyline points="'+trail.map(p=>p[0].toFixed(0)+","+p[1].toFixed(0)).join(" ")+'" fill="none" stroke="#38bdf8" stroke-width="1.5" opacity="0.5"/>';
+    s+='<circle cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" r="9" fill="#38bdf8" stroke="#fff" stroke-width="1.5"/>';
+    document.getElementById("scene").innerHTML=s;
+    if(d<26){clearInterval(anim);tone(120,.3,"sawtooth",.12);fail("crashed into the star! Go faster.");}
+    else if(d>140){clearInterval(anim);tone(160,.3,"triangle",.1);fail("flew off into space! Go slower.");}
+    else if(steps>220){clearInterval(anim);
+      const round=(maxR-minR)/((maxR+minR)/2)<0.55;
+      if(round)win();else fail("orbit too stretched (elliptical). Fine-tune the speed.");}
+  },28);
+  function win(){const pts=Math.max(15,45-(tries-1)*10);score+=pts;
+    tone(660,.12);tone(880,.14,"sine",.15,.1);confetti(35);
+    document.getElementById("fb").textContent="🛰️ Stable orbit achieved!  (+"+pts+" pts)";
+    document.getElementById("score").textContent=score+" pts";setTimeout(next,1400);}
+  function fail(m){document.getElementById("fb").textContent="💥 The planet "+m;setTimeout(drawStatic,600);}
+};
+function load(){tries=0;document.getElementById("speed").value=15;document.getElementById("speedv").textContent="15";
+  document.getElementById("task").innerHTML=CH[idx].text;
+  document.getElementById("fb").textContent="Too slow → crashes into the star. Too fast → flies away. Find the balance!";
+  document.getElementById("prog").textContent=(idx+1)+"/5";drawStatic();}
+function next(){idx++;
+  if(idx>=CH.length){report(true);confetti(60);
+    document.getElementById("ovTitle").textContent="Orbital mechanic! 🏆";
+    document.getElementById("ovScore").textContent=score+" pts · gravity & stable orbits mastered";
+    document.getElementById("ovNext").onclick=()=>{idx=0;score=0;load();document.getElementById("ov").classList.remove("show");};
+    document.getElementById("ov").classList.add("show");return;}
+  load();}
+window.__qa={solve:()=>{const c=CH[idx];const spd=Math.round((c.band[0]+c.band[1])/2);
+  document.getElementById("speed").value=spd;document.getElementById("speedv").textContent=spd;document.getElementById("check").click();}};
+load();
+</script><button id="neoExit" aria-label="Back" style="position:fixed;top:10px;right:10px;z-index:90;width:38px;height:38px;border:none;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 2px 8px rgba(0,0,0,.18);font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;color:#334155">✕</button><script>(function(){var b=document.getElementById("neoExit");b.onclick=function(){try{if(window.parent!==window){parent.postMessage({type:"labExit"},"*");return}}catch(e){}try{history.back()}catch(e){}};})();</script></body></html>

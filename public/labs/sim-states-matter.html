@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>States of Matter 🧊</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#e0f2fe,#93c5fd)}
+.wrap{display:flex;flex-direction:column;height:100%;padding:14px;max-width:560px;margin:0 auto}
+.topbar{display:flex;justify-content:space-between;align-items:center}
+.title{font-size:18px;font-weight:700;color:#1d4ed8}
+.chip{background:#fff;border-radius:99px;padding:5px 13px;font-size:13px;font-weight:700;color:#1d4ed8;box-shadow:0 2px 0 #60a5fa}
+.task{background:#fff;border:3px solid #60a5fa;border-radius:16px;box-shadow:0 4px 0 #60a5fa;padding:10px 14px;text-align:center;font-size:clamp(14px,4vw,17px);font-weight:700;color:#1a1f3a;margin:10px 0}
+.svgbox{flex:1;display:flex;align-items:center;justify-content:center;min-height:0}
+svg{max-width:100%;max-height:100%}
+.srow{display:flex;align-items:center;gap:10px;background:#fff;border-radius:14px;padding:8px 12px;box-shadow:0 3px 0 #60a5fa;margin-top:6px}
+.srow label{font-weight:700;color:#1d4ed8;min-width:60px;font-size:13px}
+.srow input{flex:1;accent-color:#dc2626;height:28px}
+.srow .val{min-width:56px;text-align:right;font-weight:700;font-size:13px}
+.check{min-height:50px;width:100%;background:#1d4ed8;color:#fff;border:none;border-radius:14px;font-family:'Quicksand',sans-serif;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2);margin-top:8px;touch-action:manipulation}
+.fb{text-align:center;font-size:13.5px;font-weight:700;min-height:20px;margin-top:6px;color:#1d4ed8}
+.overlay{position:fixed;inset:0;background:rgba(255,255,255,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:50;text-align:center;padding:20px}
+.overlay.show{opacity:1;pointer-events:auto}
+.overlay h2{font-size:clamp(26px,7vw,36px);color:#1d4ed8}
+.overlay .sc{font-size:17px;font-weight:700;color:#374151}
+.overlay button{background:#1d4ed8;color:#fff;border:none;border-radius:99px;padding:13px 32px;font-family:'Quicksand',sans-serif;font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2)}
+.confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards;z-index:70}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+</style></head><body>
+<div class="wrap">
+  <div class="topbar"><div class="title">🧊 States of Matter</div><div style="display:flex;gap:6px"><div class="chip" id="score">0 pts</div><div class="chip" id="prog">1/5</div></div></div>
+  <div class="task" id="task"></div>
+  <div class="svgbox"><svg viewBox="0 0 300 240" id="scene"></svg></div>
+  <div class="srow"><label>🔥 Heat</label><input type="range" id="temp" min="-40" max="140" step="5" value="20"><span class="val" id="tempv">20°C</span></div>
+  <button class="check" id="check">Check state ✓</button>
+  <div class="fb" id="fb">Watch the water molecules — heat changes how they move!</div>
+</div>
+<div class="overlay" id="ov"><h2 id="ovTitle"></h2><div class="sc" id="ovScore"></div><button id="ovNext">Next →</button></div>
+<script>
+const GAME={id:"sim-states-matter"};
+const CH=[
+ {want:"solid",text:"Make the water a <b>SOLID</b> (ice) 🧊",hint:"Below 0°C molecules lock into a lattice"},
+ {want:"gas",text:"Turn it into a <b>GAS</b> (steam) ♨️",hint:"Above 100°C molecules fly free"},
+ {want:"liquid",text:"Make it a flowing <b>LIQUID</b> 💧",hint:"Between 0 and 100°C"},
+ {want:"melt",text:"Set the exact <b>MELTING POINT</b> of water",hint:"The solid↔liquid boundary"},
+ {want:"boil",text:"Set the exact <b>BOILING POINT</b> of water",hint:"The liquid↔gas boundary"},
+];
+let idx=0,score=0,tries=0,parts=[],anim=null;
+let AC=null;function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch{}}return AC;}
+function tone(f,t=.12,ty="sine",g=.15,w=0){const c=ac();if(!c)return;const o=c.createOscillator(),v=c.createGain();o.type=ty;o.frequency.value=f;v.gain.setValueAtTime(g,c.currentTime+w);v.gain.exponentialRampToValueAtTime(.001,c.currentTime+w+t);o.connect(v).connect(c.destination);o.start(c.currentTime+w);o.stop(c.currentTime+w+t+.02);}
+const CC=["#1d4ed8","#f59e0b","#ec4899","#22c55e","#3b82f6"];
+function confetti(n){for(let i=0;i<n;i++){const d=document.createElement("div");d.className="confetti";d.style.left=Math.random()*100+"vw";d.style.background=CC[i%5];d.style.animationDelay=Math.random()*.4+"s";document.body.appendChild(d);setTimeout(()=>d.remove(),2300);}}
+function report(complete){try{parent.postMessage({type:"labProgress",lab:GAME.id,score,complete},"*");}catch{}}
+function stateOf(t){return t<0?"solid":t<100?"liquid":"gas";}
+function initParts(){parts=[];for(let i=0;i<24;i++)parts.push({gx:30+(i%6)*32,gy:90+Math.floor(i/6)*32,x:0,y:0,vx:(Math.random()-0.5),vy:(Math.random()-0.5)});}
+function step(){
+  const t=+document.getElementById("temp").value;
+  const st=stateOf(t);
+  const energy=st==="solid"?1.6:st==="liquid"?5:11;
+  let s='<rect x="10" y="30" width="220" height="200" rx="12" fill="#ffffff88" stroke="#64748b" stroke-width="3"/>';
+  parts.forEach((p,i)=>{
+    if(st==="solid"){ p.x=p.gx+Math.sin(Date.now()/90+i)*energy; p.y=p.gy+Math.cos(Date.now()/80+i)*energy; }
+    else{
+      if(p.x<40)p.x=p.gx; if(p.y<40)p.y=p.gy;
+      p.x+=p.vx*energy; p.y+=p.vy*energy;
+      const top=st==="gas"?36:120;
+      if(p.x<20||p.x>216){p.vx*=-1;p.x=Math.max(20,Math.min(216,p.x));}
+      if(p.y<top||p.y>216){p.vy*=-1;p.y=Math.max(top,Math.min(216,p.y));}
+    }
+    const col=st==="solid"?"#7dd3fc":st==="liquid"?"#3b82f6":"#c4b5fd";
+    s+='<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="8" fill="'+col+'" stroke="#1e3a8a" stroke-width="1.5"/>';
+  });
+  // thermometer
+  const col=t<0?"#38bdf8":t<100?"#22c55e":"#ef4444";
+  const h=Math.min(180,Math.max(6,(t+40)*1.0));
+  s+='<rect x="255" y="30" width="18" height="190" rx="9" fill="#e5e7eb"/><rect x="258" y="'+(216-h)+'" width="12" height="'+h+'" rx="6" fill="'+col+'"/>';
+  s+='<text x="264" y="20" font-size="12" text-anchor="middle" fill="#1d4ed8" font-weight="bold">'+t+'°</text>';
+  s+='<text x="120" y="20" font-size="13" text-anchor="middle" fill="#1d4ed8" font-weight="bold">'+(st==="solid"?"🧊 SOLID — vibrating in place":st==="liquid"?"💧 LIQUID — sliding around":"♨️ GAS — flying everywhere")+'</text>';
+  document.getElementById("scene").innerHTML=s;
+}
+function loop(){step();anim=setTimeout(loop,60);}
+document.getElementById("temp").oninput=()=>{document.getElementById("tempv").textContent=document.getElementById("temp").value+"°C";};
+document.getElementById("check").onclick=()=>{
+  const c=CH[idx];tries++;
+  const t=+document.getElementById("temp").value;
+  const st=stateOf(t);
+  const ok=c.want==="melt"?t===0:c.want==="boil"?t===100:st===c.want;
+  if(ok){
+    const pts=Math.max(15,40-(tries-1)*10);score+=pts;
+    tone(660,.12);tone(880,.14,"sine",.15,.1);confetti(30);
+    document.getElementById("fb").textContent="🎉 "+(c.want==="melt"?"0°C — melting point!":c.want==="boil"?"100°C — boiling point!":"Correct — "+st.toUpperCase()+" at "+t+"°C")+"  (+"+pts+" pts)";
+    document.getElementById("score").textContent=score+" pts";
+    setTimeout(next,1400);
+  } else { tone(200,.2,"triangle",.1); document.getElementById("fb").textContent="Currently "+st.toUpperCase()+" at "+t+"°C. "+c.hint+"."; }
+};
+function load(){tries=0;document.getElementById("temp").value=20;document.getElementById("tempv").textContent="20°C";
+  document.getElementById("task").innerHTML=CH[idx].text;
+  document.getElementById("fb").textContent="Watch the water molecules — heat changes how they move!";
+  document.getElementById("prog").textContent=(idx+1)+"/5";initParts();}
+function next(){idx++;
+  if(idx>=CH.length){report(true);confetti(60);
+    document.getElementById("ovTitle").textContent="Matter master! 🏆";
+    document.getElementById("ovScore").textContent=score+" pts · solids, liquids, gases + phase changes";
+    document.getElementById("ovNext").onclick=()=>{idx=0;score=0;load();document.getElementById("ov").classList.remove("show");};
+    document.getElementById("ov").classList.add("show");return;}
+  load();}
+window.__qa={solve:()=>{const c=CH[idx];const t=c.want==="solid"?-20:c.want==="gas"?120:c.want==="liquid"?50:c.want==="melt"?0:100;
+  document.getElementById("temp").value=t;document.getElementById("tempv").textContent=t+"°C";step();document.getElementById("check").click();}};
+load();loop();
+</script><button id="neoExit" aria-label="Back" style="position:fixed;top:10px;right:10px;z-index:90;width:38px;height:38px;border:none;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 2px 8px rgba(0,0,0,.18);font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;color:#334155">✕</button><script>(function(){var b=document.getElementById("neoExit");b.onclick=function(){try{if(window.parent!==window){parent.postMessage({type:"labExit"},"*");return}}catch(e){}try{history.back()}catch(e){}};})();</script></body></html>
