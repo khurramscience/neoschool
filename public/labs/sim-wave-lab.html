@@ -39,10 +39,10 @@ svg{max-width:100%}
 <script>
 const GAME={id:"sim-wave-lab"};
 function gen(){const ch=[];const R=n=>1+Math.floor(Math.random()*n);
- ch.push({a:4,f:2,text:"Match a <b>tall, slow</b> wave (high amplitude, low frequency)"});
- ch.push({a:2,f:5,text:"Match a <b>short, fast</b> wave (low amplitude, high frequency)"});
- ch.push({a:5,f:3,text:"Match this wave exactly"});
- while(ch.length<5){const a=R(6),f=R(6);if(!ch.some(c=>c.a===a&&c.f===f))ch.push({a,f,text:"Match this wave exactly"});}
+ ch.push({a:4,f:2,text:"🌊 Ocean swells before a storm: match the <b>tall, slow</b> wave surfers wait for"});
+ ch.push({a:2,f:5,text:"📱 A phone buzzing in a pocket: match the <b>short, fast</b> vibration wave"});
+ ch.push({a:5,f:3,text:"🎸 A guitar string in slow motion — match its shape exactly"});
+ while(ch.length<5){const a=R(6),f=R(6);if(!ch.some(c=>c.a===a&&c.f===f))ch.push({a,f,text:"🎸 A guitar string in slow motion — match its shape exactly"});}
  return ch;}
 const CH=gen();
 let idx=0,score=0,tries=0,__perfects=0,t0=Date.now(),anim=null;
