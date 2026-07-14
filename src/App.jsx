@@ -2974,7 +2974,7 @@ function ParentDashboard({ user, data }) {
       <div style={{ maxWidth:440, margin:"0 auto" }}>
         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20 }}>
           <Logo sz={14}/>
-          <CreditsWidget userId={user.id} onBuyMore={() => setShowPayModal(true)}/>
+          <div style={{ display:"flex", alignItems:"center", gap:8 }}><CreditsWidget userId={user.id} onBuyMore={() => setShowPayModal(true)}/><AccountMenu user={user} /></div>
         </div>
         <div className="fu" style={{ marginBottom:22, paddingBottom:18, borderBottom:"1px solid var(--p2)" }}>
           <p className="eyebrow" style={{ marginBottom:6 }}>Welcome back</p>
@@ -3335,6 +3335,36 @@ function labMatchesGrade(lab, bandVal) {
   return bandVal >= min && bandVal <= max;
 }
 
+
+function AccountMenu({ user, accent = "var(--nv)" }) {
+  const [open, setOpen] = useState(false);
+  const signOut = () => {
+    ["neo_current","neo_last_screen","neo_parent_data"].forEach(k => localStorage.removeItem(k));
+    window.location.hash = ""; window.location.reload();
+  };
+  const goHome = () => { window.location.hash = ""; window.location.reload(); };
+  return (
+    <div style={{ position:"relative" }}>
+      <button onClick={() => setOpen(o => !o)} style={{ width:34, height:34, borderRadius:"50%", border:"2px solid rgba(255,255,255,.5)", background:accent, color:"#fff", fontWeight:800, fontSize:14, cursor:"pointer", fontFamily:"inherit" }}>
+        {(user?.name || "?")[0].toUpperCase()}
+      </button>
+      {open && (
+        <>
+          <div onClick={() => setOpen(false)} style={{ position:"fixed", inset:0, zIndex:98 }} />
+          <div style={{ position:"absolute", right:0, top:42, background:"#fff", borderRadius:14, boxShadow:"0 8px 30px rgba(0,0,0,.18)", padding:8, zIndex:99, minWidth:190 }}>
+            <p style={{ fontSize:12, fontWeight:800, padding:"8px 10px", color:"var(--nv)" }}>{user?.name}</p>
+            <p className="mu" style={{ fontSize:10, padding:"0 10px 8px", borderBottom:"1px solid var(--p)" }}>{user?.email}</p>
+            {[["🏠 Main page", goHome], ["🚪 Sign out", signOut]].map(([l, fn]) => (
+              <button key={l} onClick={fn} style={{ display:"block", width:"100%", textAlign:"left", background:"none", border:"none", padding:"10px", fontSize:12.5, fontWeight:700, color:"var(--nv)", cursor:"pointer", fontFamily:"inherit", borderRadius:8 }}
+                onMouseEnter={e=>e.target.style.background="var(--p)"} onMouseLeave={e=>e.target.style.background="none"}>{l}</button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 function LabPlayer({ lab, userId, onBack }) {
   const [showTutor, setShowTutor] = useState(false);
   const [msgs, setMsgs] = useState([]);
@@ -3348,10 +3378,16 @@ function LabPlayer({ lab, userId, onBack }) {
   const [simState, setSimState] = useState(null); // postMessage bridge: knows current sim state
   const [evLog, setEvLog] = useState([]);          // granular event stream from the sim (tutor sees everything)
   useEffect(() => {
-    const onEvt = (e) => { if (e?.data?.type === "labEvent") setEvLog(prev => [...prev.slice(-30), `${e.data.kind}: ${e.data.text}`]); };
+    const onEvt = (e) => {
+      if (e?.data?.type === "labEvent") setEvLog(prev => [...prev.slice(-30), `${e.data.kind}: ${e.data.text}`]);
+      if (e?.data?.type === "labExit") onBack && onBack();
+    };
+    const onKey = (e) => { if (e.key === "Escape") onBack && onBack(); };
+    window.addEventListener("keydown", onKey);
     window.addEventListener("message", onEvt);
     return () => {
       window.removeEventListener("message", onEvt);
+      window.removeEventListener("keydown", onKey);
       const fails = evLog.filter(x => /too |not quite|✗|wrong/i.test(x)).length;
       const wins = evLog.filter(x => /🎉|correct|solved|\+\d+ pts|charged|stabilized|match/i.test(x)).length;
       closeTutorSession(userId, lab.id, { solved: wins, fails });
@@ -3557,7 +3593,7 @@ function LabPlayer({ lab, userId, onBack }) {
       {showPay && <PaymentModal userId={userId||"demo"} onClose={()=>setShowPay(false)}/>}
       {/* Header */}
       <div style={{ background:"var(--nv)", padding:"11px 16px", display:"flex", alignItems:"center", gap:10, flexShrink:0 }}>
-        <button onClick={onBack} style={{ background:"rgba(255,255,255,.15)", border:"none", cursor:"pointer", color:"#fff", width:28, height:28, borderRadius:7, fontSize:13 }}>←</button>
+        <button onClick={onBack} style={{ background:"rgba(255,255,255,.18)", border:"none", cursor:"pointer", color:"#fff", minWidth:64, height:32, borderRadius:8, fontSize:12.5, fontWeight:700, fontFamily:"inherit", display:"flex", alignItems:"center", justifyContent:"center", gap:4 }}>← Exit</button>
         <span style={{ fontSize:18 }}>{lab.emoji}</span>
         <div style={{ flex:1 }}>
           <div style={{ color:"#fff", fontWeight:600, fontSize:13 }}>{lab.title}</div>
@@ -3973,7 +4009,7 @@ function StudentPortal({ user }) {
       <div style={{ background:"var(--nv)", padding:"11px 14px", display:"flex", alignItems:"center", gap:10, flexShrink:0 }}>
         <div className="av" style={{ background:student.color, width:30,height:30,fontSize:10 }}>{student.init}</div>
         <div style={{ flex:1 }}>
-          <div style={{ color:"#fff", fontWeight:600, fontSize:13.5 }}>Hi, {user?.name?.split(" ")[0]}! 👋</div>
+          <div style={{ display:"flex", alignItems:"center", gap:10 }}><div style={{ color:"#fff", fontWeight:600, fontSize:13.5 }}>Hi, {user?.name?.split(" ")[0]}! 👋</div><AccountMenu user={user} /></div>
           <div style={{ color:"rgba(255,255,255,.5)", fontSize:10 }}>{mem.streak>0?`${mem.streak}🔥 streak · `:""}velocity: {mem.learningVelocity}</div>
         </div>
         <CreditsWidget userId={user.id} onBuyMore={()=>setShowPay(true)}/>

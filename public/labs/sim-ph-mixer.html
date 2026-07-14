@@ -41,7 +41,7 @@ svg{max-width:100%;height:auto}
   </div>
   <div class="fb" id="fb">Acid pushes pH down · base pushes pH up</div>
 </div>
-<div class="overlay" id="ov"><h2 id="ovTitle"></h2><div class="sc" id="ovScore"></div><button id="ovNext">Next →</button></div>
+<div class="overlay" id="ov"><h2 id="ovTitle"></h2><div class="sc" id="ovScore"></div><button id="ovNext">Play again ↻</button><button id="ovDone" style="background:#1a1f3a;color:#fff;border:none;border-radius:99px;padding:13px 32px;font-family:'Quicksand',sans-serif;font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2)">Finish ✓</button></div>
 <script>
 const GAME={id:"sim-ph-mixer"};
 function genChallenges(){
@@ -123,4 +123,4 @@ function watch(id,kind){var el=document.getElementById(id);if(!el)return;var las
 if(document.getElementById("fb"))watch("fb","feedback");if(document.getElementById("task"))watch("task","challenge");if(document.getElementById("score"))watch("score","score");
 document.addEventListener("click",function(e){var b=e.target.closest("button");if(b&&b.id!=="neoExit")post("action","clicked: "+(b.textContent||b.id).trim().slice(0,60))},true);
 var inputs=document.querySelectorAll("input[type=range]");inputs.forEach(function(r){r.addEventListener("change",function(){post("adjust",(r.id||"slider")+" → "+r.value)})});
-post("start","sim loaded: "+document.title);})();</script></body></html>
+post("start","sim loaded: "+document.title);})();</script><script>(function(){var d=document.getElementById("ovDone");if(d)d.onclick=function(){try{parent.postMessage({type:"labExit"},"*")}catch(e){}if(window===window.top)try{history.back()}catch(e){}};})();</script></body></html>

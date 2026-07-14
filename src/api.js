@@ -178,14 +178,13 @@ export function personalizePlan(form) {
     .map(([name, w]) => ({
       name,
       emoji: { Math:"🔢", Reading:"📖", Science:"🔬", "Social Studies":"🗺️", Coding:"💻", Arts:"🎨" }[name] || "📘",
-      tool: "neoschool Labs",
       mins: Math.max(20, Math.round((w / total) * dayMins / 5) * 5),
       focus: matchedWhy[name]
         ? `Prioritized because you mentioned "${matchedWhy[name]}" — ${/catch up|behind|struggl/.test(text) ? "we start below grade level and rebuild confidence fast." : /ahead|advanced/.test(text) ? "we extend above grade level to keep the challenge alive." : "woven through daily practice with our interactive labs."}`
         : "Steady foundation practice, adapted to pace.",
       labs: pickLabsForSubject(name === "Coding" ? "Math" : name, grade).slice(0, 3),
       emphasized: !!matchedWhy[name],
-    }));
+    })).map(s => ({ ...s, tool: [...new Set((s.labs || []).map(l => l.topic).filter(Boolean))].slice(0, 3).join(" · ") || s.name }));
   // custom areas we don't cover yet — honor them explicitly
   const covered = Object.values(SUBJ_KEYWORDS).flat();
   const custom = (form.goalsText || "").split(/[.,;\n]/).map(s => s.trim())
