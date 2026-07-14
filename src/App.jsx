@@ -3634,6 +3634,11 @@ function LabPlayer({ lab, userId, onBack }) {
       {/* Header */}
       <div style={{ background:"var(--nv)", padding:"11px 16px", display:"flex", alignItems:"center", gap:10, flexShrink:0 }}>
         <button onClick={onBack} style={{ background:"rgba(255,255,255,.18)", border:"none", cursor:"pointer", color:"#fff", minWidth:64, height:32, borderRadius:8, fontSize:12.5, fontWeight:700, fontFamily:"inherit", display:"flex", alignItems:"center", justifyContent:"center", gap:4 }}>← Exit</button>
+        {!showTutor && !failNudge && (
+          <button onClick={() => setShowTutor(true)} style={{ position:"fixed", right:14, bottom:16, zIndex:94, display:"flex", alignItems:"center", gap:7, background:"linear-gradient(135deg,#6366f1,#8b5cf6)", color:"#fff", border:"none", borderRadius:99, padding:"11px 16px", fontSize:12.5, fontWeight:800, fontFamily:"inherit", cursor:"pointer", boxShadow:"0 6px 20px rgba(99,102,241,.45)" }}>
+            🤖 Coach · {lab.topic || lab.title}
+          </button>
+        )}
         {failNudge && (
           <div style={{ position:"fixed", left:"50%", transform:"translateX(-50%)", bottom:18, zIndex:95, background:"#fff", borderRadius:14, boxShadow:"0 8px 30px rgba(0,0,0,.25)", padding:"11px 14px", maxWidth:420, width:"calc(100% - 32px)", display:"flex", alignItems:"center", gap:10 }}>
             <span style={{ fontSize:18 }}>💡</span>
