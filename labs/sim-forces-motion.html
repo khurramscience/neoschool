@@ -4,96 +4,149 @@
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
-html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#fef3c7,#fcd34d)}
+html,body{height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,#dbeafe,#93c5fd)}
 .wrap{display:flex;flex-direction:column;height:100%;padding:14px;max-width:600px;margin:0 auto}
 .topbar{display:flex;justify-content:space-between;align-items:center}
-.title{font-size:18px;font-weight:700;color:#b45309}
-.chip{background:#fff;border-radius:99px;padding:5px 13px;font-size:13px;font-weight:700;color:#b45309;box-shadow:0 2px 0 #fbbf24}
-.task{background:#fff;border:3px solid #fbbf24;border-radius:16px;box-shadow:0 4px 0 #fbbf24;padding:10px 14px;text-align:center;font-size:clamp(14px,4vw,17px);font-weight:700;color:#1a1f3a;margin:10px 0}
+.title{font-size:18px;font-weight:700;color:#1e40af}
+.chip{background:#fff;border-radius:99px;padding:5px 13px;font-size:13px;font-weight:700;color:#1e40af;box-shadow:0 2px 0 #60a5fa}
+.task{background:#fff;border:3px solid #60a5fa;border-radius:16px;box-shadow:0 4px 0 #60a5fa;padding:10px 14px;text-align:center;font-size:clamp(13px,3.8vw,16px);font-weight:700;color:#1a1f3a;margin:10px 0}
 .svgbox{flex:1;display:flex;align-items:center;justify-content:center;min-height:0}
-svg{max-width:100%;height:auto}
-.srow{display:flex;align-items:center;gap:10px;background:#fff;border-radius:14px;padding:8px 12px;box-shadow:0 3px 0 #fbbf24;margin-top:6px}
-.srow label{font-weight:700;color:#b45309;min-width:96px;font-size:13px}
-.srow input{flex:1;height:28px}
+svg{max-width:100%;max-height:100%}
+.controls{display:flex;flex-direction:column;gap:7px;margin-top:6px}
+.srow{display:flex;align-items:center;gap:10px;background:#fff;border-radius:14px;padding:8px 12px;box-shadow:0 3px 0 #60a5fa}
+.srow label{font-weight:700;color:#1e40af;min-width:92px;font-size:13px}
+.srow input{flex:1;accent-color:#1e40af;height:28px}
 .srow .val{min-width:52px;text-align:right;font-weight:700;font-size:13px}
-#force{accent-color:#dc2626}#mass{accent-color:#2563eb}
-.check{min-height:50px;width:100%;background:#b45309;color:#fff;border:none;border-radius:14px;font-family:'Quicksand',sans-serif;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2);margin-top:8px;touch-action:manipulation}
-.fb{text-align:center;font-size:13.5px;font-weight:700;min-height:20px;margin-top:6px;color:#b45309}
+.check{min-height:50px;width:100%;background:#1e40af;color:#fff;border:none;border-radius:14px;font-family:'Quicksand',sans-serif;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2);margin-top:8px;touch-action:manipulation}
+.check:disabled{opacity:.5}
+.fb{text-align:center;font-size:13px;font-weight:700;min-height:20px;margin-top:6px;color:#1e40af}
 .overlay{position:fixed;inset:0;background:rgba(255,255,255,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:50;text-align:center;padding:20px}
 .overlay.show{opacity:1;pointer-events:auto}
-.overlay h2{font-size:clamp(26px,7vw,36px);color:#b45309}
+.overlay h2{font-size:clamp(26px,7vw,36px);color:#1e40af}
 .overlay .sc{font-size:17px;font-weight:700;color:#374151}
-.overlay button{background:#b45309;color:#fff;border:none;border-radius:99px;padding:13px 32px;font-family:'Quicksand',sans-serif;font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2)}
+.overlay button{background:#1e40af;color:#fff;border:none;border-radius:99px;padding:13px 28px;font-family:'Quicksand',sans-serif;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2);margin:0 4px}
+.lvlbadge{text-align:center;font-size:11px;font-weight:800;color:#1e40af;letter-spacing:.06em;margin-bottom:2px}
 .confetti{position:fixed;top:-10px;width:10px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.6s linear forwards;z-index:70}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
 </style></head><body>
 <div class="wrap">
-  <div class="topbar"><div class="title">🛷 Forces & Motion</div><div style="display:flex;gap:6px"><div class="chip" id="score">0 pts</div><div class="chip" id="prog">1/5</div></div></div>
+  <div class="topbar"><div class="title">🛷 Forces & Motion</div><div style="display:flex;gap:6px"><div class="chip" id="score">0 pts</div><div class="chip" id="prog">Level 1/3</div></div></div>
+  <div class="lvlbadge" id="lvlname"></div>
   <div class="task" id="task"></div>
-  <div class="svgbox"><svg viewBox="0 0 400 200" id="scene"></svg></div>
-  <div class="srow"><label>💪 Force</label><input type="range" id="force" min="0" max="20" step="1" value="0"><span class="val" id="forcev">0 N</span></div>
-  <div class="srow"><label>📦 Mass</label><input type="range" id="mass" min="1" max="10" step="1" value="2"><span class="val" id="massv">2 kg</span></div>
-  <button class="check" id="check">Push! ▶</button>
-  <div class="fb" id="fb">Newton's 2nd law: acceleration = force ÷ mass (a = F/m).</div>
+  <div class="svgbox"><svg viewBox="0 0 400 220" id="scene"></svg></div>
+  <div class="controls" id="ctrls"></div>
+  <button class="check" id="check">Push! 💨</button>
+  <div class="fb" id="fb"></div>
 </div>
-<div class="overlay" id="ov"><h2 id="ovTitle"></h2><div class="sc" id="ovScore"></div><button id="ovNext">Play again ↻</button><button id="ovDone" style="background:#1a1f3a;color:#fff;border:none;border-radius:99px;padding:13px 32px;font-family:'Quicksand',sans-serif;font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.2)">Finish ✓</button></div>
+<div class="overlay" id="ov"><h2 id="ovTitle"></h2><div class="sc" id="ovScore"></div><div><button id="ovNext">Play again ↻</button><button id="ovDone" style="background:#1a1f3a">Finish ✓</button></div></div>
 <script>
 const GAME={id:"sim-forces-motion"};
-function gen(){const ch=[];const pairs=[];
- for(let F=0;F<=20;F++)for(let m=1;m<=10;m++){const a=F/m;if(Number.isInteger(a)&&a>=1&&a<=6)pairs.push({F,m,a});}
- const targets=[2,3,1,4,5];
- for(const tA of targets){const o=pairs.filter(p=>p.a===tA);ch.push({target:tA,text:"Give the crate an acceleration of exactly <b>"+tA+" m/s²</b>",sol:o[Math.floor(Math.random()*o.length)]});}
- return ch;}
-const CH=gen();
-let idx=0,score=0,tries=0,__perfects=0,anim=null;
-let AC=null;function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch{}}return AC;}
-function tone(f,t=.12,ty="sine",g=.15,w=0){const c=ac();if(!c)return;const o=c.createOscillator(),v=c.createGain();o.type=ty;o.frequency.value=f;v.gain.setValueAtTime(g,c.currentTime+w);v.gain.exponentialRampToValueAtTime(.001,c.currentTime+w+t);o.connect(v).connect(c.destination);o.start(c.currentTime+w);o.stop(c.currentTime+w+t+.02);}
-const CC=["#b45309","#f59e0b","#ec4899","#22c55e","#3b82f6"];
+let idx=0,score=0,tries=0,__perfects=0,animId=null,busy=false;
+let AC=null;function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}return AC;}
+function tone(f,t,ty,g){t=t||.12;ty=ty||"sine";g=g||.15;const c=ac();if(!c)return;const o=c.createOscillator(),v=c.createGain();o.type=ty;o.frequency.value=f;v.gain.setValueAtTime(g,c.currentTime);v.gain.exponentialRampToValueAtTime(.001,c.currentTime+t);o.connect(v).connect(c.destination);o.start();o.stop(c.currentTime+t+.02);}
+const CC=["#1e40af","#f59e0b","#ec4899","#22c55e","#3b82f6"];
 function confetti(n){for(let i=0;i<n;i++){const d=document.createElement("div");d.className="confetti";d.style.left=Math.random()*100+"vw";d.style.background=CC[i%5];d.style.animationDelay=Math.random()*.4+"s";document.body.appendChild(d);setTimeout(()=>d.remove(),2300);}}
-function report(complete){try{parent.postMessage({type:"labProgress",lab:GAME.id,score,complete},"*");}catch{}}
-function draw(cx,F,m){
-  const sz=20+m*5;
-  let s='<rect x="0" y="150" width="400" height="50" fill="#d6b370"/>';
-  for(let i=0;i<12;i++)s+='<line x1="'+(i*36-((cx*0.3)%36))+'" y1="150" x2="'+(i*36-((cx*0.3)%36)+18)+'" y2="150" stroke="#a1824a" stroke-width="3"/>';
-  s+='<rect x="'+cx+'" y="'+(150-sz)+'" width="'+sz+'" height="'+sz+'" rx="5" fill="#92400e" stroke="#78350f" stroke-width="3"/><text x="'+(cx+sz/2)+'" y="'+(150-sz/2+5)+'" font-size="12" text-anchor="middle" fill="#fff" font-weight="bold">'+m+'kg</text>';
-  if(F>0){s+='<line x1="'+(cx-F*4)+'" y1="'+(150-sz/2)+'" x2="'+cx+'" y2="'+(150-sz/2)+'" stroke="#dc2626" stroke-width="5"/><polygon points="'+cx+','+(150-sz/2)+' '+(cx-9)+','+(150-sz/2-6)+' '+(cx-9)+','+(150-sz/2+6)+'" fill="#dc2626"/><text x="'+(cx-F*2)+'" y="'+(150-sz/2-10)+'" font-size="11" text-anchor="middle" fill="#dc2626" font-weight="bold">'+F+'N</text>';}
-  document.getElementById("scene").innerHTML=s;
-}
-document.getElementById("force").oninput=()=>{document.getElementById("forcev").textContent=document.getElementById("force").value+" N";draw(40,+document.getElementById("force").value,+document.getElementById("mass").value);};
-document.getElementById("mass").oninput=()=>{document.getElementById("massv").textContent=document.getElementById("mass").value+" kg";draw(40,+document.getElementById("force").value,+document.getElementById("mass").value);};
-document.getElementById("check").onclick=()=>{
-  const c=CH[idx];tries++;
-  const F=+document.getElementById("force").value,m=+document.getElementById("mass").value;
-  const a=F/m;
-  if(anim)clearInterval(anim);
-  let cx=40,v=0;tone(300,.15,"square",.08);
-  anim=setInterval(()=>{v+=a*0.06;cx+=v;draw(cx,F,m);if(cx>330){clearInterval(anim);settle();}},40);
-  function settle(){
-    if(Math.abs(a-c.target)<0.01){const pts=Math.max(15,45-(tries-1)*10);score+=pts;if(tries===1)__perfects++;
-      tone(660,.12);tone(880,.14,"sine",.15,.1);confetti(35);
-      document.getElementById("fb").textContent="🚀 "+F+"N ÷ "+m+"kg = "+c.target+" m/s²!  (+"+pts+" pts)";
-      document.getElementById("score").textContent=score+" pts";setTimeout(next,1300);
-    } else { tone(200,.2,"triangle",.1); document.getElementById("fb").textContent=F+"N ÷ "+m+"kg = "+a.toFixed(2)+" m/s² — "+(a>c.target?"too fast. Less force or more mass.":a<c.target?"too slow. More force or less mass.":""); draw(40,F,m); }
-  }
-};
-function load(){tries=0;document.getElementById("force").value=0;document.getElementById("mass").value=2;
-  document.getElementById("forcev").textContent="0 N";document.getElementById("massv").textContent="2 kg";
-  document.getElementById("task").innerHTML=CH[idx].text;
-  document.getElementById("fb").textContent="Newton's 2nd law: acceleration = force ÷ mass (a = F/m).";
-  document.getElementById("prog").textContent=(idx+1)+"/5";draw(40,0,2);}
+function report(complete){try{parent.postMessage({type:"labProgress",lab:GAME.id,score,complete},"*");}catch(e){}}
+function win(pts,msg){score+=pts;if(tries===1)__perfects++;tone(660,.12);tone(880,.14);confetti(30);
+ document.getElementById("fb").textContent=msg+"  (+"+pts+" pts)";document.getElementById("score").textContent=score+" pts";setTimeout(next,1500);}
+function lose(msg){tone(200,.2,"triangle",.1);document.getElementById("fb").textContent=msg;busy=false;document.getElementById("check").disabled=false;}
+const S=id=>document.getElementById(id);
+const slider=(id,lbl,min,max,val,unit)=>'<div class="srow"><label>'+lbl+'</label><input type="range" id="'+id+'" min="'+min+'" max="'+max+'" step="1" value="'+val+'"><span class="val" id="'+id+'v">'+val+' '+unit+'</span></div>';
+function wire(id,unit){S(id).oninput=()=>{S(id+"v").textContent=S(id).value+" "+unit;LV[idx].draw();};}
+let flakes=Array.from({length:26},()=>({x:Math.random()*400,y:Math.random()*220,s:0.4+Math.random()*0.9}));
+function snow(){flakes.forEach(f=>{f.y+=f.s;f.x+=Math.sin(f.y/22)*0.35;if(f.y>220){f.y=-4;f.x=Math.random()*400;}});
+ return flakes.map(f=>'<circle cx="'+f.x.toFixed(1)+'" cy="'+f.y.toFixed(1)+'" r="'+(f.s*2).toFixed(1)+'" fill="#fff" opacity="0.85"/>').join("");}
+function sled(x,y,m){const s=1+m*0.06;
+ return '<g transform="translate('+x+','+y+') scale('+s+')"><path d="M-20,10 Q-26,10 -26,4 L-26,2 L22,2 L22,10 Z" fill="#b45309"/><rect x="-18" y="-8" width="30" height="12" rx="3" fill="#dc2626"/><circle cx="2" cy="-14" r="7" fill="#fcd9b6"/><rect x="-4" y="-9" width="12" height="7" rx="2" fill="#2563eb"/><text x="-2" y="24" font-size="9" text-anchor="middle" fill="#1e40af" font-weight="bold">'+m+'kg</text></g>';}
+function slideAnim(ctx,from,to,done){busy=true;S("check").disabled=true;let t0=null;const dur=900+Math.min(900,Math.abs(to-from)*2);
+ const step=(ts)=>{if(!t0)t0=ts;const k=Math.min(1,(ts-t0)/dur);const e=1-Math.pow(1-k,3);
+  ctx.draw(from+(to-from)*e);
+  if(k<1)animId=requestAnimationFrame(step);else{busy=false;S("check").disabled=false;done();}};
+ animId=requestAnimationFrame(step);}
+
+const LV=[
+ {name:"LEVEL 1 · ❄️ SLEDDING DAY",fr:0.5,zone:[290,340],
+  text:"Your friend waits on the sled. Push with just enough force to <b>stop inside the flag zone</b> — snow slows you down!",
+  init(){S("ctrls").innerHTML=slider("F","💪 Push force",4,20,10,"N")+slider("m","🧒 Rider mass",2,8,4,"kg");wire("F","N");wire("m","kg");this.draw();},
+  draw(px){const m=+S("m").value,F=+S("F").value;px=px===undefined?50:px;
+   let s='<rect x="0" y="0" width="400" height="220" fill="#bfdbfe"/><rect x="0" y="170" width="400" height="50" fill="#f8fafc"/>';
+   s+='<rect x="'+this.zone[0]+'" y="150" width="'+(this.zone[1]-this.zone[0])+'" height="20" fill="#86efac" opacity="0.7" rx="4"/><line x1="'+this.zone[0]+'" y1="120" x2="'+this.zone[0]+'" y2="170" stroke="#16a34a" stroke-width="3"/><polygon points="'+this.zone[0]+',120 '+(this.zone[0]+22)+',127 '+this.zone[0]+',134" fill="#dc2626"/>';
+   if(px<70&&!busy)s+='<line x1="'+(px-F*2.4-14)+'" y1="152" x2="'+(px-14)+'" y2="152" stroke="#dc2626" stroke-width="5" stroke-linecap="round"/><polygon points="'+(px-10)+',152 '+(px-20)+',146 '+(px-20)+',158" fill="#dc2626"/><text x="'+(px-F*1.2-16)+'" y="142" font-size="11" fill="#dc2626" font-weight="bold">'+F+'N</text>';
+   s+=sled(px,158,m)+snow();
+   S("scene").innerHTML=s;},
+  run(){const m=+S("m").value,F=+S("F").value;
+   const v0=F/m*3, dist=(v0*v0)/(2*this.fr)*9, end=50+dist;
+   slideAnim(this,50,Math.min(end,430),()=>{ if(end>=this.zone[0]&&end<=this.zone[1])win(Math.max(20,50-(tries-1)*12),"🛷 Stopped right in the zone!");
+    else lose(end<this.zone[0]?"Stopped at "+Math.round(end)+"m — too gentle! More force or a lighter rider (a = F/m).":"Blew past the zone! Less force or more mass."); });},
+  solve(){for(let F=4;F<=20;F++)for(let m=2;m<=8;m++){const v0=F/m*3;const end=50+(v0*v0)/(2*this.fr)*9;
+   if(end>=this.zone[0]&&end<=this.zone[1]){S("F").value=F;S("m").value=m;tries++;this.run();return;}}}},
+
+ {name:"LEVEL 2 · ⛸️ ICE RINK",fr:0.12,zone:[270,340],
+  text:"Same sled — but now on <b>slippery ice</b>! Almost no friction, so a tiny push goes a LONG way. Land in the zone.",
+  init(){S("ctrls").innerHTML=slider("F","💪 Push force",1,10,5,"N")+slider("m","🧒 Rider mass",2,8,4,"kg");wire("F","N");wire("m","kg");this.draw();},
+  draw(px){const m=+S("m").value,F=+S("F").value;px=px===undefined?40:px;
+   let s='<rect x="0" y="0" width="400" height="220" fill="#a5f3fc"/><rect x="0" y="170" width="400" height="50" fill="#e0f2fe"/><line x1="0" y1="170" x2="400" y2="170" stroke="#fff" stroke-width="2"/>';
+   for(let i=0;i<5;i++)s+='<line x1="'+(i*90)+'" y1="'+(180+i%3*10)+'" x2="'+(i*90+40)+'" y2="'+(178+i%3*10)+'" stroke="#bae6fd" stroke-width="2"/>';
+   s+='<rect x="'+this.zone[0]+'" y="150" width="'+(this.zone[1]-this.zone[0])+'" height="20" fill="#86efac" opacity="0.7" rx="4"/><line x1="'+this.zone[0]+'" y1="120" x2="'+this.zone[0]+'" y2="170" stroke="#16a34a" stroke-width="3"/><polygon points="'+this.zone[0]+',120 '+(this.zone[0]+22)+',127 '+this.zone[0]+',134" fill="#dc2626"/>';
+   if(px<60&&!busy)s+='<line x1="'+(px-F*3.5-14)+'" y1="152" x2="'+(px-14)+'" y2="152" stroke="#dc2626" stroke-width="5" stroke-linecap="round"/><polygon points="'+(px-10)+',152 '+(px-20)+',146 '+(px-20)+',158" fill="#dc2626"/>';
+   s+=sled(px,158,m)+snow();
+   S("scene").innerHTML=s;},
+  run(){const m=+S("m").value,F=+S("F").value;const v0=F/m*3,dist=(v0*v0)/(2*this.fr)*9,end=40+dist;
+   slideAnim(this,40,Math.min(end,430),()=>{ if(end>430)lose("Whoosh — right off the rink! On ice, friction barely helps you stop.");
+    else if(end>=this.zone[0]&&end<=this.zone[1])win(Math.max(20,50-(tries-1)*12),"⛸️ Perfect glide!");
+    else lose(end<this.zone[0]?"Stopped at "+Math.round(end)+" — even ice needs a bit more push here.":"Overshot — on ice, less is more!"); });},
+  solve(){for(let F=1;F<=10;F++)for(let m=2;m<=8;m++){const v0=F/m*3;const end=40+(v0*v0)/(2*this.fr)*9;
+   if(end>=this.zone[0]&&end<=this.zone[1]){S("F").value=F;S("m").value=m;tries++;this.run();return;}}}},
+
+ {name:"LEVEL 3 · 🪢 TUG-OF-WAR",opp:120,
+  text:"The other team pulls with <b>120 N</b>. Balanced forces = nobody moves. Win with the <b>smallest</b> team that still out-pulls them — each kid adds 30 N.",
+  init(){S("ctrls").innerHTML=slider("kids","🧒 Kids pulling",1,6,3,"kids");wire("kids","kids");S("check").textContent="PULL! 🪢";this.draw();},
+  draw(shift){shift=shift||0;const kids=+S("kids").value,F=kids*30;
+   let s='<rect x="0" y="0" width="400" height="220" fill="#dcfce7"/><rect x="0" y="165" width="400" height="55" fill="#86efac"/>';
+   s+='<line x1="195" y1="60" x2="195" y2="165" stroke="#dc2626" stroke-width="2" stroke-dasharray="5 4"/><text x="195" y="52" font-size="10" text-anchor="middle" fill="#dc2626" font-weight="bold">center line</text>';
+   s+='<line x1="'+(60+shift)+'" y1="140" x2="'+(340+shift)+'" y2="140" stroke="#92400e" stroke-width="5"/><circle cx="'+(200+shift)+'" cy="140" r="7" fill="#dc2626"/>';
+   for(let i=0;i<kids;i++)s+='<g transform="translate('+(50+shift-i*24)+',132)"><circle cx="0" cy="-10" r="8" fill="#fcd9b6"/><rect x="-6" y="-3" width="12" height="18" rx="4" fill="#2563eb"/></g>';
+   for(let i=0;i<4;i++)s+='<g transform="translate('+(350+shift+i*24)+',132)"><circle cx="0" cy="-10" r="8" fill="#fcd9b6"/><rect x="-6" y="-3" width="12" height="18" rx="4" fill="#dc2626"/></g>';
+   s+='<text x="90" y="80" font-size="13" fill="#1e40af" font-weight="bold">You: '+F+' N →</text><text x="250" y="80" font-size="13" fill="#dc2626" font-weight="bold">← Them: '+this.opp+' N</text>';
+   s+='<text x="200" y="105" font-size="12" text-anchor="middle" fill="#374151" font-weight="bold">Net force: '+(F-this.opp)+' N '+(F===this.opp?"— balanced!":(F>this.opp?"→":"←"))+'</text>';
+   S("scene").innerHTML=s;},
+  run(){const kids=+S("kids").value,F=kids*30;const net=F-this.opp;const self=this;
+   busy=true;S("check").disabled=true;let t0=null;
+   const target=net===0?0:(net>0?-70:70);
+   const step=(ts)=>{if(!t0)t0=ts;const k=Math.min(1,(ts-t0)/1100);const e=net===0?Math.sin(k*Math.PI*4)*4:target*(1-Math.pow(1-k,3));
+    self.draw(e);
+    if(k<1)animId=requestAnimationFrame(step);
+    else{busy=false;S("check").disabled=false;
+     if(net>0&&net<=60)win(Math.max(20,50-(tries-1)*12),"🪢 Unbalanced force → the rope moves your way. WIN!");
+     else if(net===0)lose("120 N vs 120 N — perfectly balanced, nobody moves. Add a kid!");
+     else if(net<0)lose("They out-pull you by "+(-net)+" N — the rope slides their way. More kids!");
+     else lose("You won, but "+kids+" kids is overkill — win with the SMALLEST winning team!");}};
+   animId=requestAnimationFrame(step);},
+  solve(){S("kids").value=5;S("kidsv").textContent="5 kids";tries++;this.run();}},
+];
+function check(){if(busy)return;tries++;LV[idx].run();}
+S("check").onclick=check;
+function load(){tries=0;if(animId)cancelAnimationFrame(animId);busy=false;S("check").disabled=false;S("check").textContent="Push! 💨";
+ S("lvlname").textContent=LV[idx].name;S("task").innerHTML=LV[idx].text;
+ S("fb").textContent="Newton's law: a = F ÷ m — and friction fights every slide.";
+ S("prog").textContent="Level "+(idx+1)+"/3";LV[idx].init();}
 function next(){idx++;
-  if(idx>=CH.length){report(true);confetti(60);
-    document.getElementById("ovTitle").textContent="Physics force! 🏆";
-    var __st=__perfects>=5?5:__perfects>=4?4:__perfects>=3?3:__perfects>=2?2:1;document.getElementById("ovScore").textContent="⭐".repeat(__st)+"☆".repeat(5-__st)+"   "+(__perfects===5?"PERFECT RUN! ⚡  ":"")+score+" pts · F = ma mastered";
-    document.getElementById("ovNext").onclick=()=>{idx=0;score=0;__perfects=0;load();document.getElementById("ov").classList.remove("show");};
-    document.getElementById("ov").classList.add("show");return;}
-  load();}
-window.__qa={solve:()=>{const c=CH[idx];document.getElementById("force").value=c.sol.F;document.getElementById("mass").value=c.sol.m;
-  document.getElementById("forcev").textContent=c.sol.F+" N";document.getElementById("massv").textContent=c.sol.m+" kg";document.getElementById("check").click();}};
+ if(idx>=LV.length){report(true);confetti(60);
+  S("ovTitle").textContent="Force master! 🏆";
+  var st=__perfects>=3?5:__perfects>=2?4:__perfects>=1?3:2;
+  S("ovScore").textContent="⭐".repeat(st)+"☆".repeat(5-st)+"   "+(__perfects===3?"PERFECT RUN! ⚡  ":"")+score+" pts · snow, ice & tug-of-war conquered";
+  S("ovNext").onclick=()=>{idx=0;score=0;__perfects=0;load();S("ov").classList.remove("show");};
+  S("ovDone").onclick=()=>{try{parent.postMessage({type:"labExit"},"*")}catch(e){}if(window===window.top)try{history.back()}catch(e){}};
+  S("ov").classList.add("show");return;}
+ load();}
+window.__qa={solve:()=>LV[idx].solve()};
 load();
-</script><button id="neoExit" aria-label="Back" style="position:fixed;top:10px;right:10px;z-index:90;width:38px;height:38px;border:none;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 2px 8px rgba(0,0,0,.18);font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;color:#334155">✕</button><script>(function(){var b=document.getElementById("neoExit");b.onclick=function(){try{if(window.parent!==window){parent.postMessage({type:"labExit"},"*");return}}catch(e){}try{history.back()}catch(e){}};})();</script><script>(function(){function post(kind,text){try{parent.postMessage({type:"labEvent",kind:kind,text:String(text).slice(0,140),ts:Date.now()},"*")}catch(e){}}
+(function amb(){if(idx<2&&!busy&&!document.getElementById("ov").classList.contains("show"))try{LV[idx].draw();}catch(e){}setTimeout(amb,120);})();
+</script>
+<button id="neoExit" aria-label="Back" style="position:fixed;top:10px;right:10px;z-index:90;width:38px;height:38px;border:none;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 2px 8px rgba(0,0,0,.18);font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;color:#334155">✕</button><script>(function(){var b=document.getElementById("neoExit");b.onclick=function(){try{if(window.parent!==window){parent.postMessage({type:"labExit"},"*");return}}catch(e){}try{history.back()}catch(e){}};})();</script>
+<script>(function(){function post(kind,text){try{parent.postMessage({type:"labEvent",kind:kind,text:String(text).slice(0,140),ts:Date.now()},"*")}catch(e){}}
 function watch(id,kind){var el=document.getElementById(id);if(!el)return;var last=el.textContent;new MutationObserver(function(){var t=el.textContent;if(t&&t!==last){last=t;post(kind,t)}}).observe(el,{childList:true,characterData:true,subtree:true})}
-if(document.getElementById("fb"))watch("fb","feedback");if(document.getElementById("task"))watch("task","challenge");if(document.getElementById("score"))watch("score","score");
+watch("fb","feedback");watch("task","challenge");watch("score","score");
 document.addEventListener("click",function(e){var b=e.target.closest("button");if(b&&b.id!=="neoExit")post("action","clicked: "+(b.textContent||b.id).trim().slice(0,60))},true);
-var inputs=document.querySelectorAll("input[type=range]");inputs.forEach(function(r){r.addEventListener("change",function(){post("adjust",(r.id||"slider")+" → "+r.value)})});
-post("start","sim loaded: "+document.title);})();</script><script>(function(){var d=document.getElementById("ovDone");if(d)d.onclick=function(){try{parent.postMessage({type:"labExit"},"*")}catch(e){}if(window===window.top)try{history.back()}catch(e){}};})();</script></body></html>
+post("start","sim loaded: "+document.title);})();</script>
+</body></html>
