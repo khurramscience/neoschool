@@ -136,7 +136,7 @@ function next(){idx++;
   var st=__perfects>=3?5:__perfects>=2?4:__perfects>=1?3:2;
   S("ovScore").textContent="⭐".repeat(st)+"☆".repeat(5-st)+"   "+(__perfects===3?"PERFECT RUN! ⚡  ":"")+score+" pts · snow, ice & tug-of-war conquered";
   S("ovNext").onclick=()=>{idx=0;score=0;__perfects=0;load();S("ov").classList.remove("show");};
-  S("ovDone").onclick=()=>{try{parent.postMessage({type:"labExit"},"*")}catch(e){}if(window===window.top)try{history.back()}catch(e){}};
+  S("ovDone").onclick=()=>{try{parent.postMessage({type:"labExit"},"*")}catch(e){}if(window===window.top)if(history.length>1){try{history.back()}catch(e){}setTimeout(function(){location.href="/"},400)}else{location.href="/"}};
   S("ov").classList.add("show");return;}
  load();}
 window.__qa={solve:()=>LV[idx].solve()};
