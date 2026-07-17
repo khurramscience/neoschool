@@ -123,7 +123,7 @@ function PaymentModal({ userId, onClose }) {
 }
 
 // ── MARKETING LANDING ─────────────────────────────────────────────────────────
-function Marketing({ onStart }) {
+function Marketing({ onStart, user, onDashboard }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [heroLoaded, setHeroLoaded] = useState(false);
@@ -135,10 +135,15 @@ function Marketing({ onStart }) {
     return () => clearTimeout(t);
   }, []);
 
+  // Deep links: neoschool.me/#campuses etc. scroll to the section on load
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 100);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    const id = (window.location.hash || "").replace("#", "");
+    if (!id) return;
+    const t = setTimeout(() => {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 200);
+    return () => clearTimeout(t);
   }, []);
 
   const heroFade = (delay) => ({
@@ -151,10 +156,9 @@ function Marketing({ onStart }) {
   const scrollTo = (id) => {
     setMenuOpen(false);
     const el = document.getElementById(id);
-    if (el) {
-      const y = el.getBoundingClientRect().top + window.scrollY - 72;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
+    // The page scrolls inside .lovable-root (html/body are overflow:hidden),
+    // so window.scrollTo is a no-op — scrollIntoView scrolls whichever ancestor scrolls.
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const bg = "hsl(34 33% 96%)";
@@ -169,7 +173,7 @@ function Marketing({ onStart }) {
   const borderSubtle = "rgba(42,38,34,.06)";
 
   return (
-    <div className="lovable-root" style={{
+    <div className="lovable-root" onScroll={e => setScrolled(e.currentTarget.scrollTop > 100)} style={{
       overflowY:"auto", height:"100%", width:"100%",
       background: bg, color: textPrimary,
       fontFamily:"'Source Serif 4', Georgia, serif",
@@ -212,8 +216,9 @@ function Marketing({ onStart }) {
                 {item.label}
               </button>
             ))}
-            {/* Sign in — styled as outlined pill button so it's clearly clickable */}
-            <button onClick={() => onStart("parent")} className="text-nav" style={{
+            {/* Sign in — styled as outlined pill button so it's clearly clickable.
+                When already signed in, becomes a way back into the portal. */}
+            <button onClick={() => (user && onDashboard) ? onDashboard() : onStart("parent")} className="text-nav" style={{
               padding:"8px 18px", borderRadius:10,
               background: scrolled ? "transparent" : "rgba(255,255,255,.1)",
               border: `1.5px solid ${scrolled ? iris : "rgba(255,255,255,.55)"}`,
@@ -223,7 +228,7 @@ function Marketing({ onStart }) {
             }}
               onMouseEnter={e => { if (scrolled) { e.currentTarget.style.background = iris; e.currentTarget.style.color = "#fff"; } else { e.currentTarget.style.background = "rgba(255,255,255,.22)"; e.currentTarget.style.borderColor = "#fff"; }}}
               onMouseLeave={e => { if (scrolled) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = iris; } else { e.currentTarget.style.background = "rgba(255,255,255,.1)"; e.currentTarget.style.borderColor = "rgba(255,255,255,.55)"; }}}>
-              Sign in
+              {user ? "My dashboard" : "Sign in"}
             </button>
             <a href="/missoula.html" className="btn-iris" style={{ padding:"10px 22px" }}>
               Apply →
@@ -263,7 +268,7 @@ function Marketing({ onStart }) {
           { label:"Afternoons",   action:() => scrollTo("afternoons") },
           { label:"Who we are",   action:() => scrollTo("who-we-are") },
           { label:"Apply",        action:() => { setMenuOpen(false); window.location.href = "/missoula.html"; } },
-          { label:"Sign in",      action:() => { setMenuOpen(false); onStart("parent"); } },
+          { label: user ? "My dashboard" : "Sign in", action:() => { setMenuOpen(false); (user && onDashboard) ? onDashboard() : onStart("parent"); } },
         ].map(item => (
           <button key={item.label} onClick={item.action} className="text-nav" style={{
             fontSize:20, color: textSecondary,
@@ -7125,15 +7130,18 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    // Marketing hash deep links (neoschool.me/#campuses etc.) win over session restore —
+    // signed-in users following a link to a landing-page section should see the landing page.
+    const marketingHash = ["#approach", "#afternoons", "#who-we-are", "#campuses"].includes(window.location.hash);
     const saved = localStorage.getItem("neo_current");
-    if (saved) { const u = JSON.parse(saved); setUser(u); setRole(u.role); setScreen("app"); }
+    if (saved) { const u = JSON.parse(saved); setUser(u); setRole(u.role); if (!marketingHash) setScreen("app"); }
     // Restore parent data + screen position
     const pd = localStorage.getItem("neo_parent_data");
     if (pd) {
       try { setParentData(JSON.parse(pd)); } catch {}
     }
     const lastScreen = localStorage.getItem("neo_last_screen");
-    if (lastScreen && saved) {
+    if (lastScreen && saved && !marketingHash) {
       const u = JSON.parse(saved);
       setScreen(u.role === "student" ? "app" : lastScreen); // students have exactly one home
     }
@@ -7208,7 +7216,7 @@ export default function App() {
       )}
       {screen === "app" && user && <ConnectAccountNudge userId={user.id}/>}
       <div style={{ flex: 1, overflow: "hidden" }}>
-        {screen === "marketing"  && <Marketing onStart={handleRole} />}
+        {screen === "marketing"  && <Marketing onStart={handleRole} user={user} onDashboard={() => setScreen("app")} />}
         {screen === "auth"       && <Auth role={role} onAuth={handleAuth} />}
         {screen === "onboard"    && <ParentOnboarding user={user} onDone={handleOnboardDone} />}
         {screen === "apply"      && <ApplicationScreen user={user} data={parentData} onDone={handleApplied} />}

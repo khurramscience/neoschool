@@ -177,6 +177,8 @@ body::after{
 
 /* Smooth scroll site-wide */
 html{scroll-behavior:smooth}
+/* Landing sections scrolled to via the fixed 72px nav — keep headings visible */
+#approach,#afternoons,#who-we-are,#campuses{scroll-margin-top:84px}
 .fu{animation:fu .65s cubic-bezier(.22,.68,0,1.1) both}
 .fi{animation:fi .4s ease both}
 .pi{animation:pi .45s cubic-bezier(.22,.68,0,1.2) both}
