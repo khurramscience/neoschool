@@ -205,20 +205,19 @@ export async function genCurriculum(form) {
 
 Return ONLY this JSON (no extra text):
 {
-"tagline":"inspiring 10-word sentence",
-"morning":"2-hour morning block description (2 sentences)",
-"afternoon":"afternoon enrichment (2 sentences)",
-"subjects":[{"name":"Subject","emoji":"emoji","tool":"tool name","focus":"specific focus (1 sentence)","mins":60}],
+"summary":"one plain, concrete sentence describing this plan — grounded ONLY in the parent's stated goals, in normal language, no marketing voice",
+"morning":"2-hour morning academic block description (2 short sentences, concrete)",
+"afternoon":"afternoon enrichment (2 short sentences, concrete)",
+"subjects":[{"name":"Subject","emoji":"emoji","tool":"tool name","focus":"specific focus for ${grade} (1 sentence)","mins":150}],
 "workshops":[{"name":"Workshop","emoji":"emoji","cadence":"1x/week","desc":"1 sentence"}],
-"uniqueGenius":{"title":"3-5 word phrase highlighting ${name}'s specific strength or genius","description":"1-2 sentence specific observation about what makes ${name} unique"},
-"persona":{"learningStyle":"how ${name} learns best","strengths":"observed strengths","interests":"what excites them","growthEdges":"reframed as opportunities, not weaknesses","communicationStyle":"how they engage"},
-"coachNote":"warm coach note (2 sentences)",
-"nextStep":"one specific action"
+"nextStep":"one specific action the parent takes next"
 }
 
-Include 5 subjects and 4 workshops (Life skills: cooking, gardening, communication, financial literacy, entrepreneurship, emotional intelligence, survival skills).
-Use ONLY neoschool Labs — our in-house library of 285+ interactive games and simulations. Never reference external education brands or products.
-For "uniqueGenius" — be SPECIFIC to ${name}'s grade and goals, not generic. Frame as their unique super-power.`, 1200);
+Rules:
+- Include 5 subjects. "mins" is minutes PER WEEK; the five must sum to 600 (the 2-hour morning block × 5 days). Weight math and reading heaviest for the grade.
+- Include 4 workshops (Life skills: cooking, gardening, communication, financial literacy, entrepreneurship, emotional intelligence, survival skills).
+- NEVER invent observations, traits, strengths, or a personality for ${name} — you have not met this child. Everything must follow from the grade and the parent's stated goals only.
+- Use ONLY neoschool Labs — our in-house library of interactive games and simulations. Never reference external education brands or products.`, 1200);
 
     // After getting the AI response, enrich each subject with specific labs from our catalog
     if (c.subjects) {
@@ -228,9 +227,9 @@ For "uniqueGenius" — be SPECIFIC to ${name}'s grade and goals, not generic. Fr
   } catch (e) {
     console.warn("genCurriculum used fallback:", e.message);
     return {
-      tagline: `Built from your words: a ${grade} plan for ${name}${form.goalsText ? " — \"" + form.goalsText.slice(0,70) + (form.goalsText.length>70?"…":"") + "\"" : ""}`,
-      morning: `${name} starts with a focused 2-hour academic block covering math and reading using AI-powered tools that adapt to their pace.`,
-      afternoon: "Afternoons are for creative projects, outdoor exploration, and real-world skills that AI can never replace.",
+      summary: `A ${grade} weekly plan for ${name}${form.goalsText ? `, built around your goals: "${form.goalsText.slice(0,70)}${form.goalsText.length>70?"…":""}"` : ", weighted toward math and reading with daily science and social studies"}.`,
+      morning: `${name} starts each day with a focused 2-hour academic block covering math and reading, using interactive labs that adapt to their pace.`,
+      afternoon: "Afternoons are for creative projects, outdoor exploration, and real-world skills — workshops, building, and unstructured time.",
       subjects: personalizePlan(form).subjects,
       customAreas: personalizePlan(form).custom,
       workshops: [
@@ -239,19 +238,7 @@ For "uniqueGenius" — be SPECIFIC to ${name}'s grade and goals, not generic. Fr
         { name:"Entrepreneurship",       emoji:"💡", cadence:"1x/week", desc:"Coming up with ideas, designing simple businesses, pitching to peers." },
         { name:"Outdoor exploration",    emoji:"🌳", cadence:"daily",   desc:"Free unstructured outside time — nature scavenger hunts, fort-building, observation." },
       ],
-      uniqueGenius: {
-        title: "Pattern-spotter and connector",
-        description: `${name} notices connections others miss — across stories, numbers, and the natural world. We'll cultivate this strength by pairing math-reading-science weekly.`,
-      },
-      persona: {
-        learningStyle: "Visual + kinesthetic — learns by seeing and doing",
-        strengths: "Curiosity, persistence, asks unusual questions",
-        interests: "Stories, building things, asking 'why'",
-        growthEdges: "Practicing patience with multi-step problems (opportunity, not weakness)",
-        communicationStyle: "Best when given choice and time to think",
-      },
-      coachNote: `${name} sounds like a curious learner. We'll meet them exactly where they are. Expect visible growth within the first two weeks.`,
-      nextStep: "Schedule a 15-minute intro call with your Guide to discuss learning style and specific goals.",
+      nextStep: "Schedule a 15-minute intro call with your Guide to talk through goals and finalize the plan.",
     };
   }
 }

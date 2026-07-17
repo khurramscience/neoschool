@@ -82,7 +82,7 @@ function next(){idx++;
     var st=__perfects>=5?5:__perfects>=4?4:__perfects>=3?3:__perfects>=2?2:1;
     document.getElementById("ovScore").textContent="⭐".repeat(st)+"☆".repeat(5-st)+"   "+(__perfects===5?"PERFECT RUN! ⚡  ":"")+score+" pts · why things float — mastered";
     document.getElementById("ovNext").onclick=()=>{idx=0;score=0;__perfects=0;load();document.getElementById("ov").classList.remove("show");};
-    document.getElementById("ovDone").onclick=()=>{try{parent.postMessage({type:"labExit"},"*")}catch(e){}if(window===window.top)try{history.back()}catch(e){}};
+    document.getElementById("ovDone").onclick=()=>{try{parent.postMessage({type:"labExit"},"*")}catch(e){}if(window===window.top)if(history.length>1){try{history.back()}catch(e){}setTimeout(function(){location.href="/"},400)}else{location.href="/"}};
     document.getElementById("ov").classList.add("show");return;}
   load();}
 load();

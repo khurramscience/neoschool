@@ -4,7 +4,7 @@ import { resolveTool } from "./toolResolver.js";
 import { claude, genJSON, genCurriculum, genMultiCurriculum, genBriefing, genParentComm } from "./api.js";
 import { getMemory, saveSession, saveTutorFeedback, buildRecommendations, buildCrossContext } from "./memory.js";
 import { getCredits, useCredits, addCredits, PLANS, COSTS, FREE_DEMO_CREDITS } from "./credits.js";
-import { supabase, supabaseEnabled, supabaseReady } from "./supabase.js";
+import { supabase, supabaseEnabled, supabaseReady, restSignIn, restSignUp, adoptSession } from "./supabase.js";
 import { loadTaxonomy, labsForTopic, coveredTopicIds, masteredTopics, prereqPath, suggestNext, ageLabel } from "./learningGraph.js";
 import { LAB_TOPIC } from "./labTopicMap.js";
 import { getTutorConfig, saveTutorConfig } from "./tutorConfig.js";
@@ -2094,48 +2094,54 @@ function Auth({ role, onAuth }) {
     if (!emailOk) { setErr("Enter a valid email address."); return; }
     if (mode === "signup" && pwIssues.length) { setErr("Please fix your password first."); return; }
     setBusy(true);
-    const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), ms))]);
     try {
-      if (supabaseEnabled() && supabase) {
-        const sb = supabase;
+      if (supabaseEnabled()) {
         if (mode === "signup") {
-          let timedOut = false;
-          const res = await withTimeout(sb.auth.signUp({
-            email: form.email, password: form.password,
-            options: { emailRedirectTo: window.location.origin, data: { name: form.name, role } },
-          }), 6000).catch(e => { if (/timeout/i.test(e?.message)) { timedOut = true; return null; } throw e; });
-          if (timedOut) { finishLocal(); return; } // account request sent; let them in now, verify later
-          const { data, error } = res || {};
-          if (error) {
-            if (/already registered|already exists|already been/i.test(error.message||"")) { setErr("That email already has an account — switch to Sign in."); setBusy(false); return; }
-            throw error;
+          let res;
+          try { res = await restSignUp(form.email, form.password, { name: form.name, role }); }
+          catch { res = await restSignUp(form.email, form.password, { name: form.name, role }, 15000); } // one slower retry
+          const { status, data } = res;
+          if (status === 200) {
+            if (data.access_token) { adoptSession(data); finishLocal(); return; } // autoconfirm on — signed in
+            const identities = data.identities ?? data.user?.identities;
+            if (Array.isArray(identities) && identities.length === 0) {
+              setErr("That email is already registered — switch to Sign in (or use Forgot password).");
+            } else {
+              setConfirmSent(true); // real account created, awaiting email confirmation
+            }
+            setBusy(false); return;
           }
-          if (data?.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
-            setErr("That email is already registered — switch to Sign in (or use Forgot password)."); setBusy(false); return;
-          }
-          if (data?.user && !data.session) { setConfirmSent(true); setBusy(false); return; } // confirmation email required
-          finishLocal();
+          const msg = data?.msg || data?.error_description || data?.error || "";
+          if (/already registered|already exists|already been/i.test(msg)) setErr("That email already has an account — switch to Sign in.");
+          else setErr(msg || "Sign up failed. Try again.");
         } else {
-          const attempt=(ms)=>withTimeout(sb.auth.signInWithPassword({ email: form.email, password: form.password }), ms);
-          let __res; try { __res = await attempt(6000); } catch(e1){ if(!/timeout|fetch|network/i.test(e1?.message||"")) throw e1; try { __res = await attempt(12000); } catch(e2){ throw new Error("network"); } }
-          const { data, error } = __res;
-          if (error) throw error;
-          const meta = data?.user?.user_metadata || {};
-          const fullUser = { name: meta.name || form.email.split("@")[0], email: form.email, role: meta.role || role, id: form.email };
-          localStorage.setItem("neo_current", JSON.stringify(fullUser));
-          getCredits(fullUser.id);
-          onAuth(fullUser);
+          let res;
+          try { res = await restSignIn(form.email, form.password); }
+          catch { res = await restSignIn(form.email, form.password, 15000); } // one slower retry
+          const { status, data } = res;
+          if (status === 200 && data.access_token) {
+            adoptSession(data);
+            const meta = data.user?.user_metadata || {};
+            const fullUser = { name: meta.name || form.email.split("@")[0], email: form.email, role: meta.role || role, id: form.email };
+            localStorage.setItem("neo_current", JSON.stringify(fullUser));
+            getCredits(fullUser.id);
+            onAuth(fullUser);
+            return;
+          }
+          const code = data?.error_code || data?.error || "";
+          const msg  = data?.error_description || data?.msg || "";
+          if (/invalid_credentials|invalid_grant/i.test(code) || /invalid login|credentials/i.test(msg)) setErr("Email or password is incorrect.");
+          else if (/not confirmed|email_not_confirmed/i.test(code + " " + msg)) setErr("Please confirm your email first — check your inbox for the link.");
+          else if (/rate|too many/i.test(code + " " + msg)) setErr("Too many attempts — wait a minute and try again.");
+          else setErr(msg || "Sign in failed. Try again.");
         }
       } else {
         finishLocal(); // dev fallback when Supabase env not configured
       }
     } catch (e) {
-      const m = e?.message || "";
-      if (/confirm/i.test(m)) setErr("Please confirm your email first, or check your inbox for the link.");
-      else if (/invalid login|credentials/i.test(m)) setErr("Email or password is incorrect.");
-      else if (/already registered|already exists/i.test(m)) setErr("That email already has an account — switch to Sign in.");
-      else if (/timeout|fetch|network|load failed/i.test(m)) { if (mode === "signup") { finishLocal(); return; } setErr("offline-option"); }
-      else setErr(m || "Something went wrong. Try again.");
+      // Only genuine network failures land here now (both attempts aborted/failed)
+      if (mode === "signup") setErr("Can't reach the server — your account was NOT created yet. Check your connection and try again.");
+      else setErr("offline-option");
     }
     setBusy(false);
   };
@@ -2437,150 +2443,86 @@ function ParentOnboarding({ user, onDone }) {
               )}
               {curriculum && !loading && !curriculum.error && (
                 <div className="fi">
-                  <div style={{ background: "var(--nv)", borderRadius: 16, padding: "18px 20px", marginBottom: 16, textAlign: "center" }}>
-                    <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,.4)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 6 }}>✦ {form.childName}'s plan</p>
-                    <p style={{ fontFamily: "'Fraunces',serif", fontStyle: "italic", fontSize: 16, color: "rgba(255,255,255,.95)", lineHeight: 1.4 }}>"{curriculum.tagline}"</p>
+                  {/* Header — plain and grounded, no marketing quote */}
+                  <div style={{ background: "var(--nv)", borderRadius: 14, padding: "16px 18px", marginBottom: 18 }}>
+                    <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,.45)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 6 }}>{form.childName}'s weekly plan{form.grade ? ` \u00b7 ${form.grade}` : ""}</p>
+                    <p style={{ fontSize: 13.5, color: "rgba(255,255,255,.92)", lineHeight: 1.55 }}>{curriculum.summary || curriculum.tagline}</p>
                   </div>
-                  <p className="lbl" style={{ marginBottom: 10 }}>Weekly schedule</p>
-                  {[{ icon: "🌅", lbl: "MORNING · 2-HOUR BLOCK", c: "var(--or)", txt: curriculum.morning }, { icon: "🌤️", lbl: "AFTERNOON", c: "var(--sg)", txt: curriculum.afternoon }].map((s, i) => (
-                    <div key={i} style={{ background: "var(--p)", borderRadius: 12, padding: 13, marginBottom: 9 }}>
-                      <div style={{ display: "flex", gap: 8 }}><span style={{ fontSize: 16 }}>{s.icon}</span><div><p style={{ fontSize: 10, fontWeight: 700, color: s.c, textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 3 }}>{s.lbl}</p><p style={{ fontSize: 12.5, lineHeight: 1.6 }}>{s.txt}</p></div></div>
-                    </div>
-                  ))}
-                  <p className="lbl" style={{ marginBottom: 10 }}>Subject plan <span style={{ fontWeight:400, color:"var(--mu)", fontSize:10 }}>(tap any row to preview)</span></p>
-                  {curriculum.subjects?.map((s, i) => (
-                    <div
-                      key={i}
-                      onClick={() => s.tool && setActiveTool(resolveTool(s.tool))}
-                      style={{
-                        background: "var(--p)",
-                        borderRadius: 11,
-                        padding: 12,
-                        marginBottom: 8,
-                        cursor: s.tool ? "pointer" : "default",
-                        transition:"background .15s, transform .1s",
-                        border:"1px solid transparent",
-                      }}
-                      onMouseEnter={(e) => {
-                        if (s.tool) {
-                          e.currentTarget.style.background = "#fff";
-                          e.currentTarget.style.borderColor = "var(--or)";
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "var(--p)";
-                        e.currentTarget.style.borderColor = "transparent";
-                      }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                        <span style={{ fontSize: 18 }}>{s.emoji}</span><span style={{ fontWeight: 700, fontSize: 13 }}>{s.name}</span>
-                        {s.tool && (
-                          <span style={{ fontSize: 10, background: "var(--nv)", color: "#fff", padding: "3px 9px", borderRadius: 99, fontWeight: 600, display:"inline-flex", alignItems:"center", gap:4 }}>
-                            {s.tool} →
-                          </span>
-                        )}
-                        <span style={{ marginLeft: "auto", fontSize: 11, fontWeight: 700, color: "var(--or)" }}>{s.mins}m/wk</span>
-                      </div>
-                      <p style={{ fontSize: 12, color: "var(--mu)", lineHeight: 1.5, marginBottom: 6 }}>{s.focus}</p>
-                      <PBar v={(s.mins / 90) * 100} />
 
-                      {/* Specific labs for this subject — from our 75-lab catalog */}
-                      {s.labs && s.labs.length > 0 && (
-                        <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid var(--p2)" }}>
-                          <p style={{ fontFamily:"'Geist Mono',monospace", fontSize: 9.5, color:"var(--mu)", letterSpacing:".08em", textTransform:"uppercase", marginBottom: 6 }}>
-                            🎮 {s.labs.length} hands-on labs included
-                          </p>
-                          <div style={{ display:"flex", flexWrap:"wrap", gap: 6 }}>
+                  {/* The school day */}
+                  <p className="lbl" style={{ marginBottom: 8 }}>The school day</p>
+                  <div style={{ border: "1px solid var(--p2)", borderRadius: 12, marginBottom: 18, overflow: "hidden" }}>
+                    {[["Morning \u00b7 2-hour academic block", curriculum.morning], ["Afternoon", curriculum.afternoon]].map(([lbl, txt], i) => (
+                      <div key={i} style={{ padding: "11px 14px", borderTop: i ? "1px solid var(--p2)" : "none" }}>
+                        <p style={{ fontSize: 10.5, fontWeight: 700, color: "var(--or)", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>{lbl}</p>
+                        <p style={{ fontSize: 12.5, lineHeight: 1.6 }}>{txt}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Core subjects */}
+                  <p className="lbl" style={{ marginBottom: 8 }}>
+                    Core subjects
+                    <span style={{ fontWeight: 400, color: "var(--mu)", fontSize: 10.5 }}> \u00b7 {(curriculum.subjects || []).reduce((a, s) => a + (+s.mins || 0), 0)} min/week</span>
+                  </p>
+                  <div style={{ border: "1px solid var(--p2)", borderRadius: 12, marginBottom: 18, overflow: "hidden" }}>
+                    {curriculum.subjects?.map((s, i) => (
+                      <div key={i} style={{ padding: "11px 14px", borderTop: i ? "1px solid var(--p2)" : "none" }}>
+                        <div
+                          onClick={() => s.tool && setActiveTool(resolveTool(s.tool))}
+                          style={{ display: "flex", alignItems: "baseline", gap: 8, cursor: s.tool ? "pointer" : "default" }}>
+                          <span style={{ fontSize: 15 }}>{s.emoji}</span>
+                          <span style={{ fontWeight: 700, fontSize: 13 }}>{s.name}</span>
+                          <span style={{ marginLeft: "auto", fontSize: 11.5, fontWeight: 600, color: "var(--mu)", fontVariantNumeric: "tabular-nums" }}>{s.mins} min/wk</span>
+                        </div>
+                        <p style={{ fontSize: 12, color: "var(--mu)", lineHeight: 1.55, marginTop: 4 }}>{s.focus}</p>
+                        {s.labs && s.labs.length > 0 && (
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
                             {s.labs.map((lab, j) => (
-                              <a
-                                key={j}
-                                href={lab.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                onClick={(e) => e.stopPropagation()}
-                                style={{
-                                  display:"inline-flex",
-                                  alignItems:"center",
-                                  gap: 5,
-                                  background:"#fff",
-                                  border:"1px solid var(--p2)",
-                                  borderRadius: 8,
-                                  padding:"5px 9px",
-                                  fontSize: 11,
-                                  fontWeight: 500,
-                                  color:"var(--tx)",
-                                  textDecoration:"none",
-                                  transition:"all .15s"
-                                }}
+                              <a key={j} href={lab.url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
+                                style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "var(--p)", border: "1px solid var(--p2)", borderRadius: 8, padding: "4px 9px", fontSize: 11, fontWeight: 500, color: "var(--tx)", textDecoration: "none", transition: "all .15s" }}
                                 onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--or)"; e.currentTarget.style.color = "var(--or)"; }}
                                 onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--p2)"; e.currentTarget.style.color = "var(--tx)"; }}>
-                                <span>{lab.emoji}</span>
-                                <span>{lab.title}</span>
+                                <span>{lab.emoji}</span><span>{lab.title}</span>
                               </a>
                             ))}
                           </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-
-                  {/* WORKSHOPS — life skills */}
-                  {curriculum.workshops?.length > 0 && (
-                    <div style={{ marginTop: 14, marginBottom: 8 }}>
-                      <p className="lbl" style={{ marginBottom: 8 }}>🛠️ Life skills workshops</p>
-                      <p style={{ fontSize: 11, color: "var(--mu)", marginBottom: 10 }}>The skills traditional school skips.</p>
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 7 }}>
-                        {curriculum.workshops.map((w, i) => (
-                          <div key={i} style={{ background: "#dff2ea", borderRadius: 10, padding: "9px 11px", borderLeft: "2px solid var(--sg)" }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 3 }}>
-                              <span style={{ fontSize: 15 }}>{w.emoji}</span>
-                              <span style={{ fontSize: 12, fontWeight: 700 }}>{w.name}</span>
-                              <span style={{ marginLeft: "auto", fontSize: 9, color: "var(--sg)", fontWeight: 600 }}>{w.cadence}</span>
-                            </div>
-                            <p style={{ fontSize: 10.5, color: "var(--mu)", lineHeight: 1.45 }}>{w.desc}</p>
-                          </div>
-                        ))}
+                        )}
                       </div>
-                    </div>
-                  )}
-
-                  {/* UNIQUE GENIUS — highlights child's strength */}
-                  {curriculum.uniqueGenius && (
-                    <div style={{ background: "linear-gradient(135deg, #fff8f0 0%, #fff 100%)", borderRadius: 13, padding: "14px 16px", margin: "14px 0", borderLeft: "3px solid var(--or)" }}>
-                      <p style={{ fontSize: 10, fontWeight: 700, color: "var(--or)", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 6 }}>✨ {form.childName}'s unique genius</p>
-                      <p style={{ fontFamily: "'Fraunces',serif", fontSize: 16, lineHeight: 1.45, marginBottom: 4 }}>{curriculum.uniqueGenius.title}</p>
-                      <p style={{ fontSize: 12, color: "var(--mu)", lineHeight: 1.6 }}>{curriculum.uniqueGenius.description}</p>
-                    </div>
-                  )}
-
-                  {/* STUDENT PERSONA — for review/QA */}
-                  {curriculum.persona && (
-                    <details style={{ background: "var(--p)", borderRadius: 11, padding: "10px 14px", margin: "10px 0" }}>
-                      <summary style={{ cursor: "pointer", fontSize: 11, fontWeight: 700, color: "var(--mu)", textTransform:"uppercase", letterSpacing:".06em" }}>🔍 How we understand {form.childName} (persona)</summary>
-                      <div style={{ marginTop: 10, fontSize: 12, color: "var(--mu)", lineHeight: 1.6 }}>
-                        {Object.entries(curriculum.persona).map(([k, v]) => (
-                          <div key={k} style={{ marginBottom: 6 }}>
-                            <strong style={{ color:"var(--tx)" }}>{k.replace(/([A-Z])/g, " $1").replace(/^./, x => x.toUpperCase())}:</strong> {v}
-                          </div>
-                        ))}
-                      </div>
-                    </details>
-                  )}
-
-                  <div style={{ background: "var(--nv)", borderRadius: 13, padding: "14px 16px", margin: "12px 0" }}>
-                    <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,.4)", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 6 }}>Coach note</p>
-                    <p style={{ fontFamily: "'Fraunces',serif", fontStyle: "italic", fontSize: 13, color: "rgba(255,255,255,.9)", lineHeight: 1.65 }}>"{curriculum.coachNote}"</p>
+                    ))}
                   </div>
 
-                  {/* AUTO-SAVED indicator */}
-                  <p style={{ textAlign:"center", fontSize: 10.5, color: "var(--sg)", marginBottom: 10 }}>
-                    💾 Saved automatically · You can come back anytime
-                  </p>
+                  {/* Workshops */}
+                  {curriculum.workshops?.length > 0 && (
+                    <>
+                      <p className="lbl" style={{ marginBottom: 8 }}>Life-skills workshops</p>
+                      <div style={{ border: "1px solid var(--p2)", borderRadius: 12, marginBottom: 18, overflow: "hidden" }}>
+                        {curriculum.workshops.map((w, i) => (
+                          <div key={i} style={{ display: "flex", alignItems: "baseline", gap: 8, padding: "10px 14px", borderTop: i ? "1px solid var(--p2)" : "none" }}>
+                            <span style={{ fontSize: 14 }}>{w.emoji}</span>
+                            <div style={{ flex: 1 }}>
+                              <span style={{ fontSize: 12.5, fontWeight: 700 }}>{w.name}</span>
+                              <p style={{ fontSize: 11.5, color: "var(--mu)", lineHeight: 1.5, marginTop: 2 }}>{w.desc}</p>
+                            </div>
+                            <span style={{ fontSize: 10.5, color: "var(--mu)", fontWeight: 600, whiteSpace: "nowrap" }}>{w.cadence}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  {curriculum.nextStep && (
+                    <p style={{ fontSize: 12, color: "var(--mu)", lineHeight: 1.6, marginBottom: 14 }}>
+                      <strong style={{ color: "var(--tx)" }}>Next step:</strong> {curriculum.nextStep}
+                    </p>
+                  )}
 
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    <button className="btn bo fw" onClick={() => onDone({ form, curriculum, apply: true })}>Apply to neoschool →</button>
-                    <button className="btn bg fw" onClick={() => onDone({ form, curriculum, apply: false })}>Explore the platform →</button>
-                    <button onClick={reset} style={{ background:"none", border:"none", color:"var(--mu)", fontSize: 11, textDecoration: "underline", cursor:"pointer", marginTop: 2 }}>↻ Start over with a different child</button>
+                    <button className="btn bo fw" onClick={() => onDone({ form, curriculum, apply: true })}>Apply to neoschool \u2192</button>
+                    <button className="btn bg fw" onClick={() => onDone({ form, curriculum, apply: false })}>Explore the platform \u2192</button>
+                    <button onClick={reset} style={{ background: "none", border: "none", color: "var(--mu)", fontSize: 11, textDecoration: "underline", cursor: "pointer", marginTop: 2 }}>\u21bb Start over with a different child</button>
                   </div>
+                  <p style={{ textAlign: "center", fontSize: 10.5, color: "var(--mu)", marginTop: 10 }}>Saved automatically \u2014 you can come back anytime.</p>
                 </div>
               )}
               {curriculum?.error && <div style={{ textAlign: "center", padding: "24px", color: "var(--rd)" }}>Error. <button className="btn bg sm" onClick={() => { setCurriculum(null); setLoading(false); setStep(3); }}>Try again</button></div>}
