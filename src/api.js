@@ -130,7 +130,7 @@ function pickLabsForSubject(subjectName, gradeStr) {
     if (subjLower.includes("math") || subjLower.includes("number"))
       return tx.includes("math") || tx.includes("fraction") || tx.includes("multipl") || tx.includes("divis") || tx.includes("addition") || tx.includes("subtract") || tx.includes("number");
     if (subjLower.includes("science") || subjLower.includes("biology") || subjLower.includes("physic") || subjLower.includes("chem"))
-      return tx.includes("biology") || tx.includes("physics") || tx.includes("science") || tx.includes("nerve") || tx.includes("cardiac") || tx.includes("newton") || tx.includes("ohm");
+      return lab.subject === "Science" || tx.includes("biology") || tx.includes("physics") || tx.includes("chemistry") || tx.includes("science") || tx.includes("cell") || tx.includes("organelle") || tx.includes("genetic") || tx.includes("photosynth") || tx.includes("bond") || tx.includes("equation") || tx.includes("acid") || tx.includes("newton") || tx.includes("energy") || tx.includes("wave") || tx.includes("earth") || tx.includes("planet") || tx.includes("atom") || tx.includes("nerve") || tx.includes("cardiac") || tx.includes("ohm");
     if (subjLower.includes("read") || subjLower.includes("literac") || subjLower.includes("language"))
       return tx.includes("read") || tx.includes("literac") || tx.includes("phonics");
     return false;
@@ -145,8 +145,9 @@ function pickLabsForSubject(subjectName, gradeStr) {
   };
 
   const matches = LABS.filter(l => topicMatch(l) && gradeMatch(l));
-  // Shuffle a bit so different parents see different labs
-  const shuffled = matches.sort(() => Math.random() - 0.5);
+  // Exam-prep quiz games first (they're built to align with test standards),
+  // then a light shuffle so different parents see some variety.
+  const shuffled = matches.sort((a, b) => (b.examPrep ? 1 : 0) - (a.examPrep ? 1 : 0) || Math.random() - 0.5);
   return shuffled.slice(0, 3).map(l => ({ id: l.id, title: l.title, emoji: l.emoji, url: l.url }));
 }
 
